@@ -1,0 +1,12 @@
+*.pyc
+*.pyo
+*.swp
+*~
+.DS_Store
+resources/
+fonts/
+spell_pali/
+spell_thai/
+config/
+build/
+dist/
