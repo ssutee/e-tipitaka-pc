@@ -1,0 +1,95 @@
+# E-Tipitaka for PC.
+# Copyright (C) 2013
+# This file is distributed under the same license as the E-Tipitaka package.
+# Sutee Sudprasert <sutee.s@gmail.com>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-08-13 18:57+0700\n"
+"PO-Revision-Date: 2013-08-13 19:03+0700\n"
+"Last-Translator: \n"
+"Language-Team: Thai <sutee.s@gmail.com>\n"
+"Language: th\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.7\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: search/view.py:34
+msgid "AppName"
+msgstr "โปรแกรมตรวจหาและเทียบเคียงพุทธวจนจากพระไตรปิฎก"
+
+#: widget/__init__.py:97
+msgid "Latest search"
+msgstr "คำค้นหาล่าสุด"
+
+#: widget/__init__.py:197
+msgid "Thai Royal"
+msgstr "ไทย (ฉบับหลวง)"
+
+#: widget/__init__.py:197
+msgid "Pali Siam"
+msgstr "บาลี (สยามรัฐ)"
+
+#: widget/__init__.py:197
+msgid "Thai Mahamakut"
+msgstr "ไทย (มหามกุฏฯ)"
+
+#: widget/__init__.py:197
+msgid "Thai Mahachula"
+msgstr "ไทย (มหาจุฬาฯ)"
+
+#: widget/__init__.py:197
+msgid "Thai Five Books"
+msgstr "ไทย (จากพระโอษฐ์ ๕ เล่ม)"
+
+#: widget/__init__.py:200
+msgid "Languages"
+msgstr "ภาษา"
+
+#: widget/__init__.py:208
+msgid "Choose volumes"
+msgstr "เล่มที่ต้องการค้นหา"
+
+#: widget/__init__.py:208
+msgid "All"
+msgstr "ทั้งหมด"
+
+#: widget/__init__.py:208
+msgid "Custom"
+msgstr "กำหนดเอง"
+
+#: widget/__init__.py:211
+msgid "Search"
+msgstr "ค้นหา"
+
+#: widget/__init__.py:215
+msgid "Special characters"
+msgstr "อักษรพิเศษ"
+
+#: widget/__init__.py:235
+msgid "Change font"
+msgstr "เปลี่ยนรูปแบบตัวหนังสือ"
+
+#: widget/__init__.py:246
+msgid "Import data"
+msgstr "นำข้อมูลส่วนตัวเข้า"
+
+#: widget/__init__.py:251
+msgid "Export data"
+msgstr "นำข้อมูลส่วนตัวออก"
+
+#: widget/__init__.py:255
+msgid "Read"
+msgstr "อ่านพระไตรปิฎก"
+
+#: widget/__init__.py:257
+msgid "About"
+msgstr "เกี่ยวกับโปรแกรม"
+
+#: widget/__init__.py:259
+msgid "About E-Tipitaka"
+msgstr "เกี่ยวกับโปรแกรม E-Tipitaka"
