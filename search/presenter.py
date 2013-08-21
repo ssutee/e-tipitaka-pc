@@ -1,6 +1,140 @@
+import search.model
+from dialogs import AboutDialog
+import wx
+
+import i18n
+_ = i18n.language.ugettext
+
+import constants, utils 
+
 class Presenter(object):
     def __init__(self, model, view, interactor):
-        self.Model = model
-        self.View = view
+        self._scrollPosition = 0
+        self._model = model
+        self._model.Delegate = self
+        self._view = view
+        self._view.Delegate = self
         interactor.Install(self, view)
-        self.View.Start()
+        self._view.Start()
+         
+    def ShowAboutDialog(self):
+        dialog = AboutDialog(self._view)
+        dialog.Center()
+        dialog.ShowModal()
+        dialog.Destroy()
+        
+    def ShowFontDialog(self):
+        curFont = utils.LoadFont(constants.SEARCH_FONT)
+        fontData = wx.FontData()
+        fontData.EnableEffects(False)
+        if curFont != None:
+            fontData.SetInitialFont(curFont)
+        dialog = wx.FontDialog(self._view, fontData)
+        if dialog.ShowModal() == wx.ID_OK:
+            data = dialog.GetFontData()
+            font = data.GetChosenFont()
+            if font.IsOk():
+                utils.SaveFont(font, constants.SEARCH_FONT)
+                self._view.Font = font
+                if 'wxMac' not in wx.PlatformInfo:
+                    size = font.GetPointSize()
+                    font.SetPointSize(16)
+                    self._view.SearchCtrl.SetFont(font)
+                    font.SetPointSize(size)
+                self._view.ResultsWindow.SetStandardFonts(font.GetPointSize(),font.GetFaceName())
+        dialog.Destroy()
+        
+    def Search(self, keywords=None):
+        if not keywords:
+            keywords = self._view.SearchCtrl.GetValue()
+
+        if keywords.replace('+',' ').strip() == '':            
+            return True
+        
+        self._view.SearchCtrl.SetValue(keywords)
+        self._model.Search(keywords)
+        
+        return True
+        
+    def Read(self, code, volume, page, idx):
+        self._model.Read(code, volume, page, idx)
+
+    def SearchWillStart(self):
+        self._view.DisableSearchControls()
+        self._view.SetPage(_('Searching data, please wait...'))
+        self._view.SetStatusText(_('Searching data'), 0)
+        self._view.SetStatusText('', 1)
+        self._view.SetStatusText('', 2)
+                
+    def SearchDidFinish(self, results):
+        self._model.Results = results
+        
+        if len(results) > 0:
+           self.ShowResults(1)
+        else:
+            self._view.SetPage(self._model.NotFoundMessage()+self._model.MakeHtmlSuggestion(found=False))
+            
+        self._view.SetStatusText('', 0)
+        self._view.SetStatusText(_('Found %d pages') % (len(results)), 1)
+        
+    def ShowResults(self, current):
+        self._model.Display(current)
+        
+    def SelectLanguage(self, index):
+        self._model = search.model.SearchModelCreator.create(self, index)
+        self._view.VolumesRadio.Disable() if index == 4 else self._view.VolumesRadio.Enable()
+        
+    def SelectVolumes(self, index):
+        
+        def OnDismiss(ret, volumes):
+            if ret == wx.ID_OK:
+                self._model.SelectedVolumes = volumes
+                self._model.Mode = constants.MODE_CUSTOM
+            else:
+                self._view.VolumesRadio.SetSelection(0)
+                self._model.Mode = constants.MODE_ALL
+        
+        if index == 1:
+            volumes = self._model.SelectedVolumes if len(self._model.SelectedVolumes) > 0 else self._model.Volumes            
+            self._view.ShowVolumesDialog(self._model, volumes, OnDismiss)
+        else:
+            self._model.Mode = constants.MODE_ALL
+                
+    def HasDisplayResult(self, key):
+        return self._model.HasDisplayResult(key)
+        
+    def SaveDisplayResult(self, items, key):
+        self._model.SaveDisplayResult(items, key)
+        
+    def SaveScrollPosition(self, position):
+        self._scrollPosition = position
+        
+    def DisplayDidProgress(self, progress):
+        self._view.SetProgress((progress * 100.0) / constants.ITEMS_PER_PAGE)
+        
+    def DisplayWillStart(self):
+        self._view.SetPage(u'')
+        self._view.SetProgress(0)
+        self._view.SetStatusText(_('Displaying results'), 0)
+        
+    def DisplayDidFinish(self, key, current):
+        self._view.SetPage(self._model.MakeHtmlResults(current))
+        self._view.SetProgress(0)        
+        mark = self._model.GetMark(current)
+        self._view.SetStatusText('', 0)        
+        self._view.SetStatusText(_('Search results') + ' %d - %d' % (mark[0]+1, mark[1]) , 2)
+        self._view.EnableSearchControls()
+
+        self._view.BackwardButton.Disable() if current == 1 else self._view.BackwardButton.Enable()
+        self._view.ForwardButton.Disable() if current == self._model.GetPages() else self._view.ForwardButton.Enable()
+        
+        self._view.ScrollTo(self._scrollPosition)
+                    
+    def NextPagination(self):
+        self._model.DisplayNext()
+        
+    def PreviousPagination(self):
+        self._model.DisplayPrevious()
+                    
+    def Close(self):
+        self._view.SearchCtrl.SaveSearches()

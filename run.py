@@ -9,6 +9,6 @@ import os, sys
 
 view = search.view.View()
 interactor = search.interactor.Interactor()
-model = search.model.Model()
+model = search.model.ThaiRoyalSearchModel(None)  
 
 search.presenter.Presenter(model, view, interactor)

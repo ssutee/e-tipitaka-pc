@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-13 18:57+0700\n"
-"PO-Revision-Date: 2013-08-13 19:03+0700\n"
+"POT-Creation-Date: 2013-08-20 15:00+0700\n"
+"PO-Revision-Date: 2013-08-20 15:01+0700\n"
 "Last-Translator: \n"
 "Language-Team: Thai <sutee.s@gmail.com>\n"
 "Language: th\n"
@@ -18,78 +18,214 @@ msgstr ""
 "X-Generator: Poedit 1.5.7\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: search/view.py:34
+#: dialogs/__init__.py:10
+msgid "Please select volumes"
+msgstr "โปรดเลือกเล่มที่ต้องการค้นหา"
+
+#: dialogs/__init__.py:21 search/model.py:196
+msgid "Section 1"
+msgstr "พระวินัยฯ"
+
+#: dialogs/__init__.py:22 search/model.py:196
+msgid "Section 2"
+msgstr "พระสุตตันตฯ"
+
+#: dialogs/__init__.py:23 search/model.py:196
+msgid "Section 3"
+msgstr "พระอภิธรรมฯ"
+
+#: dialogs/__init__.py:24
+msgid "Select all"
+msgstr "เลือกทั้งหมด"
+
+#: dialogs/__init__.py:25
+msgid "Clear"
+msgstr "ลบทั้งหมด"
+
+#: dialogs/__init__.py:33 dialogs/__init__.py:111
+msgid "OK"
+msgstr "ตกลง"
+
+#: dialogs/__init__.py:35
+msgid "Cancel"
+msgstr "ยกเลิก"
+
+#: dialogs/__init__.py:97 widgets/__init__.py:281
+msgid "About E-Tipitaka"
+msgstr "เกี่ยวกับโปรแกรม E-Tipitaka"
+
+#: dialogs/__init__.py:100
+#, python-format
+msgid ""
+"E-Tipitaka %s - developed by Sutee Sudprasert Copyright (C) 2010\n"
+" written by Python 2.7.3 and wxPython 2.8 (unicode)"
+msgstr ""
+"E-Tipitaka %s - พัฒนาโดย นายสุธี สุดประเสริฐ สงวนลิขสิทธิ์ © 2010\n"
+"เขียนด้วย Python 2.7.3 และ wxPython 2.8 (unicode)"
+
+#: dialogs/__init__.py:102
+msgid ""
+"This program is free software distributed under Apache License, Version 2.0"
+msgstr ""
+"โปรแกรมนี้เป็นซอฟแวร์เสรีและสามารถแจกจ่ายได้ตามสนธิสัญญา Apache License, Version 2.0"
+
+#: dialogs/__init__.py:104
+msgid ""
+"If you have any suggestion or comment, please send to <etipitaka@gmail.com>"
+msgstr ""
+"หากมีคำแนะนำ หรือ พบข้อผิดพลาดของโปรแกรม \n"
+"กรุณาแจ้งที่ <etipitaka@gmail.com>"
+
+#: search/model.py:146
+msgid "You mean?"
+msgstr "หรือคุณหมายถึง"
+
+#: search/model.py:154
+msgid "Item"
+msgstr "ข้อที่"
+
+#: search/model.py:162
+msgid "(read)"
+msgstr "(อ่านแล้ว)"
+
+#: search/model.py:165
+msgid "All results"
+msgstr "ผลการค้นหาทั้งหมด"
+
+#: search/model.py:197 search/model.py:198 search/model.py:199
+msgid "Page unit"
+msgstr "หน้า"
+
+#: search/model.py:203
+#, python-format
+msgid "Search results %s - %s of %s for keyword \"%s\""
+msgstr "ผลการค้นหา %s - %s จากทั้งหมด %s หน้า สำหรับคำว่า \"%s\""
+
+#: search/model.py:208
+msgid "Tipitaka volume"
+msgstr "พระไตรปิฎก เล่มที่"
+
+#: search/model.py:209 search/model.py:408
+msgid "Page"
+msgstr "หน้าที่"
+
+#: search/model.py:302
+#, python-format
+msgid "Not found %s in Thai Royal"
+msgstr "ไม่พบคำว่า \"%s\" ในพระไตรปิฎก (ภาษาไทย ฉบับหลวง)"
+
+#: search/model.py:328
+#, python-format
+msgid "Not found %s in Pali Siam"
+msgstr "ไม่พบคำว่า \"%s\" ในพระไตรปิฎก (ภาษาบาลี ฉบับสยามรัฐ)"
+
+#: search/model.py:351
+#, python-format
+msgid "Not found %s in Thai MahaChula"
+msgstr "ไม่พบคำว่า \"%s\" ในพระไตรปิฎก (ภาษาไทย ฉบับมหาจุฬาฯ)"
+
+#: search/model.py:378
+#, python-format
+msgid "Not found %s in Thai MahaMakut"
+msgstr "ไม่พบคำว่า \"%s\" ในพระไตรปิฎก (ภาษาไทย ฉบับมหามกุฏฯ)"
+
+#: search/model.py:420
+#, python-format
+msgid "Not found %s in Thai Five Books"
+msgstr "ไม่พบคำว่า \"%s\" ใน ๕ เล่มจากพระโอษฐ์ (ภาษาไทย ฉบับท่านพุทธทาส)"
+
+#: search/presenter.py:42
+msgid "Searching data, please wait..."
+msgstr "โปรแกรมกำลังค้นหาข้อมูล กรุณารอซักครู่..."
+
+#: search/presenter.py:43
+msgid "Searching data"
+msgstr "โปรแกรมกำลังค้นหาข้อมูล"
+
+#: search/presenter.py:56
+#, python-format
+msgid "Found %d pages"
+msgstr "ค้นเจอทั้งหมด %d หน้า"
+
+#: search/presenter.py:91
+msgid "Displaying results"
+msgstr "โปรแกรมกำลังจัดแสดงข้อมูล"
+
+#: search/presenter.py:98
+msgid "Search results"
+msgstr "ผลการค้นหา"
+
+#: search/view.py:117
 msgid "AppName"
 msgstr "โปรแกรมตรวจหาและเทียบเคียงพุทธวจนจากพระไตรปิฎก"
 
-#: widget/__init__.py:97
+#: widgets/__init__.py:93
 msgid "Latest search"
 msgstr "คำค้นหาล่าสุด"
 
-#: widget/__init__.py:197
+#: widgets/__init__.py:226
 msgid "Thai Royal"
 msgstr "ไทย (ฉบับหลวง)"
 
-#: widget/__init__.py:197
+#: widgets/__init__.py:226
 msgid "Pali Siam"
 msgstr "บาลี (สยามรัฐ)"
 
-#: widget/__init__.py:197
+#: widgets/__init__.py:226
 msgid "Thai Mahamakut"
 msgstr "ไทย (มหามกุฏฯ)"
 
-#: widget/__init__.py:197
+#: widgets/__init__.py:226
 msgid "Thai Mahachula"
 msgstr "ไทย (มหาจุฬาฯ)"
 
-#: widget/__init__.py:197
+#: widgets/__init__.py:226
 msgid "Thai Five Books"
 msgstr "ไทย (จากพระโอษฐ์ ๕ เล่ม)"
 
-#: widget/__init__.py:200
+#: widgets/__init__.py:228
 msgid "Languages"
 msgstr "ภาษา"
 
-#: widget/__init__.py:208
+#: widgets/__init__.py:234
 msgid "Choose volumes"
 msgstr "เล่มที่ต้องการค้นหา"
 
-#: widget/__init__.py:208
+#: widgets/__init__.py:234
 msgid "All"
 msgstr "ทั้งหมด"
 
-#: widget/__init__.py:208
+#: widgets/__init__.py:234
 msgid "Custom"
 msgstr "กำหนดเอง"
 
-#: widget/__init__.py:211
+#: widgets/__init__.py:237
 msgid "Search"
 msgstr "ค้นหา"
 
-#: widget/__init__.py:215
+#: widgets/__init__.py:240
 msgid "Special characters"
 msgstr "อักษรพิเศษ"
 
-#: widget/__init__.py:235
+#: widgets/__init__.py:259
 msgid "Change font"
 msgstr "เปลี่ยนรูปแบบตัวหนังสือ"
 
-#: widget/__init__.py:246
+#: widgets/__init__.py:272
 msgid "Import data"
 msgstr "นำข้อมูลส่วนตัวเข้า"
 
-#: widget/__init__.py:251
+#: widgets/__init__.py:276
 msgid "Export data"
 msgstr "นำข้อมูลส่วนตัวออก"
 
-#: widget/__init__.py:255
+#: widgets/__init__.py:279
 msgid "Read"
 msgstr "อ่านพระไตรปิฎก"
 
-#: widget/__init__.py:257
+#: widgets/__init__.py:280
 msgid "About"
 msgstr "เกี่ยวกับโปรแกรม"
 
-#: widget/__init__.py:259
-msgid "About E-Tipitaka"
-msgstr "เกี่ยวกับโปรแกรม E-Tipitaka"
+#~ msgid "item"
+#~ msgstr "ข้อที่"

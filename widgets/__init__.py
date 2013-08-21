@@ -4,11 +4,7 @@ import wx
 import wx.aui as aui
 import wx.lib.buttons as buttons
 import wx.html
-
-import os, os.path, sys
-PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, PARENT_DIR)
-
+import os, os.path, sys, codecs
 import constants, utils
 import i18n
 _ = i18n.language.ugettext
@@ -72,7 +68,7 @@ class MySearchCtrl(wx.SearchCtrl):
             
     def OnTextEnter(self, event):
         text = self.GetValue().strip()
-        if hasattr(self._delegate, 'DoSearch') and self._delegate.DoSearch(text):
+        if hasattr(self._delegate, 'Search') and self._delegate.Search(text):
             self.AppendSearch(text)
     
     def AppendSearch(self, text):
@@ -84,10 +80,10 @@ class MySearchCtrl(wx.SearchCtrl):
             self.SetMenu(self.MakeMenu())
         
     def OnMenuItem(self, event):
-        text = self._searches[event.GetId()]
+        text = self._searches[event.GetId()-1]
         self.SetValue(text)
-        if hasattr(self._delegate, 'DoSearch'):
-            self._delegate.DoSearch(text)
+        if hasattr(self._delegate, 'Search'):
+            self._delegate.Search(text)
 
     def MakeMenu(self):
         font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
@@ -100,7 +96,7 @@ class MySearchCtrl(wx.SearchCtrl):
         menu.AppendItem(item)
 
         for idx, txt in enumerate(self._searches):
-            item = wx.MenuItem(menu, idx, txt)
+            item = wx.MenuItem(menu, idx+1, txt)
             item.SetFont(font)
             menu.AppendItem(item)
         return menu
@@ -116,6 +112,8 @@ class MySearchCtrl(wx.SearchCtrl):
             self.SetMenu(menu)        
 
     def SaveSearches(self):
+        if not os.path.exists(constants.CONFIG_PATH):
+            os.makedirs(constants.CONFIG_PATH)
         out = codecs.open(self._logFile, 'w', 'utf-8')
         for search in self._searches:
             if self._lang == constants.LANG_PALI:
@@ -144,6 +142,7 @@ class SearchToolPanel(wx.Panel):
     def __init__(self, parent, font, *args, **kwargs):
         super(SearchToolPanel, self).__init__(parent, *args, **kwargs)
         self._delegate = None
+        self._font = font
         self._CreateAttributes(font)        
         self._DoLayout()
 
@@ -154,8 +153,40 @@ class SearchToolPanel(wx.Panel):
     @Delegate.setter
     def Delegate(self, delegate):
         self._delegate = delegate
-        self.text.Delegate = delegate                
+        self._text.Delegate = delegate                
                 
+    @property
+    def SearchCtrl(self):
+        return self._text
+
+    @property
+    def AboutButton(self):
+        return self._aboutButton
+
+    @property
+    def ForwardButton(self):
+        return self._nextButton
+        
+    @property
+    def BackwardButton(self):
+        return self._prevButton
+        
+    @property
+    def FontsButton(self):
+        return self._fontsButton
+        
+    @property
+    def SearchButton(self):
+        return self._findButton
+        
+    @property
+    def VolumesRadio(self):
+        return self._volumesRadio
+        
+    @property
+    def LanguagesComboBox(self):
+        return self._langComboBox
+
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -234,6 +265,9 @@ class SearchToolPanel(wx.Panel):
         self._nextButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.RIGHT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
         
+        self._prevButton.Disable()
+        self._nextButton.Disable()
+        
         self._importButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.IMPORT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._importButton.SetToolTip(wx.ToolTip(_('Import data')))
@@ -249,6 +283,30 @@ class SearchToolPanel(wx.Panel):
         
 class ResultsWindow(wx.html.HtmlWindow):
     
-    def __init__(self, parent, lang, *args, **kwargs):
-        super(ResultsWindow, self).__init__(parent, *args, **kwargs)
+    @property
+    def Delegate(self):
+        return self._delegate
         
+    @Delegate.setter
+    def Delegate(self, delegate):
+        self._delegate = delegate
+
+    def __init__(self, parent, delegate=None, *args, **kwargs):
+        super(ResultsWindow, self).__init__(parent, *args, **kwargs)
+        self._delegate = delegate        
+        
+    def OnLinkClicked(self, link):                                    
+        cmd, body = link.GetHref().split(':')
+        if cmd == 'n':
+            current, per, total = map(int, body.split(u'_'))
+            if hasattr(self._delegate, 'ShowResults'):
+                self._delegate.ShowResults(current)
+        elif cmd == 's':
+            if hasattr(self._delegate, 'Search'):
+                self._delegate.Search(body)
+        elif cmd == 'p':
+            if hasattr(self._delegate, 'SaveScrollPosition'):
+                self._delegate.SaveScrollPosition(self.GetScrollPos(wx.VERTICAL))            
+            volume, page, code, now, per, total, idx = body.split(u'_')
+            if hasattr(self._delegate, 'Read'):
+                self._delegate.Read(code, int(volume), int(page), int(idx))
