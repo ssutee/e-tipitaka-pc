@@ -10,6 +10,7 @@ class Interactor(object):
         self.View.TopBar.AboutButton.Bind(wx.EVT_BUTTON, self.OnAboutButtonClick)
         self.View.TopBar.SearchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
         self.View.TopBar.FontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClick)
+        self.View.TopBar.ReadButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
         
         self.View.TopBar.LanguagesComboBox.Bind(wx.EVT_COMBOBOX, self.OnLanguagesComboBoxSelect)
         
@@ -42,3 +43,6 @@ class Interactor(object):
 
     def OnFontsButtonClick(self, event):
         self.Presenter.ShowFontDialog()
+        
+    def OnReadButtonClick(self, event):
+        self.Presenter.OpenBook()

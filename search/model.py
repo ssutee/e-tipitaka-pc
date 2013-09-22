@@ -17,7 +17,7 @@ class Model(object):
         self._readItems = []
         self._data = {}
         self._spellChecker = None
-        self._keywords = None
+        self._keywords = u''
         self._currentPagination = 0
         self._mode = constants.MODE_ALL        
 
@@ -108,11 +108,11 @@ class Model(object):
         return 45
 
     def Read(self, code, volume, page, idx):
-        if idx not in  self._readItems:
+        if idx > 0 and idx not in  self._readItems:
             self._readItems.append(idx)
             self._ReloadDisplay()
         print 'open'
-            
+
     def _ReloadDisplay(self):
         self.Display(self._currentPagination)
 
@@ -242,8 +242,7 @@ class Model(object):
     def GetPages(self):
         pages = len(self._results)/constants.ITEMS_PER_PAGE
         return pages if len(self._results) == 0 else pages + 1
-        
-        
+                
     def _MakeHtmlExcerpts(self, excerpts):
         return u'<font size="4">%s</font><br>'%(excerpts) 
         

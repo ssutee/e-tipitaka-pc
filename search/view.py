@@ -37,7 +37,7 @@ class View(AuiBaseFrame):
         self._delegate = delegate
         self.TopBar.Delegate = delegate
         self._resultsWindow.Delegate = delegate
-
+        
     @property
     def ResultsWindow(self):
         return self._resultsWindow
@@ -125,6 +125,9 @@ class View(AuiBaseFrame):
         ret = dialog.ShowModal()
         OnDismiss(ret, dialog.GetCheckedVolumes())
         dialog.Destroy()
+        
+    def SetTitle(self, title):
+        self.SetTitle(title)
 
     def AppName(self):
         return '%s (%s)' % (_('AppName'), 'E-Tipitaka' + ' v' + settings.VERSION)  

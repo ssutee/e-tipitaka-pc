@@ -7,6 +7,8 @@ def ConvertToPaliSearch(search):
     return search.replace(u'ฐ', u'\uf700').replace(u'ญ', u'\uf70f').replace(u'\u0e4d', u'\uf711')
 
 def ThaiToArabic(number):
+    if isinstance(number, int):
+        number = unicode(number)
     assert isinstance(number, unicode), "%r is not unicode" % (number)
     d_tha = u'๐๑๒๓๔๕๖๗๘๙'
     d_arb = u'0123456789'
@@ -19,6 +21,8 @@ def ThaiToArabic(number):
     return result
 
 def ArabicToThai(number):
+    if isinstance(number, int):
+        number = unicode(number)        
     assert isinstance(number, unicode), "%r is not unicode" % (number)
     d_tha = u'๐๑๒๓๔๕๖๗๘๙'
     d_arb = u'0123456789'

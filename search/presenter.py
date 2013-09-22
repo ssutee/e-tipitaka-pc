@@ -7,8 +7,14 @@ _ = i18n.language.ugettext
 
 import constants, utils 
 
+import read.model
+import read.interactor
+import read.view
+import read.presenter
+
 class Presenter(object):
     def __init__(self, model, view, interactor):
+        self._presenters = {}
         self._scrollPosition = 0
         self._model = model
         self._model.Delegate = self
@@ -56,8 +62,27 @@ class Presenter(object):
         
         return True
         
-    def Read(self, code, volume, page, idx):
+    def OpenBook(self):
+        self.Read(self._model.Code, 1, 0, 0, 1)
+
+    def Read(self, code, volume, page, idx, section=None):
         self._model.Read(code, volume, page, idx)
+        presenter = self._presenters.get(code, None)
+        if not presenter:
+            model = read.model.Model(code)
+            view = read.view.View(self._view, self._model.Code, code)
+            interactor = read.interactor.Interactor()
+            presenter = read.presenter.Presenter(model, view, interactor, code)
+            presenter.Delegate = self
+            self._presenters[code] = presenter
+        else:
+            presenter.BringToFront() 
+
+        presenter.OpenBook(volume, page, section)
+            
+    def OnReadWindowClose(self, code):
+        if code in self._presenters:
+            del self._presenters[code]           
 
     def SearchWillStart(self):
         self._view.DisableSearchControls()
