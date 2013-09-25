@@ -8,12 +8,12 @@ class Presenter(object):
         self._delegate = None
         self._view = view
         self._view.DataSource = self
+        self._view.Delegate = self
         self._view.SetTitle(self._model.GetTitle())
         self._view.Start()
         interactor.Install(self, view)     
-        self._currentPage = 0
+        self._currentPage = self._model.MinimumPage
         self._currentVolume = 0
-        self._currentSection = None
 
     @property
     def Delegate(self):
@@ -28,16 +28,17 @@ class Presenter(object):
         self._view.Iconize(False)
 
     def OpenBook(self, volume, page, section=None):
-        self._ToggleButtons(volume)
+        self._currentVolume = volume
+        self._currentPage = self._model.MinimumPage if page < self._model.MinimumPage else page
+                
+        self._ToggleButtons(self._currentVolume)
 
-        self._currentVolume, self._currentSection = volume, section
-        self._currentPage = self._model.MinimumPage if self._currentPage < self._model.MinimumPage else page
+        self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
+        self._view.SetPageNumber(self._currentPage if self._currentPage > 0 else None)
+        self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))
 
-        self._view.SetTitles(*self._model.GetTitles(volume, section))
-        self._view.SetPageNumber(page if page > 0 else None)
-        self._view.SetItemNumber(*self._model.GetItems(volume, page))
-
-        self._view.SetText(self._model.GetPage(volume, page))
+        self._view.SetText(self._model.GetPage(self._currentVolume, self._currentPage))
+        self._view.UpdateSlider(self._currentPage, self._model.GetTotalPages(self._currentVolume))
 
     def Close(self):
         if hasattr(self._delegate, 'OnReadWindowClose'):
@@ -51,22 +52,41 @@ class Presenter(object):
 
     def Forward(self):
         self._currentPage += 1
-        self.OpenBook(self._currentVolume, self._currentPage)
+        self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
         
     def Backward(self):
         self._currentPage -= 1
-        self.OpenBook(self._currentVolume, self._currentPage)
+        self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
 
     def HandleBookSelection(self, event):
-        print event
+        if isinstance(event, wx.TreeEvent):
+            volume, page, section = self._view.BookList.GetItemPyData(event.GetItem())
+            self.OpenBook(volume, page, section if section is not None else self._model.GetSection(volume, page))
+        elif isinstance(event, wx.CommandEvent):
+            self.OpenBook(event.GetSelection()+1, self._model.MinimumPage)
+            
+    def JumpToPage(self, page, code=None):
+        page = page if page > 0 and page <= self._model.GetTotalPages(self._currentVolume) else self._model.MinimumPage
+        self.OpenBook(self._currentVolume, page, self._model.GetSection(self._currentVolume, page))
+        
+    def JumpToItem(self, item):
+        page, sub = 0, 0
+        try:
+            if len(item.split('.')) == 2:
+                item, sub = map(int, item.split('.'))
+            elif len(item.split('.')) == 1:
+                item, sub = int(item), 1
+        except ValueError, e:
+            pass
+        if self._view.CheckBox.IsChecked():
+            page = int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(self._currentVolume, sub, item)])
+        else:
+            try:
+                page = self._model.ConvertItemToPage(self._currentVolume, item, sub)
+            except ValueError, e:
+                pass
+        self.JumpToPage(page)
 
     def _ToggleButtons(self, volume):
-        if self._currentPage <= self._model.MinimumPage:
-            self._view.BackwardButton.Disable()
-        else:
-            self._view.BackwardButton.Enable()
-
-        if self._currentPage >= self._model.GetTotalPages(volume):
-            self._view.ForwardButton.Disable()
-        else:
-            self._view.ForwardButton.Enable()        
+        getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.MinimumPage else 'Enable')()
+        getattr(self._view.ForwardButton, 'Disable' if self._currentPage >= self._model.GetTotalPages(volume) else 'Enable')()

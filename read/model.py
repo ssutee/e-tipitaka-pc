@@ -35,7 +35,7 @@ class Engine(object):
         
     def GetFirstPage(self, volume):
         pages = map(lambda x:u'%s'%(x), range(1, self.GetTotalPages(volume)))
-        text1 = u'\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0]), int(pages[-1]))
+        text1 = u'\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0]), int(pages[-1])+1)
         text2 = u''
 
         sub = constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume].keys()
@@ -56,6 +56,9 @@ class Engine(object):
     def GetItems(self, volume, page):
         result = self.Query(volume, page)
         return map(int, result['items'].split()) if len(result) > 0 else []
+        
+    def GetSection(self, volume, page):
+        return self.Query(volume, page).get('section', 0)
 
     def GetPage(self, volume, page):
         return self.GetContent(self.Query(volume, page)) if page > 0 else self.GetFirstPage(volume)
@@ -208,6 +211,7 @@ class ThaiFiveBooksEngine(Engine):
         r = {}
         if result is not None:
             r['content'] = result[3]
+            r['section'] = int(result[2].split()[1].split('.')[1]) if len(result[2].split()[1].split('.')) > 1 else 0
         return r
         
     def GetTotalPages(self, volume):
@@ -256,7 +260,10 @@ class Model(object):
         
     def GetItems(self, volume, page):
         return self._engine[self._code].GetItems(volume, page)
-        
+
+    def GetSection(self, volume, page):
+        return self._engine[self._code].GetSection(volume, page)
+
     def GetTotalPages(self, volume):
         return self._engine[self._code].GetTotalPages(volume)
 
@@ -265,6 +272,12 @@ class Model(object):
         
     def GetCompareChoices(self):
         return self._engine[self._code].GetCompareChoices()
+        
+    def ConvertItemToPage(self, volume, item, sub):
+        try:
+            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+        except KeyError, e:
+            return 0
 
     def __init__(self, code):
         self._engine = {}

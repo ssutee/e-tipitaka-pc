@@ -11,10 +11,10 @@ _ = i18n.language.ugettext
 
 class ReadPanelCreator(object):
     @staticmethod
-    def create(code, parent, font):
+    def create(parent, code, font, delegate):
         if code == constants.THAI_FIVE_BOOKS_CODE:
-            return widgets.ReadWithReferencesPanel(parent, font)
-        return widgets.ReadPanel(parent, font)
+            return widgets.ReadWithReferencesPanel(parent, code, font, delegate)
+        return widgets.ReadPanel(parent, code, font, delegate)
 
 class ViewComponentsCreator(object):
     @staticmethod
@@ -89,11 +89,30 @@ class View(AuiBaseFrame):
         super(View, self).__init__(parent, wx.ID_ANY, size=(1024, 768), title=title)
             
         self._dataSource = None
+        self._delegate = None
+        
         self._components = ViewComponentsCreator.create(code, self)
         self._code = code                
         self._readPanel = {}        
         self._font = None
+
+    @property
+    def DataSource(self):
+        return self._dataSource
+
+    @DataSource.setter
+    def DataSource(self, dataSource):
+        self._dataSource = dataSource
+        self._components.DataSource = dataSource        
         
+    @property
+    def Delegate(self):
+        return self._delegate
+        
+    @Delegate.setter
+    def Delegate(self, delegate):
+        self._delegate = delegate
+
     @property
     def ForwardButton(self):
         return self._toolPanel.ForwardButton
@@ -117,6 +136,18 @@ class View(AuiBaseFrame):
     @property
     def BookList(self):
         return self._bookList
+        
+    @property
+    def InputPage(self):
+        return self._inputPage
+        
+    @property
+    def InputItem(self):
+        return self._inputItem
+        
+    @property
+    def CheckBox(self):
+        return self._checkBox
 
     def SetPageNumber(self, number):
         self._readPanel[self._code].SetPageNumber(number)
@@ -125,7 +156,7 @@ class View(AuiBaseFrame):
         self._readPanel[self._code].SetItemNumber(*numbers)
 
     def _PostInit(self):
-        self._readPanel[self._code] = ReadPanelCreator.create(self._code, self, self._font)
+        self._readPanel[self._code] = ReadPanelCreator.create(self, self._code, self._font, self._delegate)
         self._readPanel[self._code].SetPageNumber(None)
         self._readPanel[self._code].SetItemNumber(None)
 
@@ -153,9 +184,9 @@ class View(AuiBaseFrame):
         labelPage = wx.StaticText(naviPanel, wx.ID_ANY, u'หน้า: ')
         labelItem = wx.StaticText(naviPanel, wx.ID_ANY, u'ข้อ: ')
         
-        self._inputPage = wx.TextCtrl(naviPanel, -1, size=(50,-1), style=wx.TE_PROCESS_ENTER)
+        self._inputPage = wx.TextCtrl(naviPanel, wx.ID_ANY, size=(50,-1), style=wx.TE_PROCESS_ENTER)
 		
-        self._inputItem = wx.TextCtrl(naviPanel, -1, size=(50,-1), style=wx.TE_PROCESS_ENTER)
+        self._inputItem = wx.TextCtrl(naviPanel, wx.ID_ANY, size=(50,-1), style=wx.TE_PROCESS_ENTER)
         
         self._checkBox = wx.CheckBox(naviPanel, wx.ID_ANY, label="=สยามรัฐฯ")
 		
@@ -176,26 +207,22 @@ class View(AuiBaseFrame):
         
         return panel        
         
-    @property
-    def DataSource(self):
-        return self._dataSource
-        
-    @DataSource.setter
-    def DataSource(self, dataSource):
-        self._dataSource = dataSource
-        self._components.DataSource = dataSource
-        
     def AddReadPanel(self, code):
         if code not in self._readPanel:
-            self._readPanel[code] = ReadPanelCreator.create(code, self, self._font)
+            self._readPanel[code] = ReadPanelCreator.create(self, code, self._font, self._delegate)
             info = AuiPaneInfo().Floatable(False).Center().Row(len(self._readPanel))
             self.AddPane(self._readPanel[code], info.Name(code))
+
         
     def SetTitles(self, title1, title2, code=None):
         self._readPanel[self._code if code == None else code].SetTitles(title1, title2)
         
     def SetText(self, text, code=None):
         self._readPanel[self._code if code == None else code].SetBody(text)
+        
+    def UpdateSlider(self, value, maximum):
+        self._readPanel[self._code].Slider.SetMax(maximum)
+        self._readPanel[self._code].Slider.SetValue(value)
         
     def Start(self):
         self._PostInit()

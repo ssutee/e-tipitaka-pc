@@ -64,6 +64,8 @@ BOOK_NAMES = cPickle.load(open(os.path.join('resources','book_name.pkl'),'rb'))
 BOOK_PAGES = cPickle.load(open(os.path.join('resources','book_page.pkl'), 'rb'))
 BOOK_ITEMS = cPickle.load(open(os.path.join('resources','book_item.pkl'), 'rb'))
 
+MAP_MC_TO_SIAM = cPickle.load(open(os.path.join('resources','mc_map.pkl'), 'rb'))
+
 FIVE_BOOKS_TOC = json.loads(open(os.path.join('resources','bt_toc.json')).read())
 
 FIVE_BOOKS_NAMES = [

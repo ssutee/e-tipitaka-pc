@@ -15,6 +15,11 @@ class Interactor(object):
             self.View.BookList.Bind(wx.EVT_LISTBOX, self.OnBookListSelect)
         elif isinstance(self.View.BookList, wx.TreeCtrl):
             self.View.BookList.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnBookListSelect)
+            
+        self.View.InputPage.Bind(wx.EVT_TEXT_ENTER, self.OnInputPageEnter)
+        self.View.InputPage.Bind(wx.EVT_TEXT, self.OnInputPageEnter)        
+        self.View.InputItem.Bind(wx.EVT_TEXT_ENTER, self.OnInputItemEnter)
+        self.View.InputItem.Bind(wx.EVT_TEXT, self.OnInputItemEnter)
                 
     def OnClose(self, event):
         self.Presenter.Close()
@@ -28,3 +33,13 @@ class Interactor(object):
         
     def OnBookListSelect(self, event):
         self.Presenter.HandleBookSelection(event)
+
+    def OnInputPageEnter(self, event):
+        try:
+            self.Presenter.JumpToPage(int(self.View.InputPage.GetValue()))
+        except ValueError,e:
+            self.Presenter.JumpToPage(0)
+        
+    def OnInputItemEnter(self, event):
+        self.Presenter.JumpToItem(self.View.InputItem.GetValue())
+            

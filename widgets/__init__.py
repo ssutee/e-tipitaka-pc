@@ -290,10 +290,12 @@ class ReadToolPanel(wx.Panel):
         
 class ReadPanel(wx.Panel):
 
-    def __init__(self, parent, font, *args, **kwargs):
+    def __init__(self, parent, code, font, delegate, *args, **kwargs):
         super(ReadPanel, self).__init__(parent, *args, **kwargs)
 
-        self._delegate = None
+        self._delegate = delegate
+        self._code = code
+        
         self._font = font
         self._CreateAttributes()
         self._DoLayout()
@@ -307,6 +309,10 @@ class ReadPanel(wx.Panel):
     @Delegate.setter
     def Delegate(self, delegate):
         self._delegate = delegate
+
+    @property
+    def Slider(self):
+        return self._slider
         
     def _CreateAttributes(self):
         self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER|wx.html.HW_NO_SELECTION)
@@ -322,6 +328,9 @@ class ReadPanel(wx.Panel):
             self._font = self._body.GetFont()
             self._font.SetPointSize(16)
             self._body.SetFont(self._font)
+        
+        self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)
+        self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
 
     def _DoLayout(self):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -334,11 +343,14 @@ class ReadPanel(wx.Panel):
         
         self._mainSizer.Add(sizer, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.BOTTOM, 5)        
 
-        self._mainSizer.Add(wx.StaticLine(self), 0, wx.EXPAND)
+        self._mainSizer.Add(self._slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
         
         self._mainSizer.Add(self._body, 10, wx.EXPAND|wx.LEFT, 15)
         
         self.SetSizer(self._mainSizer)
+        
+    def OnSliderValueChange(self, event):
+        self.Delegate.JumpToPage(event.GetSelection(), self._code)
         
     def SetBody(self, text):
         self._body.SetValue(text)
