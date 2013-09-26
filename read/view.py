@@ -93,7 +93,8 @@ class View(AuiBaseFrame):
         
         self._components = ViewComponentsCreator.create(code, self)
         self._code = code                
-        self._readPanel = {}        
+        self._readPanel = None
+        self._comparePanel = {}
         self._font = None
 
     @property
@@ -150,20 +151,20 @@ class View(AuiBaseFrame):
         return self._checkBox
 
     def SetPageNumber(self, number):
-        self._readPanel[self._code].SetPageNumber(number)
+        self._readPanel.SetPageNumber(number)
         
     def SetItemNumber(self, *numbers):
-        self._readPanel[self._code].SetItemNumber(*numbers)
+        self._readPanel.SetItemNumber(*numbers)
 
     def _PostInit(self):
-        self._readPanel[self._code] = ReadPanelCreator.create(self, self._code, self._font, self._delegate)
-        self._readPanel[self._code].SetPageNumber(None)
-        self._readPanel[self._code].SetItemNumber(None)
+        self._readPanel = ReadPanelCreator.create(self, self._code, self._font, self._delegate)
+        self._readPanel.SetPageNumber(None)
+        self._readPanel.SetItemNumber(None)
 
         self._toolPanel = widgets.ReadToolPanel(self, self._dataSource)        
         self._listPanel = self._CreateBookListPanel()        
         
-        self.SetCenterPane(self._readPanel[self._code], caption=True)
+        self.SetCenterPane(self._readPanel, caption=True)
 
         info = AuiPaneInfo().CaptionVisible(False).Resizable(False)
         info = info.FloatingSize((740, 80)).MinSize((740, 80)).Top().Layer(0)
@@ -208,21 +209,28 @@ class View(AuiBaseFrame):
         return panel        
         
     def AddReadPanel(self, code):
-        if code not in self._readPanel:
-            self._readPanel[code] = ReadPanelCreator.create(self, code, self._font, self._delegate)
-            info = AuiPaneInfo().Floatable(False).Center().Row(len(self._readPanel))
-            self.AddPane(self._readPanel[code], info.Name(code))
+        if code not in self._comparePanel:
+            self._comparePanel[code] = ReadPanelCreator.create(self, code, self._font, self._delegate)
+            info = AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
+            self.AddPane(self._comparePanel[code], info.Name(code))
 
         
     def SetTitles(self, title1, title2, code=None):
-        self._readPanel[self._code if code == None else code].SetTitles(title1, title2)
+        if code is None:
+            self._readPanel.SetTitles(title1, title2)
+        else:
+            self._comparePanel[code].SetTitles(title1, title2)
         
     def SetText(self, text, code=None):
-        self._readPanel[self._code if code == None else code].SetBody(text)
+        if code is None:
+            self._readPanel.SetBody(text)
+        else:
+            self._comparePanel[self._code if code == None else code].SetBody(text)
         
-    def UpdateSlider(self, value, maximum):
-        self._readPanel[self._code].Slider.SetMax(maximum)
-        self._readPanel[self._code].Slider.SetValue(value)
+    def UpdateSlider(self, value, minimum, maximum):
+        self._readPanel.Slider.SetMin(minimum)
+        self._readPanel.Slider.SetMax(maximum)
+        self._readPanel.Slider.SetValue(value)
         
     def Start(self):
         self._PostInit()

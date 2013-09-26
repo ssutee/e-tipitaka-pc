@@ -20,6 +20,8 @@ class Interactor(object):
         self.View.InputPage.Bind(wx.EVT_TEXT, self.OnInputPageEnter)        
         self.View.InputItem.Bind(wx.EVT_TEXT_ENTER, self.OnInputItemEnter)
         self.View.InputItem.Bind(wx.EVT_TEXT, self.OnInputItemEnter)
+        
+        self.View.CompareComboBox.Bind(wx.EVT_COMBOBOX, self.OnCompareComboBoxSelect)
                 
     def OnClose(self, event):
         self.Presenter.Close()
@@ -39,7 +41,9 @@ class Interactor(object):
             self.Presenter.JumpToPage(int(self.View.InputPage.GetValue()))
         except ValueError,e:
             self.Presenter.JumpToPage(0)
-        
-    def OnInputItemEnter(self, event):
+                
+    def OnInputItemEnter(self, event):        
         self.Presenter.JumpToItem(self.View.InputItem.GetValue())
             
+    def OnCompareComboBoxSelect(self, event):
+        print event.GetSelection()

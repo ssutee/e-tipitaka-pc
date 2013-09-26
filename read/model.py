@@ -7,11 +7,7 @@ class Engine(object):
     
     def __init__(self):
         self._searcher = None
-    
-    @property
-    def MinimumPage(self):
-        return 0
-    
+        
     def Query(self, volume, page):
         results = self._searcher.execute(*self.PrepareStatement(volume, page))
         return self.ProcessResult(results.fetchone())
@@ -32,6 +28,9 @@ class Engine(object):
     
     def GetTotalPages(self, volume):
         return int(constants.BOOK_PAGES['%s_%d' % (self._code, volume)])
+        
+    def GetFirstPageNumber(self, volume):
+        return 0
         
     def GetFirstPage(self, volume):
         pages = map(lambda x:u'%s'%(x), range(1, self.GetTotalPages(volume)))
@@ -84,7 +83,7 @@ class Engine(object):
         return ['%s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        raise NotImplementedError('Subclass needs to implement this method!')
+        return [u'บาลี  (บาลีสยามรัฐ)',u'ไทย (มหามกุฏฯ)',u'ไทย (มหาจุฬาฯ)']
 
 class ThaiRoyalEngine(Engine):
     
@@ -100,7 +99,7 @@ class ThaiRoyalEngine(Engine):
         return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
     def GetCompareChoices(self):
-        return [u'บาลี  (บาลีสยามรัฐ)',u'ไทย (มหามกุฏฯ)',u'ไทย (มหาจุฬาฯ)']
+        return [u'ไทย  (บาลีสยามรัฐ)', u'บาลี  (บาลีสยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
         
 class PaliSiamEngine(Engine):
 
@@ -115,9 +114,6 @@ class PaliSiamEngine(Engine):
             return u'พระไตรปิฎก ฉบับสยามรัฐ (ภาษาบาลี)'
         return u'พระไตรปิฎก ฉบับสยามรัฐ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
-    def GetCompareChoices(self):
-        return [u'ไทย  (บาลีสยามรัฐ)',u'ไทย (มหามกุฏฯ)',u'ไทย (มหาจุฬาฯ)']
-
 class ThaiMahaChulaEngine(Engine):
 
     def __init__(self):
@@ -130,9 +126,6 @@ class ThaiMahaChulaEngine(Engine):
         if not volume:
             return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
-
-    def GetCompareChoices(self):
-        return [u'ไทย (บาลีสยามรัฐ)',u'บาลี (บาลีสยามรัฐ)',u'ไทย (มหามกุฏฯ)']
 
     def ProcessResult(self, result):
         r = {}
@@ -159,9 +152,6 @@ class ThaiMahaMakutEngine(Engine):
             return 'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
-    def GetCompareChoices(self):
-        return [u'ไทย (บาลีสยามรัฐ)',u'บาลี  (บาลีสยามรัฐ)',u'ไทย (มหาจุฬาฯ)']
-
     def ProcessResult(self, result):
         r = {}
         if result is not None:
@@ -187,9 +177,8 @@ class ThaiFiveBooksEngine(Engine):
         conn = sqlite3.connect(constants.THAI_FIVE_BOOKS_DB)
         self._searcher = conn.cursor()
 
-    @property
-    def MinimumPage(self):
-        return 1
+    def GetFirstPageNumber(self, volume):
+        return 1 if volume != 3 else 819
 
     def GetCompareChoices(self):
         return []
@@ -245,10 +234,6 @@ class Model(object):
         elif constants.THAI_FIVE_BOOKS_CODE == code:
             self._engine[code] = ThaiFiveBooksEngine()
             
-    @property
-    def MinimumPage(self):
-        return self._engine[self._code].MinimumPage
-            
     def GetTitle(self, volume=None):
         return self._engine[self._code].GetTitle(volume)
 
@@ -266,6 +251,9 @@ class Model(object):
 
     def GetTotalPages(self, volume):
         return self._engine[self._code].GetTotalPages(volume)
+
+    def GetFirstPageNumber(self, volume):
+        return self._engine[self._code].GetFirstPageNumber(volume)
 
     def GetBookListItems(self):
         return self._engine[self._code].GetBookListItems()
