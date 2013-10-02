@@ -362,7 +362,10 @@ class ReadPanel(wx.Panel):
         self.Delegate.JumpToPage(event.GetSelection(), self._code)
         
     def OnCharKeyPress(self, event):
-        self.Delegate.ProcessKeyCommand(event.GetKeyCode(), self._code)
+        try:
+            self.Delegate.ProcessKeyCommand(event.GetKeyCode(), self._code)
+        except ValueError, e:
+            pass
 
     def SetBody(self, text):
         self._body.SetValue(text)

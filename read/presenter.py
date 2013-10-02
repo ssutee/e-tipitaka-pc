@@ -9,28 +9,35 @@ class KeyCommandHandler(object):
         self._filter = {3653:49, 47:50, 45:51, 3616:52, 3606:53, 3640:54, 3638:55, 3588:56, 3605:57, 3592:48, 3651:46}
         
     def handle(self, code):
-        print code
         code = self._filter.get(code, code)
+        
         if code == wx.WXK_LEFT:
             self._command = ''
             return constants.CMD_BACKWARD
-        if code == wx.WXK_RIGHT:
+        elif code == wx.WXK_RIGHT:
             self._command = ''
             return constants.CMD_FORWARD
-        if (code >= 48 and code <= 57) or code == 46:
+        elif (code >= 48 and code <= 57) or code == 46:
             self._command += chr(code)
             return constants.CMD_IDLE
-        if code == 105 or code == 112 or code == 3618 or code == 3619:
-            try:
-                self._result = int(self._command)
-                self._command = ''                
-                if code == 3619 or code == 105:
-                    return constants.CMD_JUMP_TO_ITEM
-                elif code == 3618 or code == 112:
-                    return constants.CMD_JUMP_TO_PAGE
-            except ValueError,e:
-                self._command = ''
-                return constants.CMD_IDLE
+        elif code == 105 or code == 112 or code == 118 or code == 3618 or code == 3619 or code == 3629:
+            self._result = self._command
+            self._command = ''                
+            if code == 3619 or code == 105:
+                return constants.CMD_JUMP_TO_ITEM
+            elif code == 3618 or code == 112:
+                return constants.CMD_JUMP_TO_PAGE
+            elif code == 3629 or code == 118:
+                return constants.CMD_JUMP_TO_VOLUME
+            return constants.CMD_IDLE            
+        elif code == 43:
+            self._command = ''
+            return constants.CMD_ZOOM_IN
+        elif code == 45:
+            self._command = ''
+            return constants.CMD_ZOOM_OUT
+
+        self._command = ''                
         return constants.CMD_IDLE
         
     @property
@@ -87,16 +94,14 @@ class Presenter(object):
     def OpenAnotherBook(self, code, volume, page):
         currentCode = self._model.Code
         self._model.Code = code
-        
-        self._compareVolume[code] = volume        
-        self._comparePage[code] = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
-        
-        self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
-        self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
-        self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
-        self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
-        self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)
-        
+        if page <= self._model.GetTotalPages(volume) and page >= self._model.GetFirstPageNumber(volume):
+            self._compareVolume[code] = volume        
+            self._comparePage[code] = page
+            self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
+            self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
+            self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
+            self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
+            self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
         self._model.Code = currentCode                
 
     def Close(self):
@@ -109,13 +114,19 @@ class Presenter(object):
     def GetCompareChoices(self):
         return self._model.GetCompareChoices()
 
-    def Forward(self):
-        self._currentPage += 1
-        self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
+    def Forward(self, code=None):
+        if code is None:
+            self._currentPage += 1
+            self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
+        else:
+            self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] + 1)
         
-    def Backward(self):
-        self._currentPage -= 1
-        self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
+    def Backward(self, code=None):
+        if code is None:
+            self._currentPage -= 1
+            self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
+        else:
+            self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] - 1)
 
     def HandleBookSelection(self, event):
         if isinstance(event, wx.TreeEvent):
@@ -131,7 +142,7 @@ class Presenter(object):
         else:
             self.OpenAnotherBook(code, self._compareVolume[code], page)
         
-    def JumpToItem(self, item):
+    def JumpToItem(self, item, code=None):
         page, sub = 0, 0
 
         try:
@@ -147,7 +158,7 @@ class Presenter(object):
         except ValueError, e:
             pass
             
-        self.JumpToPage(page)
+        self.JumpToPage(page, code)
 
     def CompareTo(self, index):
         item = None    
@@ -183,15 +194,16 @@ class Presenter(object):
     def ProcessKeyCommand(self, keyCode, code):
         ret = self._keyCommandHandler.handle(keyCode)        
         if ret == constants.CMD_FORWARD:
-            pass
+            self.Forward(code)
         elif ret == constants.CMD_BACKWARD:
-            pass
+            self.Backward(code)
         elif ret == constants.CMD_JUMP_TO_PAGE:
-            pass
+            self.JumpToPage(int(self._keyCommandHandler.Result), code)
         elif ret == constants.CMD_JUMP_TO_ITEM:
-            pass
+            self.JumpToItem(self._keyCommandHandler.Result, code)
         elif ret == constants.CMD_JUMP_TO_VOLUME:
-            pass
+            volume = int(self._keyCommandHandler.Result)
+            self.OpenAnotherBook(code, volume, 1) if code is not None else self.OpenBook(volume, 1)
         elif ret == constants.CMD_ZOOM_IN:
             pass
         elif ret == constants.CMD_ZOOM_OUT:
