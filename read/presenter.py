@@ -153,7 +153,7 @@ class Presenter(object):
         item = None    
         items = self._model.GetItems(self._currentVolume, self._currentPage)
         if len(items) > 1:
-            dialog = wx.SingleChoiceDialog(self._view, 'เลือกข้อที่ต้องการเทียบเคียง', 
+            dialog = wx.SingleChoiceDialog(self._view, u'เลือกข้อที่ต้องการเทียบเคียง', 
                 self._model.GetTitle(self._currentVolume), map(lambda x: u'ข้อที่ ' + utils.ArabicToThai(x), items))
             if dialog.ShowModal() == wx.ID_OK:
                 item = items[dialog.GetSelection()]

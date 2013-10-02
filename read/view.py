@@ -183,7 +183,7 @@ class View(AuiBaseFrame):
 		
         self._inputItem = wx.TextCtrl(naviPanel, wx.ID_ANY, size=(50,-1), style=wx.TE_PROCESS_ENTER)
         
-        self._checkBox = wx.CheckBox(naviPanel, wx.ID_ANY, label="=สยามรัฐฯ")
+        self._checkBox = wx.CheckBox(naviPanel, wx.ID_ANY, label=u'=สยามรัฐฯ')
 		
         naviSizer.Add(labelPage, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(self._inputPage, flag=wx.ALIGN_CENTER_VERTICAL)

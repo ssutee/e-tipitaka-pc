@@ -368,7 +368,7 @@ class ReadPanel(wx.Panel):
         self._body.SetValue(text)
         
     def SetTitles(self, title1, title2):
-        self._title.SetPage('''<div align="center"><font color="#0000FF" size="6">%s</font></div>
+        self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>
             <div align="center"><font color="#0000FF" size="6">%s</font></div>''' % (title1, title2))
     
     def SetPageNumber(self, number):        
@@ -376,7 +376,7 @@ class ReadPanel(wx.Panel):
             self._page.SetPage('')
         else:
             text = _('Page') + ' ' + utils.ArabicToThai(unicode(number))
-            self._page.SetPage('<div align="left"><font color="#378000" size="5">%s</font></div>' % (text))
+            self._page.SetPage(u'<div align="left"><font color="#378000" size="5">%s</font></div>' % (text))
         
     def SetItemNumber(self, *numbers):
         if len(numbers) == 0 or numbers[0] is None:
@@ -385,7 +385,7 @@ class ReadPanel(wx.Panel):
             text = _('Item') + ' ' + utils.ArabicToThai(unicode(numbers[0]))
             if len(numbers) > 1:
                 text += ' - ' + utils.ArabicToThai(unicode(numbers[-1]))
-            self._item.SetPage('<div align="right"><font color="#378000" size="5">%s</font></div>' % (text))
+            self._item.SetPage(u'<div align="right"><font color="#378000" size="5">%s</font></div>' % (text))
 
 class ReadWithReferencesPanel(ReadPanel):
     

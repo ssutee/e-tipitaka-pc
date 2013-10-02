@@ -106,7 +106,7 @@ class ThaiRoyalEngine(Engine):
         
     def GetTitle(self, volume=None):
         if not volume:
-            return 'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
+            return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
         
 class PaliSiamEngine(Engine):
@@ -132,7 +132,7 @@ class ThaiMahaChulaEngine(Engine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย)'
+            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
     def ProcessResult(self, result):
@@ -160,7 +160,7 @@ class ThaiMahaMakutEngine(Engine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return 'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย)'
+            return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
     def ProcessResult(self, result):
@@ -210,7 +210,7 @@ class ThaiFiveBooksEngine(Engine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return 'ชุดห้าเล่มจากพระโอษฐ์'
+            return u'ชุดห้าเล่มจากพระโอษฐ์'
         return constants.FIVE_BOOKS_NAMES[volume-1]
 
     def GetSubtitle(self, volume, section=None):
