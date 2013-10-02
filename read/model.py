@@ -83,7 +83,18 @@ class Engine(object):
         return ['%s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        return [u'บาลี  (บาลีสยามรัฐ)',u'ไทย (มหามกุฏฯ)',u'ไทย (มหาจุฬาฯ)']
+        return [u'ไทย  (บาลีสยามรัฐ)', u'บาลี  (บาลีสยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
+        
+    def GetSubItem(self, volume, page, item): 
+        for sub in constants.BOOK_ITEMS[self._code][volume]:
+            if item in constants.BOOK_ITEMS[self._code][volume][sub]:
+                pages = constants.BOOK_ITEMS[self._code][volume][sub][item]
+                if page in pages:
+                    return sub
+        return 1
+        
+    def ConvertVolume(self, volume, item, sub):
+        return volume
 
 class ThaiRoyalEngine(Engine):
     
@@ -97,9 +108,6 @@ class ThaiRoyalEngine(Engine):
         if not volume:
             return 'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
-
-    def GetCompareChoices(self):
-        return [u'ไทย  (บาลีสยามรัฐ)', u'บาลี  (บาลีสยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
         
 class PaliSiamEngine(Engine):
 
@@ -138,6 +146,9 @@ class ThaiMahaChulaEngine(Engine):
             r['display'] = result[5]
             r['content'] = result[6]
         return r
+        
+    def GetSubItem(self, volume, page, item):
+        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])[1]
 
 class ThaiMahaMakutEngine(Engine):
 
@@ -168,6 +179,20 @@ class ThaiMahaMakutEngine(Engine):
         if position == 1:
             return 74
         return 91
+        
+    def GetSubItem(self, volume, page, item):    
+        result = self.Query(volume, page)
+        volume = int(result['volume_orig'])
+        for sub in constants.BOOK_ITEMS[self._code+'_orig'][volume]:
+            if item in constants.BOOK_ITEMS[self._code+'_orig'][volume][sub]:
+                pages = constants.BOOK_ITEMS[self._code+'_orig'][volume][sub][item]
+                if page in pages:
+                    return sub
+        return 1
+
+    def ConvertVolume(self, volume, item, sub):
+        item = 1 if '%d-%d-%d'%(volume, sub, item) not in constants.VOLUME_TABLE[self._code] else item
+        return int(constants.VOLUME_TABLE[self._code]['%d-%d-%d'%(volume, sub, item)])
 
 class ThaiFiveBooksEngine(Engine):
 
@@ -213,6 +238,9 @@ class ThaiFiveBooksEngine(Engine):
 
     def GetItems(self, volume, page):
         return []
+        
+    def GetSubItem(self, volume, page, item):
+        return 1
 
 class Model(object):
     
@@ -248,6 +276,9 @@ class Model(object):
 
     def GetSection(self, volume, page):
         return self._engine[self._code].GetSection(volume, page)
+        
+    def GetSubItem(self, volume, page, item):
+        return self._engine[self._code].GetSubItem(volume, page, item)
 
     def GetTotalPages(self, volume):
         return self._engine[self._code].GetTotalPages(volume)
@@ -261,11 +292,14 @@ class Model(object):
     def GetCompareChoices(self):
         return self._engine[self._code].GetCompareChoices()
         
-    def ConvertItemToPage(self, volume, item, sub):
-        try:
-            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+    def ConvertItemToPage(self, volume, item, sub, checked=False):
+        try:            
+            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
         except KeyError, e:
             return 0
+
+    def ConvertVolume(self, volume, item, sub):
+        return self._engine[self._code].ConvertVolume(volume, item, sub)
 
     def __init__(self, code):
         self._engine = {}

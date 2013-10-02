@@ -9,12 +9,23 @@ from whoosh.index import open_dir
 
 HOME = expanduser("~")
 
+CODES = ['thai', 'pali', 'thaimm', 'thaimc', 'thaibt']
+
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
 
 DEFAULT_FONT = 'TF Chiangsaen'
 
 ITEMS_PER_PAGE = 20
+
+CMD_IDLE            = 1000
+CMD_FORWARD         = 1001
+CMD_BACKWARD        = 1002
+CMD_JUMP_TO_PAGE    = 1003
+CMD_JUMP_TO_ITEM    = 1004
+CMD_JUMP_TO_VOLUME  = 1005
+CMD_ZOOM_IN         = 1006
+CMD_ZOOM_OUT        = 1007
 
 MODE_ALL = 0
 MODE_CUSTOM = 1
@@ -63,6 +74,7 @@ PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join('resources', 'spell_p
 BOOK_NAMES = cPickle.load(open(os.path.join('resources','book_name.pkl'),'rb'))
 BOOK_PAGES = cPickle.load(open(os.path.join('resources','book_page.pkl'), 'rb'))
 BOOK_ITEMS = cPickle.load(open(os.path.join('resources','book_item.pkl'), 'rb'))
+VOLUME_TABLE = cPickle.load(open(os.path.join('resources', 'maps.pkl'), 'rb'))
 
 MAP_MC_TO_SIAM = cPickle.load(open(os.path.join('resources','mc_map.pkl'), 'rb'))
 

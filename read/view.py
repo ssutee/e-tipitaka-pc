@@ -150,14 +150,8 @@ class View(AuiBaseFrame):
     def CheckBox(self):
         return self._checkBox
 
-    def SetPageNumber(self, number):
-        self._readPanel.SetPageNumber(number)
-        
-    def SetItemNumber(self, *numbers):
-        self._readPanel.SetItemNumber(*numbers)
-
-    def _PostInit(self):
-        self._readPanel = ReadPanelCreator.create(self, self._code, self._font, self._delegate)
+    def _PostInit(self):                
+        self._readPanel = ReadPanelCreator.create(self, None, self._font, self._delegate)
         self._readPanel.SetPageNumber(None)
         self._readPanel.SetItemNumber(None)
 
@@ -213,24 +207,32 @@ class View(AuiBaseFrame):
             self._comparePanel[code] = ReadPanelCreator.create(self, code, self._font, self._delegate)
             info = AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
             self.AddPane(self._comparePanel[code], info.Name(code))
-
+        else:
+            info = self.AuiManager.GetPane(self._comparePanel[code])
+            info.Show()
+            self.AuiManager.Update()
+        
+    def SetPageNumber(self, number, code=None):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        readPanel.SetPageNumber(number)
+        
+    def SetItemNumber(self, *numbers, **kwargs):
+        readPanel = self._readPanel if 'code' not in kwargs else self._comparePanel[kwargs['code']]
+        readPanel.SetItemNumber(*numbers)
         
     def SetTitles(self, title1, title2, code=None):
-        if code is None:
-            self._readPanel.SetTitles(title1, title2)
-        else:
-            self._comparePanel[code].SetTitles(title1, title2)
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        readPanel.SetTitles(title1, title2)
         
     def SetText(self, text, code=None):
-        if code is None:
-            self._readPanel.SetBody(text)
-        else:
-            self._comparePanel[self._code if code == None else code].SetBody(text)
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        readPanel.SetBody(text)
         
-    def UpdateSlider(self, value, minimum, maximum):
-        self._readPanel.Slider.SetMin(minimum)
-        self._readPanel.Slider.SetMax(maximum)
-        self._readPanel.Slider.SetValue(value)
+    def UpdateSlider(self, value, minimum, maximum, code=None):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        readPanel.Slider.SetMin(minimum)
+        readPanel.Slider.SetMax(maximum)
+        readPanel.Slider.SetValue(value)
         
     def Start(self):
         self._PostInit()

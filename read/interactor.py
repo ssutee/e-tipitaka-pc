@@ -46,4 +46,4 @@ class Interactor(object):
         self.Presenter.JumpToItem(self.View.InputItem.GetValue())
             
     def OnCompareComboBoxSelect(self, event):
-        print event.GetSelection()
+        self.Presenter.CompareTo(event.GetSelection())

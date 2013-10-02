@@ -110,8 +110,7 @@ class Model(object):
     def Read(self, code, volume, page, idx):
         if idx > 0 and idx not in  self._readItems:
             self._readItems.append(idx)
-            self._ReloadDisplay()
-        print 'open'
+            self._ReloadDisplay()        
 
     def _ReloadDisplay(self):
         self.Display(self._currentPagination)

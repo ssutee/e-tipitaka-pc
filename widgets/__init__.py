@@ -321,6 +321,9 @@ class ReadPanel(wx.Panel):
         self._item = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER|wx.html.HW_NO_SELECTION)
         
         self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
+        self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
+        self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
+        self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
         self._font = utils.LoadFont(constants.READ_FONT)
         if self._font != None and self._font.IsOk():
             self._body.SetFont(self._font)
@@ -349,9 +352,18 @@ class ReadPanel(wx.Panel):
         
         self.SetSizer(self._mainSizer)
         
+    def OnTextBodySetFocus(self, event):
+        self.Delegate.SetFocus(True, self._code)
+        
+    def OnTextBodyKillFocus(self, event):
+        self.Delegate.SetFocus(False, self._code)        
+        
     def OnSliderValueChange(self, event):
         self.Delegate.JumpToPage(event.GetSelection(), self._code)
         
+    def OnCharKeyPress(self, event):
+        self.Delegate.ProcessKeyCommand(event.GetKeyCode(), self._code)
+
     def SetBody(self, text):
         self._body.SetValue(text)
         
