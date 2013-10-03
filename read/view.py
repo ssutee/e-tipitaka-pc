@@ -161,7 +161,7 @@ class View(AuiBaseFrame):
         self.SetCenterPane(self._readPanel, caption=True)
 
         info = AuiPaneInfo().CaptionVisible(False).Resizable(False)
-        info = info.FloatingSize((740, 80)).MinSize((740, 80)).Top().Layer(0)
+        info = info.FloatingSize((740, 65)).MinSize((740, 65)).Top().Layer(0)
         self.AddPane(self._toolPanel, info)
 
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)

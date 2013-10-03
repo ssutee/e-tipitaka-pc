@@ -207,16 +207,18 @@ class ReadToolPanel(wx.Panel):
             wx.BitmapFromImage(wx.Image(constants.LEFT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._forwardButton = wx.BitmapButton(self._viewPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.RIGHT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
-        viewSizer.Add(self._backwardButton)
-        viewSizer.Add(self._forwardButton)        
+        viewSizer.Add(self._backwardButton, flag=wx.ALIGN_CENTER)
+        viewSizer.Add(self._forwardButton, flag=wx.ALIGN_CENTER)        
         self._viewPanel.SetSizer(viewSizer)
+        self._viewPanel.Fit()
                 
         self._comparePanel = wx.Panel(self, wx.ID_ANY)
         compareSizer = wx.StaticBoxSizer(wx.StaticBox(self._comparePanel, wx.ID_ANY, u'เทียบเคียงกับ'), orient=wx.HORIZONTAL)
         self._comboCompare = wx.ComboBox(self._comparePanel, wx.ID_ANY, 
             choices=self._dataSource.GetCompareChoices(), style=wx.CB_DROPDOWN|wx.CB_READONLY)
         compareSizer.Add(self._comboCompare, flag=wx.ALIGN_CENTER)
-        self._comparePanel.SetSizer(compareSizer)        
+        self._comparePanel.SetSizer(compareSizer) 
+        self._comparePanel.Fit()       
 
         # tools
         self._toolsPanel = wx.Panel(self, wx.ID_ANY)
@@ -254,29 +256,31 @@ class ReadToolPanel(wx.Panel):
             wx.BitmapFromImage(wx.Image(constants.PRINT_IMAGE, wx.BITMAP_TYPE_PNG)))
         self._printButton.SetToolTip(wx.ToolTip(u'พิมพ์หน้าที่ต้องการ'))                
                 
-        toolsSizer.Add(self._searchButton)
+        toolsSizer.Add(self._searchButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
-        toolsSizer.Add(self._starButton)
+        toolsSizer.Add(self._starButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
-        toolsSizer.Add(self._layoutButton)
+        toolsSizer.Add(self._layoutButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))                
-        toolsSizer.Add(self._fontsButton)
-        toolsSizer.Add(self._incFontButton)
-        toolsSizer.Add(self._decFontButton)
+        toolsSizer.Add(self._fontsButton, flag=wx.ALIGN_CENTER)
+        toolsSizer.Add(self._incFontButton, flag=wx.ALIGN_CENTER)
+        toolsSizer.Add(self._decFontButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))                
-        toolsSizer.Add(self._saveButton)
-        toolsSizer.Add(self._printButton)
+        toolsSizer.Add(self._saveButton, flag=wx.ALIGN_CENTER)
+        toolsSizer.Add(self._printButton, flag=wx.ALIGN_CENTER)
                 
         self._toolsPanel.SetSizer(toolsSizer)
+        self._toolsPanel.Fit()
         
         self._dictPanel = wx.Panel(self, wx.ID_ANY)
         dictSizer = wx.StaticBoxSizer(wx.StaticBox(self._dictPanel, wx.ID_ANY, u'พจนานุกรม'), orient=wx.HORIZONTAL)        
         self._dictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._dictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
-        dictSizer.Add(self._dictButton)        
+        dictSizer.Add(self._dictButton, flag=wx.ALIGN_CENTER)        
         dictSizer.Add((15, -1))        
         self._dictPanel.SetSizer(dictSizer)        
+        self._dictPanel.Fit()
 
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -480,9 +484,9 @@ class SearchToolPanel(wx.Panel):
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
         bottomSizer.Add(self._readButton, flag=wx.ALIGN_BOTTOM)
         bottomSizer.Add((5,5))
-        bottomSizer.Add(self._langPanel, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
+        bottomSizer.Add(self._langPanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
         bottomSizer.Add((5,5))
-        bottomSizer.Add(self._volumesRadio ,flag=wx.ALIGN_BOTTOM|wx.EXPAND)
+        bottomSizer.Add(self._volumesRadio, 0 ,flag=wx.ALIGN_BOTTOM|wx.EXPAND)
         bottomSizer.Add((5,5))
         bottomSizer.Add(self._prevButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)    
         bottomSizer.Add(self._nextButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
@@ -490,10 +494,11 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add(self._exportButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)    
         
-        mainSizer.Add(topSizer, 1, flag=wx.EXPAND)
-        mainSizer.Add(bottomSizer, 1, flag=wx.EXPAND)
+        mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_CENTER)
+        mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         
         self.SetSizer(mainSizer)
+
             
     def _CreateAttributes(self):
         self._text = MySearchCtrl(self, constants.LOG_FILE)        
@@ -510,6 +515,7 @@ class SearchToolPanel(wx.Panel):
         self._langComboBox.SetStringSelection(langs[0])
         langSizer.Add(self._langComboBox)
         self._langPanel.SetSizer(langSizer)
+        langSizer.Fit(self._langPanel)
         
         self._volumesRadio = wx.RadioBox(self, wx.ID_ANY, _('Choose volumes'), choices=[_('All'), _('Custom')], majorDimension=2)
         
