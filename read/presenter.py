@@ -154,7 +154,10 @@ class Presenter(object):
             pass
 
         try:
+            currentCode = self._model.Code                
+            self._model.Code = code if code is not None else currentCode
             page = self._model.ConvertItemToPage(self._currentVolume, item, sub, self._view.CheckBox.IsChecked())
+            self._model.Code = currentCode
         except ValueError, e:
             pass
             

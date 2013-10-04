@@ -60,7 +60,7 @@ class View(AuiBaseFrame):
 
     def __init__(self):
         self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)
-        super(View, self).__init__(None, id=wx.ID_ANY, size=(800, 600), title=self.AppName())
+        super(View, self).__init__(None, id=wx.ID_ANY, size=(1024, 800), title=self.AppName())
 
         icon = wx.IconBundle()
         icon.AddIconFromFile(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)

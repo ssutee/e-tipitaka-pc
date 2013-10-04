@@ -19,6 +19,8 @@ class Interactor(object):
         
         self.View.VolumesRadio.Bind(wx.EVT_RADIOBOX, self.OnVolumesRadioSelect)
         
+        self.View.TopBar.CheckBox.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxChange)
+        
     def OnAboutButtonClick(self, event):
         self.Presenter.ShowAboutDialog()
 
@@ -46,3 +48,6 @@ class Interactor(object):
         
     def OnReadButtonClick(self, event):
         self.Presenter.OpenBook()
+        
+    def OnCheckBoxChange(self, event):
+        self.Presenter.SetOpenNewWindow(event.GetSelection() == 1)

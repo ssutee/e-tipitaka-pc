@@ -16,7 +16,8 @@ class Presenter(object):
     def __init__(self, model, view, interactor):
         self._presenters = {}
         self._scrollPosition = 0
-        self._model = model
+        self._shouldOpenNewWindow = False
+        self._model = model        
         self._model.Delegate = self
         self._view = view
         self._view.Delegate = self
@@ -67,17 +68,19 @@ class Presenter(object):
 
     def Read(self, code, volume, page, idx, section=None):
         self._model.Read(code, volume, page, idx)
-        presenter = self._presenters.get(code, None)
-        if not presenter:
+        presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
+        if not presenter or self._shouldOpenNewWindow:
             model = read.model.Model(code)
             view = read.view.View(self._view, self._model.Code, code)
             interactor = read.interactor.Interactor()
             presenter = read.presenter.Presenter(model, view, interactor, code)
             presenter.Delegate = self
-            self._presenters[code] = presenter
+            if code not in self._presenters:
+                self._presenters[code] = [presenter]
+            else:
+                self._presenters[code] += [presenter]
         else:
             presenter.BringToFront() 
-
         presenter.OpenBook(volume, page, section)
             
     def OnReadWindowClose(self, code):
@@ -160,6 +163,9 @@ class Presenter(object):
         
     def PreviousPagination(self):
         self._model.DisplayPrevious()
+                    
+    def SetOpenNewWindow(self, flag):
+        self._shouldOpenNewWindow = flag
                     
     def Close(self):
         self._view.SearchCtrl.SaveSearches()

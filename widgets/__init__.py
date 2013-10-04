@@ -468,6 +468,10 @@ class SearchToolPanel(wx.Panel):
     @property
     def ReadButton(self):
         return self._readButton
+        
+    @property
+    def CheckBox(self):
+        return self._checkBox
 
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -483,7 +487,9 @@ class SearchToolPanel(wx.Panel):
         
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
         bottomSizer.Add(self._readButton, flag=wx.ALIGN_BOTTOM)
-        bottomSizer.Add((5,5))
+        bottomSizer.Add((5,5))        
+        bottomSizer.Add(self._checkBox, flag=wx.ALIGN_CENTER)
+        bottomSizer.Add((10,5))
         bottomSizer.Add(self._langPanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
         bottomSizer.Add((5,5))
         bottomSizer.Add(self._volumesRadio, 0 ,flag=wx.ALIGN_BOTTOM|wx.EXPAND)
@@ -494,7 +500,7 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add(self._exportButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)    
         
-        mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_CENTER)
+        mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         
         self.SetSizer(mainSizer)
@@ -562,9 +568,11 @@ class SearchToolPanel(wx.Panel):
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
         
         self._readButton = buttons.GenBitmapTextButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.BOOKS_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)), _('Read'), size=(-1, 40))
+            wx.BitmapFromImage(wx.Image(constants.BOOKS_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)), _('Read'), size=(-1, 57))
         self._aboutButton = wx.Button(self, wx.ID_ANY, _('About'), size=wx.DefaultSize)        
         self._aboutButton.SetToolTip(wx.ToolTip(_('About E-Tipitaka')))        
+        
+        self._checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'เปิดหน้าใหม่ทุกครั้ง')
                 
 class ResultsWindow(wx.html.HtmlWindow):
     
