@@ -123,6 +123,10 @@ class View(AuiBaseFrame):
         return self._toolPanel.BackwardButton
         
     @property
+    def BookListButton(self):
+        return self._toolPanel.BookListButton
+        
+    @property
     def InputItem(self):
         return self._inputItem
         
@@ -162,11 +166,11 @@ class View(AuiBaseFrame):
 
         info = AuiPaneInfo().CaptionVisible(False).Resizable(False)
         info = info.FloatingSize((740, 65)).MinSize((740, 65)).Top().Layer(0)
-        self.AddPane(self._toolPanel, info)
+        self.AddPane(self._toolPanel, info.Name('Tool'))
 
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
         info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 768)).Left().Layer(1)
-        self.AddPane(self._listPanel, info)
+        self.AddPane(self._listPanel, info.Name('BookList'))
         
     def _CreateBookListPanel(self):
         panel = wx.Panel(self, wx.ID_ANY)        
@@ -211,7 +215,22 @@ class View(AuiBaseFrame):
             info = self.AuiManager.GetPane(self._comparePanel[code])
             info.Show()
             self.AuiManager.Update()
-        
+            
+    def HideBookList(self):
+        info = self.AuiManager.GetPane('BookList')
+        info.Hide()
+        self.AuiManager.Update()
+
+    def ShowBookList(self):
+        info = self.AuiManager.GetPane('BookList')
+        info.Show()
+        self.AuiManager.Update()
+
+    def ToggleBookList(self):
+        info = self.AuiManager.GetPane('BookList')
+        info.Hide() if info.IsShown() else info.Show()            
+        self.AuiManager.Update()
+
     def SetPageNumber(self, number, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.SetPageNumber(number)

@@ -178,6 +178,7 @@ class Presenter(object):
         sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
 
         if item is not None:    
+            self._view.HideBookList()
             self._view.AddReadPanel(constants.CODES[index])
             currentCode = self._model.Code
             self._model.Code = constants.CODES[index]                        
@@ -211,6 +212,9 @@ class Presenter(object):
             pass
         elif ret == constants.CMD_ZOOM_OUT:
             pass
+            
+    def ToggleBookList(self):
+        self._view.ToggleBookList()
 
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()

@@ -190,6 +190,10 @@ class ReadToolPanel(wx.Panel):
     @property
     def BackwardButton(self):
         return self._backwardButton
+        
+    @property
+    def BookListButton(self):
+        return self._bookListButton
 
     def __init__(self, parent, dataSource, *args, **kwargs):
         super(ReadToolPanel, self).__init__(parent, *args, **kwargs)
@@ -232,9 +236,9 @@ class ReadToolPanel(wx.Panel):
             wx.BitmapFromImage(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._starButton.SetToolTip(wx.ToolTip(u'ที่คั่นหน้า'))
                 
-        self._layoutButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
+        self._bookListButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.LAYOUT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(32,32)))
-        self._layoutButton.SetToolTip(wx.ToolTip(u'แสดง/ซ่อน หน้าต่างเลือกหนังสือ'))
+        self._bookListButton.SetToolTip(wx.ToolTip(u'แสดง/ซ่อน หน้าต่างเลือกหนังสือ'))
                 
         self._fontsButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=self._searchButton.GetSize())
@@ -260,7 +264,7 @@ class ReadToolPanel(wx.Panel):
         toolsSizer.Add((5,-1))        
         toolsSizer.Add(self._starButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
-        toolsSizer.Add(self._layoutButton, flag=wx.ALIGN_CENTER)
+        toolsSizer.Add(self._bookListButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))                
         toolsSizer.Add(self._fontsButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add(self._incFontButton, flag=wx.ALIGN_CENTER)

@@ -10,6 +10,7 @@ class Interactor(object):
         
         self.View.ForwardButton.Bind(wx.EVT_BUTTON, self.OnForwardButtonClick)
         self.View.BackwardButton.Bind(wx.EVT_BUTTON, self.OnBackwordButtonClick)
+        self.View.BookListButton.Bind(wx.EVT_BUTTON, self.OnBookListButtonClick)
         
         if isinstance(self.View.BookList, wx.ListBox):
             self.View.BookList.Bind(wx.EVT_LISTBOX, self.OnBookListSelect)
@@ -32,6 +33,9 @@ class Interactor(object):
         
     def OnBackwordButtonClick(self, event):
         self.Presenter.Backward()
+        
+    def OnBookListButtonClick(self, event):
+        self.Presenter.ToggleBookList()
         
     def OnBookListSelect(self, event):
         self.Presenter.HandleBookSelection(event)
