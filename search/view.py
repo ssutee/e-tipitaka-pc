@@ -57,6 +57,10 @@ class View(AuiBaseFrame):
     @Font.setter
     def Font(self, font):
         self._font = font
+        
+    @property
+    def HistoryList(self):
+        return self._historyList
 
     def __init__(self):
         self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)
@@ -79,6 +83,17 @@ class View(AuiBaseFrame):
         info = AuiPaneInfo().CloseButton(False).RightDockable(False).Resizable(False).LeftDockable(False)
         info = info.FloatingSize((720, 125)).MinSize((720, 125)).Top()
         self.AddPane(self._topBar, info)
+        
+        self._CreateHistoryListPane()
+
+    def _CreateHistoryListPane(self):
+        panel = wx.Panel(self, wx.ID_ANY)
+        panel.SetBackgroundColour('white')
+        sizer = wx.StaticBoxSizer(wx.StaticBox(panel, wx.ID_ANY, _('History')), orient=wx.VERTICAL)
+        self._historyList = wx.ListBox(panel, wx.ID_ANY, choices=[], style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
+        sizer.Add(self._historyList, 1, wx.EXPAND)
+        panel.SetSizer(sizer)
+        self.AddPane(panel, AuiPaneInfo().CloseButton(False).CaptionVisible(False).BestSize((200, -1)).Right())        
 
     def _CreateStatusBar(self):
         self._statusBar = self.CreateStatusBar()
@@ -128,6 +143,9 @@ class View(AuiBaseFrame):
         
     def SetTitle(self, title):
         self.SetTitle(title)
+        
+    def SetHistoryListItems(self, items):
+        self._historyList.SetItems(items)
 
     def AppName(self):
         return '%s (%s)' % (_('AppName'), 'E-Tipitaka' + ' v' + settings.VERSION)  

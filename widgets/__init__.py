@@ -322,6 +322,10 @@ class ReadPanel(wx.Panel):
     def Slider(self):
         return self._slider
         
+    @property
+    def Body(self):
+        return self._body
+        
     def _CreateAttributes(self):
         self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER|wx.html.HW_NO_SELECTION)
         

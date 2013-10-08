@@ -7,6 +7,8 @@ _ = i18n.language.ugettext
 
 import constants, utils 
 
+from pony.orm import db_session
+
 import read.model
 import read.interactor
 import read.view
@@ -22,6 +24,7 @@ class Presenter(object):
         self._view = view
         self._view.Delegate = self
         interactor.Install(self, view)
+        self.RefreshHistoryList(0)
         self._view.Start()
          
     def ShowAboutDialog(self):
@@ -55,7 +58,7 @@ class Presenter(object):
         if not keywords:
             keywords = self._view.SearchCtrl.GetValue()
 
-        if keywords.replace('+',' ').strip() == '':            
+        if len(keywords.strip()) == 0 or len(keywords.replace('+',' ').strip()) == 0:
             return True
         
         self._view.SearchCtrl.SetValue(keywords)
@@ -64,9 +67,9 @@ class Presenter(object):
         return True
         
     def OpenBook(self):
-        self.Read(self._model.Code, 1, 0, 0, 1)
+        self.Read(self._model.Code, 1, 0, 0, section=1, shouldHighlight=False)
 
-    def Read(self, code, volume, page, idx, section=None):
+    def Read(self, code, volume, page, idx, section=None, shouldHighlight=True):
         self._model.Read(code, volume, page, idx)
         presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
         if not presenter or self._shouldOpenNewWindow:
@@ -81,20 +84,28 @@ class Presenter(object):
                 self._presenters[code] += [presenter]
         else:
             presenter.BringToFront() 
+        presenter.Keywords = self._model.Keywords if shouldHighlight else None
         presenter.OpenBook(volume, page, section)
             
     def OnReadWindowClose(self, code):
         if code in self._presenters:
-            del self._presenters[code]           
+            self._model.SaveHistory(code)
+            del self._presenters[code]  
+            
+    def OnReadWindowOpenPage(self, volume, page, code):
+        self._model.Skim(volume, page, code)
 
-    def SearchWillStart(self):
+    def SearchWillStart(self, keywords):
         self._view.DisableSearchControls()
         self._view.SetPage(_('Searching data, please wait...'))
         self._view.SetStatusText(_('Searching data'), 0)
         self._view.SetStatusText('', 1)
         self._view.SetStatusText('', 2)
                 
-    def SearchDidFinish(self, results):
+    def SearchDidFinish(self, results, keywords):
+        
+        self._model.LoadHistory(keywords, self._model.Code, len(results))
+
         self._model.Results = results
         
         if len(results) > 0:
@@ -105,12 +116,15 @@ class Presenter(object):
         self._view.SetStatusText('', 0)
         self._view.SetStatusText(_('Found %d pages') % (len(results)), 1)
         
+        self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection())
+        
     def ShowResults(self, current):
         self._model.Display(current)
         
     def SelectLanguage(self, index):
         self._model = search.model.SearchModelCreator.create(self, index)
         self._view.VolumesRadio.Disable() if index == 4 else self._view.VolumesRadio.Enable()
+        self.RefreshHistoryList(index)
         
     def SelectVolumes(self, index):
         
@@ -166,6 +180,16 @@ class Presenter(object):
                     
     def SetOpenNewWindow(self, flag):
         self._shouldOpenNewWindow = flag
-                    
+    
+    @db_session
+    def RefreshHistoryList(self, index):
+        items = search.model.Model.GetHistoryListItems(index)
+        self._view.SetHistoryListItems(items)
+    
+    @db_session                
+    def ReloadHistory(self, position):
+        h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection()))[position]
+        self.Search(h.keywords)
+    
     def Close(self):
         self._view.SearchCtrl.SaveSearches()

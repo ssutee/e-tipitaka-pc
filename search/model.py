@@ -1,12 +1,34 @@
 #-*- coding:utf-8 -*-
 
 import threads, utils, constants
-import wx
+import wx, os.path, sys
+
 
 import i18n
 _ = i18n.language.ugettext
 
+from pony.orm import Database, Required, Optional, db_session, select
+
+db = Database('sqlite', os.path.join(sys.path[0], 'resources', 'data.sqlite'), create_db=True)
+
+class History(db.Entity):
+    keywords = Required(unicode)
+    total = Required(int)
+    code = Required(unicode)
+    read = Optional(unicode)
+    skimmed = Optional(unicode)
+
+db.generate_mapping(create_tables=True)
+
 class Model(object):
+
+    @staticmethod
+    def GetHistoryListItems(index):
+        return [u'%s (%d)' % (h.keywords, h.total) for h in Model.GetHistories(index)]
+
+    @staticmethod
+    def GetHistories(index):
+        return select(h for h in History if h.code == constants.CODES[index]).order_by(lambda h: h.keywords)
 
     def __init__(self, delegate):
         self._delegate = delegate
@@ -15,6 +37,7 @@ class Model(object):
         self._results = []
         self._clickedPages = []
         self._readItems = []
+        self._skimmedItems = []
         self._data = {}
         self._spellChecker = None
         self._keywords = u''
@@ -108,7 +131,12 @@ class Model(object):
         return 45
 
     def Read(self, code, volume, page, idx):
+        if self.Code != code:
+            return
+            
         if idx > 0 and idx not in  self._readItems:
+            if idx in self._skimmedItems:                
+                self._skimmedItems.remove(idx)            
             self._readItems.append(idx)
             self._ReloadDisplay()        
 
@@ -135,6 +163,32 @@ class Model(object):
         if current not in self._clickedPages:
             self._clickedPages.append(current)
         
+    @db_session
+    def LoadHistory(self, keywords, code, total):        
+        history = History.get(keywords=keywords, code=code)
+        if history is None:
+            history = History(keywords=keywords, code=code, total=total, read=u'', skimmed=u'')
+
+        self._readItems = map(int, history.read.split(',')) if len(history.read) > 0 else []            
+        self._skimmedItems = map(int, history.skimmed.split(',')) if len(history.skimmed) > 0 else []
+                        
+    @db_session
+    def SaveHistory(self, code):
+        if len(self._keywords) > 0:
+            history = History.get(keywords=self._keywords, code=code)
+            history.read = ','.join(map(str, self._readItems))
+            history.skimmed = ','.join(map(str, self._skimmedItems))
+                    
+    def Skim(self, volume, page, code):
+        if self.Code != code:
+            return
+        
+        for idx, result in enumerate(self._results):
+            if int(result['volume']) == volume and int(result['page']) == page:
+                if (idx+1) not in self._skimmedItems and (idx+1) not in self._readItems:
+                    self._skimmedItems.append(idx+1)
+                    self._ReloadDisplay()
+            
     def DisplayNext(self):
         self.Display(self._currentPagination+1)
 
@@ -143,7 +197,7 @@ class Model(object):
 
     def NotFoundMessage(self):
         raise NotImplementedError('Subclass needs to implement this method!')
-        
+
     def MakeHtmlSuggestion(self, found=False):
         html = ''
         for word in self.GetSuggestion():
@@ -159,12 +213,17 @@ class Model(object):
             self.GetBookName(volume), _('Item'), self._MakeItemsLabel(items))                                
                 
     def _MakeHtmlEntry(self, idx, volume, page):
+        info = ''
+        if idx in self._readItems:
+            info = _('(read)')
+        elif idx in self._skimmedItems:
+            info = _('(skimmed)')
         return u'''
             <font size="4">
                 <a href="p:%s_%s_%s_%d_%d_%d_%d">%s</a> <font color="red">%s</font><br>
             </font>''' % (volume, page, self.Code, self.CurrentPagination, 
                 constants.ITEMS_PER_PAGE, len(self._results), idx, 
-                self._GetEntry(idx, volume ,page), _('(read)') if idx in self._readItems else '' )
+                self._GetEntry(idx, volume ,page), info)
     
     def _MakeHtmlPagination(self, pages, current):
         text = _('All results') + '<br>'

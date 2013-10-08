@@ -11,4 +11,5 @@ view = search.view.View()
 interactor = search.interactor.Interactor()
 model = search.model.ThaiRoyalSearchModel(None)  
 
-search.presenter.Presenter(model, view, interactor)
+presenter = search.presenter.Presenter(model, view, interactor)
+

@@ -154,6 +154,10 @@ class View(AuiBaseFrame):
     def CheckBox(self):
         return self._checkBox
 
+    @property
+    def Body(self):
+        return self._readPanel.Body
+
     def _PostInit(self):                
         self._readPanel = ReadPanelCreator.create(self, None, self._font, self._delegate)
         self._readPanel.SetPageNumber(None)

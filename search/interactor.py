@@ -21,6 +21,8 @@ class Interactor(object):
         
         self.View.TopBar.CheckBox.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxChange)
         
+        self.View.HistoryList.Bind(wx.EVT_LISTBOX, self.OnHistoryListSelect)
+        
     def OnAboutButtonClick(self, event):
         self.Presenter.ShowAboutDialog()
 
@@ -51,3 +53,6 @@ class Interactor(object):
         
     def OnCheckBoxChange(self, event):
         self.Presenter.SetOpenNewWindow(event.GetSelection() == 1)
+        
+    def OnHistoryListSelect(self, event):
+        self.Presenter.ReloadHistory(event.GetSelection())

@@ -4,7 +4,7 @@ import wx
 import os, codecs
 
 def ConvertToPaliSearch(search):
-    return search.replace(u'ฐ', u'\uf700').replace(u'ญ', u'\uf70f').replace(u'\u0e4d', u'\uf711')
+    return search.replace(u'ฐ', u'\uf700').replace(u'ญ', u'\uf70f').replace(u'\u0e4d', u'\uf711') if 'wxMac' not in wx.PlatformInfo else search
 
 def ThaiToArabic(number):
     if isinstance(number, int):

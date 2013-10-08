@@ -24,14 +24,14 @@ class SearchThread(threading.Thread):
         query, args = self.PrepareStatement(terms)
 
         if hasattr(self._delegate, 'SearchWillStart'):
-            wx.CallAfter(self._delegate.SearchWillStart)
+            wx.CallAfter(self._delegate.SearchWillStart, self._keywords)
         
         results = []
         for result in searcher.execute(query, args):
             results.append(self.ProcessResult(result))
         
         if hasattr(self._delegate, 'SearchDidFinish'):
-            wx.CallAfter(self._delegate.SearchDidFinish, results)
+            wx.CallAfter(self._delegate.SearchDidFinish, results, self._keywords)
         
     def ProcessResult(self, result):
         r = {}

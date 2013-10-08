@@ -8,7 +8,7 @@ class KeyCommandHandler(object):
         self._command = ''
         self._filter = {3653:49, 47:50, 45:51, 3616:52, 3606:53, 3640:54, 3638:55, 3588:56, 3605:57, 3592:48, 3651:46}
         
-    def handle(self, code):
+    def Handle(self, code):
         code = self._filter.get(code, code)
         
         if code == wx.WXK_LEFT:
@@ -47,6 +47,7 @@ class KeyCommandHandler(object):
 class Presenter(object):
     def __init__(self, model, view, interactor, code):
         self._code = code
+        self._keywords = None
         self._model = model
         self._delegate = None
         self._view = view
@@ -72,6 +73,14 @@ class Presenter(object):
     @Delegate.setter
     def Delegate(self, delegate):
         self._delegate = delegate
+        
+    @property
+    def Keywords(self):
+        return self._keywords
+        
+    @Keywords.setter
+    def Keywords(self, keywords):
+        self._keywords = keywords
 
     def BringToFront(self):
         self._view.Raise()
@@ -87,9 +96,15 @@ class Presenter(object):
         self._view.SetPageNumber(self._currentPage if self._currentPage > 0 else None)
         self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))
 
-        self._view.SetText(self._model.GetPage(self._currentVolume, self._currentPage))
+        content = self._model.GetPage(self._currentVolume, self._currentPage)
+        self._view.SetText(content)
+        self._HighlightKeywords(content, self._keywords)
+        
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
+            
+        if hasattr(self._delegate, 'OnReadWindowOpenPage'):
+            self._delegate.OnReadWindowOpenPage(volume, page, self._code)
             
     def OpenAnotherBook(self, code, volume, page):
         currentCode = self._model.Code
@@ -103,6 +118,16 @@ class Presenter(object):
             self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
             self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
         self._model.Code = currentCode                
+
+    def _HighlightKeywords(self, content, keywords):
+        if content != u'' and keywords is not None:
+            font = self._view.Body.GetFont()
+            for term in keywords.replace('+',' ').replace('|',' ').split():
+                n = -1
+                while True:                    
+                    n = content.find(term, n+1)
+                    if n == -1: break
+                    self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
 
     def Close(self):
         if hasattr(self._delegate, 'OnReadWindowClose'):
@@ -196,7 +221,7 @@ class Presenter(object):
             self._focusList = []
     
     def ProcessKeyCommand(self, keyCode, code):
-        ret = self._keyCommandHandler.handle(keyCode)        
+        ret = self._keyCommandHandler.Handle(keyCode)        
         if ret == constants.CMD_FORWARD:
             self.Forward(code)
         elif ret == constants.CMD_BACKWARD:
