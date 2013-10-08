@@ -4,7 +4,7 @@ import wx
 import wx.aui as aui
 import wx.lib.buttons as buttons
 import wx.html
-import os, os.path, sys, codecs
+import os, os.path, sys, codecs, re
 import constants, utils
 import i18n
 _ = i18n.language.ugettext
@@ -415,13 +415,23 @@ class ReadWithReferencesPanel(ReadPanel):
 
     def _CreateAttributes(self):
         super(ReadWithReferencesPanel, self)._CreateAttributes()
-        
         self._refs = ReferencesWindow(self)
         
     def _DoLayout(self):
-        super(ReadWithReferencesPanel, self)._DoLayout()
-        
+        super(ReadWithReferencesPanel, self)._DoLayout()        
         self._mainSizer.Add(self._refs, 1, wx.EXPAND|wx.ALL, 5)
+        
+    def SetBody(self, text):
+        super(ReadWithReferencesPanel, self).SetBody(text)
+        refs = re.findall(ur'[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+', text, re.U)
+        if len(refs) > 0:
+            html = u'อ้างอิง:  '
+            for ref in refs:
+                ref = ref.strip().strip(u')').strip(u'(').strip(u',').strip()
+                html += u'<a href="%s">%s</a>  '%(ref, ref)
+            self._refs.SetPage(html)
+        else:
+            self._refs.SetPage(u'')    
 
 class SearchToolPanel(wx.Panel):
     
@@ -630,7 +640,7 @@ class ReferencesWindow(wx.html.HtmlWindow):
         href = link.GetHref()
         dlg = wx.SingleChoiceDialog(self.Parent, 
             u'พระไตรปิฎก', u'เทียบเคียง', 
-            [u'ภาษาไทย ฉบับหลวง', u'บาลีสยามรัฐ'], wx.CHOICEDLG_STYLE)
+            [u'ภาษาไทย ฉบับหลวง', u'ภาษาบาลี ฉบับสยามรัฐ'], wx.CHOICEDLG_STYLE)
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
             tokens = map(unicode.strip,href.split('/'))
@@ -638,6 +648,6 @@ class ReferencesWindow(wx.html.HtmlWindow):
             item = utils.ThaiToArabic(re.split(r'[–\-,\s]+', tokens[2])[0])
             if hasattr(self._delegate, 'OnLinkToReference'):
                 self._delegate.OnLinkToReference(
-                    u'thai' if dlg.GetStringSelection() == u'ภาษาไทย ฉบับหลวง' else u'pali', 
+                    constants.THAI_ROYAL_CODE if dlg.GetSelection() == 0 else constants.PALI_SIAM_CODE, 
                     int(volume), int(item))
         dlg.Destroy()

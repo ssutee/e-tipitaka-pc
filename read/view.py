@@ -11,10 +11,10 @@ _ = i18n.language.ugettext
 
 class ReadPanelCreator(object):
     @staticmethod
-    def create(parent, code, font, delegate):
+    def create(parent, code, font, delegate, mainWindow=False):
         if code == constants.THAI_FIVE_BOOKS_CODE:
-            return widgets.ReadWithReferencesPanel(parent, code, font, delegate)
-        return widgets.ReadPanel(parent, code, font, delegate)
+            return widgets.ReadWithReferencesPanel(parent, code if not mainWindow else None, font, delegate)
+        return widgets.ReadPanel(parent, code if not mainWindow else None, font, delegate)
 
 class ViewComponentsCreator(object):
     @staticmethod
@@ -158,8 +158,9 @@ class View(AuiBaseFrame):
     def Body(self):
         return self._readPanel.Body
 
-    def _PostInit(self):                
-        self._readPanel = ReadPanelCreator.create(self, None, self._font, self._delegate)
+    def _PostInit(self):            
+        self._readPanel = ReadPanelCreator.create(self, self._code, self._font, self._delegate, mainWindow=True)
+        self._readPanel.Delegate = self._delegate
         self._readPanel.SetPageNumber(None)
         self._readPanel.SetItemNumber(None)
 

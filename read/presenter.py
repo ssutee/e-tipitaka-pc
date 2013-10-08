@@ -87,9 +87,13 @@ class Presenter(object):
         self._view.Iconize(False)
 
     def OpenBook(self, volume, page, section=None):
+        page = self._model.GetFirstPageNumber(self._currentVolume) if page < self._model.GetFirstPageNumber(self._currentVolume) else page
+
+        if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
+
         self._currentVolume = volume
-        self._currentPage = self._model.GetFirstPageNumber(self._currentVolume) if page < self._model.GetFirstPageNumber(self._currentVolume) else page
-                
+        self._currentPage = page
+            
         self._ToggleButtons(self._currentVolume)
 
         self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
@@ -99,35 +103,41 @@ class Presenter(object):
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._view.SetText(content)
         self._HighlightKeywords(content, self._keywords)
-        
+    
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
-            
+        
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
             self._delegate.OnReadWindowOpenPage(volume, page, self._code)
             
     def OpenAnotherBook(self, code, volume, page):
         currentCode = self._model.Code
         self._model.Code = code
-        if page <= self._model.GetTotalPages(volume) and page >= self._model.GetFirstPageNumber(volume):
-            self._compareVolume[code] = volume        
-            self._comparePage[code] = page
-            self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
-            self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
-            self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
-            self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
-            self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
+
+        if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
+
+        self._compareVolume[code] = volume        
+        self._comparePage[code] = page
+        self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
+        self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
+        self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
+        self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
+        self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
         self._model.Code = currentCode                
 
     def _HighlightKeywords(self, content, keywords):
-        if content != u'' and keywords is not None:
-            font = self._view.Body.GetFont()
-            for term in keywords.replace('+',' ').replace('|',' ').split():
-                n = -1
-                while True:                    
-                    n = content.find(term, n+1)
-                    if n == -1: break
-                    self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
+        if content == u'' or keywords is None: return
+
+        font = self._view.Body.GetFont()
+        for term in keywords.replace('+',' ').replace('|',' ').split():
+            n = -1
+            while True:                    
+                n = content.find(term, n+1)
+                if n == -1: break
+                self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
+
+    def OnLinkToReference(self, code, volume, item):
+        self._DoCompare(code, volume, 1, item)
 
     def Close(self):
         if hasattr(self._delegate, 'OnReadWindowClose'):
@@ -141,15 +151,13 @@ class Presenter(object):
 
     def Forward(self, code=None):
         if code is None:
-            self._currentPage += 1
-            self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
+            self.OpenBook(self._currentVolume, self._currentPage+1, self._model.GetSection(self._currentVolume, self._currentPage))
         else:
             self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] + 1)
         
     def Backward(self, code=None):
         if code is None:
-            self._currentPage -= 1
-            self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
+            self.OpenBook(self._currentVolume, self._currentPage-1, self._model.GetSection(self._currentVolume, self._currentPage))
         else:
             self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] - 1)
 
@@ -201,16 +209,19 @@ class Presenter(object):
             item = items[0]
 
         sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
+        self._DoCompare(constants.CODES[index], self._currentVolume, sub, item)
 
-        if item is not None:    
-            self._view.HideBookList()
-            self._view.AddReadPanel(constants.CODES[index])
-            currentCode = self._model.Code
-            self._model.Code = constants.CODES[index]                        
-            volume = self._model.ConvertVolume(self._currentVolume, item, sub)
-            page = self._model.ConvertItemToPage(volume, item, sub, constants.CODES[index] == constants.THAI_MAHACHULA_CODE)
-            self._model.Code = currentCode                    
-            self.OpenAnotherBook(constants.CODES[index], volume, page)
+    def _DoCompare(self, code, volume, sub, item):        
+        if item is None: return
+        
+        self._view.HideBookList()
+        self._view.AddReadPanel(code)
+        currentCode = self._model.Code
+        self._model.Code = code
+        volume = self._model.ConvertVolume(volume, item, sub)
+        page = self._model.ConvertItemToPage(volume, item, sub, code == constants.THAI_MAHACHULA_CODE)
+        self._model.Code = currentCode
+        self.OpenAnotherBook(code, volume, page)
 
     def SetFocus(self, flag, code):
         if flag and code is not None:
