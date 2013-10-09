@@ -196,6 +196,14 @@ class ReadToolPanel(wx.Panel):
         return self._fontsButton
         
     @property
+    def IncreaseFontButton(self):
+        return self._incFontButton
+        
+    @property
+    def DecreaseFontButton(self):
+        return self._decFontButton
+
+    @property
     def BookListButton(self):
         return self._bookListButton
 

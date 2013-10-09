@@ -248,9 +248,9 @@ class Presenter(object):
             volume = int(self._keyCommandHandler.Result)
             self.OpenAnotherBook(code, volume, 1) if code is not None else self.OpenBook(volume, 1)
         elif ret == constants.CMD_ZOOM_IN:
-            pass
+            self.IncreaseFontSize()
         elif ret == constants.CMD_ZOOM_OUT:
-            pass
+            self.DecreaseFontSize()
             
     def ToggleBookList(self):
         self._view.ToggleBookList()
@@ -270,6 +270,20 @@ class Presenter(object):
                 self._view.Font = font
         dialog.Destroy()
 
+    def IncreaseFontSize(self):
+        font = utils.LoadFont(constants.READ_FONT)
+        font.SetPointSize(font.GetPointSize()+1)
+        self._view.Font = font        
+        utils.SaveFont(font, constants.READ_FONT)        
+        self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        
+    def DecreaseFontSize(self):
+        font = utils.LoadFont(constants.READ_FONT)
+        font.SetPointSize(font.GetPointSize()-1)
+        self._view.Font = font
+        utils.SaveFont(font, constants.READ_FONT)
+        self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
         getattr(self._view.ForwardButton, 'Disable' if self._currentPage >= self._model.GetTotalPages(volume) else 'Enable')()

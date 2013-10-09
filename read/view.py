@@ -138,6 +138,14 @@ class View(AuiBaseFrame):
         return self._toolPanel.FontsButton
         
     @property
+    def IncreaseFontButton(self):
+        return self._toolPanel.IncreaseFontButton
+        
+    @property
+    def DecreaseFontButton(self):
+        return self._toolPanel.DecreaseFontButton
+        
+    @property
     def BookListButton(self):
         return self._toolPanel.BookListButton
         
