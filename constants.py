@@ -18,6 +18,8 @@ DEFAULT_FONT = 'TF Chiangsaen'
 
 ITEMS_PER_PAGE = 20
 
+FOOTER_STYLE = '#3CBF3F', 4
+
 CMD_IDLE            = 1000
 CMD_FORWARD         = 1001
 CMD_BACKWARD        = 1002
@@ -33,8 +35,8 @@ MODE_CUSTOM = 1
 CONFIG_PATH = os.path.join(HOME, 'E-Tipitaka','config')
 LOG_FILE = os.path.join(CONFIG_PATH,'history.log')
 
-SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.log')
-READ_FONT = os.path.join(CONFIG_PATH, 'font_read.log')
+SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')
+READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')
 
 SEARCH_IMAGE = os.path.join('resources','search.png')
 NIKHAHIT_IMAGE = os.path.join('resources','nikhahit.gif')

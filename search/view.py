@@ -80,7 +80,7 @@ class View(AuiBaseFrame):
         self._CreateStatusBar()
 
         self.SetCenterPane(self._resultsWindow)
-        info = AuiPaneInfo().CloseButton(False).RightDockable(False).Resizable(False).LeftDockable(False)
+        info = AuiPaneInfo().CloseButton(False).Resizable(False).CaptionVisible(False)
         info = info.FloatingSize((720, 125)).MinSize((720, 125)).Top()
         self.AddPane(self._topBar, info)
         

@@ -192,6 +192,10 @@ class ReadToolPanel(wx.Panel):
         return self._backwardButton
         
     @property
+    def FontsButton(self):
+        return self._fontsButton
+        
+    @property
     def BookListButton(self):
         return self._bookListButton
 
@@ -304,10 +308,15 @@ class ReadPanel(wx.Panel):
         self._delegate = delegate
         self._code = code
         
-        self._font = font
+        self._font = utils.LoadFont(constants.READ_FONT) if font is None else font
+        if self._font is None and not self._font.IsOk():
+            self._font = self._body.GetFont()
+            self._font.SetPointSize(16)
+        
         self._CreateAttributes()
         self._DoLayout()
-
+        
+        self.SetContentFont(self._font)
         self.SetBackgroundColour('white')
 
     @property
@@ -326,6 +335,9 @@ class ReadPanel(wx.Panel):
     def Body(self):
         return self._body
         
+    def SetContentFont(self, font):
+        self._body.SetFont(font)
+        
     def _CreateAttributes(self):
         self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER|wx.html.HW_NO_SELECTION)
         
@@ -336,13 +348,6 @@ class ReadPanel(wx.Panel):
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
         self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
-        self._font = utils.LoadFont(constants.READ_FONT)
-        if self._font != None and self._font.IsOk():
-            self._body.SetFont(self._font)
-        else:
-            self._font = self._body.GetFont()
-            self._font.SetPointSize(16)
-            self._body.SetFont(self._font)
         
         self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)
         self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
@@ -412,6 +417,10 @@ class ReadWithReferencesPanel(ReadPanel):
     def Delegate(self, delegate):
         self._delegate = delegate
         self._refs.Delegate = delegate
+
+    def SetContentFont(self, font):
+        super(ReadWithReferencesPanel, self).SetContentFont(font)
+        self._refs.SetStandardFonts(font.GetPointSize(), font.GetFaceName())
 
     def _CreateAttributes(self):
         super(ReadWithReferencesPanel, self)._CreateAttributes()

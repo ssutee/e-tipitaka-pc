@@ -52,6 +52,24 @@ class Engine(object):
     def GetContent(self, result):
         return result.get('content')
         
+    def GetFormatter(self, volume, page):
+        result = self.Query(volume, page)
+        content = self.GetContent(result)
+        
+        formatter = result.get('display')
+        if formatter is None:
+            return ''
+            
+        header = result.get('header')
+        if header is not None:
+            formatter += u' h1|0|%d'%(len(header))
+            
+        footer = result.get('footer')
+        if footer is not None:
+            formatter += u' s3|%d|%d'%(len(content)-len(footer), len(content))
+        
+        return formatter
+        
     def GetItems(self, volume, page):
         result = self.Query(volume, page)
         return map(int, result['items'].split()) if len(result) > 0 else []
@@ -129,6 +147,9 @@ class ThaiMahaChulaEngine(Engine):
         self._code = constants.THAI_MAHACHULA_CODE
         conn = sqlite3.connect(constants.THAI_MAHACHULA_DB)
         self._searcher = conn.cursor()
+
+    def GetContent(self, result):
+        return None if result.get('content') is None else result.get('header', u'') + result.get('content') + result.get('footer', u'')
 
     def GetTitle(self, volume=None):
         if not volume:
@@ -270,6 +291,9 @@ class Model(object):
 
     def GetPage(self, volume, page):
         return self._engine[self._code].GetPage(volume, page)
+        
+    def GetFormatter(self, volume, page):        
+        return self._engine[self._code].GetFormatter(volume, page)
         
     def GetItems(self, volume, page):
         return self._engine[self._code].GetItems(volume, page)

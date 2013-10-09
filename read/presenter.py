@@ -87,7 +87,7 @@ class Presenter(object):
         self._view.Iconize(False)
 
     def OpenBook(self, volume, page, section=None):
-        page = self._model.GetFirstPageNumber(self._currentVolume) if page < self._model.GetFirstPageNumber(self._currentVolume) else page
+        page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
 
         if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
 
@@ -98,11 +98,12 @@ class Presenter(object):
 
         self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
         self._view.SetPageNumber(self._currentPage if self._currentPage > 0 else None)
-        self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))
+        self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))        
 
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._view.SetText(content)
         self._HighlightKeywords(content, self._keywords)
+        self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
     
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
@@ -122,6 +123,8 @@ class Presenter(object):
         self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
         self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
         self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
+        self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage), code=code)        
+        
         self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
         self._model.Code = currentCode                
 
@@ -251,6 +254,21 @@ class Presenter(object):
             
     def ToggleBookList(self):
         self._view.ToggleBookList()
+        
+    def ShowFontDialog(self):
+        curFont = utils.LoadFont(constants.READ_FONT)
+        fontData = wx.FontData()
+        fontData.EnableEffects(False)
+        if curFont != None:
+            fontData.SetInitialFont(curFont)
+        dialog = wx.FontDialog(self._view, fontData)
+        if dialog.ShowModal() == wx.ID_OK:
+            data = dialog.GetFontData()
+            font = data.GetChosenFont()
+            if font.IsOk():
+                utils.SaveFont(font, constants.READ_FONT)
+                self._view.Font = font
+        dialog.Destroy()
 
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()

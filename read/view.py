@@ -98,6 +98,17 @@ class View(AuiBaseFrame):
         self._font = None
 
     @property
+    def Font(self):
+        return self._font
+        
+    @Font.setter
+    def Font(self, font):
+        self._font
+        self._readPanel.SetContentFont(font)
+        for code in self._comparePanel:
+            self._comparePanel[code].SetContentFont(font)
+
+    @property
     def DataSource(self):
         return self._dataSource
 
@@ -121,6 +132,10 @@ class View(AuiBaseFrame):
     @property
     def BackwardButton(self):
         return self._toolPanel.BackwardButton
+        
+    @property
+    def FontsButton(self):
+        return self._toolPanel.FontsButton
         
     @property
     def BookListButton(self):
@@ -251,6 +266,30 @@ class View(AuiBaseFrame):
     def SetText(self, text, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.SetBody(text)
+        
+    def FormatText(self, formatter, code=None):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        font = readPanel.Body.GetFont()
+        fontSize = font.GetPointSize()
+
+        if 'wxMac' in wx.PlatformInfo:
+            readPanel.SetContentFont(font)
+
+        for token in formatter.split():
+            tag,x,y = token.split('|')
+            if tag == 's3' or tag == 'p3':
+                colorCode, diffSize = constants.FOOTER_STYLE
+                font.SetPointSize(fontSize-diffSize)
+                if 'wxMac' not in wx.PlatformInfo:
+                    readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr(colorCode, wx.NullColour, font))
+                else:
+                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr(colorCode, wx.NullColour, font))
+            elif tag == 'h1' or tag == 'h2' or tag == 'h3':
+                font.SetPointSize(fontSize)
+                if 'wxMac' not in wx.PlatformInfo:
+                    readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('blue', wx.NullColour, font))
+                else:
+                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))        
         
     def UpdateSlider(self, value, minimum, maximum, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
