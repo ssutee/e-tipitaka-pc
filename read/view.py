@@ -282,7 +282,7 @@ class View(AuiBaseFrame):
 
         if 'wxMac' in wx.PlatformInfo:
             readPanel.Body.SetStyle(s, t, wx.TextAttr('blue', wx.NullColour, 
-                wx.Font(font.GetPointSize(), font.GetFamily(), font.GetStyle(), wx.FONTWEIGHT_BOLD, True, font.GetFaceName())))
+                wx.Font(font.GetPointSize(), font.GetFamily(), font.GetStyle(), wx.FONTWEIGHT_BOLD, False, font.GetFaceName())))
         else:
             readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'yellow', font))
             
