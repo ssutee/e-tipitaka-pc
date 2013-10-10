@@ -275,6 +275,23 @@ class View(AuiBaseFrame):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.SetBody(text)
         
+    def MarkText(self, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        s,t = readPanel.Body.GetSelection()
+        font = readPanel.Body.GetFont()
+
+        if 'wxMac' in wx.PlatformInfo:
+            readPanel.Body.SetStyle(s, t, wx.TextAttr('blue', wx.NullColour, 
+                wx.Font(font.GetPointSize(), font.GetFamily(), font.GetStyle(), wx.FONTWEIGHT_BOLD, True, font.GetFaceName())))
+        else:
+            readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'yellow', font))
+            
+    def UnmarkText(self, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        s,t = readPanel.Body.GetSelection()
+        font = readPanel.Body.GetFont()
+        readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'white', font))    
+                
     def FormatText(self, formatter, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         font = readPanel.Body.GetFont()

@@ -57,6 +57,8 @@ INC_IMAGE = os.path.join('resources','fontSizeUp.gif')
 DEC_IMAGE = os.path.join('resources','fontSizeDown.gif')
 SAVE_IMAGE = os.path.join('resources','save.png')
 PRINT_IMAGE = os.path.join('resources','print.png')
+YELLOW_IMAGE = os.path.join('resources','yellow.png')
+WHITE_IMAGE = os.path.join('resources','white.png')
 
 THAI_FIVE_BOOKS_DB = os.path.join('resources','thaibt.db')
 THAI_ROYAL_DB = os.path.join('resources','thai.db')

@@ -330,7 +330,7 @@ class ReadPanel(wx.Panel):
     @property
     def Delegate(self):
         return self._delegate
-        
+
     @Delegate.setter
     def Delegate(self, delegate):
         self._delegate = delegate
@@ -338,11 +338,19 @@ class ReadPanel(wx.Panel):
     @property
     def Slider(self):
         return self._slider
-        
+
     @property
     def Body(self):
         return self._body
-        
+
+    @property
+    def MarkButton(self):
+        return self._markButton
+
+    @property
+    def UnmarkButton(self):
+        return self._unmarkButton
+
     def SetContentFont(self, font):
         self._body.SetFont(font)
         
@@ -359,7 +367,24 @@ class ReadPanel(wx.Panel):
         
         self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)
         self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
+        
+        self._paintPanel = wx.Panel(self, wx.ID_ANY)        
 
+        self._markButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._markButton.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton.Bind(wx.EVT_BUTTON, self.OnMarkButtonClick)
+        
+        self._unmarkButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.WHITE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._unmarkButton.SetToolTip(wx.ToolTip(u'ลบสีข้อความที่ถูกเลือก'))
+        self._unmarkButton.Bind(wx.EVT_BUTTON, self.OnUnmarkButtonClick)
+
+        paintSizer = wx.BoxSizer(wx.HORIZONTAL)
+        paintSizer.Add(self._markButton)
+        paintSizer.Add(self._unmarkButton)
+        self._paintPanel.SetSizer(paintSizer)      
+        
     def _DoLayout(self):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
         
@@ -372,6 +397,8 @@ class ReadPanel(wx.Panel):
         self._mainSizer.Add(sizer, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.BOTTOM, 5)        
 
         self._mainSizer.Add(self._slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
+        
+        self._mainSizer.Add(self._paintPanel, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
         
         self._mainSizer.Add(self._body, 10, wx.EXPAND|wx.LEFT, 15)
         
@@ -386,6 +413,12 @@ class ReadPanel(wx.Panel):
     def OnSliderValueChange(self, event):
         self.Delegate.JumpToPage(event.GetSelection(), self._code)
         
+    def OnMarkButtonClick(self, event):
+        self.Delegate.MarkText(self._code)
+        
+    def OnUnmarkButtonClick(self, event):
+        self.Delegate.UnmarkText(self._code)
+
     def OnCharKeyPress(self, event):
         try:
             self.Delegate.ProcessKeyCommand(event.GetKeyCode(), self._code)

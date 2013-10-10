@@ -123,7 +123,7 @@ class Presenter(object):
         self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
         self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
         self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
-        self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage), code=code)        
+        self._view.FormatText(self._model.GetFormatter(volume, page), code=code)        
         
         self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
         self._model.Code = currentCode                
@@ -283,6 +283,12 @@ class Presenter(object):
         self._view.Font = font
         utils.SaveFont(font, constants.READ_FONT)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        
+    def MarkText(self, code):
+        self._view.MarkText(code)
+    
+    def UnmarkText(self, code):
+        self._view.UnmarkText(code)
         
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
