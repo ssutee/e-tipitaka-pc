@@ -8,10 +8,12 @@ class KeyCommandHandler(object):
         self._command = ''
         self._filter = {3653:49, 47:50, 45:51, 3616:52, 3606:53, 3640:54, 3638:55, 3588:56, 3605:57, 3592:48, 3651:46}
         
-    def Handle(self, code):
-        code = self._filter.get(code, code)
-        
-        if code == wx.WXK_LEFT:
+    def Handle(self, event, code):
+        code = self._filter.get(code, code)        
+        if (event.CmdDown() or event.ControlDown()) and code == 102:
+            self._command = ''
+            return constants.CMD_FIND
+        elif code == wx.WXK_LEFT:
             self._command = ''
             return constants.CMD_BACKWARD
         elif code == wx.WXK_RIGHT:
@@ -43,6 +45,45 @@ class KeyCommandHandler(object):
     @property
     def Result(self):
         return self._result
+        
+class FindTextHandler(object):
+    def __init__(self):
+        self._direction = constants.DOWN
+        self._text = ''
+        self.Reset()        
+        
+    def Reset(self):
+        self._content = None
+        self._position = 0
+        
+    @property
+    def Text(self):
+        return self._text
+        
+    @property
+    def Direction(self):
+        return self._direction
+        
+    def Handle(self, text, content, direction):
+        if content != self._content:
+            self._content = content
+            self._position = len(content) if direction == constants.UP else 0            
+        elif self._direction != direction:
+            self._position += len(self._text) if direction == constants.DOWN else -len(self._text)
+            
+        self._direction = direction
+        self._text = text
+                        
+        n = -1
+        while True:            
+            start = 0 if direction == constants.UP else self._position
+            end = self._position if direction == constants.UP else len(content) + 1
+            n = getattr(content, 'rfind' if direction == constants.UP else 'find')(self._text, start, end)
+            if n == -1: break
+            self._position = n + (0 if direction == constants.UP else len(self._text))
+            return n
+    
+        return n
 
 class Presenter(object):
     def __init__(self, model, view, interactor, code):
@@ -65,6 +106,7 @@ class Presenter(object):
         self._focusList = []
         
         self._keyCommandHandler = KeyCommandHandler()
+        self._findTextHandler = FindTextHandler()
 
     @property
     def Delegate(self):
@@ -87,6 +129,7 @@ class Presenter(object):
         self._view.Iconize(False)
 
     def OpenBook(self, volume, page, section=None):
+        self._findTextHandler.Reset()
         page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
 
         if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
@@ -112,6 +155,7 @@ class Presenter(object):
             self._delegate.OnReadWindowOpenPage(volume, page, self._code)
             
     def OpenAnotherBook(self, code, volume, page):
+        self._findTextHandler.Reset()        
         currentCode = self._model.Code
         self._model.Code = code
 
@@ -234,9 +278,11 @@ class Presenter(object):
         elif flag and code is None:
             self._focusList = []
     
-    def ProcessKeyCommand(self, keyCode, code):
-        ret = self._keyCommandHandler.Handle(keyCode)        
-        if ret == constants.CMD_FORWARD:
+    def ProcessKeyCommand(self, event, keyCode, code):
+        ret = self._keyCommandHandler.Handle(event, keyCode)        
+        if ret == constants.CMD_FIND:
+            self.Find(code)
+        elif ret == constants.CMD_FORWARD:
             self.Forward(code)
         elif ret == constants.CMD_BACKWARD:
             self.Backward(code)
@@ -251,6 +297,14 @@ class Presenter(object):
             self.IncreaseFontSize()
         elif ret == constants.CMD_ZOOM_OUT:
             self.DecreaseFontSize()
+            
+    def Find(self, code):
+        self._view.ShowFindDialog(code, self._findTextHandler.Text, self._findTextHandler.Direction)
+        
+    def DoFind(self, code, text, content, flags):
+        n = self._findTextHandler.Handle(text, content, flags)
+        if n > -1:
+            self._view.SetSelection(content, n, n+len(text), code)
             
     def ToggleBookList(self):
         self._view.ToggleBookList()

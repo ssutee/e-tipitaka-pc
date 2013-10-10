@@ -316,6 +316,23 @@ class View(AuiBaseFrame):
                 else:
                     readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))        
         
+    def ShowFindDialog(self, code, text, flags):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        data = wx.FindReplaceData()
+        data.SetFlags(flags)
+        data.SetFindString(text)
+        dlg = wx.FindReplaceDialog(readPanel, data, "Find", style=wx.FR_NOMATCHCASE|wx.FR_NOWHOLEWORD)
+        dlg.data = data
+        dlg.Show(True)
+        
+    def SetSelection(self, content, start, end, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        readPanel.Body.SetSelection(start, end)
+        
+    def SetBodyFocus(self, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        readPanel.Body.SetFocus()
+        
     def UpdateSlider(self, value, minimum, maximum, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.Slider.SetMin(minimum)

@@ -316,6 +316,10 @@ class ReadPanel(wx.Panel):
         self._delegate = delegate
         self._code = code
         
+        self.Bind(wx.EVT_FIND, self.OnFind)
+        self.Bind(wx.EVT_FIND_NEXT, self.OnFind)
+        self.Bind(wx.EVT_FIND_CLOSE, self.OnFindClose)        
+        
         self._font = utils.LoadFont(constants.READ_FONT) if font is None else font
         if self._font is None and not self._font.IsOk():
             self._font = self._body.GetFont()
@@ -418,10 +422,19 @@ class ReadPanel(wx.Panel):
         
     def OnUnmarkButtonClick(self, event):
         self.Delegate.UnmarkText(self._code)
+        
+    def OnFind(self, event):
+        event.GetDialog().Destroy()       
+        self._body.SetFocus()
+        self.Delegate.DoFind(self._code, event.GetFindString(), self._body.GetValue(), event.GetFlags())
+        
+    def OnFindClose(self, event):
+        event.GetDialog().Destroy()
+        self._body.SetFocus()
 
     def OnCharKeyPress(self, event):
         try:
-            self.Delegate.ProcessKeyCommand(event.GetKeyCode(), self._code)
+            self.Delegate.ProcessKeyCommand(event, event.GetKeyCode(), self._code)
         except ValueError, e:
             pass
 

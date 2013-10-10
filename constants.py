@@ -28,6 +28,10 @@ CMD_JUMP_TO_ITEM    = 1004
 CMD_JUMP_TO_VOLUME  = 1005
 CMD_ZOOM_IN         = 1006
 CMD_ZOOM_OUT        = 1007
+CMD_FIND            = 1008
+
+UP      = 0
+DOWN    = 1
 
 MODE_ALL = 0
 MODE_CUSTOM = 1
