@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-08 08:24+0700\n"
+"POT-Creation-Date: 2013-10-11 17:37+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,15 +21,15 @@ msgstr ""
 msgid "Please select volumes"
 msgstr ""
 
-#: dialogs/__init__.py:22 search/model.py:254
+#: dialogs/__init__.py:22 search/model.py:260
 msgid "Section 1"
 msgstr ""
 
-#: dialogs/__init__.py:23 search/model.py:254
+#: dialogs/__init__.py:23 search/model.py:260
 msgid "Section 2"
 msgstr ""
 
-#: dialogs/__init__.py:24 search/model.py:254
+#: dialogs/__init__.py:24 search/model.py:260
 msgid "Section 3"
 msgstr ""
 
@@ -49,7 +49,7 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: dialogs/__init__.py:98 widgets/__init__.py:577
+#: dialogs/__init__.py:98 widgets/__init__.py:670
 msgid "About E-Tipitaka"
 msgstr ""
 
@@ -70,94 +70,94 @@ msgid ""
 "If you have any suggestion or comment, please send to <etipitaka@gmail.com>"
 msgstr ""
 
-#: search/model.py:199
+#: search/model.py:205
 msgid "You mean?"
 msgstr ""
 
-#: search/model.py:207 widgets/__init__.py:396
+#: search/model.py:213 widgets/__init__.py:459
 msgid "Item"
 msgstr ""
 
-#: search/model.py:212
+#: search/model.py:218
 msgid "(read)"
 msgstr ""
 
-#: search/model.py:214
+#: search/model.py:220
 msgid "(skimmed)"
 msgstr ""
 
-#: search/model.py:223
+#: search/model.py:229
 msgid "All results"
 msgstr ""
 
-#: search/model.py:255 search/model.py:256 search/model.py:257
+#: search/model.py:261 search/model.py:262 search/model.py:263
 msgid "Page unit"
 msgstr ""
 
-#: search/model.py:261
+#: search/model.py:267
 #, python-format
 msgid "Search results %s - %s of %s for keyword \"%s\""
 msgstr ""
 
-#: search/model.py:266
+#: search/model.py:272
 msgid "Tipitaka volume"
 msgstr ""
 
-#: search/model.py:267 search/model.py:464 widgets/__init__.py:389
+#: search/model.py:273 search/model.py:470 widgets/__init__.py:452
 msgid "Page"
 msgstr ""
 
-#: search/model.py:358
+#: search/model.py:364
 #, python-format
 msgid "Not found %s in Thai Royal"
 msgstr ""
 
-#: search/model.py:384
+#: search/model.py:390
 #, python-format
 msgid "Not found %s in Pali Siam"
 msgstr ""
 
-#: search/model.py:407
+#: search/model.py:413
 #, python-format
 msgid "Not found %s in Thai MahaChula"
 msgstr ""
 
-#: search/model.py:434
+#: search/model.py:440
 #, python-format
 msgid "Not found %s in Thai MahaMakut"
 msgstr ""
 
-#: search/model.py:476
+#: search/model.py:482
 #, python-format
 msgid "Not found %s in Thai Five Books"
 msgstr ""
 
-#: search/presenter.py:96
+#: search/presenter.py:100
 msgid "Searching data, please wait..."
 msgstr ""
 
-#: search/presenter.py:97
+#: search/presenter.py:101
 msgid "Searching data"
 msgstr ""
 
-#: search/presenter.py:113
+#: search/presenter.py:117
 #, python-format
 msgid "Found %d pages"
 msgstr ""
 
-#: search/presenter.py:153
+#: search/presenter.py:160
 msgid "Displaying results"
 msgstr ""
 
-#: search/presenter.py:160
+#: search/presenter.py:167
 msgid "Search results"
 msgstr ""
 
-#: search/view.py:84
+#: search/view.py:92
 msgid "History"
 msgstr ""
 
-#: search/view.py:138
+#: search/view.py:151
 msgid "AppName"
 msgstr ""
 
@@ -165,66 +165,70 @@ msgstr ""
 msgid "Latest search"
 msgstr ""
 
-#: widgets/__init__.py:521
+#: widgets/__init__.py:507
+msgid "Notes"
+msgstr ""
+
+#: widgets/__init__.py:614
 msgid "Thai Royal"
 msgstr ""
 
-#: widgets/__init__.py:521
+#: widgets/__init__.py:614
 msgid "Pali Siam"
 msgstr ""
 
-#: widgets/__init__.py:521
+#: widgets/__init__.py:614
 msgid "Thai Mahamakut"
 msgstr ""
 
-#: widgets/__init__.py:521
+#: widgets/__init__.py:614
 msgid "Thai Mahachula"
 msgstr ""
 
-#: widgets/__init__.py:521
+#: widgets/__init__.py:614
 msgid "Thai Five Books"
 msgstr ""
 
-#: widgets/__init__.py:523
+#: widgets/__init__.py:616
 msgid "Languages"
 msgstr ""
 
-#: widgets/__init__.py:530
+#: widgets/__init__.py:623
 msgid "Choose volumes"
 msgstr ""
 
-#: widgets/__init__.py:530
+#: widgets/__init__.py:623
 msgid "All"
 msgstr ""
 
-#: widgets/__init__.py:530
+#: widgets/__init__.py:623
 msgid "Custom"
 msgstr ""
 
-#: widgets/__init__.py:533
+#: widgets/__init__.py:626
 msgid "Search"
 msgstr ""
 
-#: widgets/__init__.py:536
+#: widgets/__init__.py:629
 msgid "Special characters"
 msgstr ""
 
-#: widgets/__init__.py:555
+#: widgets/__init__.py:648
 msgid "Change font"
 msgstr ""
 
-#: widgets/__init__.py:568
+#: widgets/__init__.py:661
 msgid "Import data"
 msgstr ""
 
-#: widgets/__init__.py:572
+#: widgets/__init__.py:665
 msgid "Export data"
 msgstr ""
 
-#: widgets/__init__.py:575
+#: widgets/__init__.py:668
 msgid "Read"
 msgstr ""
 
-#: widgets/__init__.py:576
+#: widgets/__init__.py:669
 msgid "About"
 msgstr ""

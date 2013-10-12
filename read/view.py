@@ -86,7 +86,7 @@ class ThaiFiveBooksViewComponents(ViewComponents):
 class View(AuiBaseFrame):    
     
     def __init__(self, parent, title, code):
-        super(View, self).__init__(parent, wx.ID_ANY, size=(1024, 768), title=title)
+        super(View, self).__init__(parent, wx.ID_ANY, size=(1024, 768), title=title)            
             
         self._dataSource = None
         self._delegate = None
@@ -96,7 +96,7 @@ class View(AuiBaseFrame):
         self._readPanel = None
         self._comparePanel = {}
         self._font = None
-
+        
     @property
     def Font(self):
         return self._font
@@ -180,6 +180,14 @@ class View(AuiBaseFrame):
     @property
     def Body(self):
         return self._readPanel.Body
+        
+    @property
+    def NotePanel(self):
+        return self._notePanel
+        
+    @property
+    def NoteTextCtrl(self):
+        return self._notePanel.NoteTextCtrl
 
     def _PostInit(self):            
         self._readPanel = ReadPanelCreator.create(self, self._code, self._font, self._delegate, mainWindow=True)
@@ -196,9 +204,14 @@ class View(AuiBaseFrame):
         info = info.FloatingSize((740, 65)).MinSize((740, 65)).Top().Layer(0)
         self.AddPane(self._toolPanel, info.Name('Tool'))
 
+        self._notePanel = widgets.NotePanel(self)
+        info = AuiPaneInfo().CaptionVisible(False).Resizable(True).BestSize((740, 150)).Bottom()        
+        self.AddPane(self._notePanel, info.Name('Note'))
+
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
-        info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 768)).Left().Layer(1)
+        info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 768)).Left().Layer(1)        
         self.AddPane(self._listPanel, info.Name('BookList'))
+        
         
     def _CreateBookListPanel(self):
         panel = wx.Panel(self, wx.ID_ANY)        
@@ -247,16 +260,28 @@ class View(AuiBaseFrame):
     def HideBookList(self):
         info = self.AuiManager.GetPane('BookList')
         info.Hide()
+        
+        info = self.AuiManager.GetPane('Note')
+        info.Hide()        
+        
         self.AuiManager.Update()
 
     def ShowBookList(self):
         info = self.AuiManager.GetPane('BookList')
         info.Show()
+
+        info = self.AuiManager.GetPane('Note')
+        info.Show()        
+
         self.AuiManager.Update()
 
     def ToggleBookList(self):
         info = self.AuiManager.GetPane('BookList')
-        info.Hide() if info.IsShown() else info.Show()            
+        info.Hide() if info.IsShown() else info.Show()   
+        
+        info = self.AuiManager.GetPane('Note')
+        info.Hide() if info.IsShown() else info.Show()   
+                 
         self.AuiManager.Update()
 
     def SetPageNumber(self, number, code=None):
@@ -275,22 +300,33 @@ class View(AuiBaseFrame):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.SetBody(text)
         
-    def MarkText(self, code):
+    def MarkText(self, code, selection=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
-        s,t = readPanel.Body.GetSelection()
+        s,t = readPanel.Body.GetSelection() if selection is None else selection
         font = readPanel.Body.GetFont()
 
         if 'wxMac' in wx.PlatformInfo:
             readPanel.Body.SetStyle(s, t, wx.TextAttr('blue', wx.NullColour, 
-                wx.Font(font.GetPointSize(), font.GetFamily(), font.GetStyle(), wx.FONTWEIGHT_BOLD, False, font.GetFaceName())))
+                wx.Font(font.GetPointSize()+2, font.GetFamily(), font.GetStyle(), wx.FONTWEIGHT_BOLD, False, font.GetFaceName())))
         else:
             readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'yellow', font))
             
-    def UnmarkText(self, code):
+        return s,t
+            
+    def UnmarkText(self, code, selection=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
-        s,t = readPanel.Body.GetSelection()
+        s,t = readPanel.Body.GetSelection() if selection is None else selection
         font = readPanel.Body.GetFont()
         readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'white', font))    
+
+        return s,t
+        
+    def ClearMarks(self, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        font = readPanel.Body.GetFont()
+        text = readPanel.Body.GetValue()
+        readPanel.Body.SetFont(font)   
+        readPanel.Body.SetStyle(0, len(text)+1, wx.TextAttr(wx.NullColour, 'white', font))    
                 
     def FormatText(self, formatter, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
@@ -328,11 +364,7 @@ class View(AuiBaseFrame):
     def SetSelection(self, content, start, end, code):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.Body.SetSelection(start, end)
-        
-    def SetBodyFocus(self, code):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
-        readPanel.Body.SetFocus()
-        
+                
     def UpdateSlider(self, value, minimum, maximum, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.Slider.SetMin(minimum)

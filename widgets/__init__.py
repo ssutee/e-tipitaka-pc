@@ -5,8 +5,10 @@ import wx.aui as aui
 import wx.lib.buttons as buttons
 import wx.html
 import os, os.path, sys, codecs, re
+import wx.richtext as rt
+import wx.lib.buttons as buttons
 import constants, utils
-import i18n
+import i18n, images
 _ = i18n.language.ugettext
 
 class AuiBaseFrame(wx.Frame):
@@ -384,9 +386,22 @@ class ReadPanel(wx.Panel):
         self._unmarkButton.SetToolTip(wx.ToolTip(u'ลบสีข้อความที่ถูกเลือก'))
         self._unmarkButton.Bind(wx.EVT_BUTTON, self.OnUnmarkButtonClick)
 
+        self._saveButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._saveButton.SetToolTip(wx.ToolTip(u'บันทึกการระบบสีข้อความ'))
+        self._saveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)        
+        
+        self._clearButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.CLEAR_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._clearButton.SetToolTip(wx.ToolTip(u'ลบการบันทึกการระบบสีข้อความทั้งหมด'))
+        self._clearButton.Bind(wx.EVT_BUTTON, self.OnClearButtonClick)        
+
         paintSizer = wx.BoxSizer(wx.HORIZONTAL)
         paintSizer.Add(self._markButton)
         paintSizer.Add(self._unmarkButton)
+        paintSizer.Add((10,-1))
+        paintSizer.Add(self._saveButton)
+        paintSizer.Add(self._clearButton)
         self._paintPanel.SetSizer(paintSizer)      
         
     def _DoLayout(self):
@@ -422,6 +437,12 @@ class ReadPanel(wx.Panel):
         
     def OnUnmarkButtonClick(self, event):
         self.Delegate.UnmarkText(self._code)
+        
+    def OnClearButtonClick(self, event):
+        self.Delegate.ClearMarkedText(self._code)
+        
+    def OnSaveButtonClick(self, event):
+        self.Delegate.SaveMarkedText(self._code)
         
     def OnFind(self, event):
         event.GetDialog().Destroy()       
@@ -496,6 +517,88 @@ class ReadWithReferencesPanel(ReadPanel):
         else:
             self._refs.SetPage(u'')    
 
+class NotePanel(wx.Panel):
+    def __init__(self, parent, *args, **kwargs):
+        super(NotePanel, self).__init__(parent, *args, **kwargs)
+        self._CreateAttributes()
+        self._DoLayout()
+        
+    @property
+    def BoldItem(self):
+        return self._boldItem
+        
+    @property
+    def ItalicItem(self):
+        return self._italicItem
+        
+    @property
+    def UnderlineItem(self):
+        return self._underlineItem
+        
+    @property
+    def AlignLeftItem(self):
+        return self._alignLeftItem
+    
+    @property
+    def AlignRightItem(self):
+        return self._alignRightItem
+        
+    @property
+    def CenterItem(self):
+        return self._centerItem
+        
+    @property
+    def IndentLessItem(self):
+        return self._indentLessItem
+        
+    @property
+    def IndentMoreItem(self):
+        return self._indentMoreItem
+        
+    @property
+    def FontItem(self):
+        return self._fontItem
+        
+    @property
+    def FontColorItem(self):
+        return self._fontColorItem
+        
+    @property
+    def SaveItem(self):
+        return self._saveItem
+        
+    @property
+    def NoteTextCtrl(self):
+        return self._noteTextCtrl
+        
+    def _CreateAttributes(self):
+        self.SetBackgroundColour('white')
+        self._sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Notes')), orient=wx.VERTICAL)
+        self._noteTextCtrl = rt.RichTextCtrl(self, style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER) 
+        self._noteTextCtrl.SetModified(False)
+        self._toolBar = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
+        
+        self._saveItem = self._toolBar.AddTool(-1, images._rt_save.GetBitmap(), shortHelpString="Save")
+        self._toolBar.AddSeparator()
+        self._boldItem = self._toolBar.AddTool(-1, images._rt_bold.GetBitmap(), isToggle=True, shortHelpString="Bold")
+        self._italicItem = self._toolBar.AddTool(-1, images._rt_italic.GetBitmap(), isToggle=True, shortHelpString="Italic")
+        self._underlineItem = self._toolBar.AddTool(-1, images._rt_underline.GetBitmap(), isToggle=True, shortHelpString="Underline")   
+        self._toolBar.AddSeparator()
+        self._alignLeftItem = self._toolBar.AddTool(-1, images._rt_alignleft.GetBitmap(), isToggle=True, shortHelpString="Align Left")
+        self._centerItem = self._toolBar.AddTool(-1, images._rt_centre.GetBitmap(), isToggle=True, shortHelpString="Center")
+        self._alignRightItem = self._toolBar.AddTool(-1, images._rt_alignright.GetBitmap(), isToggle=True, shortHelpString="Align Right")   
+        self._toolBar.AddSeparator()
+        self._indentLessItem = self._toolBar.AddTool(-1, images._rt_indentless.GetBitmap(), shortHelpString="Indent Less")
+        self._indentMoreItem = self._toolBar.AddTool(-1, images._rt_indentmore.GetBitmap(), shortHelpString="Indent More")   
+        self._toolBar.AddSeparator()
+        self._fontItem = self._toolBar.AddTool(-1, images._rt_font.GetBitmap(), shortHelpString="Font")
+        self._fontColorItem = self._toolBar.AddTool(-1, images._rt_colour.GetBitmap(), shortHelpString="Font Color")   
+        
+    def _DoLayout(self):        
+        self._sizer.Add(self._noteTextCtrl, 1, wx.EXPAND)        
+        self._sizer.Add(self._toolBar, 0, wx.EXPAND)        
+        self.SetSizer(self._sizer)
+        
 class SearchToolPanel(wx.Panel):
     
     def __init__(self, parent, font, *args, **kwargs):

@@ -36,6 +36,9 @@ DOWN    = 1
 MODE_ALL = 0
 MODE_CUSTOM = 1
 
+NOTES_PATH = os.path.join(HOME, 'E-Tipitaka','notes')
+MARKS_PATH = os.path.join(HOME, 'E-Tipitaka','marks')
+
 CONFIG_PATH = os.path.join(HOME, 'E-Tipitaka','config')
 LOG_FILE = os.path.join(CONFIG_PATH,'history.log')
 
@@ -63,6 +66,7 @@ SAVE_IMAGE = os.path.join('resources','save.png')
 PRINT_IMAGE = os.path.join('resources','print.png')
 YELLOW_IMAGE = os.path.join('resources','yellow.png')
 WHITE_IMAGE = os.path.join('resources','white.png')
+CLEAR_IMAGE = os.path.join('resources','clear.png')
 
 THAI_FIVE_BOOKS_DB = os.path.join('resources','thaibt.db')
 THAI_ROYAL_DB = os.path.join('resources','thai.db')

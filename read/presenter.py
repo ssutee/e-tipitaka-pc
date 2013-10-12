@@ -1,7 +1,9 @@
 #-*- coding:utf-8 -*-
 
 import wx
+import wx.richtext as rt
 import constants, utils
+import os, json
 
 class KeyCommandHandler(object):
     def __init__(self):
@@ -104,9 +106,12 @@ class Presenter(object):
         self._compareVolume = {}
         
         self._focusList = []
+        self._marks = {}
         
         self._keyCommandHandler = KeyCommandHandler()
         self._findTextHandler = FindTextHandler()
+        
+        rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
 
     @property
     def Delegate(self):
@@ -128,8 +133,40 @@ class Presenter(object):
         self._view.Raise()
         self._view.Iconize(False)
 
+    def _LoadNoteText(self, volume, page):
+        self._view.NoteTextCtrl.SelectAll()
+        self._view.NoteTextCtrl.DeleteSelection()        
+        path = os.path.join(constants.NOTES_PATH, self._model.Code)
+        if not os.path.exists(path):
+            os.makedirs(path)  
+        filename = os.path.join(path, '%02d-%04d.xml'%(volume, page))
+        self._view.NoteTextCtrl.SetFilename(filename)
+        if os.path.exists(filename):
+            self._view.NoteTextCtrl.LoadFile(filename, rt.RICHTEXT_TYPE_XML)        
+        self._view.NoteTextCtrl.SetModified(False)
+
+    def _MarkKey(self, code, volume, page):
+        code = self._model.Code if code is None else code
+        return '%s-%02d-%04d' % (code, volume, page)
+
+    def _LoadMarks(self, volume, page, code=None):
+        path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)
+        if not os.path.exists(path):
+            os.makedirs(path)        
+
+        filename = os.path.join(path, '%02d-%04d.json'%(volume, page))
+        key = self._MarkKey(code, volume, page)
+        if os.path.exists(filename):
+            with open(filename) as f: self._marks[key] = json.load(f)
+        else:
+            self._marks[key] = []
+                
+        for marked, s, t in self._marks[key]:
+            self._view.MarkText(code, (s,t)) if marked else self._view.UnmarkText(code, (s,t))                
+
     def OpenBook(self, volume, page, section=None):
         self._findTextHandler.Reset()
+        
         page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
 
         if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
@@ -137,6 +174,8 @@ class Presenter(object):
         self._currentVolume = volume
         self._currentPage = page
             
+        self._LoadNoteText(self._currentVolume, self._currentPage)
+
         self._ToggleButtons(self._currentVolume)
 
         self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
@@ -147,7 +186,7 @@ class Presenter(object):
         self._view.SetText(content)
         self._HighlightKeywords(content, self._keywords)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
-    
+        self._LoadMarks(self._currentVolume, self._currentPage)
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
         
@@ -163,12 +202,13 @@ class Presenter(object):
 
         self._compareVolume[code] = volume        
         self._comparePage[code] = page
+                
         self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
         self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
         self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
         self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
         self._view.FormatText(self._model.GetFormatter(volume, page), code=code)        
-        
+        self._LoadMarks(volume, page, code)        
         self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
         self._model.Code = currentCode                
 
@@ -338,11 +378,116 @@ class Presenter(object):
         utils.SaveFont(font, constants.READ_FONT)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         
-    def MarkText(self, code):
-        self._view.MarkText(code)
-    
+    def MarkText(self, code, mark=True):
+        s,t = self._view.MarkText(code) if mark else self._view.UnmarkText(code)
+        volume = self._currentVolume if code is None else self._compareVolume[code]
+        page = self._currentPage if code is None else self._comparePage[code]
+        key = self._MarkKey(code, volume, page)
+        if key not in self._marks:
+            self._marks[key] = [(mark, s, t)]
+        else:
+            self._marks[key] += [(mark, s, t)]
+        
     def UnmarkText(self, code):
-        self._view.UnmarkText(code)
+        self.MarkText(code, False)
+        
+    def IndentLessNoteText(self):
+        attr = rt.TextAttrEx()
+        attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+        ip = self._view.NoteTextCtrl.GetInsertionPoint()
+        if self._view.NoteTextCtrl.GetStyle(ip, attr):
+            r = rt.RichTextRange(ip, ip)
+            if self._view.NoteTextCtrl.HasSelection():
+                r = self._view.NoteTextCtrl.GetSelectionRange()
+
+        if attr.GetLeftIndent() >= 100:
+            attr.SetLeftIndent(attr.GetLeftIndent() - 100)
+            attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+            self._view.NoteTextCtrl.SetStyle(r, attr)
+    
+    def IndentMoreNoteText(self):
+        attr = rt.TextAttrEx()
+        attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+        ip = self._view.NoteTextCtrl.GetInsertionPoint()
+        if self._view.NoteTextCtrl.GetStyle(ip, attr):
+            r = rt.RichTextRange(ip, ip)
+            if self._view.NoteTextCtrl.HasSelection():
+                r = self._view.NoteTextCtrl.GetSelectionRange()
+
+            attr.SetLeftIndent(attr.GetLeftIndent() + 100)
+            attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+            self._view.NoteTextCtrl.SetStyle(r, attr)
+            
+    def ApplyFontToNoteText(self):
+        if not self._view.NoteTextCtrl.HasSelection():
+            return
+
+        r = self._view.NoteTextCtrl.GetSelectionRange()
+        fontData = wx.FontData()
+        fontData.EnableEffects(False)
+        attr = rt.TextAttrEx()
+        attr.SetFlags(rt.TEXT_ATTR_FONT)
+        if self._view.NoteTextCtrl.GetStyle(self._view.NoteTextCtrl.GetInsertionPoint(), attr):
+            fontData.SetInitialFont(attr.GetFont())
+
+        dlg = wx.FontDialog(self._view, fontData)
+        if dlg.ShowModal() == wx.ID_OK:
+            fontData = dlg.GetFontData()
+            font = fontData.GetChosenFont()
+            if font:
+                attr.SetFlags(rt.TEXT_ATTR_FONT)
+                attr.SetFont(font)
+                self._view.NoteTextCtrl.SetStyle(r, attr)
+        dlg.Destroy()
+
+    def ApplyFontColorToNoteText(self):
+        colourData = wx.ColourData()
+        attr = rt.TextAttrEx()
+        attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
+        if self._view.NoteTextCtrl.GetStyle(self._view.NoteTextCtrl.GetInsertionPoint(), attr):
+            colourData.SetColour(attr.GetTextColour())
+
+        dlg = wx.ColourDialog(self._view, colourData)
+        if dlg.ShowModal() == wx.ID_OK:
+            colourData = dlg.GetColourData()
+            colour = colourData.GetColour()
+            if colour:
+                if not self._view.NoteTextCtrl.HasSelection():
+                    self._view.NoteTextCtrl.BeginTextColour(colour)
+                else:
+                    r = self._view.NoteTextCtrl.GetSelectionRange()
+                    attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
+                    attr.SetTextColour(colour)
+                    self._view.NoteTextCtrl.SetStyle(r, attr)
+        dlg.Destroy()
+        
+    def SaveNoteText(self):
+        self._view.NoteTextCtrl.SaveFile(self._view.NoteTextCtrl.GetFilename(), rt.RICHTEXT_TYPE_XML)
+        self._view.NoteTextCtrl.SetModified(False)
+        
+    def SaveMarkedText(self, code):
+        volume = self._currentVolume if code is None else self._compareVolume[code]
+        page = self._currentPage if code is None else self._comparePage[code]
+        key = self._MarkKey(code, volume, page)
+                
+        path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)        
+        filename = os.path.join(path, '%02d-%04d.json'%(volume, page))
+        if key not in self._marks or len(self._marks[key]) == 0: 
+            os.remove(filename) if os.path.exists(filename) else None
+        else:
+            with open(filename, 'w') as f: json.dump(self._marks[key], f)
+        
+    def ClearMarkedText(self, code):
+        dlg = wx.MessageDialog(self._view, u'คุณต้องการลบการระบายสีข้อความทั้งหมดหรือไม่?', u'ยืนยันการลบ', 
+            wx.YES_NO|wx.ICON_EXCLAMATION)
+        if dlg.ShowModal() == wx.ID_YES:
+            volume = self._currentVolume if code is None else self._compareVolume[code]
+            page = self._currentPage if code is None else self._comparePage[code]
+            key = self._MarkKey(code, volume, page)
+            self._marks[key] = []
+            self._view.ClearMarks(code)
+            self.SaveMarkedText(code)
+        dlg.Destroy()
         
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
