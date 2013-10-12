@@ -388,13 +388,15 @@ class ReadPanel(wx.Panel):
 
         self._saveButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._saveButton.SetToolTip(wx.ToolTip(u'บันทึกการระบบสีข้อความ'))
+        self._saveButton.SetToolTip(wx.ToolTip(u'บันทึกการระบายสีข้อความ'))
         self._saveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)        
+        self._saveButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateSaveButton)
         
         self._clearButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.CLEAR_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._clearButton.SetToolTip(wx.ToolTip(u'ลบการบันทึกการระบบสีข้อความทั้งหมด'))
-        self._clearButton.Bind(wx.EVT_BUTTON, self.OnClearButtonClick)        
+        self._clearButton.SetToolTip(wx.ToolTip(u'ลบบันทึกการระบายสีข้อความทั้งหมด'))
+        self._clearButton.Bind(wx.EVT_BUTTON, self.OnClearButtonClick)
+        self._clearButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateClearButton)
 
         paintSizer = wx.BoxSizer(wx.HORIZONTAL)
         paintSizer.Add(self._markButton)
@@ -458,6 +460,12 @@ class ReadPanel(wx.Panel):
             self.Delegate.ProcessKeyCommand(event, event.GetKeyCode(), self._code)
         except ValueError, e:
             pass
+            
+    def OnUpdateClearButton(self, event):
+        event.Enable(self.Delegate.HasSavedMark(self._code))
+        
+    def OnUpdateSaveButton(self, event):
+        event.Enable(self.Delegate.HasMarkText(self._code))
 
     def SetBody(self, text):
         self._body.SetValue(text)

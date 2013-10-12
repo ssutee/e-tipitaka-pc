@@ -461,17 +461,25 @@ class Presenter(object):
                     self._view.NoteTextCtrl.SetStyle(r, attr)
         dlg.Destroy()
         
+    def _CurrentMarkKey(self, code):
+        volume = self._currentVolume if code is None else self._compareVolume[code]
+        page = self._currentPage if code is None else self._comparePage[code]
+        return self._MarkKey(code, volume, page)
+              
+    def _CurrentMarkFilename(self, code):
+        volume = self._currentVolume if code is None else self._compareVolume[code]
+        page = self._currentPage if code is None else self._comparePage[code]        
+        path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)        
+        return os.path.join(path, '%02d-%04d.json'%(volume, page))        
+                
     def SaveNoteText(self):
         self._view.NoteTextCtrl.SaveFile(self._view.NoteTextCtrl.GetFilename(), rt.RICHTEXT_TYPE_XML)
         self._view.NoteTextCtrl.SetModified(False)
         
     def SaveMarkedText(self, code):
-        volume = self._currentVolume if code is None else self._compareVolume[code]
-        page = self._currentPage if code is None else self._comparePage[code]
-        key = self._MarkKey(code, volume, page)
-                
-        path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)        
-        filename = os.path.join(path, '%02d-%04d.json'%(volume, page))
+        key = self._CurrentMarkKey(code)                
+        filename = self._CurrentMarkFilename(code)
+        
         if key not in self._marks or len(self._marks[key]) == 0: 
             os.remove(filename) if os.path.exists(filename) else None
         else:
@@ -481,13 +489,16 @@ class Presenter(object):
         dlg = wx.MessageDialog(self._view, u'คุณต้องการลบการระบายสีข้อความทั้งหมดหรือไม่?', u'ยืนยันการลบ', 
             wx.YES_NO|wx.ICON_EXCLAMATION)
         if dlg.ShowModal() == wx.ID_YES:
-            volume = self._currentVolume if code is None else self._compareVolume[code]
-            page = self._currentPage if code is None else self._comparePage[code]
-            key = self._MarkKey(code, volume, page)
-            self._marks[key] = []
+            self._marks[self._CurrentMarkKey(code)] = []
             self._view.ClearMarks(code)
             self.SaveMarkedText(code)
         dlg.Destroy()
+        
+    def HasSavedMark(self, code):
+        return os.path.exists(self._CurrentMarkFilename(code))
+        
+    def HasMarkText(self, code):
+        return any(map(lambda x:x[0], self._marks.get(self._CurrentMarkKey(code), [])))
         
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
