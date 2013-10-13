@@ -2,8 +2,9 @@
 
 import wx
 import os, sys, os.path
-import widgets, constants
+import widgets, constants, utils
 from widgets import AuiBaseFrame
+from dialogs import BookMarkDialog, BookmarkManagerDialog
 from wx.aui import AuiPaneInfo
 
 import i18n
@@ -97,6 +98,8 @@ class View(AuiBaseFrame):
         self._comparePanel = {}
         self._font = None
         
+        self._bookmarkMenu = None
+        
     @property
     def Font(self):
         return self._font
@@ -148,6 +151,10 @@ class View(AuiBaseFrame):
     @property
     def BookListButton(self):
         return self._toolPanel.BookListButton
+        
+    @property
+    def StarButton(self):
+        return self._toolPanel.StarButton
         
     @property
     def InputItem(self):
@@ -351,6 +358,7 @@ class View(AuiBaseFrame):
                     readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('blue', wx.NullColour, font))
                 else:
                     readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))        
+        self.AuiManager.Update()
         
     def ShowFindDialog(self, code, text, flags):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
@@ -360,6 +368,50 @@ class View(AuiBaseFrame):
         dlg = wx.FindReplaceDialog(readPanel, data, "Find", style=wx.FR_NOMATCHCASE|wx.FR_NOWHOLEWORD)
         dlg.data = data
         dlg.Show(True)
+        
+    def ShowBookmarkPopup(self, x, y):
+        if self._bookmarkMenu is not None:
+            self._bookmarkMenu.Destroy()
+        self._bookmarkMenu = wx.Menu()
+        self.Bind(wx.EVT_MENU, self.OnMenuAddBookmarkSelected, self._bookmarkMenu.Append(-1, u'คั่นหน้านี้'))
+        self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, u'จัดการคั่นหน้า'))        
+        self._bookmarkMenu.AppendSeparator()        
+        self._delegate.LoadBookmarks(self._bookmarkMenu)
+        self._toolPanel.PopupMenu(self._bookmarkMenu, (x,y))
+        
+    def GetBookmarkMenuItem(self, itemId):
+        return self._bookmarkMenu.FindItemById(itemId)
+        
+    def OnMenuAddBookmarkSelected(self, event):
+        volume, page = self._delegate.CurrentVolume, self._delegate.CurrentPage
+        if page != 0:
+            x,y = self.StarButton.GetScreenPosition()
+            w,h = self.StarButton.GetSize()        
+            dialog = BookMarkDialog(self._readPanel, self._delegate.BookmarkItems)
+            if dialog.ShowModal() == wx.ID_OK:
+                result = dialog.GetValue()
+                if result != None and len(result) == 2:
+                    container, note = result
+                    note = u'%s : %s' %(utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d'%(volume, page)), note)
+                    container.append((volume, page, note))
+            dialog.Destroy()
+        else:
+            wx.MessageBox(u'หน้ายังไม่ได้ถูกเลือก',u'พบข้อผิดพลาด')
+        
+    def SetBookListSelection(self, volume):
+        if isinstance(self._bookList, wx.ListBox):
+            self._bookList.SetSelection(volume-1)
+        elif isinstance(self._bookList, wx.TreeCtrl):
+            root = self._bookList.GetRootItem()
+            child, cookie = self._bookList.GetFirstChild(root)
+            for i in xrange(volume-1):
+                child = self._bookList.GetNextSibling(child)
+            self._bookList.SelectItem(child, True)
+        
+    def OnMenuManageBookmarkSelected(self, event):
+        dlg = BookmarkManagerDialog(self._readPanel, self._delegate.BookmarkItems)
+        dlg.ShowModal()
+        dlg.Destroy()
         
     def SetSelection(self, content, start, end, code):
         readPanel = self._readPanel if code is None else self._comparePanel[code]

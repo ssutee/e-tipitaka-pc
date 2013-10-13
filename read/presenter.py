@@ -3,7 +3,7 @@
 import wx
 import wx.richtext as rt
 import constants, utils
-import os, json
+import os, json, codecs
 
 class KeyCommandHandler(object):
     def __init__(self):
@@ -86,6 +86,73 @@ class FindTextHandler(object):
             return n
     
         return n
+        
+class BookmarkManager(object):
+    def __init__(self, view, code):
+        self._items = []
+        self._view = view
+        self._code = code
+        self.Load()
+                
+    def Load(self):
+        filename = os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code))
+        if not os.path.exists(filename): return
+        self._items = []
+        roots = [self._items]
+        with codecs.open(filename,'r','utf8') as f:
+            for text in f:
+                if text.strip() == '': continue
+                n_root = text.rstrip().count(u'\t')
+                if n_root > len(roots): continue
+                root = roots[n_root]
+                if text.strip()[0] == '~':
+                    child = []
+                    root.append({text.strip().strip(u'~') : child})
+                    try:
+                        roots[n_root+1] = child
+                    except IndexError,e:
+                        roots.append(child)
+                else:
+                    tokens = utils.ArabicToThai(text.strip()).split()
+                    root.append((int(tokens[1]), int(tokens[3]), text.strip()))
+        map(lambda x:x.sort(), roots)
+        
+    def Save(self):
+        
+        def _Save(items, out, depth=0):
+            for item in items:
+                if isinstance(item, dict):
+                    folder = item.keys()[0]
+                    out.write(u'\t'*depth + '~' + folder + '\n')
+                    _Save(item[folder], out, depth+1)
+                elif isinstance(item, tuple):
+                    out.write(u'\t'*depth + item[2] + '\n')
+
+        if not os.path.exists(constants.BOOKMARKS_PATH):
+            os.makedirs(constants.BOOKMARKS_PATH)
+        
+        with codecs.open(os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code)),'w','utf8') as out:
+            _Save(self._items, out)
+
+        
+    def MakeMenu(self, menu, handler):
+        def _MakeMenu(root, items):
+            for item in items:
+                if isinstance(item, dict):
+                    child = wx.Menu()
+                    folder = item.keys()[0]
+                    _MakeMenu(child, item[folder])
+                    root.AppendMenu(-1, folder, child)
+                elif isinstance(item, tuple):
+                    menuItem = root.Append(-1, item[2])
+                    menuItem.volume = item[0]
+                    menuItem.page = item[1]
+                    self._view.Bind(wx.EVT_MENU, handler, menuItem)
+        _MakeMenu(menu, self._items)
+        
+    @property
+    def Items(self):
+        return self._items
 
 class Presenter(object):
     def __init__(self, model, view, interactor, code):
@@ -110,8 +177,22 @@ class Presenter(object):
         
         self._keyCommandHandler = KeyCommandHandler()
         self._findTextHandler = FindTextHandler()
+        self._bookmarkManager = BookmarkManager(self._view, code)
+        
         
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
+
+    @property
+    def CurrentVolume(self):
+        return self._currentVolume
+        
+    @property
+    def CurrentPage(self):
+        return self._currentPage
+        
+    @property
+    def BookmarkItems(self):
+        return self._bookmarkManager.Items
 
     @property
     def Delegate(self):
@@ -164,7 +245,7 @@ class Presenter(object):
         for marked, s, t in self._marks[key]:
             self._view.MarkText(code, (s,t)) if marked else self._view.UnmarkText(code, (s,t))                
 
-    def OpenBook(self, volume, page, section=None):
+    def OpenBook(self, volume, page, section=None, selectItem=False):
         self._findTextHandler.Reset()
         
         page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
@@ -189,6 +270,9 @@ class Presenter(object):
         self._LoadMarks(self._currentVolume, self._currentPage)
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
+        
+        if selectItem:
+            self._view.SetBookListSelection(self._currentVolume)        
         
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
             self._delegate.OnReadWindowOpenPage(volume, page, self._code)
@@ -227,6 +311,7 @@ class Presenter(object):
         self._DoCompare(code, volume, 1, item)
 
     def Close(self):
+        self._bookmarkManager.Save()
         if hasattr(self._delegate, 'OnReadWindowClose'):
             self._delegate.OnReadWindowClose(self._code)
             
@@ -332,7 +417,7 @@ class Presenter(object):
             self.JumpToItem(self._keyCommandHandler.Result, code)
         elif ret == constants.CMD_JUMP_TO_VOLUME:
             volume = int(self._keyCommandHandler.Result)
-            self.OpenAnotherBook(code, volume, 1) if code is not None else self.OpenBook(volume, 1)
+            self.OpenAnotherBook(code, volume, 1) if code is not None else self.OpenBook(volume, 1, selectItem=True)
         elif ret == constants.CMD_ZOOM_IN:
             self.IncreaseFontSize()
         elif ret == constants.CMD_ZOOM_OUT:
@@ -500,6 +585,20 @@ class Presenter(object):
     def HasMarkText(self, code):
         return any(map(lambda x:x[0], self._marks.get(self._CurrentMarkKey(code), [])))
         
+    def ShowBookmarkPopup(self, x, y):
+        self._view.ShowBookmarkPopup(x,y)
+        
+    def LoadBookmarks(self, menu):
+        
+        def OnBookmark(event):
+            item = self._view.GetBookmarkMenuItem(event.GetId())
+            text = utils.ThaiToArabic(item.GetText())
+            tokens = text.split(' ')
+            volume, page = int(tokens[1]), int(tokens[3])            
+            self.OpenBook(volume, page, selectItem=True)
+        
+        self._bookmarkManager.MakeMenu(menu, OnBookmark)
+                
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
         getattr(self._view.ForwardButton, 'Disable' if self._currentPage >= self._model.GetTotalPages(volume) else 'Enable')()

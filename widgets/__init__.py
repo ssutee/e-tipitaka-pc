@@ -208,6 +208,10 @@ class ReadToolPanel(wx.Panel):
     @property
     def BookListButton(self):
         return self._bookListButton
+        
+    @property
+    def StarButton(self):
+        return self._starButton
 
     def __init__(self, parent, dataSource, *args, **kwargs):
         super(ReadToolPanel, self).__init__(parent, *args, **kwargs)

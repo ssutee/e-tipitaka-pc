@@ -7,6 +7,8 @@ from whoosh.spelling import SpellChecker
 from whoosh.filedb.filestore import FileStorage
 from whoosh.index import open_dir
 
+APP_NAME = 'E-Tipitaka'
+
 HOME = expanduser("~")
 
 CODES = ['thai', 'pali', 'thaimm', 'thaimc', 'thaibt']
@@ -36,43 +38,49 @@ DOWN    = 1
 MODE_ALL = 0
 MODE_CUSTOM = 1
 
-NOTES_PATH = os.path.join(HOME, 'E-Tipitaka','notes')
-MARKS_PATH = os.path.join(HOME, 'E-Tipitaka','marks')
+RESOURCES_DIR = 'resources'
+NOTES_DIR = 'notes'
+MARKS_DIR = 'marks'
+BOOKMARKS_DIR = 'favs'
 
-CONFIG_PATH = os.path.join(HOME, 'E-Tipitaka','config')
-LOG_FILE = os.path.join(CONFIG_PATH,'history.log')
+NOTES_PATH = os.path.join(HOME, APP_NAME, NOTES_DIR)
+MARKS_PATH = os.path.join(HOME, APP_NAME, MARKS_DIR)
+BOOKMARKS_PATH = os.path.join(HOME, APP_NAME, BOOKMARKS_DIR)
+
+CONFIG_PATH = os.path.join(HOME, APP_NAME, 'config')
+LOG_FILE = os.path.join(CONFIG_PATH, 'history.log')
 
 SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')
 READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')
 
-SEARCH_IMAGE = os.path.join('resources','search.png')
-NIKHAHIT_IMAGE = os.path.join('resources','nikhahit.gif')
-THOTHAN_IMAGE = os.path.join('resources','thothan.gif')
-YOYING_IMAGE = os.path.join('resources','yoying.gif')
-FONTS_IMAGE = os.path.join('resources','fonts.png')
-LEFT_IMAGE = os.path.join('resources','left.png')
-RIGHT_IMAGE = os.path.join('resources','right.png')
-IMPORT_IMAGE = os.path.join('resources','import.png')
-EXPORT_IMAGE = os.path.join('resources','export.png')
-BOOKS_IMAGE = os.path.join('resources','books.png')
-ICON_IMAGE = os.path.join('resources','e-tri_64_icon.ico')
+SEARCH_IMAGE = os.path.join(RESOURCES_DIR, 'search.png')
+NIKHAHIT_IMAGE = os.path.join(RESOURCES_DIR, 'nikhahit.gif')
+THOTHAN_IMAGE = os.path.join(RESOURCES_DIR, 'thothan.gif')
+YOYING_IMAGE = os.path.join(RESOURCES_DIR, 'yoying.gif')
+FONTS_IMAGE = os.path.join(RESOURCES_DIR, 'fonts.png')
+LEFT_IMAGE = os.path.join(RESOURCES_DIR, 'left.png')
+RIGHT_IMAGE = os.path.join(RESOURCES_DIR, 'right.png')
+IMPORT_IMAGE = os.path.join(RESOURCES_DIR, 'import.png')
+EXPORT_IMAGE = os.path.join(RESOURCES_DIR, 'export.png')
+BOOKS_IMAGE = os.path.join(RESOURCES_DIR, 'books.png')
+ICON_IMAGE = os.path.join(RESOURCES_DIR, 'e-tri_64_icon.ico')
 
-STAR_IMAGE = os.path.join('resources','star.png')
-DICT_IMAGE = os.path.join('resources','dict.png')
-LAYOUT_IMAGE = os.path.join('resources','layout.gif')
-INC_IMAGE = os.path.join('resources','fontSizeUp.gif')
-DEC_IMAGE = os.path.join('resources','fontSizeDown.gif')
-SAVE_IMAGE = os.path.join('resources','save.png')
-PRINT_IMAGE = os.path.join('resources','print.png')
-YELLOW_IMAGE = os.path.join('resources','yellow.png')
-WHITE_IMAGE = os.path.join('resources','white.png')
-CLEAR_IMAGE = os.path.join('resources','clear.png')
+STAR_IMAGE = os.path.join(RESOURCES_DIR, 'star.png')
+DICT_IMAGE = os.path.join(RESOURCES_DIR, 'dict.png')
+LAYOUT_IMAGE = os.path.join(RESOURCES_DIR, 'layout.gif')
+INC_IMAGE = os.path.join(RESOURCES_DIR, 'fontSizeUp.gif')
+DEC_IMAGE = os.path.join(RESOURCES_DIR,'fontSizeDown.gif')
+SAVE_IMAGE = os.path.join(RESOURCES_DIR, 'save.png')
+PRINT_IMAGE = os.path.join(RESOURCES_DIR, 'print.png')
+YELLOW_IMAGE = os.path.join(RESOURCES_DIR, 'yellow.png')
+WHITE_IMAGE = os.path.join(RESOURCES_DIR, 'white.png')
+CLEAR_IMAGE = os.path.join(RESOURCES_DIR, 'clear.png')
 
-THAI_FIVE_BOOKS_DB = os.path.join('resources','thaibt.db')
-THAI_ROYAL_DB = os.path.join('resources','thai.db')
-THAI_MAHACHULA_DB = os.path.join('resources','thaimc.db')
-THAI_MAHAMAKUT_DB = os.path.join('resources','thaimm.db')
-PALI_SIAM_DB = os.path.join('resources','pali.db')
+THAI_FIVE_BOOKS_DB = os.path.join(RESOURCES_DIR, 'thaibt.db')
+THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.db')
+THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.db')
+THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.db')
+PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
 
 THAI_FIVE_BOOKS_CODE = 'thaibt'
 THAI_ROYAL_CODE = 'thai'
@@ -80,17 +88,17 @@ THAI_MAHACHULA_CODE = 'thaimc'
 THAI_MAHAMAKUT_CODE = 'thaimm'
 PALI_SIAM_CODE = 'pali'
 
-THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join('resources', 'spell_thai')))
-PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join('resources', 'spell_pali')))
+THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
+PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
 
-BOOK_NAMES = cPickle.load(open(os.path.join('resources','book_name.pkl'),'rb'))
-BOOK_PAGES = cPickle.load(open(os.path.join('resources','book_page.pkl'), 'rb'))
-BOOK_ITEMS = cPickle.load(open(os.path.join('resources','book_item.pkl'), 'rb'))
-VOLUME_TABLE = cPickle.load(open(os.path.join('resources', 'maps.pkl'), 'rb'))
+BOOK_NAMES = cPickle.load(open(os.path.join(RESOURCES_DIR, 'book_name.pkl'), 'rb'))
+BOOK_PAGES = cPickle.load(open(os.path.join(RESOURCES_DIR, 'book_page.pkl'),  'rb'))
+BOOK_ITEMS = cPickle.load(open(os.path.join(RESOURCES_DIR, 'book_item.pkl'),  'rb'))
+VOLUME_TABLE = cPickle.load(open(os.path.join(RESOURCES_DIR, 'maps.pkl'),  'rb'))
 
-MAP_MC_TO_SIAM = cPickle.load(open(os.path.join('resources','mc_map.pkl'), 'rb'))
+MAP_MC_TO_SIAM = cPickle.load(open(os.path.join(RESOURCES_DIR, 'mc_map.pkl'), 'rb'))
 
-FIVE_BOOKS_TOC = json.loads(open(os.path.join('resources','bt_toc.json')).read())
+FIVE_BOOKS_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'bt_toc.json')).read())
 
 FIVE_BOOKS_NAMES = [
     u'ขุมทรัพย์จากพระโอษฐ์', 

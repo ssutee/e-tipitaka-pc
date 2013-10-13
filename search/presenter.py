@@ -85,7 +85,7 @@ class Presenter(object):
         else:
             presenter.BringToFront() 
         presenter.Keywords = self._model.Keywords if shouldHighlight else None
-        presenter.OpenBook(volume, page, section)
+        presenter.OpenBook(volume, page, section, selectItem=True)
             
     def OnReadWindowClose(self, code):
         if code in self._presenters:

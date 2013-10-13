@@ -15,6 +15,7 @@ class Interactor(object):
         self.View.FontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClick)
         self.View.IncreaseFontButton.Bind(wx.EVT_BUTTON, self.OnIncreaseFontButtonClick)
         self.View.DecreaseFontButton.Bind(wx.EVT_BUTTON, self.OnDecreaseFontButtonClick)
+        self.View.StarButton.Bind(wx.EVT_BUTTON, self.OnStarButtonClick)
     
         if isinstance(self.View.BookList, wx.ListBox):
             self.View.BookList.Bind(wx.EVT_LISTBOX, self.OnBookListSelect)
@@ -127,6 +128,11 @@ class Interactor(object):
         
     def OnBookListSelect(self, event):
         self.Presenter.HandleBookSelection(event)
+        
+    def OnStarButtonClick(self, event):
+        x,y = self.View.StarButton.GetPosition()
+        w,h = self.View.StarButton.GetSize()
+        self.Presenter.ShowBookmarkPopup(x+280, y+h+5)        
 
     def OnInputPageEnter(self, event):
         try:
