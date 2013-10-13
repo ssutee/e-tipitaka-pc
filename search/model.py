@@ -174,7 +174,7 @@ class Model(object):
                         
     @db_session
     def SaveHistory(self, code):
-        if len(self._keywords) > 0:
+        if len(self._keywords) > 0 and self.Code == code:
             history = History.get(keywords=self._keywords, code=code)
             history.read = ','.join(map(str, self._readItems))
             history.skimmed = ','.join(map(str, self._skimmedItems))
@@ -330,7 +330,7 @@ class Model(object):
 class SearchModelCreator(object):
     
     @staticmethod
-    def create(delegate, index):
+    def Create(delegate, index):
         if index == 0:
             return ThaiRoyalSearchModel(delegate)
         if index == 1:

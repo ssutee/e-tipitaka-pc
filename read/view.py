@@ -157,6 +157,10 @@ class View(AuiBaseFrame):
         return self._toolPanel.StarButton
         
     @property
+    def SearchButton(self):
+        return self._toolPanel.SearchButton
+
+    @property
     def InputItem(self):
         return self._inputItem
         
@@ -306,6 +310,10 @@ class View(AuiBaseFrame):
     def SetText(self, text, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         readPanel.SetBody(text)
+        
+    def GetStringSelection(self, code=None):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        return readPanel.Body.GetStringSelection()
         
     def MarkText(self, code, selection=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]

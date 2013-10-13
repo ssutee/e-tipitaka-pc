@@ -54,12 +54,16 @@ class Presenter(object):
                 self._view.ResultsWindow.SetStandardFonts(font.GetPointSize(),font.GetFaceName())
         dialog.Destroy()
         
-    def Search(self, keywords=None):
+    def Search(self, keywords=None, code=None):
         if not keywords:
             keywords = self._view.SearchCtrl.GetValue()
 
         if len(keywords.strip()) == 0 or len(keywords.replace('+',' ').strip()) == 0:
             return True
+        
+        if code is not None and constants.CODES.index(code) != self._view.TopBar.LanguagesComboBox.GetSelection():
+            self._view.TopBar.LanguagesComboBox.SetSelection(constants.CODES.index(code))
+            self.SelectLanguage(constants.CODES.index(code))
         
         self._view.SearchCtrl.SetValue(keywords)
         self._model.Search(keywords)
@@ -86,6 +90,10 @@ class Presenter(object):
             presenter.BringToFront() 
         presenter.Keywords = self._model.Keywords if shouldHighlight else None
         presenter.OpenBook(volume, page, section, selectItem=True)
+        
+    def BringToFront(self):
+        self._view.Raise()
+        self._view.Iconize(False)        
             
     def OnReadWindowClose(self, code):
         if code in self._presenters:
@@ -122,7 +130,7 @@ class Presenter(object):
         self._model.Display(current)
         
     def SelectLanguage(self, index):
-        self._model = search.model.SearchModelCreator.create(self, index)
+        self._model = search.model.SearchModelCreator.Create(self, index)
         self._view.VolumesRadio.Disable() if index == 4 else self._view.VolumesRadio.Enable()
         self.RefreshHistoryList(index)
         

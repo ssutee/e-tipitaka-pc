@@ -598,7 +598,16 @@ class Presenter(object):
             self.OpenBook(volume, page, selectItem=True)
         
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
-                
+        
+    def SearchSelection(self):
+        code = self._focusList[0] if len(self._focusList) > 0 else None
+        keywords = self._view.GetStringSelection(code)
+        
+        if len(keywords.strip()) == 0: return
+
+        self.Delegate.BringToFront()
+        self.Delegate.Search(keywords, code)
+
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
         getattr(self._view.ForwardButton, 'Disable' if self._currentPage >= self._model.GetTotalPages(volume) else 'Enable')()
