@@ -201,7 +201,7 @@ class Presenter(object):
     def ExportData(self):
         from datetime import datetime        
         zipFile = 'backup-%s.etz' % (datetime.now().strftime('%Y-%m-%d'))
-        dlg = wx.FileDialog(self._view, _('Export data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.SAVE|wx.OVERWRITE_PROMPT)        
+        dlg = wx.FileDialog(self._view, _('Save data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.SAVE|wx.OVERWRITE_PROMPT)        
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
             with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w') as fz:                
