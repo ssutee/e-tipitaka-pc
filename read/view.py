@@ -12,14 +12,14 @@ _ = i18n.language.ugettext
 
 class ReadPanelCreator(object):
     @staticmethod
-    def create(parent, code, font, delegate, mainWindow=False):
+    def Create(parent, code, font, delegate, mainWindow=False):
         if code == constants.THAI_FIVE_BOOKS_CODE:
             return widgets.ReadWithReferencesPanel(parent, code if not mainWindow else None, font, delegate)
         return widgets.ReadPanel(parent, code if not mainWindow else None, font, delegate)
 
 class ViewComponentsCreator(object):
     @staticmethod
-    def create(code, parent):
+    def Create(code, parent):
         if code == constants.THAI_FIVE_BOOKS_CODE:
             return ThaiFiveBooksViewComponents(parent)
         if code == constants.THAI_MAHACHULA_CODE:
@@ -92,7 +92,7 @@ class View(AuiBaseFrame):
         self._dataSource = None
         self._delegate = None
         
-        self._components = ViewComponentsCreator.create(code, self)
+        self._components = ViewComponentsCreator.Create(code, self)
         self._code = code                
         self._readPanel = None
         self._comparePanel = {}
@@ -226,7 +226,7 @@ class View(AuiBaseFrame):
         self._statusBar.SetFont(font)                
 
     def _PostInit(self):            
-        self._readPanel = ReadPanelCreator.create(self, self._code, self._font, self._delegate, mainWindow=True)
+        self._readPanel = ReadPanelCreator.Create(self, self._code, self._font, self._delegate, mainWindow=True)
         self._readPanel.Delegate = self._delegate
         self._readPanel.SetPageNumber(None)
         self._readPanel.SetItemNumber(None)
@@ -284,7 +284,7 @@ class View(AuiBaseFrame):
         
     def AddReadPanel(self, code):
         if code not in self._comparePanel:
-            self._comparePanel[code] = ReadPanelCreator.create(self, code, self._font, self._delegate)
+            self._comparePanel[code] = ReadPanelCreator.Create(self, code, self._font, self._delegate)
             info = AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
             self.AddPane(self._comparePanel[code], info.Name(code))
         else:
