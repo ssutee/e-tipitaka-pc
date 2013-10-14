@@ -9,7 +9,7 @@ _ = i18n.language.ugettext
 
 from pony.orm import Database, Required, Optional, db_session, select
 
-db = Database('sqlite', os.path.join(sys.path[0], 'resources', 'data.sqlite'), create_db=True)
+db = Database('sqlite', constants.DATA_DB, create_db=True)
 
 class History(db.Entity):
     keywords = Required(unicode)

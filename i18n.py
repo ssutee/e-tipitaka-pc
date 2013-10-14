@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
  
-import os, sys
+import os, sys, constants
 import locale
 import gettext
 import wx
@@ -8,12 +8,10 @@ import wx
 # Change this variable to your app name!
 #  The translation files will be under
 #  @LOCALE_DIR@/@LANGUAGE@/LC_MESSAGES/@APP_NAME@.mo
-APP_NAME = "E-Tipitaka"
  
 # This is ok for maemo. Not sure in a regular desktop:
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
-LOCALE_DIR = os.path.join(APP_DIR, 'locale') # .mo files will then be located in APP_Dir/i18n/LANGUAGECODE/LC_MESSAGES/
- 
+LOCALE_DIR = os.path.join(constants.RESOURCES_DIR, 'locale') # .mo files will then be located in /locale/LANGUAGECODE/LC_MESSAGES/
+
 # Now we need to choose the language. We will provide a list, and gettext
 # will use the first translation available in the list
 #
@@ -36,10 +34,10 @@ mo_location = LOCALE_DIR
 #  (nothing to change here for you)
 gettext.install(True, localedir=None, unicode=1)
  
-gettext.find(APP_NAME, mo_location)
+gettext.find(constants.APP_NAME, mo_location)
  
-gettext.textdomain (APP_NAME)
+gettext.textdomain (constants.APP_NAME)
  
-gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
+gettext.bind_textdomain_codeset(constants.APP_NAME, "UTF-8")
 
-language = gettext.translation(APP_NAME, mo_location, languages=['th'], fallback=True)
+language = gettext.translation(constants.APP_NAME, mo_location, languages=['th'], fallback=True)

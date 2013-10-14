@@ -81,6 +81,8 @@ YELLOW_IMAGE = os.path.join(RESOURCES_DIR, 'yellow.png')
 WHITE_IMAGE = os.path.join(RESOURCES_DIR, 'white.png')
 CLEAR_IMAGE = os.path.join(RESOURCES_DIR, 'clear.png')
 
+DATA_DB = os.path.join(DATA_PATH, 'data.sqlite')
+
 THAI_FIVE_BOOKS_DB = os.path.join(RESOURCES_DIR, 'thaibt.db')
 THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.db')
 THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.db')
