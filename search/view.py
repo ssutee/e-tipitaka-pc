@@ -59,6 +59,18 @@ class View(AuiBaseFrame):
         return self._topBar.VolumesRadio
         
     @property
+    def NikhahitButton(self):
+        return self._topBar.NikhahitButton
+
+    @property
+    def ThothanButton(self):
+        return self._topBar.ThothanButton
+
+    @property
+    def YoyingButton(self):
+        return self._topBar.YoyingButton
+                
+    @property
     def Font(self):
         return self._font
         

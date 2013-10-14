@@ -232,6 +232,14 @@ class Presenter(object):
 
             wx.MessageBox(_('Import data complete'), u'E-Tipitaka')
         dlg.Destroy()
-    
+        
+    def InputSpecialCharacter(self, charCode):
+        text = self._view.SearchCtrl.GetValue()
+        ins = self._view.SearchCtrl.GetInsertionPoint()
+        text = text[:ins] + charCode + text[ins:]
+        self._view.SearchCtrl.SetValue(text)
+        self._view.SearchCtrl.SetFocus()
+        self._view.SearchCtrl.SetInsertionPoint(ins+1)
+
     def Close(self):
         self._view.SearchCtrl.SaveSearches()

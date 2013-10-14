@@ -834,7 +834,19 @@ class SearchToolPanel(wx.Panel):
     @property
     def ImportButton(self):
         return self._importButton
-
+        
+    @property
+    def NikhahitButton(self):
+        return self._nikhahitButton
+        
+    @property
+    def ThothanButton(self):
+        return self._thothanButton
+        
+    @property
+    def YoyingButton(self):
+        return self._yoyingButton
+        
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 

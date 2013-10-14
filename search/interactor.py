@@ -1,4 +1,5 @@
 import wx
+import constants
 
 class Interactor(object):
     def Install(self, presenter, view):
@@ -20,6 +21,10 @@ class Interactor(object):
         self.View.ImportButton.Bind(wx.EVT_BUTTON, self.OnImportButtonClick)
         
         self.View.VolumesRadio.Bind(wx.EVT_RADIOBOX, self.OnVolumesRadioSelect)
+        
+        self.View.NikhahitButton.Bind(wx.EVT_BUTTON, self.OnNikhahitButtonClick)
+        self.View.ThothanButton.Bind(wx.EVT_BUTTON, self.OnThothanButtonClick)
+        self.View.YoyingButton.Bind(wx.EVT_BUTTON, self.OnYoyingButtonClick)
         
         self.View.TopBar.CheckBox.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxChange)
         
@@ -65,3 +70,11 @@ class Interactor(object):
     def OnImportButtonClick(self, event):
         self.Presenter.ImportData()
 
+    def OnNikhahitButtonClick(self, event):
+        self.Presenter.InputSpecialCharacter(constants.NIKHAHIT_CHAR)
+
+    def OnThothanButtonClick(self, event):
+        self.Presenter.InputSpecialCharacter(constants.THOTHAN_CHAR)
+        
+    def OnYoyingButtonClick(self, event):
+        self.Presenter.InputSpecialCharacter(constants.YOYING_CHAR)
