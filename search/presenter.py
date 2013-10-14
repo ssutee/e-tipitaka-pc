@@ -1,7 +1,6 @@
 import search.model
 from dialogs import AboutDialog
-import wx
-
+import wx, zipfile, os
 import i18n
 _ = i18n.language.ugettext
 
@@ -198,6 +197,39 @@ class Presenter(object):
     def ReloadHistory(self, position):
         h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection()))[position]
         self.Search(h.keywords)
+    
+    def ExportData(self):
+        from datetime import datetime        
+        zipFile = 'backup-%s.etz' % (datetime.now().strftime('%Y-%m-%d'))
+        dlg = wx.FileDialog(self._view, _('Export data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.SAVE|wx.OVERWRITE_PROMPT)        
+        if dlg.ShowModal() == wx.ID_OK:
+            with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w') as fz:                
+                rootlen = len(constants.DATA_PATH) + 1
+                for base, dirs, files in os.walk(constants.DATA_PATH):
+                    for filename in files:
+                            fn = os.path.join(base, filename)
+                            fz.write(fn, fn[rootlen:])                
+            wx.MessageBox(_('Export data complete'), u'E-Tipitaka')
+        dlg.Destroy()
+        
+    def ImportData(self):
+        dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:        
+            with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'r') as fz:
+                fz.extractall(constants.DATA_PATH)
+            
+            # relocate old version data file
+            for filename in os.listdir(constants.DATA_PATH):
+                fullpath = os.path.join(constants.DATA_PATH, filename)
+                if os.path.isfile(fullpath) and filename.split('.')[-1] == 'fav':
+                    os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, filename))
+                elif os.path.isfile(fullpath) and filename.split('.')[-1] == 'log':
+                    os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, '.'.join(filename.split('.')[:-1])+'.cfg'))
+                elif os.path.isfile(fullpath):
+                    os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))
+
+            wx.MessageBox(_('Import data complete'), u'E-Tipitaka')
+        dlg.Destroy()
     
     def Close(self):
         self._view.SearchCtrl.SaveSearches()

@@ -25,6 +25,14 @@ class View(AuiBaseFrame):
         return self._topBar.BackwardButton
         
     @property
+    def ExportButton(self):
+        return self._topBar.ExportButton
+        
+    @property
+    def ImportButton(self):
+        return self._topBar.ImportButton
+        
+    @property
     def SearchCtrl(self):
         return self._topBar.SearchCtrl
     

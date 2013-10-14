@@ -16,6 +16,8 @@ class Interactor(object):
         
         self.View.ForwardButton.Bind(wx.EVT_BUTTON, self.OnForwardButtonClick)
         self.View.BackwardButton.Bind(wx.EVT_BUTTON, self.OnBackwardButtonClick)
+        self.View.ExportButton.Bind(wx.EVT_BUTTON, self.OnExportButtonClick)
+        self.View.ImportButton.Bind(wx.EVT_BUTTON, self.OnImportButtonClick)
         
         self.View.VolumesRadio.Bind(wx.EVT_RADIOBOX, self.OnVolumesRadioSelect)
         
@@ -56,3 +58,10 @@ class Interactor(object):
         
     def OnHistoryListSelect(self, event):
         self.Presenter.ReloadHistory(event.GetSelection())
+        
+    def OnExportButtonClick(self, event):
+        self.Presenter.ExportData()
+        
+    def OnImportButtonClick(self, event):
+        self.Presenter.ImportData()
+

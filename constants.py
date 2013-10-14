@@ -22,6 +22,8 @@ ITEMS_PER_PAGE = 20
 
 FOOTER_STYLE = '#3CBF3F', 4
 
+ETZ_TYPE = u'E-Tipitaka Backup File (*.etz)|*.etz'
+
 CMD_IDLE            = 1000
 CMD_FORWARD         = 1001
 CMD_BACKWARD        = 1002
@@ -42,12 +44,14 @@ RESOURCES_DIR = 'resources'
 NOTES_DIR = 'notes'
 MARKS_DIR = 'marks'
 BOOKMARKS_DIR = 'favs'
+CONFIG_DIR = 'config'
 
-NOTES_PATH = os.path.join(HOME, APP_NAME, NOTES_DIR)
-MARKS_PATH = os.path.join(HOME, APP_NAME, MARKS_DIR)
-BOOKMARKS_PATH = os.path.join(HOME, APP_NAME, BOOKMARKS_DIR)
+DATA_PATH = os.path.join(HOME, APP_NAME)
+NOTES_PATH = os.path.join(DATA_PATH, NOTES_DIR)
+MARKS_PATH = os.path.join(DATA_PATH, MARKS_DIR)
+BOOKMARKS_PATH = os.path.join(DATA_PATH, BOOKMARKS_DIR)
 
-CONFIG_PATH = os.path.join(HOME, APP_NAME, 'config')
+CONFIG_PATH = os.path.join(DATA_PATH, CONFIG_DIR)
 LOG_FILE = os.path.join(CONFIG_PATH, 'history.log')
 
 SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')

@@ -430,7 +430,7 @@ class ReadToolPanel(wx.Panel):
 
         self._printButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.PRINT_IMAGE, wx.BITMAP_TYPE_PNG)))
-        self._printButton.SetToolTip(wx.ToolTip(u'พิมพ์หน้าที่ต้องการ'))                
+        self._printButton.SetToolTip(wx.ToolTip(u'พิมพ์หน้าที่ต้องการ'))                        
                 
         toolsSizer.Add(self._searchButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
@@ -826,6 +826,14 @@ class SearchToolPanel(wx.Panel):
     @property
     def CheckBox(self):
         return self._checkBox
+
+    @property
+    def ExportButton(self):
+        return self._exportButton
+        
+    @property
+    def ImportButton(self):
+        return self._importButton
 
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
