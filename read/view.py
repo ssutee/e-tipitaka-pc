@@ -159,6 +159,14 @@ class View(AuiBaseFrame):
     @property
     def SearchButton(self):
         return self._toolPanel.SearchButton
+        
+    @property
+    def PrintButton(self):
+        return self._toolPanel.PrintButton
+        
+    @property
+    def SaveButton(self):
+        return self._toolPanel.SaveButton
 
     @property
     def InputItem(self):

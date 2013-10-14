@@ -2,8 +2,24 @@
 
 import wx
 import wx.richtext as rt
-import constants, utils
+from wx.html import HtmlEasyPrinting
+import constants, utils, dialogs
 import os, json, codecs
+
+class Printer(HtmlEasyPrinting):
+    def __init__(self):
+        HtmlEasyPrinting.__init__(self)
+    
+    def GetHtmlText(self, text):
+        return text
+        
+    def Print(self, text, doc_name):
+        self.SetHeader(doc_name)
+        self.PrintText(self.GetHtmlText(text), doc_name)
+        
+    def PreviewText(self, text, doc_name):
+        self.SetHeader(doc_name)
+        HtmlEasyPrinting.PreviewText(self, self.GetHtmlText(text))
 
 class KeyCommandHandler(object):
     def __init__(self):
@@ -175,12 +191,15 @@ class Presenter(object):
         self._focusList = []
         self._marks = {}
         
+        self._saveDirectory = constants.HOME
+        
         self._keyCommandHandler = KeyCommandHandler()
         self._findTextHandler = FindTextHandler()
         self._bookmarkManager = BookmarkManager(self._view, code)
         
-        
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
+
+        self._SetupPrinter()
 
     @property
     def CurrentVolume(self):
@@ -209,6 +228,13 @@ class Presenter(object):
     @Keywords.setter
     def Keywords(self, keywords):
         self._keywords = keywords
+
+    def _SetupPrinter(self):
+        self._printer = Printer()
+        data = self._printer.GetPageSetupData()
+        data.SetDefaultMinMargins(False)
+        data.SetMarginTopLeft((20,20))
+        data.SetMarginBottomRight((10,10))        
 
     def BringToFront(self):
         self._view.Raise()
@@ -262,20 +288,18 @@ class Presenter(object):
         self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
         self._view.SetPageNumber(self._currentPage if self._currentPage > 0 else None)
         self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))        
+        self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
+            self._model.GetTotalPages(self._currentVolume))
+        if selectItem: self._view.SetBookListSelection(self._currentVolume)        
 
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._view.SetText(content)
         self._HighlightKeywords(content, self._keywords)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         self._LoadMarks(self._currentVolume, self._currentPage)
-        self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
-            self._model.GetTotalPages(self._currentVolume))
-        
-        if selectItem:
-            self._view.SetBookListSelection(self._currentVolume)        
         
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
-            self._delegate.OnReadWindowOpenPage(volume, page, self._code)
+            self._delegate.OnReadWindowOpenPage(self._currentVolume, self._currentPage, self._code)
             
     def OpenAnotherBook(self, code, volume, page):
         self._findTextHandler.Reset()        
@@ -288,12 +312,15 @@ class Presenter(object):
         self._comparePage[code] = page
                 
         self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
-        self._view.SetPageNumber(self._comparePage[code] if self._comparePage[code] > 0 else None, code=code)
-        self._view.SetItemNumber(*self._model.GetItems(volume, self._comparePage[code]), code=code)
-        self._view.SetText(self._model.GetPage(volume, self._comparePage[code]), code=code)       
+        self._view.SetPageNumber(page if page > 0 else None, code=code)
+        self._view.SetItemNumber(*self._model.GetItems(volume, page), code=code)
+        self._view.UpdateSlider(page, self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
+        
+        content = self._model.GetPage(volume, page)
+        self._view.SetText(content, code=code)       
         self._view.FormatText(self._model.GetFormatter(volume, page), code=code)        
         self._LoadMarks(volume, page, code)        
-        self._view.UpdateSlider(self._comparePage[code], self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
+
         self._model.Code = currentCode                
 
     def _HighlightKeywords(self, content, keywords):
@@ -587,6 +614,72 @@ class Presenter(object):
         
     def ShowBookmarkPopup(self, x, y):
         self._view.ShowBookmarkPopup(x,y)
+        
+    def ShowPrintDialog(self):
+        volume = self._currentVolume if len(self._focusList) == 0 else self._compareVolume[self._focusList[0]]
+        page = self._currentPage if len(self._focusList) == 0 else self._comparePage[self._focusList[0]]
+        
+        currentCode = self._model.Code
+        self._model.Code = currentCode if len(self._focusList) == 0 else self._focusList[0]
+        
+        title1, title2 = self._model.GetTitles(volume)
+        total = self._model.GetTotalPages(volume)
+
+        data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0}
+        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการพิมพ์', title1, title2, total, data)
+        
+        if dlg.ShowModal() == wx.ID_OK:
+            font = utils.LoadFont(constants.READ_FONT)
+            text = u'<font face="%s" size=+2>' % ('TF Chiangsaen' if font is None else font.GetFaceName())
+            text += u"<div align=center><b>%s</b><br><b>%s</b><br><b>%s</b><br>หน้าที่ %s ถึง %s</div><hr>" % \
+                (self._model.GetTitle(), title1, title2, 
+                 utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')), 
+                 utils.ArabicToThai(str(data['to']+1).decode('utf8','ignore')))
+            
+            for p in range(data['from'], data['to']+1) if data['from'] <= data['to'] else range(data['from'], data['to']-1, -1):
+                content = self._model.GetPage(volume, p+1).replace(u'\t', u'&nbsp;'*7).replace(u'\x0a', u'<br>')
+                content = content.replace(u'\x0b', u'<br>').replace(u'\x0c', u'<br>').replace(u'\x0d', u'<br>')
+                text += u'<div align=right>หน้าที่ %s</div><p>'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore')))
+                text += u'%s<p><p><p>'%(content)
+            text += u'</font>'
+            self._printer.Print(text, "")
+
+        dlg.Destroy()
+    
+        self._model.Code = currentCode
+
+    def _ShowConfirmSaveDialog(self, code, volume, data, text):
+        dlg = wx.FileDialog(self._view, u'โปรดเลือกไฟล์', self._saveDirectory, 
+            '%s_volumn-%02d_page-%04d-%04d' % (code, volume, data['from']+1, data['to']+1), 
+            u'Plain Text (*.txt)|*.txt', wx.SAVE|wx.OVERWRITE_PROMPT)
+        if dlg.ShowModal() == wx.ID_OK:
+            with codecs.open(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w', 'utf-8') as f:
+                f.write(text)
+            self._saveDirectory = dlg.GetDirectory()                
+        dlg.Destroy()
+        
+    def ShowSaveDialog(self):
+        volume = self._currentVolume if len(self._focusList) == 0 else self._compareVolume[self._focusList[0]]
+        page = self._currentPage if len(self._focusList) == 0 else self._comparePage[self._focusList[0]]
+        
+        currentCode = self._model.Code
+        self._model.Code = currentCode if len(self._focusList) == 0 else self._focusList[0]
+        
+        title1, title2 = self._model.GetTitles(volume)
+        total = self._model.GetTotalPages(volume)
+
+        data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0}
+        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการบันทึก', title1, title2, total, data)        
+        if dlg.ShowModal() == wx.ID_OK:
+            text = u'%s\n%s\n\n' % (title1, title2)
+            for p in range(data['from'], data['to']+1) if data['from'] <= data['to'] else range(data['from'], data['to']-1, -1):
+                content = self._model.GetPage(volume, p+1)
+                text += u' '*60 + u'หน้าที่ %s\n\n'%(utils.ArabicToThai(str(page+1).decode('utf8','ignore')))
+                text += u'%s\n\n\n' % (content)
+            self._ShowConfirmSaveDialog(self._model.Code, volume, data, text)
+        dlg.Destroy()
+    
+        self._model.Code = currentCode        
         
     def LoadBookmarks(self, menu):
         

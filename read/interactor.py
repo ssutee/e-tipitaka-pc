@@ -17,6 +17,8 @@ class Interactor(object):
         self.View.DecreaseFontButton.Bind(wx.EVT_BUTTON, self.OnDecreaseFontButtonClick)
         self.View.StarButton.Bind(wx.EVT_BUTTON, self.OnStarButtonClick)
         self.View.SearchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
+        self.View.PrintButton.Bind(wx.EVT_BUTTON, self.OnPrintButtonClick)
+        self.View.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)
     
         if isinstance(self.View.BookList, wx.ListBox):
             self.View.BookList.Bind(wx.EVT_LISTBOX, self.OnBookListSelect)
@@ -137,6 +139,12 @@ class Interactor(object):
         
     def OnSearchButtonClick(self, event):
         self.Presenter.SearchSelection()   
+        
+    def OnPrintButtonClick(self, event):
+        self.Presenter.ShowPrintDialog()
+        
+    def OnSaveButtonClick(self, event):
+        self.Presenter.ShowSaveDialog()
 
     def OnInputPageEnter(self, event):
         try:

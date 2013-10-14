@@ -8,6 +8,116 @@ _ = i18n.language.ugettext
 
 import settings
 
+class DataXferPagesValidator(wx.PyValidator):
+    def __init__(self, data, key):
+        wx.PyValidator.__init__(self)
+        self.data = data
+        self.key = key
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+        
+    def Clone(self):
+        return DataXferPagesValidator(self.data, self.key)
+        
+    def Validate(self, win):
+        combo = self.GetWindow()
+        text = combo.GetValue()
+        if len(text.strip()) == 0:
+            wx.MessageBox(u'ช่องนี้ไม่สามารถเว้นว่างได้',u'พบข้อผิดพลาด')
+            combo.SetBackgroundColour('pink')
+            combo.Refresh()
+            return False
+        else:
+            combo.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            combo.Refresh()
+            return True
+        
+    def TransferToWindow(self):
+        combo = self.GetWindow()
+        combo.SetSelection(self.data.get(self.key,0))
+        return True
+        
+    def TransferFromWindow(self):
+        combo = self.GetWindow()
+        self.data[self.key] = int(combo.GetValue())-1
+        return True
+        
+    def OnChar(self, event):
+        code = event.GetKeyCode()
+        combo = self.GetWindow()
+        text = combo.GetValue()
+        count = combo.GetCount()
+        
+        if (code < 48 or code > 57) and code != 8:
+            return
+            
+        if (code >= 48 and code <= 57) and int(text + chr(code)) > count:
+            return
+
+        if text == '' and code == 48:
+            return
+            
+        event.Skip()
+
+class PageRangeDialog(wx.Dialog):
+    def __init__(self, parent, title, msg1, msg2, num, data):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(350,200))
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        s1 = wx.BoxSizer(wx.HORIZONTAL)
+        s1.Add((20,-1), 1, flag=wx.EXPAND)
+        s1.Add(wx.StaticText(self, -1, u'%s'%(msg1), style=wx.ALIGN_CENTER))
+        s1.Add((20,-1), 1, flag=wx.EXPAND)
+        
+        s2 = wx.BoxSizer(wx.HORIZONTAL)
+        s2.Add((20,-1), 1, flag=wx.EXPAND)
+        s2.Add(wx.StaticText(self, -1, u'%s'%(msg2), style=wx.ALIGN_CENTER))
+        s2.Add((20,-1), 1, flag=wx.EXPAND)
+
+        s3 = wx.BoxSizer(wx.HORIZONTAL)
+        s3.Add((20,-1), 1, flag=wx.EXPAND)
+        s3.Add(wx.StaticText(self, wx.ID_ANY, u'หน้า', style=wx.ALIGN_CENTER))
+        s3.Add((20,-1),1, flag=wx.EXPAND)
+        
+        rangeSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        fromChoice = wx.ComboBox(self, wx.ID_ANY, size=(70,-1),
+                                 choices=[u'%d'%(x) for x in range(1,num+1)], validator=DataXferPagesValidator(data,'from'))
+        toChoice = wx.ComboBox(self, wx.ID_ANY, size=(70,-1),
+                               choices=[u'%d'%(x) for x in range(1,num+1)], validator=DataXferPagesValidator(data,'to'))
+        
+        rangeSizer.Add((20,-1), 1, flag=wx.EXPAND)
+        rangeSizer.Add(fromChoice)
+        rangeSizer.Add((5,-1)) 
+        rangeSizer.Add(wx.StaticText(self, wx.ID_ANY, u' ถึง ', style=wx.ALIGN_CENTER), flag=wx.ALIGN_CENTER_VERTICAL)
+        rangeSizer.Add((5,-1))        
+        rangeSizer.Add(toChoice)
+        rangeSizer.Add((20,-1), 1, flag=wx.EXPAND)
+        
+        btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+        btnOk = wx.Button(self, wx.ID_OK, u'ตกลง',size=(-1,-1))
+        btnCancel = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก', size=(-1,-1))
+        btnOk.SetDefault()
+        btnSizer.Add((20,-1), 1, flag=wx.EXPAND)
+        btnSizer.Add(btnOk, flag=wx.EXPAND)
+        btnSizer.Add((10,-1))
+        btnSizer.Add(btnCancel, flag=wx.EXPAND)
+        btnSizer.Add((20,-1), 1, flag=wx.EXPAND)
+
+        mainSizer.Add((-1,10), 1, flag=wx.EXPAND)
+        mainSizer.Add(s1, flag=wx.EXPAND)
+        mainSizer.Add((-1,5), flag=wx.EXPAND)
+        mainSizer.Add(s2, flag=wx.EXPAND)
+        mainSizer.Add((-1,10),flag=wx.EXPAND)
+        mainSizer.Add(s3, flag=wx.EXPAND)
+        mainSizer.Add((-1,5),flag=wx.EXPAND)
+        mainSizer.Add(rangeSizer, flag=wx.EXPAND)
+        mainSizer.Add((-1,15),flag=wx.EXPAND)
+        mainSizer.Add(btnSizer, flag=wx.EXPAND)
+        mainSizer.Add((-1,10), 1, flag=wx.EXPAND)
+        
+        self.Center()
+        self.SetSizer(mainSizer)
+
 class BookmarkManagerDialog(wx.Dialog):
     def __init__(self, parent, items):
         wx.Dialog.__init__(self, parent, -1, u'ตัวจัดการที่คั่นหน้า', size=(600, 400))

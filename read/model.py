@@ -7,9 +7,11 @@ class Engine(object):
     
     def __init__(self):
         self._searcher = None
+        self._cache = {}
         
     def Query(self, volume, page):
-        results = self._searcher.execute(*self.PrepareStatement(volume, page))
+        results = self._cache.get('q:%d:%d'%(volume, page), self._searcher.execute(*self.PrepareStatement(volume, page)))
+        if 'q:%d:%d'%(volume, page) not in self._cache: self._cache['q:%d:%d'%(volume, page)] = results
         return self.ProcessResult(results.fetchone())
         
     def PrepareStatement(self, volume, page):
@@ -139,6 +141,9 @@ class PaliSiamEngine(Engine):
         if not volume:
             return u'พระไตรปิฎก ฉบับสยามรัฐ (ภาษาบาลี)'
         return u'พระไตรปิฎก ฉบับสยามรัฐ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+        
+    def GetPage(self, volume, page):
+        return super(PaliSiamEngine, self).GetPage(volume, page).replace(u'ฐ',u'\uf700').replace(u'ญ',u'\uf70f').replace(u'\u0e4d',u'\uf711')
 
 class ThaiMahaChulaEngine(Engine):
 

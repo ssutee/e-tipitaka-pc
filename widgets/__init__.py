@@ -216,6 +216,14 @@ class ReadToolPanel(wx.Panel):
     @property
     def SearchButton(self):
         return self._searchButton
+
+    @property
+    def PrintButton(self):
+        return self._printButton
+        
+    @property
+    def SaveButton(self):
+        return self._saveButton
         
     def __init__(self, parent, dataSource, *args, **kwargs):
         super(ReadToolPanel, self).__init__(parent, *args, **kwargs)
