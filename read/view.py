@@ -99,6 +99,7 @@ class View(AuiBaseFrame):
         self._font = None
         
         self._bookmarkMenu = None
+        self._SetupStatusBar()
         
     @property
     def Font(self):
@@ -169,6 +170,10 @@ class View(AuiBaseFrame):
         return self._toolPanel.SaveButton
 
     @property
+    def DictButton(self):
+        return self._toolPanel.DictButton
+
+    @property
     def InputItem(self):
         return self._inputItem
         
@@ -207,6 +212,18 @@ class View(AuiBaseFrame):
     @property
     def NoteTextCtrl(self):
         return self._notePanel.NoteTextCtrl
+        
+    @property
+    def StatusBar(self):
+        return self._statusBar
+
+    def _SetupStatusBar(self):
+        self._statusBar = self.CreateStatusBar()
+        self._statusBar.SetFieldsCount(2)
+        self._statusBar.SetStatusWidths([-1,-1])
+        font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+        font.SetFaceName('TF Chiangsaen')
+        self._statusBar.SetFont(font)                
 
     def _PostInit(self):            
         self._readPanel = ReadPanelCreator.create(self, self._code, self._font, self._delegate, mainWindow=True)
@@ -228,9 +245,8 @@ class View(AuiBaseFrame):
         self.AddPane(self._notePanel, info.Name('Note'))
 
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
-        info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 768)).Left().Layer(1)        
-        self.AddPane(self._listPanel, info.Name('BookList'))
-        
+        info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 0)).Left().Layer(1)        
+        self.AddPane(self._listPanel, info.Name('BookList'))        
         
     def _CreateBookListPanel(self):
         panel = wx.Panel(self, wx.ID_ANY)        

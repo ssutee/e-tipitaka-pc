@@ -3,7 +3,7 @@
 import wx
 import wx.richtext as rt
 from wx.html import HtmlEasyPrinting
-import constants, utils, dialogs
+import constants, utils, dialogs, widgets
 import os, json, codecs
 
 class Printer(HtmlEasyPrinting):
@@ -200,6 +200,8 @@ class Presenter(object):
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
 
         self._SetupPrinter()
+        
+        self._dictWindow = None
 
     @property
     def CurrentVolume(self):
@@ -295,6 +297,8 @@ class Presenter(object):
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._view.SetText(content)
         self._HighlightKeywords(content, self._keywords)
+        self._view.StatusBar.SetStatusText(u'', 0)
+        self._view.StatusBar.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         self._LoadMarks(self._currentVolume, self._currentPage)
         
@@ -366,6 +370,12 @@ class Presenter(object):
             self.OpenBook(volume, page, section if section is not None else self._model.GetSection(volume, page))
         elif isinstance(event, wx.CommandEvent):
             self.OpenBook(event.GetSelection()+1, self._model.GetFirstPageNumber(event.GetSelection()+1))
+            
+    def HandleTextSelection(self, text, code):
+        text = text.strip().split('\n')[0]        
+        self._view.StatusBar.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
+        if self._dictWindow is not None:            
+            self._dictWindow.SetInput(text)
             
     def JumpToPage(self, page, code=None):
         if code is None:
@@ -700,6 +710,21 @@ class Presenter(object):
 
         self.Delegate.BringToFront()
         self.Delegate.Search(keywords, code)
+
+    def OpenDict(self):
+        
+        def OnDictClose(event):
+            self._dictWindow = None
+            event.Skip()
+        
+        if self._dictWindow is None:
+            self._dictWindow = widgets.DictWindow(self._view)
+            self._dictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._dictWindow.SetTitle(u'พจนานุกรม บาลี-ไทย')
+            
+        self._dictWindow.Show()        
+        text = self._view.GetStringSelection(None if len(self._focusList) == 0 else self._focusList[0])
+        self._dictWindow.SetInput(text.strip().split('\n')[0].strip())
 
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()

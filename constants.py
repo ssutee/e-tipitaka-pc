@@ -67,6 +67,7 @@ ICON_IMAGE = os.path.join(RESOURCES_DIR, 'e-tri_64_icon.ico')
 
 STAR_IMAGE = os.path.join(RESOURCES_DIR, 'star.png')
 DICT_IMAGE = os.path.join(RESOURCES_DIR, 'dict.png')
+DICT_ICON = os.path.join(RESOURCES_DIR, 'dict.ico')
 LAYOUT_IMAGE = os.path.join(RESOURCES_DIR, 'layout.gif')
 INC_IMAGE = os.path.join(RESOURCES_DIR, 'fontSizeUp.gif')
 DEC_IMAGE = os.path.join(RESOURCES_DIR,'fontSizeDown.gif')
@@ -81,6 +82,7 @@ THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.db')
 THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.db')
 THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.db')
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
+DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 
 THAI_FIVE_BOOKS_CODE = 'thaibt'
 THAI_ROYAL_CODE = 'thai'
