@@ -202,6 +202,7 @@ class Presenter(object):
         from datetime import datetime        
         zipFile = 'backup-%s.etz' % (datetime.now().strftime('%Y-%m-%d'))
         dlg = wx.FileDialog(self._view, _('Export data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.SAVE|wx.OVERWRITE_PROMPT)        
+        dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
             with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w') as fz:                
                 rootlen = len(constants.DATA_PATH) + 1
@@ -214,6 +215,7 @@ class Presenter(object):
         
     def ImportData(self):
         dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
+        dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:        
             with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'r') as fz:
                 fz.extractall(constants.DATA_PATH)
