@@ -72,6 +72,7 @@ IMPORT_IMAGE = os.path.join(RESOURCES_DIR, 'import.png')
 EXPORT_IMAGE = os.path.join(RESOURCES_DIR, 'export.png')
 BOOKS_IMAGE = os.path.join(RESOURCES_DIR, 'books.png')
 ICON_IMAGE = os.path.join(RESOURCES_DIR, 'e-tri_64_icon.ico')
+KEY_ENTER_IMAGE = os.path.join(RESOURCES_DIR, 'key_enter.png')
 
 STAR_IMAGE = os.path.join(RESOURCES_DIR, 'star.png')
 DICT_IMAGE = os.path.join(RESOURCES_DIR, 'dict.png')

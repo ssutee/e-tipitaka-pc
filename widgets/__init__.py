@@ -480,13 +480,13 @@ class ReadPanel(wx.Panel):
         self.Bind(wx.EVT_FIND_NEXT, self.OnFind)
         self.Bind(wx.EVT_FIND_CLOSE, self.OnFindClose)        
         
-        self._font = utils.LoadFont(constants.READ_FONT) if font is None else font
-        if self._font is None and not self._font.IsOk():
-            self._font = self._body.GetFont()
-            self._font.SetPointSize(16)
-        
         self._CreateAttributes()
         self._DoLayout()
+
+        self._font = utils.LoadFont(constants.READ_FONT) if font is None else font
+        if self._font is None or not self._font.IsOk():
+            self._font = self._body.GetFont()
+            self._font.SetPointSize(16)
         
         self.SetContentFont(self._font)
         self.SetBackgroundColour('white')
@@ -691,7 +691,6 @@ class NotePanel(wx.Panel):
     def __init__(self, parent, *args, **kwargs):
         super(NotePanel, self).__init__(parent, *args, **kwargs)
         self._CreateAttributes()
-        self._DoLayout()
         
     @property
     def BoldItem(self):
@@ -738,16 +737,28 @@ class NotePanel(wx.Panel):
         return self._saveItem
         
     @property
+    def KeyEnterItem(self):
+        return self._keyEnterItem
+        
+    @property
     def NoteTextCtrl(self):
         return self._noteTextCtrl
         
     def _CreateAttributes(self):
         self.SetBackgroundColour('white')
         self._sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Notes')), orient=wx.VERTICAL)
-        self._noteTextCtrl = rt.RichTextCtrl(self, style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER) 
+        self._noteTextCtrl = rt.RichTextCtrl(self, style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
         self._noteTextCtrl.SetModified(False)
-        self._toolBar = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
         
+        self._toolBar = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
+                
+        self._sizer.Add(self._noteTextCtrl, 1, wx.EXPAND)        
+        self._sizer.Add(self._toolBar, 0, wx.EXPAND)
+        
+        self.SetSizer(self._sizer)
+     
+        self._toolBar.SetToolBitmapSize((22,22))
+     
         self._saveItem = self._toolBar.AddTool(-1, images._rt_save.GetBitmap(), shortHelpString="Save")
         self._toolBar.AddSeparator()
         self._boldItem = self._toolBar.AddTool(-1, images._rt_bold.GetBitmap(), isToggle=True, shortHelpString="Bold")
@@ -762,12 +773,11 @@ class NotePanel(wx.Panel):
         self._indentMoreItem = self._toolBar.AddTool(-1, images._rt_indentmore.GetBitmap(), shortHelpString="Indent More")   
         self._toolBar.AddSeparator()
         self._fontItem = self._toolBar.AddTool(-1, images._rt_font.GetBitmap(), shortHelpString="Font")
-        self._fontColorItem = self._toolBar.AddTool(-1, images._rt_colour.GetBitmap(), shortHelpString="Font Color")   
+        self._fontColorItem = self._toolBar.AddTool(-1, images._rt_colour.GetBitmap(), shortHelpString="Font Color")         
+        self._toolBar.AddSeparator()
+        self._keyEnterItem = self._toolBar.AddTool(-1, wx.BitmapFromImage(wx.Image(constants.KEY_ENTER_IMAGE, wx.BITMAP_TYPE_PNG)), shortHelpString="Newline")
         
-    def _DoLayout(self):        
-        self._sizer.Add(self._noteTextCtrl, 1, wx.EXPAND)        
-        self._sizer.Add(self._toolBar, 0, wx.EXPAND)        
-        self.SetSizer(self._sizer)
+        self._toolBar.Realize()
         
 class SearchToolPanel(wx.Panel):
     
@@ -777,7 +787,7 @@ class SearchToolPanel(wx.Panel):
         self._font = font
         self._CreateAttributes()        
         self._DoLayout()
-
+        
     @property
     def Delegate(self):
         return self._delegate

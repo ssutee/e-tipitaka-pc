@@ -48,6 +48,7 @@ class Interactor(object):
 
         self._DoBind(self.View.NotePanel.FontItem, self.OnFont)
         self._DoBind(self.View.NotePanel.FontColorItem, self.OnFontColor)
+        self._DoBind(self.View.NotePanel.KeyEnterItem, self.OnEnter)
 
     def _DoBind(self, item, handler, updateUI=None):
         self.View.Bind(wx.EVT_TOOL, handler, item)
@@ -59,6 +60,11 @@ class Interactor(object):
         
     def OnUpdateSave(self, event):
         event.Enable(self.View.NotePanel.NoteTextCtrl.IsModified())
+
+    def OnEnter(self, event):
+        self.View.NotePanel.NoteTextCtrl.Freeze()
+        self.View.NotePanel.NoteTextCtrl.Newline()
+        self.View.NotePanel.NoteTextCtrl.Thaw()
 
     def OnBold(self, event):
         self.View.NotePanel.NoteTextCtrl.ApplyBoldToSelection()
