@@ -28,7 +28,7 @@ class KeyCommandHandler(object):
         
     def Handle(self, event, code):
         code = self._filter.get(code, code)        
-        if (event.CmdDown() or event.ControlDown()) and code == 102:
+        if ((event.CmdDown() or event.ControlDown()) and code == 102) or code == 6:
             self._command = ''
             return constants.CMD_FIND
         elif code == wx.WXK_LEFT:
