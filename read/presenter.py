@@ -85,7 +85,7 @@ class FindTextHandler(object):
     def Handle(self, text, content, direction):
         if content != self._content:
             self._content = content
-            self._position = len(content) if direction == constants.UP else 0            
+            self._position = 0
         elif self._direction != direction:
             self._position += len(self._text) if direction == constants.DOWN else -len(self._text)
             
@@ -100,7 +100,7 @@ class FindTextHandler(object):
             if n == -1: break
             self._position = n + (0 if direction == constants.UP else len(self._text))
             return n
-    
+
         return n
         
 class BookmarkManager(object):
@@ -467,6 +467,11 @@ class Presenter(object):
         n = self._findTextHandler.Handle(text, content, flags)
         if n > -1:
             self._view.SetSelection(content, n, n+len(text), code)
+        else:
+            dlg = wx.MessageDialog(self._view, u'การค้นหาสิ้นสุดแล้ว', 'Find', style=wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+            self._findTextHandler.Reset()
             
     def ToggleBookList(self):
         self._view.ToggleBookList()

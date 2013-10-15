@@ -2,6 +2,7 @@
 
 import wx
 import os, codecs
+import constants
 
 def ConvertToPaliSearch(search):
     return search.replace(u'ฐ', u'\uf700').replace(u'ญ', u'\uf70f').replace(u'\u0e4d', u'\uf711') if 'wxMac' not in wx.PlatformInfo else search
@@ -40,14 +41,16 @@ def SaveFont(font, path):
         f.write(t)        
 
 def LoadFont(path):
+    font = wx.Font(24, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+    font.SetFaceName(constants.DEFAULT_FONT)
+    
     if not os.path.exists(path):
-        return None        
+        return font
 
-    font = None
     with codecs.open(path,'r','utf8') as f:    
         tokens = f.read().split(',')
         if len(tokens) == 5:    
             font = wx.Font(int(tokens[4]),int(tokens[1]),int(tokens[2]),int(tokens[3]))
             font.SetFaceName(tokens[0])
-    return font
 
+    return font

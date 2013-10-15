@@ -486,6 +486,7 @@ class ReadPanel(wx.Panel):
         self._font = utils.LoadFont(constants.READ_FONT) if font is None else font
         if self._font is None or not self._font.IsOk():
             self._font = self._body.GetFont()
+            self._font.SetFaceName(constants.DEFAULT_FONT)
             self._font.SetPointSize(16)
         
         self.SetContentFont(self._font)
