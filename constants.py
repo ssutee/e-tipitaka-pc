@@ -51,7 +51,7 @@ MARKS_DIR = 'marks'
 BOOKMARKS_DIR = 'favs'
 CONFIG_DIR = 'config'
 
-DATA_PATH = os.path.join(HOME, '~' if 'wxMSW' in wx.PlatformInfo else '.' + APP_NAME)
+DATA_PATH = os.path.join(HOME, '.' + APP_NAME)
 NOTES_PATH = os.path.join(DATA_PATH, NOTES_DIR)
 MARKS_PATH = os.path.join(DATA_PATH, MARKS_DIR)
 BOOKMARKS_PATH = os.path.join(DATA_PATH, BOOKMARKS_DIR)
