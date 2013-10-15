@@ -1,0 +1,298 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-10-15 07:38+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: dialogs/__init__.py:373
+msgid "Please select volumes"
+msgstr ""
+
+#: dialogs/__init__.py:385 search/model.py:260
+msgid "Section 1"
+msgstr ""
+
+#: dialogs/__init__.py:386 search/model.py:260
+msgid "Section 2"
+msgstr ""
+
+#: dialogs/__init__.py:387 search/model.py:260
+msgid "Section 3"
+msgstr ""
+
+#: dialogs/__init__.py:388
+msgid "Select all"
+msgstr ""
+
+#: dialogs/__init__.py:389
+msgid "Clear"
+msgstr ""
+
+#: dialogs/__init__.py:397 dialogs/__init__.py:475
+msgid "OK"
+msgstr ""
+
+#: dialogs/__init__.py:399
+msgid "Cancel"
+msgstr ""
+
+#: dialogs/__init__.py:461 widgets/__init__.py:957
+msgid "About E-Tipitaka"
+msgstr ""
+
+#: dialogs/__init__.py:464
+#, python-format
+msgid ""
+"E-Tipitaka %s - developed by Sutee Sudprasert Copyright (C) 2010\n"
+" written by Python 2.7.3 and wxPython 2.8 (unicode)"
+msgstr ""
+
+#: dialogs/__init__.py:466
+msgid ""
+"This program is free software distributed under Apache License, Version 2.0"
+msgstr ""
+
+#: dialogs/__init__.py:468
+msgid ""
+"If you have any suggestion or comment, please send to <etipitaka@gmail.com>"
+msgstr ""
+
+#: search/model.py:205
+msgid "You mean?"
+msgstr ""
+
+#: search/model.py:213 widgets/__init__.py:650
+msgid "Item"
+msgstr ""
+
+#: search/model.py:218
+msgid "(read)"
+msgstr ""
+
+#: search/model.py:220
+msgid "(skimmed)"
+msgstr ""
+
+#: search/model.py:229
+msgid "All results"
+msgstr ""
+
+#: search/model.py:261 search/model.py:262 search/model.py:263
+msgid "Page unit"
+msgstr ""
+
+#: search/model.py:267
+#, python-format
+msgid "Search results %s - %s of %s for keyword \"%s\""
+msgstr ""
+
+#: search/model.py:272
+msgid "Tipitaka volume"
+msgstr ""
+
+#: search/model.py:273 search/model.py:470 widgets/__init__.py:643
+msgid "Page"
+msgstr ""
+
+#: search/model.py:364
+#, python-format
+msgid "Not found %s in Thai Royal"
+msgstr ""
+
+#: search/model.py:390
+#, python-format
+msgid "Not found %s in Pali Siam"
+msgstr ""
+
+#: search/model.py:413
+#, python-format
+msgid "Not found %s in Thai MahaChula"
+msgstr ""
+
+#: search/model.py:440
+#, python-format
+msgid "Not found %s in Thai MahaMakut"
+msgstr ""
+
+#: search/model.py:482
+#, python-format
+msgid "Not found %s in Thai Five Books"
+msgstr ""
+
+#: search/presenter.py:107
+msgid "Searching data, please wait..."
+msgstr ""
+
+#: search/presenter.py:108
+msgid "Searching data"
+msgstr ""
+
+#: search/presenter.py:124
+#, python-format
+msgid "Found %d pages"
+msgstr ""
+
+#: search/presenter.py:167
+msgid "Displaying results"
+msgstr ""
+
+#: search/presenter.py:174
+msgid "Search results"
+msgstr ""
+
+#: search/presenter.py:204
+msgid "Save data"
+msgstr ""
+
+#: search/presenter.py:213
+msgid "Export data complete"
+msgstr ""
+
+#: search/presenter.py:217
+msgid "Choose import data"
+msgstr ""
+
+#: search/presenter.py:233
+msgid "Import data complete"
+msgstr ""
+
+#: search/view.py:112
+msgid "History"
+msgstr ""
+
+#: search/view.py:171
+msgid "AppName"
+msgstr ""
+
+#: widgets/__init__.py:240
+msgid "Latest search"
+msgstr ""
+
+#: widgets/__init__.py:749
+msgid "Notes"
+msgstr ""
+
+#: widgets/__init__.py:762
+msgid "Save"
+msgstr ""
+
+#: widgets/__init__.py:764
+msgid "Bold"
+msgstr ""
+
+#: widgets/__init__.py:765
+msgid "Italic"
+msgstr ""
+
+#: widgets/__init__.py:766
+msgid "Underline"
+msgstr ""
+
+#: widgets/__init__.py:768
+msgid "Align Left"
+msgstr ""
+
+#: widgets/__init__.py:769
+msgid "Center"
+msgstr ""
+
+#: widgets/__init__.py:770
+msgid "Align Right"
+msgstr ""
+
+#: widgets/__init__.py:772
+msgid "Indent Less"
+msgstr ""
+
+#: widgets/__init__.py:773
+msgid "Indent More"
+msgstr ""
+
+#: widgets/__init__.py:775
+msgid "Font"
+msgstr ""
+
+#: widgets/__init__.py:776
+msgid "Font Color"
+msgstr ""
+
+#: widgets/__init__.py:778
+msgid "Newline"
+msgstr ""
+
+#: widgets/__init__.py:901
+msgid "Thai Royal"
+msgstr ""
+
+#: widgets/__init__.py:901
+msgid "Pali Siam"
+msgstr ""
+
+#: widgets/__init__.py:901
+msgid "Thai Mahamakut"
+msgstr ""
+
+#: widgets/__init__.py:901
+msgid "Thai Mahachula"
+msgstr ""
+
+#: widgets/__init__.py:901
+msgid "Thai Five Books"
+msgstr ""
+
+#: widgets/__init__.py:903
+msgid "Languages"
+msgstr ""
+
+#: widgets/__init__.py:910
+msgid "Choose volumes"
+msgstr ""
+
+#: widgets/__init__.py:910
+msgid "All"
+msgstr ""
+
+#: widgets/__init__.py:910
+msgid "Custom"
+msgstr ""
+
+#: widgets/__init__.py:913
+msgid "Search"
+msgstr ""
+
+#: widgets/__init__.py:916
+msgid "Special characters"
+msgstr ""
+
+#: widgets/__init__.py:935
+msgid "Change font"
+msgstr ""
+
+#: widgets/__init__.py:948
+msgid "Import data"
+msgstr ""
+
+#: widgets/__init__.py:952
+msgid "Export data"
+msgstr ""
+
+#: widgets/__init__.py:955
+msgid "Read"
+msgstr ""
+
+#: widgets/__init__.py:956
+msgid "About"
+msgstr ""

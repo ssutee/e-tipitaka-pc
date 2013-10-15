@@ -3,7 +3,13 @@
 *.swp
 *~
 .DS_Store
-resources/
+resources/*.db
+resources/*.pkl
+resources/*.ico
+resources/*.png
+resources/*.gif
+resources/*.json
+resources/spell_*
 fonts/
 build/
 dist/
