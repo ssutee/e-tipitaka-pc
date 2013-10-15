@@ -62,9 +62,7 @@ class Interactor(object):
         event.Enable(self.View.NotePanel.NoteTextCtrl.IsModified())
 
     def OnEnter(self, event):
-        self.View.NotePanel.NoteTextCtrl.Freeze()
         self.View.NotePanel.NoteTextCtrl.Newline()
-        self.View.NotePanel.NoteTextCtrl.Thaw()
 
     def OnBold(self, event):
         self.View.NotePanel.NoteTextCtrl.ApplyBoldToSelection()
