@@ -21,6 +21,10 @@ class Interactor(object):
         self.View.ImportButton.Bind(wx.EVT_BUTTON, self.OnImportButtonClick)
         
         self.View.VolumesRadio.Bind(wx.EVT_RADIOBOX, self.OnVolumesRadioSelect)
+        self.View.SortingRadioBox.Bind(wx.EVT_RADIOBOX, self.OnSortingRadioBoxSelect)
+        self.View.FilterCtrl.Bind(wx.EVT_TEXT, self.OnFilterCtrlText)
+        self.View.DeleteButton.Bind(wx.EVT_BUTTON, self.OnDeleteButtonClick)
+        self.View.DeleteButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateDeleteButton)
         
         self.View.NikhahitButton.Bind(wx.EVT_BUTTON, self.OnNikhahitButtonClick)
         self.View.ThothanButton.Bind(wx.EVT_BUTTON, self.OnThothanButtonClick)
@@ -78,3 +82,15 @@ class Interactor(object):
         
     def OnYoyingButtonClick(self, event):
         self.Presenter.InputSpecialCharacter(constants.YOYING_CHAR)
+        
+    def OnSortingRadioBoxSelect(self, event):
+        self.Presenter.SortHistoryList(event.GetSelection())
+        
+    def OnFilterCtrlText(self, event):
+        self.Presenter.FilterHistoryList(event.GetString())
+        
+    def OnDeleteButtonClick(self, event):
+        self.Presenter.DeleteSelectedHistoryItem()
+        
+    def OnUpdateDeleteButton(self, event):
+        event.Enable(self.View.HistoryList.GetSelection() > -1)

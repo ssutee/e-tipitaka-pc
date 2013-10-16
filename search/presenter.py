@@ -6,6 +6,7 @@ _ = i18n.language.ugettext
 
 import constants, utils 
 
+import pony.orm
 from pony.orm import db_session
 
 import read.model
@@ -18,6 +19,7 @@ class Presenter(object):
         self._presenters = {}
         self._scrollPosition = 0
         self._shouldOpenNewWindow = False
+        self._refreshHistoryList = True
         self._model = model        
         self._model.Delegate = self
         self._view = view
@@ -53,7 +55,9 @@ class Presenter(object):
                 self._view.ResultsWindow.SetStandardFonts(font.GetPointSize(),font.GetFaceName())
         dialog.Destroy()
         
-    def Search(self, keywords=None, code=None):
+    def Search(self, keywords=None, code=None, refreshHistoryList=True):
+        self._refreshHistoryList = refreshHistoryList
+        
         if not keywords:
             keywords = self._view.SearchCtrl.GetValue()
 
@@ -108,9 +112,9 @@ class Presenter(object):
         self._view.SetStatusText(_('Searching data'), 0)
         self._view.SetStatusText('', 1)
         self._view.SetStatusText('', 2)
+        self._view.DisableHistoryControls()
                 
     def SearchDidFinish(self, results, keywords):
-        
         self._model.LoadHistory(keywords, self._model.Code, len(results))
 
         self._model.Results = results
@@ -123,15 +127,17 @@ class Presenter(object):
         self._view.SetStatusText('', 0)
         self._view.SetStatusText(_('Found %d pages') % (len(results)), 1)
         
-        self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection())
-        
+        if self._refreshHistoryList:
+            self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+                self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
+                
     def ShowResults(self, current):
         self._model.Display(current)
         
     def SelectLanguage(self, index):
         self._model = search.model.SearchModelCreator.Create(self, index)
         self._view.VolumesRadio.Disable() if index == 4 else self._view.VolumesRadio.Enable()
-        self.RefreshHistoryList(index)
+        self.RefreshHistoryList(index, self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
         
     def SelectVolumes(self, index):
         
@@ -173,6 +179,7 @@ class Presenter(object):
         self._view.SetStatusText('', 0)        
         self._view.SetStatusText(_('Search results') + ' %d - %d' % (mark[0]+1, mark[1]) , 2)
         self._view.EnableSearchControls()
+        self._view.EnableHistoryControls()    
 
         self._view.BackwardButton.Disable() if current == 1 else self._view.BackwardButton.Enable()
         self._view.ForwardButton.Disable() if current == self._model.GetPages() else self._view.ForwardButton.Enable()
@@ -189,14 +196,15 @@ class Presenter(object):
         self._shouldOpenNewWindow = flag
     
     @db_session
-    def RefreshHistoryList(self, index):
-        items = search.model.Model.GetHistoryListItems(index)
+    def RefreshHistoryList(self, index, alphabetSort=True, text=''):
+        items = search.model.Model.GetHistoryListItems(index, alphabetSort, text)
         self._view.SetHistoryListItems(items)
     
     @db_session                
     def ReloadHistory(self, position):
-        h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection()))[position]
-        self.Search(h.keywords)
+        h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+            self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue()))[position]
+        self.Search(h.keywords, refreshHistoryList=False)
     
     def ExportData(self):
         from datetime import datetime        
@@ -240,6 +248,25 @@ class Presenter(object):
         self._view.SearchCtrl.SetValue(text)
         self._view.SearchCtrl.SetFocus()
         self._view.SearchCtrl.SetInsertionPoint(ins+1)
+
+    def SortHistoryList(self, selection):
+        self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), selection==0, self._view.FilterCtrl.GetValue())
+        
+    def FilterHistoryList(self, text):
+        self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+            self._view.SortingRadioBox.GetSelection()==0, text)
+
+    def DeleteSelectedHistoryItem(self):
+        if self._view.HistoryList.GetSelection() == -1: return
+        
+        with db_session:
+            h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+                self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue()))[self._view.HistoryList.GetSelection()]
+            h.delete()
+
+        with db_session:
+            self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+                self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
 
     def Close(self):
         self._view.SearchCtrl.SaveSearches()

@@ -81,6 +81,18 @@ class View(AuiBaseFrame):
     @property
     def HistoryList(self):
         return self._historyList
+        
+    @property
+    def SortingRadioBox(self):
+        return self._sortingRadioBox
+        
+    @property
+    def FilterCtrl(self):
+        return self._filterCtrl
+        
+    @property
+    def DeleteButton(self):
+        return self._deleteButton
 
     def __init__(self):
         self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)
@@ -141,20 +153,24 @@ class View(AuiBaseFrame):
         self._statusBar.Bind(wx.EVT_SIZE, lambda event: self._progressBar.SetRect(self._statusBar.GetFieldRect(3)))
 
     def DisableSearchControls(self):
-        self._topBar.SearchButton.Disable()
-        self._topBar.SearchButton.Refresh()
-        self._topBar.ForwardButton.Disable()
-        self._topBar.ForwardButton.Refresh()
-        self._topBar.BackwardButton.Disable()
-        self._topBar.BackwardButton.Refresh()      
+        for control in ['SearchButton', 'ForwardButton', 'BackwardButton']:
+            getattr(self._topBar, control).Disable()
+            getattr(self._topBar, control).Refresh()
         
     def EnableSearchControls(self):
-        self._topBar.SearchButton.Enable()
-        self._topBar.SearchButton.Refresh()
-        self._topBar.ForwardButton.Enable()
-        self._topBar.ForwardButton.Refresh()
-        self._topBar.BackwardButton.Enable()
-        self._topBar.BackwardButton.Refresh()   
+        for control in ['SearchButton', 'ForwardButton', 'BackwardButton']:
+            getattr(self._topBar, control).Enable()
+            getattr(self._topBar, control).Refresh()
+        
+    def DisableHistoryControls(self):
+        for control in ['_historyList', '_filterCtrl', '_sortingRadioBox', '_deleteButton']:
+            getattr(self, control).Disable()
+            getattr(self, control).Refresh()
+        
+    def EnableHistoryControls(self):
+        for control in ['_historyList', '_filterCtrl', '_sortingRadioBox', '_deleteButton']:
+            getattr(self, control).Enable()
+            getattr(self, control).Refresh()
         
     def SetPage(self, html):
         self._resultsWindow.SetPage(html)

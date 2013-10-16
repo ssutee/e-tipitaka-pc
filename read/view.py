@@ -87,7 +87,6 @@ class ThaiFiveBooksViewComponents(ViewComponents):
 class View(AuiBaseFrame):    
     
     def __init__(self, parent, title, code):
-
         super(View, self).__init__(parent, wx.ID_ANY, title=title,
             size=(min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])))
             

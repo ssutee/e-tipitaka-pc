@@ -7,7 +7,7 @@ import wx, os.path, sys
 import i18n
 _ = i18n.language.ugettext
 
-from pony.orm import Database, Required, Optional, db_session, select
+from pony.orm import Database, Required, Optional, db_session, select, desc
 
 db = Database('sqlite', constants.DATA_DB, create_db=True)
 
@@ -23,12 +23,15 @@ db.generate_mapping(create_tables=True)
 class Model(object):
 
     @staticmethod
-    def GetHistoryListItems(index):
-        return [u'%s (%d)' % (h.keywords, h.total) for h in Model.GetHistories(index)]
+    def GetHistoryListItems(index, alphabetSort=True, text=''):
+        return [u'%s (%d)' % (h.keywords, h.total) for h in Model.GetHistories(index, alphabetSort, text)]
 
     @staticmethod
-    def GetHistories(index):
-        return select(h for h in History if h.code == constants.CODES[index]).order_by(lambda h: h.keywords)
+    def GetHistories(index, alphabetSort=True, text=''):
+        if alphabetSort:
+            return select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(lambda h: h.keywords)
+        else:
+            return select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(lambda h: desc(h.id))
 
     def __init__(self, delegate):
         self._delegate = delegate
