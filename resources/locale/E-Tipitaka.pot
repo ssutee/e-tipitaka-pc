@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-15 07:38+0700\n"
+"POT-Creation-Date: 2013-10-16 09:26+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: dialogs/__init__.py:461 widgets/__init__.py:957
+#: dialogs/__init__.py:461 widgets/__init__.py:941
 msgid "About E-Tipitaka"
 msgstr ""
 
@@ -74,7 +74,7 @@ msgstr ""
 msgid "You mean?"
 msgstr ""
 
-#: search/model.py:213 widgets/__init__.py:650
+#: search/model.py:213 widgets/__init__.py:634
 msgid "Item"
 msgstr ""
 
@@ -103,7 +103,7 @@ msgstr ""
 msgid "Tipitaka volume"
 msgstr ""
 
-#: search/model.py:273 search/model.py:470 widgets/__init__.py:643
+#: search/model.py:273 search/model.py:470 widgets/__init__.py:627
 msgid "Page"
 msgstr ""
 
@@ -173,7 +173,19 @@ msgstr ""
 msgid "History"
 msgstr ""
 
-#: search/view.py:171
+#: search/view.py:114
+msgid "Sorting"
+msgstr ""
+
+#: search/view.py:114
+msgid "Alphabet"
+msgstr ""
+
+#: search/view.py:114
+msgid "Creation"
+msgstr ""
+
+#: search/view.py:173
 msgid "AppName"
 msgstr ""
 
@@ -181,118 +193,118 @@ msgstr ""
 msgid "Latest search"
 msgstr ""
 
-#: widgets/__init__.py:749
+#: widgets/__init__.py:733
 msgid "Notes"
 msgstr ""
 
-#: widgets/__init__.py:762
+#: widgets/__init__.py:746
 msgid "Save"
 msgstr ""
 
-#: widgets/__init__.py:764
+#: widgets/__init__.py:748
 msgid "Bold"
 msgstr ""
 
-#: widgets/__init__.py:765
+#: widgets/__init__.py:749
 msgid "Italic"
 msgstr ""
 
-#: widgets/__init__.py:766
+#: widgets/__init__.py:750
 msgid "Underline"
 msgstr ""
 
-#: widgets/__init__.py:768
+#: widgets/__init__.py:752
 msgid "Align Left"
 msgstr ""
 
-#: widgets/__init__.py:769
+#: widgets/__init__.py:753
 msgid "Center"
 msgstr ""
 
-#: widgets/__init__.py:770
+#: widgets/__init__.py:754
 msgid "Align Right"
 msgstr ""
 
-#: widgets/__init__.py:772
+#: widgets/__init__.py:756
 msgid "Indent Less"
 msgstr ""
 
-#: widgets/__init__.py:773
+#: widgets/__init__.py:757
 msgid "Indent More"
 msgstr ""
 
-#: widgets/__init__.py:775
+#: widgets/__init__.py:759
 msgid "Font"
 msgstr ""
 
-#: widgets/__init__.py:776
+#: widgets/__init__.py:760
 msgid "Font Color"
 msgstr ""
 
-#: widgets/__init__.py:778
+#: widgets/__init__.py:762
 msgid "Newline"
 msgstr ""
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Royal"
 msgstr ""
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Pali Siam"
 msgstr ""
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Mahamakut"
 msgstr ""
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Mahachula"
 msgstr ""
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Five Books"
 msgstr ""
 
-#: widgets/__init__.py:903
+#: widgets/__init__.py:887
 msgid "Languages"
 msgstr ""
 
-#: widgets/__init__.py:910
+#: widgets/__init__.py:894
 msgid "Choose volumes"
 msgstr ""
 
-#: widgets/__init__.py:910
+#: widgets/__init__.py:894
 msgid "All"
 msgstr ""
 
-#: widgets/__init__.py:910
+#: widgets/__init__.py:894
 msgid "Custom"
 msgstr ""
 
-#: widgets/__init__.py:913
+#: widgets/__init__.py:897
 msgid "Search"
 msgstr ""
 
-#: widgets/__init__.py:916
+#: widgets/__init__.py:900
 msgid "Special characters"
 msgstr ""
 
-#: widgets/__init__.py:935
+#: widgets/__init__.py:919
 msgid "Change font"
 msgstr ""
 
-#: widgets/__init__.py:948
+#: widgets/__init__.py:932
 msgid "Import data"
 msgstr ""
 
-#: widgets/__init__.py:952
+#: widgets/__init__.py:936
 msgid "Export data"
 msgstr ""
 
-#: widgets/__init__.py:955
+#: widgets/__init__.py:939
 msgid "Read"
 msgstr ""
 
-#: widgets/__init__.py:956
+#: widgets/__init__.py:940
 msgid "About"
 msgstr ""

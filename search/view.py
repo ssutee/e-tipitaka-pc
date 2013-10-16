@@ -84,7 +84,8 @@ class View(AuiBaseFrame):
 
     def __init__(self):
         self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)
-        super(View, self).__init__(None, id=wx.ID_ANY, size=(1024, 800), title=self.AppName())
+        super(View, self).__init__(None, id=wx.ID_ANY, title=self.AppName(),
+            size=(min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])))
 
         icon = wx.IconBundle()
         icon.AddIconFromFile(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)
@@ -109,9 +110,23 @@ class View(AuiBaseFrame):
     def _CreateHistoryListPane(self):
         panel = wx.Panel(self, wx.ID_ANY)
         panel.SetBackgroundColour('white')
-        sizer = wx.StaticBoxSizer(wx.StaticBox(panel, wx.ID_ANY, _('History')), orient=wx.VERTICAL)
+        sizer = wx.StaticBoxSizer(wx.StaticBox(panel, wx.ID_ANY, _('History')), orient=wx.VERTICAL)        
         self._historyList = wx.ListBox(panel, wx.ID_ANY, choices=[], style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
-        sizer.Add(self._historyList, 1, wx.EXPAND)
+        self._sortingRadioBox = wx.RadioBox(panel, wx.ID_ANY, _('Sorting'), choices=[_('Alphabet'), _('Creation')], majorDimension=2)
+        self._filterCtrl = wx.SearchCtrl(panel, wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
+        self._deleteButton = wx.BitmapButton(panel, wx.ID_ANY,
+            wx.BitmapFromImage(wx.Image(constants.FILE_DELETE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(18,18)))
+
+        bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        bottomSizer.Add(self._filterCtrl, 1, wx.ALIGN_CENTER)
+        bottomSizer.Add((5,-1))        
+        bottomSizer.Add(self._deleteButton, 0, wx.ALIGN_CENTER)
+        
+        sizer.Add(self._sortingRadioBox, 0, wx.ALIGN_CENTER|wx.BOTTOM, 5)
+        sizer.Add(self._historyList, 1, wx.EXPAND|wx.BOTTOM, 2)
+        sizer.Add(bottomSizer, 0, wx.EXPAND)
+        
         panel.SetSizer(sizer)
         self.AddPane(panel, AuiPaneInfo().CloseButton(False).CaptionVisible(False).BestSize((200, -1)).Right())        
 

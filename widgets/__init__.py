@@ -283,23 +283,6 @@ class MySearchCtrl(wx.SearchCtrl):
     @Delegate.setter
     def Delegate(self, delegate):
         self._delegate = delegate
-
-class BookListPanel(wx.Panel):
-    
-    def __ini__(self, parent, *args, **kwargs):
-        super(BookListPanel, self).__init__(parent, *args, **kwargs)
-        
-        self._delegate = None
-        self._CreateAttributes()
-        self._DoLayout()
-        
-    def _CreateAttributes(self):
-        pass
-        
-    def _DoLayout(self):
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-
-        self.SetSizer(mainSizer)
         
 class ReadToolPanel(wx.Panel):
 
@@ -422,7 +405,7 @@ class ReadToolPanel(wx.Panel):
         
         self._decFontButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.DEC_IMAGE, wx.BITMAP_TYPE_GIF)), size=self._searchButton.GetSize())
-        self._decFontButton.SetToolTip(wx.ToolTip(u'เพิ่มขนาดตัวหนังสือ'))
+        self._decFontButton.SetToolTip(wx.ToolTip(u'ลดขนาดตัวหนังสือ'))
                 
         self._saveButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
@@ -623,6 +606,7 @@ class ReadPanel(wx.Panel):
             self.Delegate.ProcessKeyCommand(event, event.GetKeyCode(), self._code)
         except ValueError, e:
             pass
+        event.Skip()
             
     def OnUpdateClearButton(self, event):
         event.Enable(self.Delegate.HasSavedMark(self._code))

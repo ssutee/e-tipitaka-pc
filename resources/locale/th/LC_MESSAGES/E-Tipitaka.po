@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-15 07:38+0700\n"
-"PO-Revision-Date: 2013-10-15 07:42+0700\n"
+"POT-Creation-Date: 2013-10-16 09:26+0700\n"
+"PO-Revision-Date: 2013-10-16 09:27+0700\n"
 "Last-Translator: \n"
 "Language-Team: Thai <sutee.s@gmail.com>\n"
 "Language: th\n"
@@ -50,7 +50,7 @@ msgstr "ตกลง"
 msgid "Cancel"
 msgstr "ยกเลิก"
 
-#: dialogs/__init__.py:461 widgets/__init__.py:957
+#: dialogs/__init__.py:461 widgets/__init__.py:941
 msgid "About E-Tipitaka"
 msgstr "เกี่ยวกับโปรแกรม E-Tipitaka"
 
@@ -80,7 +80,7 @@ msgstr ""
 msgid "You mean?"
 msgstr "หรือคุณหมายถึง"
 
-#: search/model.py:213 widgets/__init__.py:650
+#: search/model.py:213 widgets/__init__.py:634
 msgid "Item"
 msgstr "ข้อที่"
 
@@ -109,7 +109,7 @@ msgstr "ผลการค้นหา %s - %s จากทั้งหมด %s
 msgid "Tipitaka volume"
 msgstr "พระไตรปิฎก เล่มที่"
 
-#: search/model.py:273 search/model.py:470 widgets/__init__.py:643
+#: search/model.py:273 search/model.py:470 widgets/__init__.py:627
 msgid "Page"
 msgstr "หน้าที่"
 
@@ -179,7 +179,19 @@ msgstr "นำข้อมูลส่วนตัวเข้าสำเร็
 msgid "History"
 msgstr "ประวัติการค้นหา"
 
-#: search/view.py:171
+#: search/view.py:114
+msgid "Sorting"
+msgstr "การเรียงลำดับ"
+
+#: search/view.py:114
+msgid "Alphabet"
+msgstr "อักขระ"
+
+#: search/view.py:114
+msgid "Creation"
+msgstr "การสร้าง"
+
+#: search/view.py:173
 msgid "AppName"
 msgstr "โปรแกรมตรวจหาและเทียบเคียงพุทธวจนจากพระไตรปิฎก"
 
@@ -187,119 +199,119 @@ msgstr "โปรแกรมตรวจหาและเทียบเคี
 msgid "Latest search"
 msgstr "คำค้นหาล่าสุด"
 
-#: widgets/__init__.py:749
+#: widgets/__init__.py:733
 msgid "Notes"
 msgstr "บันทึกข้อความเพิ่มเติม"
 
-#: widgets/__init__.py:762
+#: widgets/__init__.py:746
 msgid "Save"
 msgstr "บันทึก"
 
-#: widgets/__init__.py:764
+#: widgets/__init__.py:748
 msgid "Bold"
 msgstr "ตัวหนา"
 
-#: widgets/__init__.py:765
+#: widgets/__init__.py:749
 msgid "Italic"
 msgstr "ตัวเอียง"
 
-#: widgets/__init__.py:766
+#: widgets/__init__.py:750
 msgid "Underline"
 msgstr "ขีดเส้นใต้"
 
-#: widgets/__init__.py:768
+#: widgets/__init__.py:752
 msgid "Align Left"
 msgstr "ชิดซ้าย"
 
-#: widgets/__init__.py:769
+#: widgets/__init__.py:753
 msgid "Center"
 msgstr "ตรงกลาง"
 
-#: widgets/__init__.py:770
+#: widgets/__init__.py:754
 msgid "Align Right"
 msgstr "ชิดขวา"
 
-#: widgets/__init__.py:772
+#: widgets/__init__.py:756
 msgid "Indent Less"
 msgstr "ลดย่อหน้า"
 
-#: widgets/__init__.py:773
+#: widgets/__init__.py:757
 msgid "Indent More"
 msgstr "เพิ่มย่อหน้า"
 
-#: widgets/__init__.py:775
+#: widgets/__init__.py:759
 msgid "Font"
 msgstr "แบบอักษร"
 
-#: widgets/__init__.py:776
+#: widgets/__init__.py:760
 msgid "Font Color"
 msgstr "สีอักษร"
 
-#: widgets/__init__.py:778
+#: widgets/__init__.py:762
 msgid "Newline"
 msgstr "ขึ้นบรรทัดใหม่"
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Royal"
 msgstr "ไทย (ฉบับหลวง)"
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Pali Siam"
 msgstr "บาลี (สยามรัฐ)"
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Mahamakut"
 msgstr "ไทย (มหามกุฏฯ)"
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Mahachula"
 msgstr "ไทย (มหาจุฬาฯ)"
 
-#: widgets/__init__.py:901
+#: widgets/__init__.py:885
 msgid "Thai Five Books"
 msgstr "ไทย (จากพระโอษฐ์ ๕ เล่ม)"
 
-#: widgets/__init__.py:903
+#: widgets/__init__.py:887
 msgid "Languages"
 msgstr "ภาษา"
 
-#: widgets/__init__.py:910
+#: widgets/__init__.py:894
 msgid "Choose volumes"
 msgstr "เล่มที่ต้องการค้นหา"
 
-#: widgets/__init__.py:910
+#: widgets/__init__.py:894
 msgid "All"
 msgstr "ทั้งหมด"
 
-#: widgets/__init__.py:910
+#: widgets/__init__.py:894
 msgid "Custom"
 msgstr "กำหนดเอง"
 
-#: widgets/__init__.py:913
+#: widgets/__init__.py:897
 msgid "Search"
 msgstr "ค้นหา"
 
-#: widgets/__init__.py:916
+#: widgets/__init__.py:900
 msgid "Special characters"
 msgstr "อักษรพิเศษ"
 
-#: widgets/__init__.py:935
+#: widgets/__init__.py:919
 msgid "Change font"
 msgstr "เปลี่ยนรูปแบบตัวหนังสือ"
 
-#: widgets/__init__.py:948
+#: widgets/__init__.py:932
 msgid "Import data"
 msgstr "นำข้อมูลส่วนตัวเข้า"
 
-#: widgets/__init__.py:952
+#: widgets/__init__.py:936
 msgid "Export data"
 msgstr "นำข้อมูลส่วนตัวออก"
 
-#: widgets/__init__.py:955
+#: widgets/__init__.py:939
 msgid "Read"
 msgstr "อ่านพระไตรปิฎก"
 
-#: widgets/__init__.py:956
+#: widgets/__init__.py:940
 msgid "About"
 msgstr "เกี่ยวกับโปรแกรม"
 
