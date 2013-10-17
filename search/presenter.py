@@ -123,6 +123,8 @@ class Presenter(object):
            self.ShowResults(1)
         else:
             self._view.SetPage(self._model.NotFoundMessage()+self._model.MakeHtmlSuggestion(found=False))
+            self._view.EnableSearchControls()
+            self._view.EnableHistoryControls()                
             
         self._view.SetStatusText('', 0)
         self._view.SetStatusText(_('Found %d pages') % (len(results)), 1)
