@@ -513,8 +513,10 @@ class ReadPanel(wx.Panel):
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
         self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
         self._body.Bind(wx.EVT_MOTION if 'wxMac' in wx.PlatformInfo else wx.EVT_LEFT_UP, self.OnTextBodySelect)
+        self._body.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)        
         
         self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)
+        
         self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
         
         self._paintPanel = wx.Panel(self, wx.ID_ANY)        
@@ -576,6 +578,12 @@ class ReadPanel(wx.Panel):
         
     def OnTextBodySelect(self, event):
         self.Delegate.HandleTextSelection(self._body.GetStringSelection(), self._code)
+        
+    def OnTextBodyMouseRightDown(self, event):
+        if 'wxMac' in wx.PlatformInfo:
+            self.Delegate.ShowContextMenu(event.GetPosition(), self._code)
+        else:
+            event.Skip()
         
     def OnSliderValueChange(self, event):
         self.Delegate.JumpToPage(event.GetSelection(), self._code)

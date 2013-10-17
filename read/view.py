@@ -412,6 +412,25 @@ class View(AuiBaseFrame):
         self._delegate.LoadBookmarks(self._bookmarkMenu)
         self._toolPanel.PopupMenu(self._bookmarkMenu, (x,y))
         
+    def ShowContextMenu(self, position, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        
+        def OnCopy(event):
+            readPanel.Body.Copy()
+            
+        def OnSelectAll(event):
+            readPanel.Body.SelectAll()
+                    
+        menu = wx.Menu()
+        copy = menu.Append(constants.ID_COPY, 'Copy')
+        copy.Enable(readPanel.Body.CanCopy())
+        menu.AppendSeparator()
+        selectAll = menu.Append(constants.ID_SELECT_ALL, 'Select All')
+        wx.EVT_MENU(menu, constants.ID_COPY, OnCopy)
+        wx.EVT_MENU(menu, constants.ID_SELECT_ALL, OnSelectAll)
+        readPanel.Body.PopupMenu(menu, position)                        
+        menu.Destroy()        
+        
     def GetBookmarkMenuItem(self, itemId):
         return self._bookmarkMenu.FindItemById(itemId)
         

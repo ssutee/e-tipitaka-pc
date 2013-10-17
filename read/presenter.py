@@ -735,6 +735,9 @@ class Presenter(object):
         self._dictWindow.Show()        
         text = self._view.GetStringSelection(None if len(self._focusList) == 0 else self._focusList[0])
         self._dictWindow.SetInput(text.strip().split('\n')[0].strip())
+        
+    def ShowContextMenu(self, position, code):
+        self._view.ShowContextMenu(position, code)
 
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
