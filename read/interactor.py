@@ -20,6 +20,7 @@ class Interactor(object):
         self.View.PrintButton.Bind(wx.EVT_BUTTON, self.OnPrintButtonClick)
         self.View.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)
         self.View.DictButton.Bind(wx.EVT_BUTTON, self.OnDictButtonClick)
+        self.View.NotesButton.Bind(wx.EVT_BUTTON, self.OnNotesButtonClick)
     
         if isinstance(self.View.BookList, wx.ListBox):
             self.View.BookList.Bind(wx.EVT_LISTBOX, self.OnBookListSelect)
@@ -153,6 +154,9 @@ class Interactor(object):
         
     def OnDictButtonClick(self, event):
         self.Presenter.OpenDict()
+        
+    def OnNotesButtonClick(self, event):
+        self.Presenter.ShowNotesManager()
 
     def OnInputPageEnter(self, event):
         try:

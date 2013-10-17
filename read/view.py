@@ -173,6 +173,10 @@ class View(AuiBaseFrame):
     @property
     def DictButton(self):
         return self._toolPanel.DictButton
+        
+    @property
+    def NotesButton(self):
+        return self._toolPanel.NotesButton
 
     @property
     def InputItem(self):

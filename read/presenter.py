@@ -172,8 +172,19 @@ class BookmarkManager(object):
 
 class Presenter(object):
     def __init__(self, model, view, interactor, code):
+        self._stopOpen = False
+        self._currentPage = 0
+        self._currentVolume = 0
         self._code = code
         self._keywords = None
+        self._comparePage = {}
+        self._compareVolume = {}
+        
+        self._saveDirectory = constants.HOME        
+        
+        self._focusList = []
+        self._marks = {}
+
         self._model = model
         self._delegate = None
         self._view = view
@@ -182,16 +193,6 @@ class Presenter(object):
         self._view.SetTitle(self._model.GetTitle())
         self._view.Start()
         interactor.Install(self, view)     
-        self._currentPage = 0
-        self._currentVolume = 0
-
-        self._comparePage = {}
-        self._compareVolume = {}
-        
-        self._focusList = []
-        self._marks = {}
-        
-        self._saveDirectory = constants.HOME
         
         self._keyCommandHandler = KeyCommandHandler()
         self._findTextHandler = FindTextHandler()
@@ -284,27 +285,30 @@ class Presenter(object):
         self._currentPage = page
             
         self._LoadNoteText(self._currentVolume, self._currentPage)
-
+        
         self._ToggleButtons(self._currentVolume)
-
+        
         self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
         self._view.SetPageNumber(self._currentPage if self._currentPage > 0 else None)
         self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))        
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
-        if selectItem: self._view.SetBookListSelection(self._currentVolume)        
 
+        self._stopOpen = True
+        if selectItem: self._view.SetBookListSelection(self._currentVolume)        
+        self._stopOpen = False
+        
         content = self._model.GetPage(self._currentVolume, self._currentPage)
-        self._view.SetText(content)
-        self._HighlightKeywords(content, self._keywords)
+        self._view.SetText(content)        
         self._view.StatusBar.SetStatusText(u'', 0)
         self._view.StatusBar.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        self._HighlightKeywords(content, self._keywords)        
         self._LoadMarks(self._currentVolume, self._currentPage)
         
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
             self._delegate.OnReadWindowOpenPage(self._currentVolume, self._currentPage, self._code)
-            
+
     def OpenAnotherBook(self, code, volume, page):
         self._findTextHandler.Reset()        
         currentCode = self._model.Code
@@ -331,12 +335,16 @@ class Presenter(object):
         if content == u'' or keywords is None: return
 
         font = self._view.Body.GetFont()
+        font.SetWeight(wx.FONTWEIGHT_BOLD)
         for term in keywords.replace('+',' ').replace('|',' ').split():
             n = -1
             while True:                    
                 n = content.find(term, n+1)
-                if n == -1: break
-                self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
+                if n == -1: break                
+                offset = self._model.HighlightOffset                
+                self._view.Body.Freeze()
+                self._view.Body.SetStyle(n-offset, n+len(term)-offset, wx.TextAttr('purple', wx.NullColour, font))
+                self._view.Body.Thaw()
 
     def OnLinkToReference(self, code, volume, item):
         self._DoCompare(code, volume, 1, item)
@@ -365,6 +373,8 @@ class Presenter(object):
             self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] - 1)
 
     def HandleBookSelection(self, event):
+        if self._stopOpen: return
+        
         if isinstance(event, wx.TreeEvent):
             volume, page, section = self._view.BookList.GetItemPyData(event.GetItem())
             self.OpenBook(volume, page, section if section is not None else self._model.GetSection(volume, page))
@@ -738,6 +748,11 @@ class Presenter(object):
         
     def ShowContextMenu(self, position, code):
         self._view.ShowContextMenu(position, code)
+        
+    def ShowNotesManager(self):
+        dlg = wx.MessageDialog(self._view, 'This function is not implemented yet.', 'Information', wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
 
     def _ToggleButtons(self, volume):
         getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()

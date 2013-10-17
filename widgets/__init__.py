@@ -350,6 +350,10 @@ class ReadToolPanel(wx.Panel):
     def DictButton(self):
         return self._dictButton
         
+    @property
+    def NotesButton(self):
+        return self._notesButton
+        
     def __init__(self, parent, dataSource, *args, **kwargs):
         super(ReadToolPanel, self).__init__(parent, *args, **kwargs)
 
@@ -390,6 +394,10 @@ class ReadToolPanel(wx.Panel):
         self._starButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._starButton.SetToolTip(wx.ToolTip(u'ที่คั่นหน้า'))
+
+        self._notesButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+        self._notesButton.SetToolTip(wx.ToolTip(u'จัดการข้อความเพิ่มเติม'))
                 
         self._bookListButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.LAYOUT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(32,32)))
@@ -418,6 +426,8 @@ class ReadToolPanel(wx.Panel):
         toolsSizer.Add(self._searchButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
         toolsSizer.Add(self._starButton, flag=wx.ALIGN_CENTER)
+        toolsSizer.Add((5,-1))        
+        toolsSizer.Add(self._notesButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
         toolsSizer.Add(self._bookListButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))                

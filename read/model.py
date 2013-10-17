@@ -1,5 +1,6 @@
 #-*- coding:utf-8 -*-
 
+import wx
 import sqlite3, cPickle
 import constants, utils
 
@@ -115,6 +116,10 @@ class Engine(object):
         
     def ConvertVolume(self, volume, item, sub):
         return volume
+        
+    @property
+    def HighlightOffset(self):
+        return 0
 
 class ThaiRoyalEngine(Engine):
     
@@ -175,6 +180,10 @@ class ThaiMahaChulaEngine(Engine):
         
     def GetSubItem(self, volume, page, item):
         return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])[1]
+        
+    @property
+    def HighlightOffset(self):
+        return 1 if 'wxMac' in wx.PlatformInfo else 0
 
 class ThaiMahaMakutEngine(Engine):
 
@@ -329,6 +338,10 @@ class Model(object):
 
     def ConvertVolume(self, volume, item, sub):
         return self._engine[self._code].ConvertVolume(volume, item, sub)
+        
+    @property
+    def HighlightOffset(self):
+        return self._engine[self._code].HighlightOffset
 
     def __init__(self, code):
         self._engine = {}

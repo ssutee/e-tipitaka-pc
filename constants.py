@@ -80,6 +80,7 @@ KEY_ENTER_IMAGE = os.path.join(RESOURCES_DIR, 'key_enter.png')
 FILE_DELETE_IMAGE = os.path.join(RESOURCES_DIR, 'file_delete.png')
 
 STAR_IMAGE = os.path.join(RESOURCES_DIR, 'star.png')
+NOTES_IMAGE = os.path.join(RESOURCES_DIR, 'edit-notes.png')
 DICT_IMAGE = os.path.join(RESOURCES_DIR, 'dict.png')
 DICT_ICON = os.path.join(RESOURCES_DIR, 'dict.ico')
 LAYOUT_IMAGE = os.path.join(RESOURCES_DIR, 'layout.gif')
