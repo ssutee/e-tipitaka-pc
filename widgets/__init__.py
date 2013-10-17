@@ -14,7 +14,7 @@ _ = i18n.language.ugettext
 class DictWindow(wx.Frame):
     def __init__(self, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
-
+        self.SetBackgroundColour('#EEEEEE')
         icon = wx.IconBundle()
         icon.AddIconFromFile(constants.DICT_ICON, wx.BITMAP_TYPE_ANY)
         self.SetIcons(icon)
@@ -32,7 +32,7 @@ class DictWindow(wx.Frame):
         self.hboxToolbar = wx.BoxSizer(wx.HORIZONTAL)
 
         labelWord = wx.StaticText(self, -1, u'ค้นหา: ')
-        self.input = wx.TextCtrl(self, -1, pos=(0,0), size=(-1,-1), style=wx.TE_PROCESS_ENTER)
+        self.input = wx.SearchCtrl(self, -1, pos=(0,0), size=(-1,-1), style=wx.TE_PROCESS_ENTER)
         self.input.SetFont(font)
         self.input.Bind(wx.EVT_TEXT_ENTER, self.OnTextEntered)
         self.input.Bind(wx.EVT_TEXT, self.OnTextEntered)
