@@ -295,7 +295,11 @@ class Presenter(object):
             self._model.GetTotalPages(self._currentVolume))
         
         content = self._model.GetPage(self._currentVolume, self._currentPage)
+        
+        # work around for fixing font size problem on win32
         self._view.SetText(content)        
+        self._view.SetText(content)
+        
         self._view.StatusBar.SetStatusText(u'', 0)
         self._view.StatusBar.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
