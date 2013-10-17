@@ -633,7 +633,9 @@ class ReadPanel(wx.Panel):
         event.Enable(self.Delegate.HasMarkText(self._code))
 
     def SetBody(self, text):
+        self._body.Freeze()
         self._body.SetValue(text)
+        self._body.Thaw()
         
     def SetTitles(self, title1, title2):
         self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>

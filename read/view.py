@@ -376,7 +376,7 @@ class View(AuiBaseFrame):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         font = readPanel.Body.GetFont()
         fontSize = font.GetPointSize()
-
+        readPanel.Body.Freeze()
         if 'wxMac' in wx.PlatformInfo:
             readPanel.SetContentFont(font)
 
@@ -394,7 +394,8 @@ class View(AuiBaseFrame):
                 if 'wxMac' not in wx.PlatformInfo:
                     readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('blue', wx.NullColour, font))
                 else:
-                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))        
+                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))  
+        readPanel.Body.Thaw()     
         self.AuiManager.Update()
         
     def ShowFindDialog(self, code, text, flags):
