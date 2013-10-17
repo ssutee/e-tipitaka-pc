@@ -293,10 +293,6 @@ class Presenter(object):
         self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))        
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
-
-        self._stopOpen = True
-        if selectItem: self._view.SetBookListSelection(self._currentVolume)        
-        self._stopOpen = False
         
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._view.SetText(content)        
@@ -308,6 +304,10 @@ class Presenter(object):
         
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
             self._delegate.OnReadWindowOpenPage(self._currentVolume, self._currentPage, self._code)
+
+        self._stopOpen = True
+        if selectItem: self._view.SetBookListSelection(self._currentVolume)        
+        self._stopOpen = False
 
     def OpenAnotherBook(self, code, volume, page):
         self._findTextHandler.Reset()        
