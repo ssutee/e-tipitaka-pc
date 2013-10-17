@@ -458,12 +458,6 @@ class View(AuiBaseFrame):
     def SetBookListSelection(self, volume):
         if isinstance(self._bookList, wx.ListBox):
             self._bookList.SetSelection(volume-1)
-        elif isinstance(self._bookList, wx.TreeCtrl):
-            root = self._bookList.GetRootItem()
-            child, cookie = self._bookList.GetFirstChild(root)
-            for i in xrange(volume-1):
-                child = self._bookList.GetNextSibling(child)
-            self._bookList.SelectItem(child, True)
         
     def OnMenuManageBookmarkSelected(self, event):
         dlg = BookmarkManagerDialog(self._readPanel, self._delegate.BookmarkItems)
