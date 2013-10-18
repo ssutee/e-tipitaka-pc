@@ -674,11 +674,11 @@ class ReadWithReferencesPanel(ReadPanel):
 
     def _CreateAttributes(self):
         super(ReadWithReferencesPanel, self)._CreateAttributes()
-        self._refs = ReferencesWindow(self)
+        self._refs = ReferencesWindow(self, size=(-1, 40))
         
     def _DoLayout(self):
         super(ReadWithReferencesPanel, self)._DoLayout()        
-        self._mainSizer.Add(self._refs, 1, wx.EXPAND|wx.ALL, 5)
+        self._mainSizer.Add(self._refs, 0, wx.EXPAND|wx.ALL, 5)
         
     def SetBody(self, text):
         super(ReadWithReferencesPanel, self).SetBody(text)
