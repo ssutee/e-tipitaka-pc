@@ -397,7 +397,7 @@ class ReadToolPanel(wx.Panel):
 
         self._notesButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
-        self._notesButton.SetToolTip(wx.ToolTip(u'จัดการข้อความเพิ่มเติม'))
+        self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
                 
         self._bookListButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.LAYOUT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(32,32)))

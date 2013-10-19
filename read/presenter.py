@@ -6,6 +6,10 @@ from wx.html import HtmlEasyPrinting
 import constants, utils, dialogs, widgets
 import os, json, codecs
 
+from pony.orm import Database, Required, Optional, db_session, select, desc
+
+from read.model import Model
+
 class Printer(HtmlEasyPrinting):
     def __init__(self):
         HtmlEasyPrinting.__init__(self)
@@ -246,6 +250,7 @@ class Presenter(object):
     def _LoadNoteText(self, volume, page):
         self._view.NoteTextCtrl.SelectAll()
         self._view.NoteTextCtrl.DeleteSelection()        
+        self._view.NoteTextCtrl.EndAllStyles()
         path = os.path.join(constants.NOTES_PATH, self._model.Code)
         if not os.path.exists(path):
             os.makedirs(path)  
@@ -617,11 +622,14 @@ class Presenter(object):
         page = self._currentPage if code is None else self._comparePage[code]        
         path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)        
         return os.path.join(path, '%02d-%04d.json'%(volume, page))        
-                
+    
+    @db_session            
     def SaveNoteText(self):
         self._view.NoteTextCtrl.SaveFile(self._view.NoteTextCtrl.GetFilename(), rt.RICHTEXT_TYPE_XML)
         self._view.NoteTextCtrl.SetModified(False)
-        
+        note = Model.Note(volume=self._currentVolume, page=self._currentPage, code=self._model.Code, 
+            text=self._view.NoteTextCtrl.GetValue(), filename=self._view.NoteTextCtrl.GetFilename())
+                        
     def SaveMarkedText(self, code):
         key = self._CurrentMarkKey(code)                
         filename = self._CurrentMarkFilename(code)
@@ -754,8 +762,10 @@ class Presenter(object):
         self._view.ShowContextMenu(window, position, code)
         
     def ShowNotesManager(self):
-        dlg = wx.MessageDialog(self._view, 'This function is not implemented yet.', 'Information', wx.ICON_INFORMATION)
-        dlg.ShowModal()
+        dlg = dialogs.NoteManagerDialog(self._view, self._model.Code)
+        if dlg.ShowModal() == wx.ID_OK:
+            volume, page = dlg.Result
+            self.OpenBook(volume, page)
         dlg.Destroy()
 
     def _ToggleButtons(self, volume):

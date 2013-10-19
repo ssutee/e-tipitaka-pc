@@ -4,6 +4,19 @@ import wx
 import sqlite3, cPickle
 import constants, utils
 
+from pony.orm import Database, Required, Optional, db_session, select, desc
+
+db = Database('sqlite', constants.NOTE_DB, create_db=True)
+
+class Note(db.Entity):
+    volume = Required(int)
+    page = Required(int)
+    code = Required(unicode)
+    filename = Optional(unicode)
+    text = Optional(unicode)
+
+db.generate_mapping(create_tables=True)
+
 class Engine(object):
     
     def __init__(self):
@@ -279,6 +292,25 @@ class ThaiFiveBooksEngine(Engine):
 
 class Model(object):
     
+    @staticmethod
+    def Note(volume, page, code, text=None, filename=None):
+        note = Note.get(volume=volume, page=page, code=code)
+        if note is None: note = Note(volume=volume, page=page, code=code)
+        if text is not None: note.text = text
+        if filename is not None: note.filename = filename        
+        return note
+
+    @staticmethod
+    def GetNoteListItems(code, text=u'', creation=False):
+        return [utils.ArabicToThai(u'เล่มที่ %2s ข้อที่ %2s' % (note.volume, note.page)) for note in Model.GetNotes(code, text, creation)]
+        
+    @staticmethod
+    def GetNotes(code, text=u'', creation=False):
+        if creation:
+            return select(note for note in Note if note.code == code and text in note.text).order_by(desc(Note.id))
+        else:
+            return select(note for note in Note if note.code == code and text in note.text).order_by(Note.volume, Note.page)
+
     @property
     def Code(self):
         return self._code

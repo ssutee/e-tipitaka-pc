@@ -2,11 +2,15 @@
 
 import wx
 from wx.lib.combotreebox import ComboTreeBox
+import wx.richtext as rt
 import sys, os
 import i18n
 _ = i18n.language.ugettext
 
 import settings
+import read.model
+
+from pony.orm import db_session
 
 class DataXferPagesValidator(wx.PyValidator):
     def __init__(self, data, key):
@@ -57,6 +61,74 @@ class DataXferPagesValidator(wx.PyValidator):
             return
             
         event.Skip()
+
+class NoteManagerDialog(wx.Dialog):
+    def __init__(self, parent, code):
+        super(NoteManagerDialog, self).__init__(parent, wx.ID_ANY, u'ค้นหาบันทึกข้อความเพิ่มเติม', size=(600,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+        self._result = None
+        self._code = code
+        self.Center()        
+        self.SetBackgroundColour('white')
+        self._noteTextCtrl = rt.RichTextCtrl(self, style=wx.VSCROLL|wx.HSCROLL)
+        self._noteTextCtrl.SetEditable(False)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        leftSizer = wx.BoxSizer(wx.VERTICAL)
+        self._searchCtrl = wx.SearchCtrl(self, wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
+        self._searchCtrl.SetFocus()
+        self._searchCtrl.Bind(wx.EVT_TEXT, self.OnSearchCtrlTextEnter)
+        self._readButton = wx.Button(self, wx.ID_ANY, u'อ่าน')
+        self._readButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateReadButton)
+        self._readButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
+        
+        with db_session:
+            items = read.model.Model.GetNoteListItems(self._code)
+            self._noteListBox = wx.ListBox(self, wx.ID_ANY, choices=items, style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
+            self._noteListBox.Bind(wx.EVT_LISTBOX, self.OnNoteListBoxSelect)
+            self._noteListBox.Bind(wx.EVT_LISTBOX_DCLICK, self.OnNoteListBoxDoubleClick)
+
+        leftSizer.Add(self._searchCtrl, 0, wx.EXPAND|wx.ALL, 5)
+        leftSizer.Add(self._noteListBox, 1, wx.EXPAND|wx.ALL, 5)
+        leftSizer.Add(self._readButton, 0, wx.CENTER|wx.BOTTOM, 10)
+        sizer.Add(leftSizer, 2, wx.EXPAND)
+        sizer.Add(self._noteTextCtrl, 3, wx.EXPAND|wx.ALL, 5)        
+        self.SetSizer(sizer)
+        
+    def OnNoteListBoxSelect(self, event):
+        text = self._searchCtrl.GetValue()
+        with db_session:
+            note = list(read.model.Model.GetNotes(self._code, text))[event.GetSelection()]
+            self._noteTextCtrl.LoadFile(note.filename, rt.RICHTEXT_TYPE_XML)
+
+    def OnSearchCtrlTextEnter(self, event):
+        with db_session:
+            items = read.model.Model.GetNoteListItems(self._code, event.GetString())
+            self._noteListBox.SetItems(items)
+            self._noteTextCtrl.SetEditable(True)
+            self._noteTextCtrl.SelectAll()
+            self._noteTextCtrl.DeleteSelection()        
+            self._noteTextCtrl.EndAllStyles()   
+            self._noteTextCtrl.SetEditable(False)  
+            
+    def OnUpdateReadButton(self, event):
+        event.Enable(self._noteListBox.GetSelection() > -1)       
+        
+    def OnReadButtonClick(self, event):
+        self._OpenNote(self._noteListBox.GetSelection())
+            
+    def OnNoteListBoxDoubleClick(self, event):
+        self._OpenNote(event.GetSelection())
+            
+    def _OpenNote(self, selection):
+        if selection == -1: return
+        
+        with db_session:
+            note = list(read.model.Model.GetNotes(self._code, self._searchCtrl.GetValue()))[self._noteListBox.GetSelection()]
+            self._result = note.volume, note.page
+            self.EndModal(wx.ID_OK)
+    
+    @property
+    def Result(self):
+        return self._result
 
 class PageRangeDialog(wx.Dialog):
     def __init__(self, parent, title, msg1, msg2, num, data):
