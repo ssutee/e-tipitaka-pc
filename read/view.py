@@ -417,23 +417,33 @@ class View(AuiBaseFrame):
         self._delegate.LoadBookmarks(self._bookmarkMenu)
         self._toolPanel.PopupMenu(self._bookmarkMenu, (x,y))
         
-    def ShowContextMenu(self, position, code):
+    def ShowContextMenu(self, window, position, code):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
         
         def OnCopy(event):
-            readPanel.Body.Copy()
+            if isinstance(window, wx.html.HtmlWindow):
+                clipdata = wx.TextDataObject()
+                clipdata.SetText(window.SelectionToText())
+                wx.TheClipboard.Open()
+                wx.TheClipboard.SetData(clipdata)
+                wx.TheClipboard.Close()
+            elif isinstance(window, wx.TextCtrl):
+                window.Copy()
             
         def OnSelectAll(event):
-            readPanel.Body.SelectAll()
+            window.SelectAll()
                     
         menu = wx.Menu()
         copy = menu.Append(constants.ID_COPY, 'Copy')
-        copy.Enable(readPanel.Body.CanCopy())
+        if isinstance(window, wx.TextCtrl):
+            copy.Enable(window.CanCopy())
+        elif isinstance(window, wx.html.HtmlWindow):
+            copy.Enable(len(window.SelectionToText()) > 0)
         menu.AppendSeparator()
         selectAll = menu.Append(constants.ID_SELECT_ALL, 'Select All')
         wx.EVT_MENU(menu, constants.ID_COPY, OnCopy)
         wx.EVT_MENU(menu, constants.ID_SELECT_ALL, OnSelectAll)
-        readPanel.Body.PopupMenu(menu, position)                        
+        window.PopupMenu(menu, position)                        
         menu.Destroy()        
         
     def GetBookmarkMenuItem(self, itemId):

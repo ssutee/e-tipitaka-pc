@@ -750,8 +750,8 @@ class Presenter(object):
         text = self._view.GetStringSelection(None if len(self._focusList) == 0 else self._focusList[0])
         self._dictWindow.SetInput(text.strip().split('\n')[0].strip())
         
-    def ShowContextMenu(self, position, code):
-        self._view.ShowContextMenu(position, code)
+    def ShowContextMenu(self, window, position, code):
+        self._view.ShowContextMenu(window, position, code)
         
     def ShowNotesManager(self):
         dlg = wx.MessageDialog(self._view, 'This function is not implemented yet.', 'Information', wx.ICON_INFORMATION)

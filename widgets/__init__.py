@@ -513,10 +513,13 @@ class ReadPanel(wx.Panel):
         self._body.SetFont(font)
         
     def _CreateAttributes(self):
-        self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER|wx.html.HW_NO_SELECTION)
+        self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER)
+        self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)
         
-        self._page = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER|wx.html.HW_NO_SELECTION)
-        self._item = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER|wx.html.HW_NO_SELECTION)
+        self._page = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
+        self._page.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)
+        self._item = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
+        self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)
         
         self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
@@ -591,7 +594,7 @@ class ReadPanel(wx.Panel):
         
     def OnTextBodyMouseRightDown(self, event):
         if 'wxMac' in wx.PlatformInfo:
-            self.Delegate.ShowContextMenu(event.GetPosition(), self._code)
+            self.Delegate.ShowContextMenu(event.GetEventObject(), event.GetPosition(), self._code)
         else:
             event.Skip()
         
