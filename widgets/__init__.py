@@ -593,10 +593,7 @@ class ReadPanel(wx.Panel):
         self.Delegate.HandleTextSelection(self._body.GetStringSelection(), self._code)
         
     def OnTextBodyMouseRightDown(self, event):
-        if 'wxMac' in wx.PlatformInfo:
-            self.Delegate.ShowContextMenu(event.GetEventObject(), event.GetPosition(), self._code)
-        else:
-            event.Skip()
+        self.Delegate.ShowContextMenu(event.GetEventObject(), event.GetPosition(), self._code)
         
     def OnSliderValueChange(self, event):
         self.Delegate.JumpToPage(event.GetSelection(), self._code)

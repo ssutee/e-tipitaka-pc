@@ -734,9 +734,9 @@ class Presenter(object):
         
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
         
-    def SearchSelection(self):
+    def SearchSelection(self, selection=None):
         code = self._focusList[0] if len(self._focusList) > 0 else None
-        keywords = self._view.GetStringSelection(code)
+        keywords = self._view.GetStringSelection(code) if selection is None else selection
         
         if len(keywords.strip()) == 0: return
 

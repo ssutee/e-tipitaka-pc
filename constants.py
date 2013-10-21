@@ -35,18 +35,19 @@ CMD_ZOOM_IN         = 1006
 CMD_ZOOM_OUT        = 1007
 CMD_FIND            = 1008
 
-ID_COPY = 2000
-ID_SELECT_ALL = 2001
+ID_COPY         = 2000
+ID_SELECT_ALL   = 2001
+ID_SEARCH       = 2002
 
 UP      = 0
 DOWN    = 1
 
-MODE_ALL = 0
+MODE_ALL    = 0
 MODE_CUSTOM = 1
 
-NIKHAHIT_CHAR = u'\uf711'
-THOTHAN_CHAR = u'\uf700'
-YOYING_CHAR = u'\uf70f'
+NIKHAHIT_CHAR   = u'\uf711'
+THOTHAN_CHAR    = u'\uf700'
+YOYING_CHAR     = u'\uf70f'
 
 RESOURCES_DIR = 'resources'
 NOTES_DIR = 'notes'
