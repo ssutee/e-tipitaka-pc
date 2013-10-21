@@ -444,12 +444,12 @@ class View(AuiBaseFrame):
         menu = wx.Menu()
         search = menu.Append(constants.ID_SEARCH, u'ค้นหา')
         menu.AppendSeparator()
-        copy = menu.Append(constants.ID_COPY, 'คัดลอก')
+        copy = menu.Append(constants.ID_COPY, u'คัดลอก')
         if isinstance(window, wx.TextCtrl):
             copy.Enable(window.CanCopy())
         elif isinstance(window, wx.html.HtmlWindow):
             copy.Enable(len(window.SelectionToText()) > 0)
-        selectAll = menu.Append(constants.ID_SELECT_ALL, 'เลือกทั้งหมด')
+        selectAll = menu.Append(constants.ID_SELECT_ALL, u'เลือกทั้งหมด')
         wx.EVT_MENU(menu, constants.ID_COPY, OnCopy)
         wx.EVT_MENU(menu, constants.ID_SELECT_ALL, OnSelectAll)
         wx.EVT_MENU(menu, constants.ID_SEARCH, OnSearch)

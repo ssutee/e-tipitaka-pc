@@ -527,6 +527,7 @@ class ReadPanel(wx.Panel):
         self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
         self._body.Bind(wx.EVT_MOTION if 'wxMac' in wx.PlatformInfo else wx.EVT_LEFT_UP, self.OnTextBodySelect)
         self._body.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)        
+        self._body.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)
         
         self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)
         
