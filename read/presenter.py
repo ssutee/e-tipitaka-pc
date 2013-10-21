@@ -741,7 +741,7 @@ class Presenter(object):
         if len(keywords.strip()) == 0: return
 
         self.Delegate.BringToFront()
-        self.Delegate.Search(keywords, code)
+        self.Delegate.Search(keywords, code if code is not None else self._model.Code)
 
     def OpenDict(self):
         
