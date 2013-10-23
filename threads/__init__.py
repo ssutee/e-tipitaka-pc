@@ -196,7 +196,9 @@ class DisplayThread(threading.Thread):
 
         termset = []
         for term in keywords.split():
-            termset.append(term)
+            for token in term.split('|'):
+                if len(token.strip()) > 0:
+                    termset.append(token)
         
         if hasattr(self._delegate, 'DisplayWillStart'):
             wx.CallAfter(self._delegate.DisplayWillStart)
