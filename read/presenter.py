@@ -348,7 +348,7 @@ class Presenter(object):
         for term in keywords.replace('+',' ').replace('|',' ').split():
             n = -1
             while True:                    
-                n = content.find(term, n+1)
+                n = content.find(utils.ConvertToPaliSearch(term, True), n+1)
                 if n == -1: break                
                 offset = self._model.HighlightOffset                
                 self._view.Body.Freeze()
@@ -741,7 +741,7 @@ class Presenter(object):
         if len(keywords.strip()) == 0: return
 
         self.Delegate.BringToFront()
-        self.Delegate.Search(keywords, code if code is not None else self._model.Code)
+        self.Delegate.Search(utils.ConvertToThaiSearch(keywords), code if code is not None else self._model.Code)
 
     def OpenDict(self):
         
