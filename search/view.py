@@ -108,7 +108,7 @@ class View(AuiBaseFrame):
         self._font = utils.LoadFont(constants.SEARCH_FONT)
         if self._font and self._font.IsOk():
             self._resultsWindow.SetStandardFonts(self._font.GetPointSize(), self._font.GetFaceName())
-
+        
         self._topBar = widgets.SearchToolPanel(self, self._font)
         self._CreateStatusBar()
 
@@ -124,6 +124,10 @@ class View(AuiBaseFrame):
         panel.SetBackgroundColour('white')
         sizer = wx.StaticBoxSizer(wx.StaticBox(panel, wx.ID_ANY, _('History')), orient=wx.VERTICAL)        
         self._historyList = wx.ListBox(panel, wx.ID_ANY, choices=[], style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
+        
+        if 'wxMSW' in wx.PlatformInfo and self._font and self._font.IsOk():
+            self._historyList.SetFont(self._font)
+            
         self._sortingRadioBox = wx.RadioBox(panel, wx.ID_ANY, _('Sorting'), choices=[_('Alphabet'), _('Creation')], majorDimension=2)
         self._filterCtrl = wx.SearchCtrl(panel, wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
         self._deleteButton = wx.BitmapButton(panel, wx.ID_ANY,

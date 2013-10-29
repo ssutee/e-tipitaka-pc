@@ -115,7 +115,8 @@ class Presenter(object):
         self._view.DisableHistoryControls()
                 
     def SearchDidFinish(self, results, keywords):
-        self._model.LoadHistory(keywords, self._model.Code, len(results))
+    
+        self._model.LoadHistory(utils.ConvertToPaliSearch(keywords), self._model.Code, len(results))
 
         self._model.Results = results
         

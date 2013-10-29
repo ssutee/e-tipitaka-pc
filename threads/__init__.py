@@ -198,7 +198,7 @@ class DisplayThread(threading.Thread):
         for term in keywords.split():
             for token in term.split('|'):
                 if len(token.strip()) > 0:
-                    termset.append(token)
+                    termset.append(utils.ConvertToThaiSearch(token, True))
         
         if hasattr(self._delegate, 'DisplayWillStart'):
             wx.CallAfter(self._delegate.DisplayWillStart)
@@ -230,9 +230,7 @@ class DisplayThread(threading.Thread):
 class PaliSiamDisplayThread(DisplayThread):
     
     def ProcessExcerpts(self, excerpts):
-        if 'wxMac' not in wx.PlatformInfo:
-            return utils.ConvertToPaliSearch(excerpts)
-        return excerpts
+        return utils.ConvertToThaiSearch(excerpts, True)
 
 class ThaiFiveBooksDisplayThread(DisplayThread):
     

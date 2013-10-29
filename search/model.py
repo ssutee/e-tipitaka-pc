@@ -382,8 +382,7 @@ class PaliSiamSearchModel(Model):
         return utils.ConvertToPaliSearch(self._keywords)
     
     def CreateSearchThread(self, keywords, volumes, delegate):
-        if 'wxMac' not in wx.PlatformInfo:
-            keywords = utils.ConvertToPaliSearch(keywords)
+        keywords = utils.ConvertToThaiSearch(keywords, True)
         return threads.PaliSiamSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
