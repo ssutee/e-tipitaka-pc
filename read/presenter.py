@@ -187,6 +187,8 @@ class Presenter(object):
         self._saveDirectory = constants.HOME        
         
         self._focusList = []
+        self._lastFocus = None
+        
         self._marks = {}
 
         self._model = model
@@ -379,7 +381,7 @@ class Presenter(object):
             self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] + 1)
 
     def Forward(self):
-        self._DoForward(None if len(self._focusList) == 0 else self._focusList[0])
+        self._DoForward(self._lastFocus)
         
     def _DoBackward(self, code=None):
         if code is None:
@@ -388,7 +390,7 @@ class Presenter(object):
             self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] - 1)
                 
     def Backward(self, code=None):
-        self._DoBackward(None if len(self._focusList) == 0 else self._focusList[0])
+        self._DoBackward(self._lastFocus)
 
     def HandleBookSelection(self, event):
         if self._stopOpen: return
@@ -463,13 +465,15 @@ class Presenter(object):
     def SetFocus(self, flag, code):
         if flag and code is not None:
             self._focusList.append(code)
+            self._lastFocus = code
         elif not flag and code is not None:
             self._focusList.remove(code)
         elif flag and code is None:
             self._focusList = []
+            self._lastFocus = None                 
             
-        volume = self._currentVolume if len(self._focusList) == 0 else self._compareVolume[self._focusList[0]]
-        self._ToggleNavigationButtons(volume, None if len(self._focusList) == 0 else self._focusList[0])
+        volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
+        self._ToggleNavigationButtons(volume, self._lastFocus)
     
     def ProcessKeyCommand(self, event, keyCode, code):
         ret = self._keyCommandHandler.Handle(event, keyCode)        
@@ -670,11 +674,11 @@ class Presenter(object):
         self._view.ShowBookmarkPopup(x,y)
         
     def ShowPrintDialog(self):
-        volume = self._currentVolume if len(self._focusList) == 0 else self._compareVolume[self._focusList[0]]
-        page = self._currentPage if len(self._focusList) == 0 else self._comparePage[self._focusList[0]]
+        volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
+        page = self._currentPage if self._lastFocus is None else self._comparePage[self._lastFocus]
         
         currentCode = self._model.Code
-        self._model.Code = currentCode if len(self._focusList) == 0 else self._focusList[0]
+        self._model.Code = currentCode if self._lastFocus is None else self._lastFocus
         
         title1, title2 = self._model.GetTitles(volume)
         total = self._model.GetTotalPages(volume)
@@ -713,11 +717,11 @@ class Presenter(object):
         dlg.Destroy()
         
     def ShowSaveDialog(self):
-        volume = self._currentVolume if len(self._focusList) == 0 else self._compareVolume[self._focusList[0]]
-        page = self._currentPage if len(self._focusList) == 0 else self._comparePage[self._focusList[0]]
+        volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
+        page = self._currentPage if self._lastFocus is None else self._comparePage[self._lastFocus]
         
         currentCode = self._model.Code
-        self._model.Code = currentCode if len(self._focusList) == 0 else self._focusList[0]
+        self._model.Code = currentCode if self._lastFocus is None else self._lastFocus
         
         title1, title2 = self._model.GetTitles(volume)
         total = self._model.GetTotalPages(volume)
@@ -747,7 +751,7 @@ class Presenter(object):
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
         
     def SearchSelection(self, selection=None):
-        code = self._focusList[0] if len(self._focusList) > 0 else None
+        code = self._lastFocus
         keywords = self._view.GetStringSelection(code) if selection is None else selection
         
         if len(keywords.strip()) == 0: return
@@ -767,7 +771,7 @@ class Presenter(object):
             self._dictWindow.SetTitle(u'พจนานุกรม บาลี-ไทย')
             
         self._dictWindow.Show()        
-        text = self._view.GetStringSelection(None if len(self._focusList) == 0 else self._focusList[0])
+        text = self._view.GetStringSelection(self._lastFocus)
         self._dictWindow.SetInput(text.strip().split('\n')[0].strip())
         
     def ShowContextMenu(self, window, position, code):
