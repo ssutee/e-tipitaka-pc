@@ -291,7 +291,8 @@ class Presenter(object):
             
         self._LoadNoteText(self._currentVolume, self._currentPage)
         
-        self._ToggleButtons(self._currentVolume)
+        self._ToggleCompareComboBox(self._currentVolume)
+        self._ToggleNavigationButtons(self._currentVolume)
         
         self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
         self._view.SetPageNumber(self._currentPage if self._currentPage > 0 else None)
@@ -327,6 +328,8 @@ class Presenter(object):
 
         self._compareVolume[code] = volume        
         self._comparePage[code] = page
+                
+        self._ToggleNavigationButtons(self._compareVolume[code], code)
                 
         self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
         self._view.SetPageNumber(page if page > 0 else None, code=code)
@@ -369,17 +372,23 @@ class Presenter(object):
     def GetCompareChoices(self):
         return self._model.GetCompareChoices()
 
-    def Forward(self, code=None):
+    def _DoForward(self, code=None):
         if code is None:
             self.OpenBook(self._currentVolume, self._currentPage+1, self._model.GetSection(self._currentVolume, self._currentPage))
         else:
             self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] + 1)
+
+    def Forward(self):
+        self._DoForward(None if len(self._focusList) == 0 else self._focusList[0])
         
-    def Backward(self, code=None):
+    def _DoBackward(self, code=None):
         if code is None:
             self.OpenBook(self._currentVolume, self._currentPage-1, self._model.GetSection(self._currentVolume, self._currentPage))
         else:
             self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] - 1)
+                
+    def Backward(self, code=None):
+        self._DoBackward(None if len(self._focusList) == 0 else self._focusList[0])
 
     def HandleBookSelection(self, event):
         if self._stopOpen: return
@@ -458,15 +467,18 @@ class Presenter(object):
             self._focusList.remove(code)
         elif flag and code is None:
             self._focusList = []
+            
+        volume = self._currentVolume if len(self._focusList) == 0 else self._compareVolume[self._focusList[0]]
+        self._ToggleNavigationButtons(volume, None if len(self._focusList) == 0 else self._focusList[0])
     
     def ProcessKeyCommand(self, event, keyCode, code):
         ret = self._keyCommandHandler.Handle(event, keyCode)        
         if ret == constants.CMD_FIND:
             self.Find(code)
         elif ret == constants.CMD_FORWARD:
-            self.Forward(code)
+            self._DoForward(code)
         elif ret == constants.CMD_BACKWARD:
-            self.Backward(code)
+            self._DoBackward(code)
         elif ret == constants.CMD_JUMP_TO_PAGE:
             self.JumpToPage(int(self._keyCommandHandler.Result), code)
         elif ret == constants.CMD_JUMP_TO_ITEM:
@@ -768,7 +780,16 @@ class Presenter(object):
             self.OpenBook(volume, page)
         dlg.Destroy()
 
-    def _ToggleButtons(self, volume):
-        getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
-        getattr(self._view.ForwardButton, 'Disable' if self._currentPage >= self._model.GetTotalPages(volume) else 'Enable')()
+    def _ToggleCompareComboBox(self, volume):
         getattr(self._view.CompareComboBox, 'Disable' if self._currentPage == 0 else 'Enable')()
+    
+    def _ToggleNavigationButtons(self, volume, code=None):
+        if code == None:
+            getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
+            getattr(self._view.ForwardButton, 'Disable' if self._currentPage >= self._model.GetTotalPages(volume) else 'Enable')()
+        else:
+            currentCode = self._model.Code
+            self._model.Code = code
+            getattr(self._view.BackwardButton, 'Disable' if self._comparePage[code] <= self._model.GetFirstPageNumber(volume) else 'Enable')()
+            getattr(self._view.ForwardButton, 'Disable' if self._comparePage[code] >= self._model.GetTotalPages(volume) else 'Enable')()            
+            self._model.Code = currentCode
