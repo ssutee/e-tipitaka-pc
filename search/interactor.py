@@ -88,7 +88,7 @@ class Interactor(object):
         self.Presenter.SortHistoryList(event.GetSelection())
         
     def OnFilterCtrlText(self, event):
-        self.Presenter.FilterHistoryList(event.GetString())
+        self.Presenter.FilterHistoryList(self.View.FilterCtrl.GetValue())
         
     def OnDeleteButtonClick(self, event):
         self.Presenter.DeleteSelectedHistoryItem()
