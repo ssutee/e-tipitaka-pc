@@ -513,7 +513,7 @@ class ReadPanel(wx.Panel):
         self._body.SetFont(font)
         
     def _CreateAttributes(self):
-        if 'wxMac' in wx.PlatformInfo:
+        if 'wxMSW' in wx.PlatformInfo:
             self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 80), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
             self._title.SetFont(wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
             self._title.SetForegroundColour(wx.BLUE)
@@ -575,7 +575,7 @@ class ReadPanel(wx.Panel):
     def _DoLayout(self):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
         
-        if 'wxMac' in wx.PlatformInfo:
+        if 'wxMSW' in wx.PlatformInfo:
             self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT|wx.TOP, 10)
         else:
             self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, 5)
@@ -649,7 +649,7 @@ class ReadPanel(wx.Panel):
         self._body.Thaw()
         
     def SetTitles(self, title1, title2):
-        if 'wxMac' in wx.PlatformInfo:
+        if 'wxMSW' in wx.PlatformInfo:
             self._title.SetValue(title1 + '\n' + title2)
         else:
             self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>
