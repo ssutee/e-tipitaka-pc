@@ -515,7 +515,7 @@ class ReadPanel(wx.Panel):
     def _CreateAttributes(self):
         if 'wxMSW' in wx.PlatformInfo:
             self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 80), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
-            self._title.SetFont(wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
+            self._title.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
             self._title.SetForegroundColour(wx.BLUE)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
             self._title.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)            
