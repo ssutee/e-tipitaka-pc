@@ -513,20 +513,27 @@ class ReadPanel(wx.Panel):
         self._body.SetFont(font)
         
     def _CreateAttributes(self):
-        self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER)
-        self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)
+        if 'wxMac' in wx.PlatformInfo:
+            self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 80), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
+            self._title.SetFont(wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
+            self._title.SetForegroundColour(wx.BLUE)
+            self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
+            self._title.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)            
+        else:
+            self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER)
+            self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._page = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
-        self._page.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)
+        self._page.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         self._item = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
-        self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)
+        self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
         self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
         self._body.Bind(wx.EVT_MOTION if 'wxMac' in wx.PlatformInfo else wx.EVT_LEFT_UP, self.OnTextBodySelect)
-        self._body.Bind(wx.EVT_RIGHT_DOWN, self.OnTextBodyMouseRightDown)        
+        self._body.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
         self._body.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)
         
         self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)
@@ -568,7 +575,10 @@ class ReadPanel(wx.Panel):
     def _DoLayout(self):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
         
-        self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, 5)
+        if 'wxMac' in wx.PlatformInfo:
+            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT|wx.TOP, 10)
+        else:
+            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, 5)
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self._page, 1, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT, 5)
@@ -593,7 +603,7 @@ class ReadPanel(wx.Panel):
     def OnTextBodySelect(self, event):
         self.Delegate.HandleTextSelection(self._body.GetStringSelection(), self._code)
         
-    def OnTextBodyMouseRightDown(self, event):
+    def OnTextCtrlMouseRightDown(self, event):
         self.Delegate.ShowContextMenu(event.GetEventObject(), event.GetPosition(), self._code)
         
     def OnSliderValueChange(self, event):
@@ -639,8 +649,11 @@ class ReadPanel(wx.Panel):
         self._body.Thaw()
         
     def SetTitles(self, title1, title2):
-        self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>
-            <div align="center"><font color="#0000FF" size="6">%s</font></div>''' % (title1, title2))
+        if 'wxMac' in wx.PlatformInfo:
+            self._title.SetValue(title1 + '\n' + title2)
+        else:
+            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>
+                <div align="center"><font color="#0000FF" size="6">%s</font></div>''' % (title1, title2))
     
     def SetPageNumber(self, number):        
         if number is None:
