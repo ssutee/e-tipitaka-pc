@@ -101,7 +101,7 @@ class NoteManagerDialog(wx.Dialog):
 
     def OnSearchCtrlTextEnter(self, event):
         with db_session:
-            items = read.model.Model.GetNoteListItems(self._code, event.GetString())
+            items = read.model.Model.GetNoteListItems(self._code, self._searchCtrl.GetValue())
             self._noteListBox.SetItems(items)
             self._noteTextCtrl.SetEditable(True)
             self._noteTextCtrl.SelectAll()
