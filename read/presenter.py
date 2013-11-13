@@ -778,6 +778,10 @@ class Presenter(object):
         self._view.ShowContextMenu(window, position, code)
         
     def ShowNotesManager(self):
+        if self._dictWindow is not None:
+            self._dictWindow.Close()
+            self._dictWindow = None
+            
         dlg = dialogs.NoteManagerDialog(self._view, self._model.Code)
         if dlg.ShowModal() == wx.ID_OK:
             volume, page = dlg.Result
