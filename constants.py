@@ -136,6 +136,14 @@ FIVE_BOOKS_PAGES = {
     5:614,
 }
 
+SECTION_THAI_NAMES = [
+    u'พระวินัยปิฎก', u'พระสุตตันตปิฎก', u'พระอภิธรรมปิฎก'
+]
+
+SECTION_PALI_NAMES = [
+    u'วินยปิฏเก', u'สุตฺตนฺตปิฏเก', u'อภิธมฺมปิฏเก'
+]
+
 FIVE_BOOKS_SECTIONS = {
     1:[
         u'',

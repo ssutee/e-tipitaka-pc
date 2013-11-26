@@ -99,9 +99,12 @@ class Engine(object):
     def GetTitle(self, volume):
         raise NotImplementedError('Subclass needs to implement this method!')
 
+    def GetSectionName(self, volume):
+        raise NotImplementedError('Subclass needs to implement this method!')
+
     def GetSubtitle(self, volume, section=None):
         tokens = constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore').split()
-        return '%s %s'%(' '.join(tokens[:3]),' '.join(tokens[3:]))
+        return '%s %s %s'%(self.GetSectionName(volume), ' '.join(tokens[:3]),' '.join(tokens[3:]))
 
     def GetSectionBoundary(self, position):
         if position == 0:
@@ -114,7 +117,7 @@ class Engine(object):
         return constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore')
 
     def GetBookListItems(self):
-        return ['%s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
+        return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
         return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
@@ -141,11 +144,18 @@ class ThaiRoyalEngine(Engine):
         self._code = constants.THAI_ROYAL_CODE
         conn = sqlite3.connect(constants.THAI_ROYAL_DB)
         self._searcher = conn.cursor()
-        
+                
     def GetTitle(self, volume=None):
         if not volume:
             return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+        
+    def GetSectionName(self, volume):
+        if volume <= 8:
+            return constants.SECTION_THAI_NAMES[0]
+        if volume <= 33:
+            return constants.SECTION_THAI_NAMES[1]
+        return constants.SECTION_THAI_NAMES[2]        
         
 class PaliSiamEngine(Engine):
 
@@ -162,6 +172,13 @@ class PaliSiamEngine(Engine):
         
     def GetPage(self, volume, page):
         return super(PaliSiamEngine, self).GetPage(volume, page).replace(u'ฐ',u'\uf700').replace(u'ญ',u'\uf70f').replace(u'\u0e4d',u'\uf711')
+
+    def GetSectionName(self, volume):
+        if volume <= 8:
+            return constants.SECTION_PALI_NAMES[0]
+        if volume <= 33:
+            return constants.SECTION_PALI_NAMES[1]
+        return constants.SECTION_PALI_NAMES[2]        
 
 class ThaiMahaChulaEngine(Engine):
 
@@ -197,6 +214,14 @@ class ThaiMahaChulaEngine(Engine):
     @property
     def HighlightOffset(self):
         return 1 if 'wxMac' in wx.PlatformInfo else 0
+
+    def GetSectionName(self, volume):
+        if volume <= 8:
+            return constants.SECTION_THAI_NAMES[0]
+        if volume <= 33:
+            return constants.SECTION_THAI_NAMES[1]
+        return constants.SECTION_THAI_NAMES[2]        
+
 
 class ThaiMahaMakutEngine(Engine):
 
@@ -241,6 +266,13 @@ class ThaiMahaMakutEngine(Engine):
     def ConvertVolume(self, volume, item, sub):
         item = 1 if '%d-%d-%d'%(volume, sub, item) not in constants.VOLUME_TABLE[self._code] else item
         return int(constants.VOLUME_TABLE[self._code]['%d-%d-%d'%(volume, sub, item)])
+
+    def GetSectionName(self, volume):
+        if volume <= 10:
+            return constants.SECTION_THAI_NAMES[0]
+        if volume <= 74:
+            return constants.SECTION_THAI_NAMES[1]
+        return constants.SECTION_THAI_NAMES[2]        
 
 class ThaiFiveBooksEngine(Engine):
 
