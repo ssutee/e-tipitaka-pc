@@ -644,9 +644,7 @@ class ReadPanel(wx.Panel):
         event.Enable(self.Delegate.HasMarkText(self._code))
 
     def SetBody(self, text):
-        self._body.Freeze()
         self._body.SetValue(text)
-        self._body.Thaw()
         
     def SetTitles(self, title1, title2):
         if 'wxMSW' in wx.PlatformInfo:
