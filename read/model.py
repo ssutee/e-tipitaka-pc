@@ -104,7 +104,7 @@ class Engine(object):
 
     def GetSubtitle(self, volume, section=None):
         tokens = constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore').split()
-        return '%s %s %s'%(self.GetSectionName(volume), ' '.join(tokens[:3]),' '.join(tokens[3:]))
+        return '%s %s'%(' '.join(tokens[:3]),' '.join(tokens[3:]))
 
     def GetSectionBoundary(self, position):
         if position == 0:
