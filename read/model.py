@@ -42,6 +42,9 @@ class Engine(object):
             r['content'] = result[3]
         return r
     
+    def GetComparingVolume(self, volume, page):
+        return volume
+    
     def GetTotalPages(self, volume):
         return int(constants.BOOK_PAGES['%s_%d' % (self._code, volume)])
         
@@ -61,6 +64,7 @@ class Engine(object):
             text2 = u'\n\tแบ่งเป็น %d เล่มย่อย มีข้อดังนี้'%(len(sub))
             for s in sub:
                 items = constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume][s].keys()
+                items.sort()
                 text2 = text2 + '\n\t\t %d) %s.%d - %s.%d'%(s,items[0],s,items[-1],s)        
 
         return utils.ArabicToThai(text1 + text2)
@@ -255,13 +259,17 @@ class ThaiMahaMakutEngine(Engine):
         
     def GetSubItem(self, volume, page, item):    
         result = self.Query(volume, page)
-        volume = int(result['volume_orig'])
+        volume = int(result['volume_orig'].split()[0])
         for sub in constants.BOOK_ITEMS[self._code+'_orig'][volume]:
             if item in constants.BOOK_ITEMS[self._code+'_orig'][volume][sub]:
                 pages = constants.BOOK_ITEMS[self._code+'_orig'][volume][sub][item]
                 if page in pages:
                     return sub
         return 1
+        
+    def GetComparingVolume(self, volume, page):
+        result = self.Query(volume, page)
+        return int(result['volume_orig'].split()[0])
 
     def ConvertVolume(self, volume, item, sub):
         item = 1 if '%d-%d-%d'%(volume, sub, item) not in constants.VOLUME_TABLE[self._code] else item
@@ -394,6 +402,9 @@ class Model(object):
     def GetCompareChoices(self):
         return self._engine[self._code].GetCompareChoices()
         
+    def GetComparingVolume(self, volume, page):
+        return self._engine[self._code].GetComparingVolume(volume, page)
+
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:            
             return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]

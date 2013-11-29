@@ -448,7 +448,9 @@ class Presenter(object):
             item = items[0]
 
         sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
-        self._DoCompare(constants.CODES[index], self._currentVolume, sub, item)
+        volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
+
+        self._DoCompare(constants.CODES[index], volume, sub, item)
 
     def _DoCompare(self, code, volume, sub, item):        
         if item is None: return
