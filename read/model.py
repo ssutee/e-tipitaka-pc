@@ -132,7 +132,7 @@ class Engine(object):
                 pages = constants.BOOK_ITEMS[self._code][volume][sub][item]
                 if page in pages:
                     return sub
-        return 1
+        return item, 1
         
     def ConvertVolume(self, volume, item, sub):
         return volume
@@ -213,7 +213,7 @@ class ThaiMahaChulaEngine(Engine):
         return r
         
     def GetSubItem(self, volume, page, item):
-        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])[1]
+        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
         
     @property
     def HighlightOffset(self):
@@ -265,7 +265,7 @@ class ThaiMahaMakutEngine(Engine):
                 pages = constants.BOOK_ITEMS[self._code+'_orig'][volume][sub][item]
                 if page in pages:
                     return sub
-        return 1
+        return item, 1
         
     def GetComparingVolume(self, volume, page):
         result = self.Query(volume, page)
@@ -328,7 +328,7 @@ class ThaiFiveBooksEngine(Engine):
         return []
         
     def GetSubItem(self, volume, page, item):
-        return 1
+        return item, 1
 
 class Model(object):
     

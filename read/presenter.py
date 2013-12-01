@@ -447,7 +447,7 @@ class Presenter(object):
         elif len(items) == 1:
             item = items[0]
 
-        sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
+        item, sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
         volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
 
         self._DoCompare(constants.CODES[index], volume, sub, item)
