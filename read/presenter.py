@@ -450,6 +450,8 @@ class Presenter(object):
         item, sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
         volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
 
+        print sub
+
         self._DoCompare(constants.CODES[index], volume, sub, item)
 
     def _DoCompare(self, code, volume, sub, item):        
@@ -631,11 +633,13 @@ class Presenter(object):
         dlg.Destroy()
         
     def _CurrentMarkKey(self, code):
+        if code not in self._compareVolume or code not in self._comparePage: return None
         volume = self._currentVolume if code is None else self._compareVolume[code]
         page = self._currentPage if code is None else self._comparePage[code]
         return self._MarkKey(code, volume, page)
               
     def _CurrentMarkFilename(self, code):
+        if code not in self._compareVolume or code not in self._comparePage: return None
         volume = self._currentVolume if code is None else self._compareVolume[code]
         page = self._currentPage if code is None else self._comparePage[code]        
         path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)        
@@ -651,6 +655,8 @@ class Presenter(object):
     def SaveMarkedText(self, code):
         key = self._CurrentMarkKey(code)                
         filename = self._CurrentMarkFilename(code)
+
+        if filename is None or key is None: return
         
         if key not in self._marks or len(self._marks[key]) == 0: 
             os.remove(filename) if os.path.exists(filename) else None
@@ -666,8 +672,8 @@ class Presenter(object):
             self.SaveMarkedText(code)
         dlg.Destroy()
         
-    def HasSavedMark(self, code):
-        return os.path.exists(self._CurrentMarkFilename(code))
+    def HasSavedMark(self, code):        
+        return os.path.exists(self._CurrentMarkFilename(code)) if self._CurrentMarkFilename(code) is not None else False
         
     def HasMarkText(self, code):
         return any(map(lambda x:x[0], self._marks.get(self._CurrentMarkKey(code), [])))

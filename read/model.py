@@ -213,7 +213,7 @@ class ThaiMahaChulaEngine(Engine):
         return r
         
     def GetSubItem(self, volume, page, item):
-        return item, map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
+        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
         
     @property
     def HighlightOffset(self):
