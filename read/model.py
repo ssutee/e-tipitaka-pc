@@ -131,7 +131,7 @@ class Engine(object):
             if item in constants.BOOK_ITEMS[self._code][volume][sub]:
                 pages = constants.BOOK_ITEMS[self._code][volume][sub][item]
                 if page in pages:
-                    return sub
+                    return item, sub
         return item, 1
         
     def ConvertVolume(self, volume, item, sub):
@@ -213,7 +213,7 @@ class ThaiMahaChulaEngine(Engine):
         return r
         
     def GetSubItem(self, volume, page, item):
-        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
+        return item, map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
         
     @property
     def HighlightOffset(self):
