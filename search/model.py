@@ -330,6 +330,9 @@ class Model(object):
     def GetBookNames(self):
         return [self.GetBookName(volume+1) for volume in range(self.GetSectionBoundary(2))]
 
+    def ConvertSpecialCharacters(self, text):
+        return text
+
 class SearchModelCreator(object):
     
     @staticmethod
@@ -393,6 +396,9 @@ class PaliSiamSearchModel(Model):
         
     def GetSuggestion(self):
         return map(utils.ConvertToPaliSearch, super(PaliSiamSearchModel, self).GetSuggestion())
+        
+    def ConvertSpecialCharacters(self, text):
+        return utils.ConvertToPaliSearch(text, True)        
         
 class ThaiMahaChulaSearchModel(Model):
 
