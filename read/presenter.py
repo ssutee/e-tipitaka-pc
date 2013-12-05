@@ -353,7 +353,7 @@ class Presenter(object):
         for term in keywords.replace('+',' ').replace('|',' ').split():
             n = -1
             while True:                    
-                n = content.find(utils.ConvertToPaliSearch(term, True), n+1)
+                n = content.find(self._model.ConvertSpecialCharacters(term), n+1)
                 if n == -1: break                
                 offset = self._model.HighlightOffset                
                 self._view.Body.Freeze()

@@ -140,6 +140,9 @@ class Engine(object):
     @property
     def HighlightOffset(self):
         return 0
+        
+    def ConvertSpecialCharacters(self, text):
+        return text
 
 class ThaiRoyalEngine(Engine):
     
@@ -183,6 +186,9 @@ class PaliSiamEngine(Engine):
         if volume <= 33:
             return constants.SECTION_PALI_NAMES[1]
         return constants.SECTION_PALI_NAMES[2]        
+        
+    def ConvertSpecialCharacters(self, text):
+        return utils.ConvertToPaliSearch(text, True)        
 
 class ThaiMahaChulaEngine(Engine):
 
@@ -413,6 +419,9 @@ class Model(object):
 
     def ConvertVolume(self, volume, item, sub):
         return self._engine[self._code].ConvertVolume(volume, item, sub)
+        
+    def ConvertSpecialCharacters(self, text):
+        return self._engine[self._code].ConvertSpecialCharacters(text)
         
     @property
     def HighlightOffset(self):
