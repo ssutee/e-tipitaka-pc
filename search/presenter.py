@@ -271,4 +271,6 @@ class Presenter(object):
                 self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
 
     def Close(self):
+        for code in self._presenters:
+            self._model.SaveHistory(code)
         self._view.SearchCtrl.SaveSearches()

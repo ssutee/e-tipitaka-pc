@@ -363,8 +363,11 @@ class Presenter(object):
     def OnLinkToReference(self, code, volume, item):
         self._DoCompare(code, volume, 1, item)
 
-    def Close(self):
+    def SaveBookmark(self):
         self._bookmarkManager.Save()
+
+    def Close(self):
+        self.SaveBookmark()
         if hasattr(self._delegate, 'OnReadWindowClose'):
             self._delegate.OnReadWindowClose(self._code)
             
@@ -428,7 +431,7 @@ class Presenter(object):
         try:
             currentCode = self._model.Code                
             self._model.Code = code if code is not None else currentCode
-            page = self._model.ConvertItemToPage(self._currentVolume, item, sub, self._view.CheckBox.IsChecked())
+            page = self._model.ConvertItemToPage(self._currentVolume if code is None else self._compareVolume[code], item, sub, self._view.CheckBox.IsChecked())
             self._model.Code = currentCode
         except ValueError, e:
             pass
