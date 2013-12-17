@@ -379,7 +379,7 @@ class View(AuiBaseFrame):
         readPanel.Body.Freeze()
         if 'wxMac' in wx.PlatformInfo:
             readPanel.SetContentFont(font)
-
+        
         for token in formatter.split():
             tag,x,y = token.split('|')
             if tag == 's3' or tag == 'p3':
@@ -396,7 +396,6 @@ class View(AuiBaseFrame):
                 else:
                     readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))  
         readPanel.Body.Thaw()     
-        self.AuiManager.Update()
         
     def ShowFindDialog(self, code, text, flags):
         readPanel = self._readPanel if code is None else self._comparePanel[code]

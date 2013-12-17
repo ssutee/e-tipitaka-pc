@@ -283,34 +283,35 @@ class Presenter(object):
 
     def OpenBook(self, volume, page, section=None, selectItem=False):
         self._findTextHandler.Reset()
-        
+
         page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
 
         if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
 
         self._currentVolume = volume
         self._currentPage = page
-            
+
         self._LoadNoteText(self._currentVolume, self._currentPage)
-        
+
         self._ToggleCompareComboBox(self._currentVolume)
         self._ToggleNavigationButtons(self._currentVolume)
-        
+
         self._view.SetTitles(*self._model.GetTitles(self._currentVolume, section))
         self._view.SetPageNumber(self._currentPage if self._currentPage > 0 else None)
         self._view.SetItemNumber(*self._model.GetItems(self._currentVolume, self._currentPage))        
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
-        
+
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         
         # work around for fixing font size problem on win32
         self._view.SetText(content)        
         self._view.SetText(content)
-        
         self._view.StatusBar.SetStatusText(u'', 0)
         self._view.StatusBar.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
+
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+
         self._HighlightKeywords(content, self._keywords)        
         self._LoadMarks(self._currentVolume, self._currentPage)
         
@@ -452,8 +453,6 @@ class Presenter(object):
 
         item, sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
         volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
-
-        print sub
 
         self._DoCompare(constants.CODES[index], volume, sub, item)
 
