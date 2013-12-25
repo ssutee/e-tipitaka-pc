@@ -76,10 +76,8 @@ class Engine(object):
         result = self.Query(volume, page)
         content = self.GetContent(result)
         
-        formatter = result.get('display')
-        if formatter is None:
-            return ''
-            
+        formatter = result.get('display', '')
+                    
         header = result.get('header')
         if header is not None:
             formatter += u' h1|0|%d'%(len(header))
@@ -415,6 +413,8 @@ class Model(object):
         try:            
             return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
         except KeyError, e:
+            return 0
+        except TypeError, e:
             return 0
 
     def ConvertVolume(self, volume, item, sub):
