@@ -25,6 +25,12 @@ FOOTER_STYLE = '#3CBF3F', 4
 
 ETZ_TYPE = u'E-Tipitaka Backup File (*.etz)|*.etz'
 
+CHECK_VERSION_URL   = 'http://download.watnapahpong.org/data/etipitaka/version.txt'
+
+DOWNLOAD_MSW_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.exe'
+DOWNLOAD_OSX_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.dmg'
+DOWNLOAD_SRC_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.tar.gz'
+
 CMD_IDLE            = 1000
 CMD_FORWARD         = 1001
 CMD_BACKWARD        = 1002
@@ -62,6 +68,7 @@ BOOKMARKS_PATH = os.path.join(DATA_PATH, BOOKMARKS_DIR)
 
 CONFIG_PATH = os.path.join(DATA_PATH, CONFIG_DIR)
 LOG_FILE = os.path.join(CONFIG_PATH, 'history.log')
+SKIP_VERSION_FILE = os.path.join(CONFIG_PATH, 'skip_version')
 
 SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')
 READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')

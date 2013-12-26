@@ -553,3 +553,36 @@ class AboutDialog(wx.Dialog):
         mainSizer.Add((-1,10), 1, flag=wx.EXPAND)        
         self.SetSizer(mainSizer)
         self.Fit()
+
+class UpdateDialog(wx.Dialog):
+    def __init__(self, parent, oldVersion, newVersion, *args, **kwargs):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, _('Update New Version'))
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        oldSizer = wx.BoxSizer(wx.HORIZONTAL)
+        newSizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        oldSizer.Add(wx.StaticText(self, wx.ID_ANY, 'Installed version:', style=wx.ALIGN_RIGHT), 1, wx.RIGHT, 5)
+        oldSizer.Add(wx.StaticText(self, wx.ID_ANY, oldVersion), 1)
+        newSizer.Add(wx.StaticText(self, wx.ID_ANY, 'Latest version:', style=wx.ALIGN_RIGHT), 1, wx.RIGHT, 5)
+        newSizer.Add(wx.StaticText(self, wx.ID_ANY, newVersion), 1)
+        
+        bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        bottomSizer.Add(wx.Button(self, wx.ID_OK, _('Download')), 1)
+        bottomSizer.Add(wx.Button(self, wx.ID_CANCEL, _('Remind me later')), 1)
+        skipButton = wx.Button(self, wx.ID_ANY, _('Skip this version'))
+        skipButton.Bind(wx.EVT_BUTTON, self.OnSkipButtonClick)
+        bottomSizer.Add(skipButton, 1)
+        
+        mainSizer.Add(oldSizer, 0, wx.EXPAND|wx.ALL, 10)
+        mainSizer.Add(newSizer, 0, wx.EXPAND|wx.ALL, 0)
+        mainSizer.Add(bottomSizer, 0, wx.EXPAND|wx.ALL, 10)
+        
+        self.SetSizer(mainSizer)
+        self.Center()
+        self.Fit()
+        
+    def OnSkipButtonClick(self, event):
+        self.EndModal(wx.ID_NO)
+        

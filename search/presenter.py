@@ -1,13 +1,16 @@
 import search.model
-from dialogs import AboutDialog
+from dialogs import AboutDialog, UpdateDialog
 import wx, zipfile, os
 import i18n
 _ = i18n.language.ugettext
 
-import constants, utils 
+import constants, utils, threads 
 
 import pony.orm
 from pony.orm import db_session
+
+from distutils.version import LooseVersion, StrictVersion
+import settings
 
 import read.model
 import read.interactor
@@ -26,6 +29,7 @@ class Presenter(object):
         self._view.Delegate = self
         interactor.Install(self, view)
         self.RefreshHistoryList(0)
+        self.CheckNewUpdate()
         self._view.Start()
          
     def ShowAboutDialog(self):
@@ -269,6 +273,35 @@ class Presenter(object):
         with db_session:
             self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), 
                 self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
+                
+    def Download(self):
+        import webbrowser
+        url = constants.DOWNLOAD_SRC_URL
+        if 'wxMac' in wx.PlatformInfo:
+            url = constants.DOWNLOAD_OSX_URL
+        elif 'wxMSW' in wx.PlatformInfo:
+            url = constants.DOWNLOAD_MSW_URL
+        webbrowser.open_new(url)
+        
+    def SkipThisVersion(self, version):
+        with open(constants.SKIP_VERSION_FILE, 'w') as f:
+            f.write(version)
+                
+    def CheckNewUpdateDidFinish(self, version):
+        skipped = open(constants.SKIP_VERSION_FILE).read() if os.path.exists(constants.SKIP_VERSION_FILE) else None
+
+        if skipped == version or StrictVersion(version) <= StrictVersion(settings.VERSION): return
+        
+        dlg = UpdateDialog(self._view, settings.VERSION, version)
+        ret = dlg.ShowModal()
+        if ret == wx.ID_OK:
+            self.Download()
+        elif ret == wx.ID_NO:
+            self.SkipThisVersion(version)
+        dlg.Destroy()
+                
+    def CheckNewUpdate(self):
+        threads.CheckNewUpdateThread(self).start()
 
     def Close(self):
         for code in self._presenters:

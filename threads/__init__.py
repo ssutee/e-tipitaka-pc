@@ -1,5 +1,5 @@
 import wx
-import threading, sqlite3, os.path, sys
+import threading, sqlite3, os.path, sys, urllib2
 from cgi import escape as htmlescape
 
 import constants, utils
@@ -7,6 +7,20 @@ import constants, utils
 from whoosh.highlight import highlight, HtmlFormatter, SimpleFragmenter
 from whoosh.analysis import NgramTokenizer
 from formatters import MyHtmlFormatter
+
+class CheckNewUpdateThread(threading.Thread):
+    
+    def __init__(self, delegate):
+        super(CheckNewUpdateThread, self).__init__()
+        self._delegate = delegate
+        
+    def run(self):
+        try:
+            response = urllib2.urlopen(constants.CHECK_VERSION_URL, timeout=3)
+            if hasattr(self._delegate, 'CheckNewUpdateDidFinish'):                
+                wx.CallAfter(self._delegate.CheckNewUpdateDidFinish, response.read().strip())
+        except urllib2.URLError as err:
+            pass
 
 class SearchThread(threading.Thread):
     
