@@ -177,7 +177,7 @@ class Model(object):
                         
     @db_session
     def SaveHistory(self, code):
-        history = History.get(keywords=self._keywords, code=code)
+        history = History.get(keywords=self._keywords, code=code) if self._keywords is not None and len(self._keywords) > 0 else None
         if history and self.Code == code:
             history.read = ','.join(map(str, self._readItems))
             history.skimmed = ','.join(map(str, self._skimmedItems))
@@ -514,7 +514,7 @@ class RomanScriptSearchModel(ScriptSearchModel):
         return constants.ROMAN_SCRIPT_TITLES[volume][1]
 
 
-class ThaiScriptSearchModel(Model):
+class ThaiScriptSearchModel(ScriptSearchModel):
 
     @property
     def Code(self):
