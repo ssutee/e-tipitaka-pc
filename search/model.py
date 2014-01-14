@@ -177,8 +177,8 @@ class Model(object):
                         
     @db_session
     def SaveHistory(self, code):
-        if len(self._keywords) > 0 and self.Code == code:
-            history = History.get(keywords=self._keywords, code=code)
+        history = History.get(keywords=self._keywords, code=code)
+        if history and self.Code == code:
             history.read = ','.join(map(str, self._readItems))
             history.skimmed = ','.join(map(str, self._skimmedItems))
                     
