@@ -12,7 +12,7 @@ APP_NAME = 'E-Tipitaka'
 
 HOME = expanduser("~")
 
-CODES = ['thai', 'pali', 'thaimm', 'thaimc', 'thaibt']
+CODES = ['thai', 'pali', 'thaimm', 'thaimc', 'thaibt', 'romanct', 'thaict']
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -107,6 +107,9 @@ THAI_FIVE_BOOKS_DB = os.path.join(RESOURCES_DIR, 'thaibt.db')
 THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.db')
 THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.db')
 THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.db')
+THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.db')
+ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
+
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
 DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 
@@ -115,6 +118,8 @@ THAI_ROYAL_CODE = 'thai'
 THAI_MAHACHULA_CODE = 'thaimc'
 THAI_MAHAMAKUT_CODE = 'thaimm'
 PALI_SIAM_CODE = 'pali'
+THAI_SCRIPT_CODE = 'thaict'
+ROMAN_SCRIPT_CODE= 'romanct'
 
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
@@ -123,10 +128,17 @@ BOOK_NAMES = cPickle.load(open(os.path.join(RESOURCES_DIR, 'book_name.pkl'), 'rb
 BOOK_PAGES = cPickle.load(open(os.path.join(RESOURCES_DIR, 'book_page.pkl'),  'rb'))
 BOOK_ITEMS = cPickle.load(open(os.path.join(RESOURCES_DIR, 'book_item.pkl'),  'rb'))
 VOLUME_TABLE = cPickle.load(open(os.path.join(RESOURCES_DIR, 'maps.pkl'),  'rb'))
+SCRIPT_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'ct_items.json')).read())
 
 MAP_MC_TO_SIAM = cPickle.load(open(os.path.join(RESOURCES_DIR, 'mc_map.pkl'), 'rb'))
 
 FIVE_BOOKS_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'bt_toc.json')).read())
+
+ROMAN_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_rm.json')).read())
+THAI_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_th.json')).read())
+
+ROMAN_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_rm.json')).read())
+THAI_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_th.json')).read())
 
 FIVE_BOOKS_NAMES = [
     u'ขุมทรัพย์จากพระโอษฐ์', 

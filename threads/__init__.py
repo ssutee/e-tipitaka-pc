@@ -1,5 +1,5 @@
 import wx
-import threading, sqlite3, os.path, sys, urllib2
+import threading, sqlite3, os.path, sys, urllib2, httplib
 from cgi import escape as htmlescape
 
 import constants, utils
@@ -21,6 +21,10 @@ class CheckNewUpdateThread(threading.Thread):
                 wx.CallAfter(self._delegate.CheckNewUpdateDidFinish, response.read().strip())
         except urllib2.URLError as err:
             pass
+        except urllib2.HTTPError as err:
+            pass
+        except httplib.HTTPException as err:
+            pass
 
 class SearchThread(threading.Thread):
     
@@ -29,6 +33,14 @@ class SearchThread(threading.Thread):
         self._delegate = delegate
         self._keywords = keywords
         self._volumes = volumes    
+    
+    @property
+    def TableName(self):
+        return self.Code
+        
+    @property
+    def VolumeColumn(self):
+        return 'volumn'
     
     def run(self):
         conn = sqlite3.connect(self.Database)
@@ -56,7 +68,7 @@ class SearchThread(threading.Thread):
         return r    
     
     def PrepareStatement(self, terms):
-        query = 'SELECT * FROM %s WHERE '%(self.Code)
+        query = 'SELECT * FROM %s WHERE '%(self.TableName)
         args = tuple([])
         for term in terms:
             if '|' in term:
@@ -73,10 +85,10 @@ class SearchThread(threading.Thread):
         
         if len(self._volumes) > 0:
             query += ' ('
-            query += "volumn = ?"
+            query += "%s = ?" % (self.VolumeColumn)
             args += ("%02d"%(self._volumes[0]+1), )
             for p in self._volumes[1:]:                
-                query += " OR volumn = ?"
+                query += " OR %s = ?" % (self.VolumeColumn)
                 args += ("%02d" % (p+1), )
             query += ')'
             
@@ -84,6 +96,47 @@ class SearchThread(threading.Thread):
 
         return query, args
         
+class ScriptSearchThread(SearchThread):
+        
+    @property
+    def TableName(self):
+        return 'main'
+        
+    @property
+    def VolumeColumn(self):
+        return 'volume'
+        
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = unicode(result[1])
+        r['page'] = unicode(result[2])
+        r['items'] = result[3]
+        r['content'] = result[4]
+        return r        
+    
+        
+class RomanScriptSearchThread(ScriptSearchThread):
+    
+    @property
+    def Code(self):
+        return constants.ROMAN_SCRIPT_CODE
+        
+    @property
+    def Database(self):
+        return constants.ROMAN_SCRIPT_DB
+    
+    
+class ThaiScriptSearchThread(ScriptSearchThread):
+    
+    @property
+    def Code(self):
+        return constants.THAI_SCRIPT_CODE
+        
+    @property
+    def Database(self):
+        return constants.THAI_SCRIPT_DB
+        
+    
 class ThaiFiveBooksSearchThread(SearchThread):
     
     @property
@@ -259,3 +312,10 @@ class ThaiMahaMakutDisplayThread(DisplayThread):
     
 class ThaiMahaChulaDisplayThread(DisplayThread):
     pass
+    
+class ScriptDisplayThread(DisplayThread):
+
+    def ProcessResult(self, idx, result, excerpts):
+        return (self._mark[0]+idx+1, result['volume'], result['page'], result['items'], excerpts)
+
+

@@ -245,11 +245,11 @@ class Model(object):
             <div align="center">
                 <table cellpadding="0">
                     <tr>
-                        <th align="center"><b><font color="#1e90ff">%s</font></b></th>
+                        <th align="center"><b><font color="%s">%s</font></b></th>
                         <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                        <th align="center"><b><font color="#ff4500">%s</font></b></th>
+                        <th align="center"><b><font color="%s">%s</font></b></th>
                         <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                        <th align="center"><b><font color="#a020f0">%s</font></b></th>                                                        
+                        <th align="center"><b><font color="%s">%s</font></b></th>                                                        
                     </tr>
                     <tr>
                         <td align="center">%s</td>
@@ -260,10 +260,26 @@ class Model(object):
                     </tr>
                 </table>
             </div><br/><p/>
-        ''' % (_('Section 1'), _('Section 2'), _('Section 3'),
+        ''' % (self.ColorCode(0), self.SectionName(0), 
+               self.ColorCode(1), self.SectionName(1), 
+               self.ColorCode(2), self.SectionName(2),
                utils.ArabicToThai(unicode(counts[0])) + ' ' + _('Page unit'), 
                utils.ArabicToThai(unicode(counts[1])) + ' ' + _('Page unit'), 
                utils.ArabicToThai(unicode(counts[2])) + ' ' + _('Page unit'))        
+               
+    def SectionName(self, index):
+        if index == 0:
+            return _('Section 1')
+        if index == 1:
+            return _('Section 2')
+        return _('Section 3')
+        
+    def ColorCode(self, index):
+        if index == 0:
+            return "#1e90ff"
+        if index == 1:
+            return "#ff4500"
+        return "#a020f0"
                
     def _MakeHtmlHeader(self, mark):
         template = u'<div align="center"><font size="3" color="brown">%s</font></div>' % \
@@ -278,10 +294,10 @@ class Model(object):
     def _GetColorCode(self, volume):
         volume = int(volume)
         if volume <= self.GetSectionBoundary(0):
-            return "#1e90ff"
+            return self.ColorCode(0)
         if volume <= self.GetSectionBoundary(1):
-            return "#ff4500"
-        return "#a020f0"
+            return self.ColorCode(1)
+        return self.ColorCode(2)
         
     def _GetResultSectionCounts(self, section=None):
         counts = [0,0,0]
@@ -322,7 +338,7 @@ class Model(object):
         keywords = self._keywords.replace('+',' ')
         if len(keywords.split()) > 1:
             return []
-        return self._spellChecker.suggest(keywords, number=5)     
+        return self._spellChecker.suggest(keywords, number=5) if self._spellChecker else []
         
     def GetBookName(self, volume):
         return constants.BOOK_NAMES['%s_%s' % (self.Code, str(volume))].decode('utf8','ignore')
@@ -347,6 +363,10 @@ class SearchModelCreator(object):
             return ThaiMahaChulaSearchModel(delegate)
         if index == 4:
             return ThaiFiveBooksSearchModel(delegate)
+        if index == 5:
+            return RomanScriptSearchModel(delegate)
+        if index == 6:
+            return ThaiScriptSearchModel(delegate)
         return None
 
 class ThaiRoyalSearchModel(Model):
@@ -447,6 +467,70 @@ class ThaiMahaMakutSearchModel(Model):
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai MahaMakut')) % (self._keywords) )
 
+class ScriptSearchModel(Model):
+
+    def __init__(self, delegate):
+        super(ScriptSearchModel, self).__init__(delegate)
+        self._volumes = range(61)
+        self._spellChecker = None
+
+    def GetSectionBoundary(self, position):
+        if position == 0:
+            return 43
+        if position == 1:
+            return 48
+        return 61
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):
+        return threads.ScriptDisplayThread(results, keywords, delegate, mark, current)
+
+    def SectionName(self, index):
+        if index == 0:
+            return _('Section 2')
+        if index == 1:
+            return _('Section 1')
+        return _('Section 3')
+
+    def ColorCode(self, index):
+        if index == 0:
+            return "#ff4500"
+        if index == 1:
+            return "#1e90ff"
+        return "#a020f0"
+
+class RomanScriptSearchModel(ScriptSearchModel):
+
+    @property
+    def Code(self):
+        return constants.ROMAN_SCRIPT_CODE
+
+    def CreateSearchThread(self, keywords, volumes, delegate):
+        return threads.RomanScriptSearchThread(keywords, volumes, delegate)
+
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Tipitaka Roman Script')) % (self._keywords) )
+
+    def GetBookName(self, volume):
+        return constants.ROMAN_SCRIPT_TITLES[volume][1]
+
+
+class ThaiScriptSearchModel(Model):
+
+    @property
+    def Code(self):
+        return constants.THAI_SCRIPT_CODE
+
+
+    def CreateSearchThread(self, keywords, volumes, delegate):
+        return threads.ThaiScriptSearchThread(keywords, volumes, delegate)
+
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Tipitaka Thai Script')) % (self._keywords) )
+
+    def GetBookName(self, volume):
+        return constants.THAI_SCRIPT_TITLES[volume][1]
+
+
 class ThaiFiveBooksSearchModel(Model):
 
     @property
@@ -488,3 +572,4 @@ class ThaiFiveBooksSearchModel(Model):
 
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai Five Books')) % (self._keywords) )
+

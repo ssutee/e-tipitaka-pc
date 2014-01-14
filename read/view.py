@@ -24,6 +24,10 @@ class ViewComponentsCreator(object):
             return ThaiFiveBooksViewComponents(parent)
         if code == constants.THAI_MAHACHULA_CODE:
             return ThaiMahaChulaViewComponents(parent)
+        if code == constants.ROMAN_SCRIPT_CODE:
+            return RomanScriptViewComponents(parent)
+        if code == constants.THAI_SCRIPT_CODE:
+            return ThaiScriptViewComponents(parent)
         return ViewComponents(parent)
 
 class ViewComponents(object):
@@ -84,6 +88,43 @@ class ThaiFiveBooksViewComponents(ViewComponents):
         view.InputItem.Disable()
         view.CompareComboBox.Disable()
         
+class ScriptViewComponents(ViewComponents):
+    
+    def GetBookList(self, parent=None):
+        tree = wx.TreeCtrl(parent if parent else self._parent, wx.ID_ANY, 
+            wx.DefaultPosition, wx.DefaultSize, style=wx.TR_HIDE_ROOT|wx.TR_HAS_BUTTONS)
+        self._InitTree(None, tree)
+        return tree
+        
+    def _InitTree(self, data, tree):
+
+        def _traverse(toc, tree, root):
+            for node in toc['items']:
+                leaf = tree.AppendItem(root, node['name'])
+                tree.SetPyData(leaf, node['info']+[0])
+                _traverse(node, tree, leaf)
+
+        root_tree = tree.AddRoot('root')
+        root_toc = self._toc
+        _traverse(root_toc, tree, root_tree)
+        child, cookie = tree.GetFirstChild(root_tree)
+        tree.Expand(child)
+                
+    def Filter(self, view):
+        view.CheckBox.Hide()
+        view.CompareComboBox.Disable()
+        
+class ThaiScriptViewComponents(ScriptViewComponents):
+    
+    def __init__(self, parent, dataSource=None):
+        super(ThaiScriptViewComponents, self).__init__(parent, dataSource)
+        self._toc = constants.THAI_SCRIPT_TOC
+        
+class RomanScriptViewComponents(ScriptViewComponents):
+    def __init__(self, parent, dataSource=None):
+        super(RomanScriptViewComponents, self).__init__(parent, dataSource)
+        self._toc = constants.ROMAN_SCRIPT_TOC
+
 class View(AuiBaseFrame):    
     
     def __init__(self, parent, title, code):

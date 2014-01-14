@@ -21,7 +21,12 @@ class Engine(object):
     
     def __init__(self):
         self._searcher = None
+        self._conn = None
         self._cache = {}
+        
+    def __del__(self):
+        if self._conn is not None:
+            self._conn.close()
         
     def Query(self, volume, page):
         results = self._cache.get('q:%d:%d'%(volume, page), self._searcher.execute(*self.PrepareStatement(volume, page)))
@@ -51,21 +56,27 @@ class Engine(object):
     def GetFirstPageNumber(self, volume):
         return 0
         
+    def GetSubItemsInVolume(self, volume):
+        return constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume].keys()
+        
+    def GetItemsInVolume(self, volume, sub):
+        return constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume][sub].keys()
+        
     def GetFirstPage(self, volume):
-        pages = map(lambda x:u'%s'%(x), range(1, self.GetTotalPages(volume)))
-        text1 = u'\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0]), int(pages[-1])+1)
+        pages = map(lambda x:u'%s'%(x), range(0, self.GetTotalPages(volume)))
+        text1 = u'\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0])+1, int(pages[-1]))
         text2 = u''
 
-        sub = constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume].keys()
+        sub = self.GetSubItemsInVolume(volume)
         if len(sub) == 1:
-            items = constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume][1].keys()
+            items = self.GetItemsInVolume(volume, 1)
             text2 = u'\n\tตั้งแต่ข้อที่ %s - %s'%(items[0],items[-1])
         else:
             text2 = u'\n\tแบ่งเป็น %d เล่มย่อย มีข้อดังนี้'%(len(sub))
             for s in sub:
-                items = constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume][s].keys()
+                items = self.GetItemsInVolume(volume, s)
                 items.sort()
-                text2 = text2 + '\n\t\t %d) %s.%d - %s.%d'%(s,items[0],s,items[-1],s)        
+                text2 = text2 + '\n\t\t %d) %s.%d - %s.%d'%(s, items[0], s, items[-1], s)
 
         return utils.ArabicToThai(text1 + text2)
         
@@ -142,13 +153,21 @@ class Engine(object):
     def ConvertSpecialCharacters(self, text):
         return text
 
+    def ConvertItemToPage(self, volume, item, sub, checked=False):
+        try:
+            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+        except KeyError, e:
+            return 0
+        except TypeError, e:
+            return 0
+
 class ThaiRoyalEngine(Engine):
     
     def __init__(self):
         super(ThaiRoyalEngine, self).__init__()
         self._code = constants.THAI_ROYAL_CODE
-        conn = sqlite3.connect(constants.THAI_ROYAL_DB)
-        self._searcher = conn.cursor()
+        self._conn = sqlite3.connect(constants.THAI_ROYAL_DB)
+        self._searcher = self._conn.cursor()
                 
     def GetTitle(self, volume=None):
         if not volume:
@@ -167,8 +186,8 @@ class PaliSiamEngine(Engine):
     def __init__(self):
         super(PaliSiamEngine, self).__init__()
         self._code = constants.PALI_SIAM_CODE
-        conn = sqlite3.connect(constants.PALI_SIAM_DB)
-        self._searcher = conn.cursor()
+        self._conn = sqlite3.connect(constants.PALI_SIAM_DB)
+        self._searcher = self._conn.cursor()
 
     def GetTitle(self, volume=None):
         if not volume:
@@ -193,8 +212,8 @@ class ThaiMahaChulaEngine(Engine):
     def __init__(self):
         super(ThaiMahaChulaEngine, self).__init__()
         self._code = constants.THAI_MAHACHULA_CODE
-        conn = sqlite3.connect(constants.THAI_MAHACHULA_DB)
-        self._searcher = conn.cursor()
+        self._conn = sqlite3.connect(constants.THAI_MAHACHULA_DB)
+        self._searcher = self._conn.cursor()
 
     def GetContent(self, result):
         return None if result.get('content') is None else result.get('header', u'') + result.get('content') + result.get('footer', u'')
@@ -236,8 +255,8 @@ class ThaiMahaMakutEngine(Engine):
     def __init__(self):
         super(ThaiMahaMakutEngine, self).__init__()
         self._code = constants.THAI_MAHAMAKUT_CODE
-        conn = sqlite3.connect(constants.THAI_MAHAMAKUT_DB)
-        self._searcher = conn.cursor()
+        self._conn = sqlite3.connect(constants.THAI_MAHAMAKUT_DB)
+        self._searcher = self._conn.cursor()
 
     def GetTitle(self, volume=None):
         if not volume:
@@ -291,8 +310,8 @@ class ThaiFiveBooksEngine(Engine):
     def __init__(self):
         super(ThaiFiveBooksEngine, self).__init__()
         self._code = constants.THAI_FIVE_BOOKS_CODE
-        conn = sqlite3.connect(constants.THAI_FIVE_BOOKS_DB)
-        self._searcher = conn.cursor()
+        self._conn = sqlite3.connect(constants.THAI_FIVE_BOOKS_DB)
+        self._searcher = self._conn.cursor()
 
     def GetFirstPageNumber(self, volume):
         return 1 if volume != 3 else 819
@@ -333,7 +352,87 @@ class ThaiFiveBooksEngine(Engine):
         
     def GetSubItem(self, volume, page, item):
         return item, 1
+        
+class ScriptEngine(Engine):
+            
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume=? AND page=?'
+        args = (int(volume), int(page))
+        return select, args        
 
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+        return r
+        
+    def GetCompareChoices(self):
+        return []
+        
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0
+        
+    def GetSubItemsInVolume(self, volume):
+        results = []
+        for item in constants.SCRIPT_ITEMS[str(volume)]:
+            for sub in constants.SCRIPT_ITEMS[str(volume)][str(item)]:
+                if int(sub) not in results:
+                    results.append(int(sub))
+        results.sort()        
+        return results
+
+    def GetItemsInVolume(self, volume, sub):
+        results = []
+        for item in constants.SCRIPT_ITEMS[str(volume)]:
+            if str(sub) in constants.SCRIPT_ITEMS[str(volume)][str(item)].keys():
+                results.append(int(item))
+        results.sort()
+        return results    
+        
+    def ConvertItemToPage(self, volume, item, sub, checked=False):
+        try:
+            return constants.SCRIPT_ITEMS[str(volume)][str(item)][str(sub)]
+        except KeyError, e:
+            return 0
+        except TypeError, e:
+            return 0
+
+class RomanScriptEngine(ScriptEngine):
+    def __init__(self):
+        super(RomanScriptEngine, self).__init__()
+        self._code = constants.ROMAN_SCRIPT_CODE
+        self._conn = sqlite3.connect(constants.ROMAN_SCRIPT_DB)
+        self._searcher = self._conn.cursor()    
+
+    def GetTitle(self, volume=None):
+        if volume is None:
+            return 'Tipitaka (Roman Script)'
+        return constants.ROMAN_SCRIPT_TITLES[str(volume)][0]
+
+    def GetSubtitle(self, volume, section=None):
+        return constants.ROMAN_SCRIPT_TITLES[str(volume)][1]
+
+class ThaiScriptEngine(ScriptEngine):
+
+    def __init__(self):
+        super(ThaiScriptEngine, self).__init__()
+        self._code = constants.THAI_SCRIPT_CODE
+        self._conn = sqlite3.connect(constants.THAI_SCRIPT_DB)
+        self._searcher = self._conn.cursor()
+        
+    def GetTitle(self, volume=None):
+        if volume is None:
+            return 'Tipitaka (Thai Script)'
+        return constants.THAI_SCRIPT_TITLES[str(volume)][0]
+
+    def GetSubtitle(self, volume, section=None):
+        return constants.THAI_SCRIPT_TITLES[str(volume)][1]
+    
 class Model(object):
     
     @staticmethod
@@ -372,6 +471,10 @@ class Model(object):
             self._engine[code] = ThaiMahaMakutEngine()
         elif constants.THAI_FIVE_BOOKS_CODE == code:
             self._engine[code] = ThaiFiveBooksEngine()
+        elif constants.ROMAN_SCRIPT_CODE == code:
+            self._engine[code] = RomanScriptEngine()
+        elif constants.THAI_SCRIPT_CODE == code:
+            self._engine[code] = ThaiScriptEngine()
             
     def GetTitle(self, volume=None):
         return self._engine[self._code].GetTitle(volume)
@@ -410,13 +513,8 @@ class Model(object):
         return self._engine[self._code].GetComparingVolume(volume, page)
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
-        try:            
-            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
-        except KeyError, e:
-            return 0
-        except TypeError, e:
-            return 0
-
+        return self._engine[self._code].ConvertItemToPage(volume, item, sub, checked)
+        
     def ConvertVolume(self, volume, item, sub):
         return self._engine[self._code].ConvertVolume(volume, item, sub)
         

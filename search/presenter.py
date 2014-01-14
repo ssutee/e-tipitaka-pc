@@ -142,7 +142,7 @@ class Presenter(object):
         
     def SelectLanguage(self, index):
         self._model = search.model.SearchModelCreator.Create(self, index)
-        self._view.VolumesRadio.Disable() if index == 4 else self._view.VolumesRadio.Enable()
+        self._view.VolumesRadio.Disable() if index == 4 or index == 5 or index == 6 else self._view.VolumesRadio.Enable()
         self.RefreshHistoryList(index, self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
         
     def SelectVolumes(self, index):
