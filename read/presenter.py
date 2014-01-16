@@ -368,6 +368,7 @@ class Presenter(object):
         self._bookmarkManager.Save()
 
     def Close(self):
+        self._stopOpen = True
         self.SaveBookmark()
         if hasattr(self._delegate, 'OnReadWindowClose'):
             self._delegate.OnReadWindowClose(self._code)
