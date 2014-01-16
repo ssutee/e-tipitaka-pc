@@ -476,27 +476,13 @@ class ScriptSearchModel(Model):
 
     def GetSectionBoundary(self, position):
         if position == 0:
-            return 43
+            return 5
         if position == 1:
             return 48
         return 61
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):
         return threads.ScriptDisplayThread(results, keywords, delegate, mark, current)
-
-    def SectionName(self, index):
-        if index == 0:
-            return _('Section 2')
-        if index == 1:
-            return _('Section 1')
-        return _('Section 3')
-
-    def ColorCode(self, index):
-        if index == 0:
-            return "#ff4500"
-        if index == 1:
-            return "#1e90ff"
-        return "#a020f0"
 
 class RomanScriptSearchModel(ScriptSearchModel):
 

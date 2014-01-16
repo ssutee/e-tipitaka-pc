@@ -15,6 +15,9 @@ class ReadPanelCreator(object):
     def Create(parent, code, font, delegate, mainWindow=False):
         if code == constants.THAI_FIVE_BOOKS_CODE:
             return widgets.ReadWithReferencesPanel(parent, code if not mainWindow else None, font, delegate)
+        if code == constants.ROMAN_SCRIPT_CODE:
+            font = utils.LoadFont(constants.READ_FONT)
+            font.SetFaceName(constants.ROMAN_SCRIPT_DEFAULT_FONT)
         return widgets.ReadPanel(parent, code if not mainWindow else None, font, delegate)
 
 class ViewComponentsCreator(object):
@@ -124,6 +127,10 @@ class RomanScriptViewComponents(ScriptViewComponents):
     def __init__(self, parent, dataSource=None):
         super(RomanScriptViewComponents, self).__init__(parent, dataSource)
         self._toc = constants.ROMAN_SCRIPT_TOC
+        
+    def Filter(self, view):
+        super(RomanScriptViewComponents, self).Filter(view)
+        view.FontsButton.Disable()
 
 class View(AuiBaseFrame):    
     

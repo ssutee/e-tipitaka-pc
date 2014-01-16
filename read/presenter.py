@@ -540,15 +540,19 @@ class Presenter(object):
     def IncreaseFontSize(self):
         font = utils.LoadFont(constants.READ_FONT)
         font.SetPointSize(font.GetPointSize()+1)
-        self._view.Font = font        
         utils.SaveFont(font, constants.READ_FONT)        
+        if self._model.Code == constants.ROMAN_SCRIPT_CODE:
+            font.SetFaceName(constants.ROMAN_SCRIPT_DEFAULT_FONT)
+        self._view.Font = font
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         
     def DecreaseFontSize(self):
         font = utils.LoadFont(constants.READ_FONT)
         font.SetPointSize(font.GetPointSize()-1)
-        self._view.Font = font
         utils.SaveFont(font, constants.READ_FONT)
+        if self._model.Code == constants.ROMAN_SCRIPT_CODE:
+            font.SetFaceName(constants.ROMAN_SCRIPT_DEFAULT_FONT)
+        self._view.Font = font
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         
     def MarkText(self, code, mark=True):

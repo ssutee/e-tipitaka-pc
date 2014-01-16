@@ -18,6 +18,7 @@ LANG_THAI = 'thai'
 LANG_PALI = 'pali'
 
 DEFAULT_FONT = 'TF Chiangsaen'
+ROMAN_SCRIPT_DEFAULT_FONT = 'Times New Roman'
 
 ITEMS_PER_PAGE = 20
 
@@ -119,7 +120,7 @@ THAI_MAHACHULA_CODE = 'thaimc'
 THAI_MAHAMAKUT_CODE = 'thaimm'
 PALI_SIAM_CODE = 'pali'
 THAI_SCRIPT_CODE = 'thaict'
-ROMAN_SCRIPT_CODE= 'romanct'
+ROMAN_SCRIPT_CODE = 'romanct'
 
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
