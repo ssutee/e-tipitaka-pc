@@ -524,7 +524,8 @@ class Presenter(object):
         self._view.ToggleBookList()
         
     def ShowFontDialog(self):
-        curFont = utils.LoadFont(constants.READ_FONT)
+        code = self._lastFocus if self._lastFocus else self._model.Code
+        curFont = utils.LoadFont(constants.READ_FONT, code)
         fontData = wx.FontData()
         fontData.EnableEffects(False)
         if curFont != None:
@@ -534,26 +535,24 @@ class Presenter(object):
             data = dialog.GetFontData()
             font = data.GetChosenFont()
             if font.IsOk():
-                utils.SaveFont(font, constants.READ_FONT)
-                self._view.Font = font
+                utils.SaveFont(font, constants.READ_FONT, code)                
+                self._view.SetFont(font, self._lastFocus)        
         dialog.Destroy()
 
     def IncreaseFontSize(self):
-        font = utils.LoadFont(constants.READ_FONT)
+        code = self._lastFocus if self._lastFocus else self._model.Code
+        font = utils.LoadFont(constants.READ_FONT, code)
         font.SetPointSize(font.GetPointSize()+1)
-        utils.SaveFont(font, constants.READ_FONT)        
-        if self._model.Code == constants.ROMAN_SCRIPT_CODE:
-            font.SetFaceName(constants.ROMAN_SCRIPT_DEFAULT_FONT)
-        self._view.Font = font
+        utils.SaveFont(font, constants.READ_FONT, code)        
+        self._view.SetFont(font, self._lastFocus)        
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         
     def DecreaseFontSize(self):
-        font = utils.LoadFont(constants.READ_FONT)
+        code = self._lastFocus if self._lastFocus else self._model.Code
+        font = utils.LoadFont(constants.READ_FONT, code)
         font.SetPointSize(font.GetPointSize()-1)
-        utils.SaveFont(font, constants.READ_FONT)
-        if self._model.Code == constants.ROMAN_SCRIPT_CODE:
-            font.SetFaceName(constants.ROMAN_SCRIPT_DEFAULT_FONT)
-        self._view.Font = font
+        utils.SaveFont(font, constants.READ_FONT, code)
+        self._view.SetFont(font, self._lastFocus)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         
     def MarkText(self, code, mark=True):
@@ -702,7 +701,7 @@ class Presenter(object):
         dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการพิมพ์', title1, title2, total, data)
         
         if dlg.ShowModal() == wx.ID_OK:
-            font = utils.LoadFont(constants.READ_FONT)
+            font = utils.LoadFont(constants.READ_FONT, self._model.Code)
             text = u'<font face="%s" size=+2>' % ('TF Chiangsaen' if font is None else font.GetFaceName())
             text += u"<div align=center><b>%s</b><br><b>%s</b><br><b>%s</b><br>หน้าที่ %s ถึง %s</div><hr>" % \
                 (self._model.GetTitle(), title1, title2, 
