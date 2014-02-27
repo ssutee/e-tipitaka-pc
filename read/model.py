@@ -287,7 +287,7 @@ class ThaiMahaMakutEngine(Engine):
             if item in constants.BOOK_ITEMS[self._code+'_orig'][volume][sub]:
                 pages = constants.BOOK_ITEMS[self._code+'_orig'][volume][sub][item]
                 if page in pages:
-                    return sub
+                    return item, sub
         return item, 1
         
     def GetComparingVolume(self, volume, page):

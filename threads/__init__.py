@@ -79,6 +79,9 @@ class SearchThread(threading.Thread):
                         args += ('%'+t+'%',)
                 if len(tmp) > 0:
                     query += ' (%s) AND' % (tmp.rstrip(' OR '))
+            elif term[0] == '~':
+                query += ' content NOT LIKE ? AND'
+                args += ('%'+term[1:]+'%',)
             else:
                 query += ' content LIKE ? AND'
                 args += ('%'+term+'%',)
@@ -259,7 +262,7 @@ class DisplayThread(threading.Thread):
     
     def run(self):
         keywords = self._keywords.replace('+',' ')
-        keywords = ' '.join(filter(lambda x:x.find('v:') != 0, keywords.split()))
+        keywords = ' '.join(filter(lambda x:x.find('v:') != 0 or x[0] == '~', keywords.split()))
 
         termset = []
         for term in keywords.split():
