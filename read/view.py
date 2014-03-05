@@ -289,7 +289,7 @@ class View(AuiBaseFrame):
         self.AddPane(self._toolPanel, info.Name('Tool'))
 
         self._notePanel = widgets.NotePanel(self)
-        info = AuiPaneInfo().CaptionVisible(False).Resizable(True).BestSize((740, 150)).Bottom()        
+        info = AuiPaneInfo().CaptionVisible(False).Resizable(True).BestSize((740, 110)).Bottom()        
         self.AddPane(self._notePanel, info.Name('Note'))
 
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
@@ -343,28 +343,29 @@ class View(AuiBaseFrame):
     def HideBookList(self):
         info = self.AuiManager.GetPane('BookList')
         info.Hide()
-        
-        info = self.AuiManager.GetPane('Note')
-        info.Hide()        
-        
         self.AuiManager.Update()
 
     def ShowBookList(self):
-        info = self.AuiManager.GetPane('BookList')
-        info.Show()
-
         info = self.AuiManager.GetPane('Note')
         info.Show()        
+        self.AuiManager.Update()
 
+    def HideNote(self):
+        info = self.AuiManager.GetPane('Note')
+        info.Hide()        
+        self.AuiManager.Update()
+
+    def ShowNote(self):
+        info = self.AuiManager.GetPane('Note')
+        info.Show()        
         self.AuiManager.Update()
 
     def ToggleBookList(self):
         info = self.AuiManager.GetPane('BookList')
-        info.Hide() if info.IsShown() else info.Show()   
-        
+        flag = info.IsShown()
+        info.Hide() if flag else info.Show()   
         info = self.AuiManager.GetPane('Note')
-        info.Hide() if info.IsShown() else info.Show()   
-                 
+        info.Hide() if flag else info.Show()   
         self.AuiManager.Update()
 
     def SetPageNumber(self, number, code=None):

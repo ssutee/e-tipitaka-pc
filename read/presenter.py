@@ -281,7 +281,7 @@ class Presenter(object):
         for marked, s, t in self._marks[key]:
             self._view.MarkText(code, (s,t)) if marked else self._view.UnmarkText(code, (s,t))                
 
-    def OpenBook(self, volume, page, section=None, selectItem=False):
+    def OpenBook(self, volume, page, section=None, selectItem=False, showBookList=None):
         self._findTextHandler.Reset()
 
         page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
@@ -321,6 +321,11 @@ class Presenter(object):
         self._stopOpen = True
         if selectItem: self._view.SetBookListSelection(self._currentVolume)        
         self._stopOpen = False
+
+        if showBookList != None and showBookList == True:
+            self._view.ShowBookList()
+        elif showBookList != None and showBookList == False:
+            self._view.HideBookList()
 
     def OpenAnotherBook(self, code, volume, page):
         self._findTextHandler.Reset()        

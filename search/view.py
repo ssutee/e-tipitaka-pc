@@ -186,8 +186,12 @@ class View(AuiBaseFrame):
         self._statusBar.SetStatusText(text, position)
         
     def ScrollTo(self, position):
-        self._resultsWindow.Scroll(0, position)
-        self._resultsWindow.ScrollLines(position)
+
+        print position, self._resultsWindow.GetScrollPos(wx.HORIZONTAL)
+        if 'wxMSW' in wx.PlatformInfo:
+            self._resultsWindow.ScrollLines(position)
+        else:
+            self._resultsWindow.Scroll(0, position)
         
     def ShowVolumesDialog(self, dataSource, volumes, OnDismiss):
         dialog = VolumesDialog(self, volumes, dataSource)
