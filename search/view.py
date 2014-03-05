@@ -186,8 +186,6 @@ class View(AuiBaseFrame):
         self._statusBar.SetStatusText(text, position)
         
     def ScrollTo(self, position):
-
-        print position, self._resultsWindow.GetScrollPos(wx.HORIZONTAL)
         if 'wxMSW' in wx.PlatformInfo:
             self._resultsWindow.ScrollLines(position)
         else:
