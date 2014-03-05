@@ -15,9 +15,7 @@ class ReadPanelCreator(object):
     def Create(parent, code, font, delegate, mainWindow=False):
         if code == constants.THAI_FIVE_BOOKS_CODE:
             return widgets.ReadWithReferencesPanel(parent, code if not mainWindow else None, font, delegate)
-        if code == constants.ROMAN_SCRIPT_CODE:
-            font = utils.LoadFont(constants.READ_FONT)
-            font.SetFaceName(constants.ROMAN_SCRIPT_DEFAULT_FONT)
+        font = utils.LoadFont(constants.READ_FONT, code)
         return widgets.ReadPanel(parent, code if not mainWindow else None, font, delegate)
 
 class ViewComponentsCreator(object):
@@ -128,10 +126,6 @@ class RomanScriptViewComponents(ScriptViewComponents):
         super(RomanScriptViewComponents, self).__init__(parent, dataSource)
         self._toc = constants.ROMAN_SCRIPT_TOC
         
-    def Filter(self, view):
-        super(RomanScriptViewComponents, self).Filter(view)
-        view.FontsButton.Disable()
-
 class View(AuiBaseFrame):    
     
     def __init__(self, parent, title, code):
@@ -145,7 +139,8 @@ class View(AuiBaseFrame):
         self._code = code                
         self._readPanel = None
         self._comparePanel = {}
-        self._font = None
+        
+        self._font = utils.LoadFont(constants.READ_FONT, code)
         
         self._bookmarkMenu = None
         self._SetupStatusBar()
@@ -156,10 +151,10 @@ class View(AuiBaseFrame):
         
     @Font.setter
     def Font(self, font):
-        self._font
-        self._readPanel.SetContentFont(font)
-        for code in self._comparePanel:
-            self._comparePanel[code].SetContentFont(font)
+        self._font = font
+            
+    def SetFont(self, font, code):
+        self._readPanel.SetContentFont(font) if code is None else self._comparePanel[code].SetContentFont(font)
 
     @property
     def DataSource(self):
