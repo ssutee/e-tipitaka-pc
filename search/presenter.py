@@ -78,9 +78,9 @@ class Presenter(object):
         return True
         
     def OpenBook(self):
-        self.Read(self._model.Code, 1, 0, 0, section=1, shouldHighlight=False)
+        self.Read(self._model.Code, 1, 0, 0, section=1, shouldHighlight=False, showBookList=True)
 
-    def Read(self, code, volume, page, idx, section=None, shouldHighlight=True):
+    def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):
         self._model.Read(code, volume, page, idx)
         presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
         if not presenter or self._shouldOpenNewWindow:
@@ -96,7 +96,7 @@ class Presenter(object):
         else:
             presenter.BringToFront() 
         presenter.Keywords = self._model.Keywords if shouldHighlight else None
-        presenter.OpenBook(volume, page, section, selectItem=True)
+        presenter.OpenBook(volume, page, section, selectItem=True, showBookList=showBookList)
         
     def BringToFront(self):
         self._view.Raise()

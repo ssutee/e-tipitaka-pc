@@ -11,6 +11,10 @@ import search.interactor
 import search.presenter
 import search.model
 
+import wx
+
+wx.Log.SetLogLevel(0)
+
 view = search.view.View()
 interactor = search.interactor.Interactor()
 model = search.model.ThaiRoyalSearchModel(None)  

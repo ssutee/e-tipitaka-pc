@@ -84,22 +84,22 @@ class Interactor(object):
         event.Check(self.View.NotePanel.NoteTextCtrl.IsSelectionUnderlined())
 
     def OnAlignLeft(self, event):
-        self.View.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(rt.TEXT_ALIGNMENT_LEFT)
+        self.View.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_LEFT)
 
     def OnUpdateAlignLeft(self, event):
-        event.Check(self.View.NotePanel.NoteTextCtrl.IsSelectionAligned(rt.TEXT_ALIGNMENT_LEFT))
+        event.Check(self.View.NotePanel.NoteTextCtrl.IsSelectionAligned(wx.TEXT_ALIGNMENT_LEFT))
 
     def OnAlignRight(self, event):
-        self.View.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(rt.TEXT_ALIGNMENT_RIGHT)
+        self.View.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_RIGHT)
 
     def OnUpdateAlignRight(self, event):
-        event.Check(self.View.NotePanel.NoteTextCtrl.IsSelectionAligned(rt.TEXT_ALIGNMENT_RIGHT))
+        event.Check(self.View.NotePanel.NoteTextCtrl.IsSelectionAligned(wx.TEXT_ALIGNMENT_RIGHT))
 
     def OnCenter(self, event):
-        self.View.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(rt.TEXT_ALIGNMENT_CENTRE)
+        self.View.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_CENTRE)
 
     def OnUpdateCenter(self, event):
-        event.Check(self.View.NotePanel.NoteTextCtrl.IsSelectionAligned(rt.TEXT_ALIGNMENT_CENTRE))
+        event.Check(self.View.NotePanel.NoteTextCtrl.IsSelectionAligned(wx.TEXT_ALIGNMENT_CENTRE))
 
     def OnIndentLess(self, event):
         self.Presenter.IndentLessNoteText()
