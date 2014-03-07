@@ -209,6 +209,10 @@ class Presenter(object):
         self._SetupPrinter()
         
         self._dictWindow = None
+        
+    @property
+    def View(self):
+        return self._view
 
     @property
     def CurrentVolume(self):
@@ -375,6 +379,7 @@ class Presenter(object):
     def Close(self):
         self._stopOpen = True
         self.SaveBookmark()
+        utils.SaveReadWindowPosition(self._view)
         if hasattr(self._delegate, 'OnReadWindowClose'):
             self._delegate.OnReadWindowClose(self._code)
             

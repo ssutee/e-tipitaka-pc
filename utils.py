@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import wx
-import os, codecs
+import os, codecs, json
 import constants
 
 def ConvertToPaliSearch(search, force=False):
@@ -58,3 +58,40 @@ def LoadFont(path, code=None):
             font.SetFaceName(tokens[0])
 
     return font
+
+def SaveWindowPosition(view, filename):
+    with open(filename, 'w') as f:
+        rect = view.GetScreenRect()
+        displaySize = wx.GetDisplaySize()
+        json.dump(((rect[0], rect[1], rect[2], rect[3]), (displaySize[0], displaySize[1])), f)
+
+def SaveSearchWindowPosition(view):
+    SaveWindowPosition(view, constants.SEARCH_RECT)
+    
+def SaveReadWindowPosition(view):
+    SaveWindowPosition(view, constants.READ_RECT)
+
+def LoadWindowPosition(filename):
+    if not os.path.exists(filename):
+        return None
+
+    with open(filename) as f:
+        try:
+            rect, savedScreen = json.load(f)
+            currentScreen = wx.GetDisplaySize()
+            xScale, yScale = 1.0*savedScreen[0]/currentScreen[0], 1.0*savedScreen[1]/currentScreen[1]
+        except ValueError, e:
+            return None
+
+    if type(rect) is list and len(rect) == 4:
+        return rect[0]*xScale, rect[1]*yScale, rect[2]*xScale , rect[3]*yScale
+        
+    return None
+
+
+def LoadReadWindowPosition():
+    return LoadWindowPosition(constants.READ_RECT)
+    
+def LoadSearchWindowPosition():
+    return LoadWindowPosition(constants.SEARCH_RECT)
+

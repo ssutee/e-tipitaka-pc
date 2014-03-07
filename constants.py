@@ -73,6 +73,8 @@ SKIP_VERSION_FILE = os.path.join(CONFIG_PATH, 'skip_version')
 
 SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')
 READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')
+SEARCH_RECT = os.path.join(CONFIG_PATH, 'rect_search.cfg')
+READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 
 SEARCH_IMAGE = os.path.join(RESOURCES_DIR, 'search.png')
 NIKHAHIT_IMAGE = os.path.join(RESOURCES_DIR, 'nikhahit.gif')

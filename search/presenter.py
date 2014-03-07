@@ -1,6 +1,6 @@
 import search.model
 from dialogs import AboutDialog, UpdateDialog
-import wx, zipfile, os
+import wx, zipfile, os, json
 import i18n
 _ = i18n.language.ugettext
 
@@ -302,8 +302,10 @@ class Presenter(object):
                 
     def CheckNewUpdate(self):
         threads.CheckNewUpdateThread(self).start()
-
+        
     def Close(self):
+        utils.SaveSearchWindowPosition(self._view)
         for code in self._presenters:
+            utils.SaveReadWindowPosition(self._presenters[code][0].View)
             self._model.SaveHistory(code)
         self._view.SearchCtrl.SaveSearches()

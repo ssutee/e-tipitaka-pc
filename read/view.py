@@ -128,9 +128,21 @@ class RomanScriptViewComponents(ScriptViewComponents):
         
 class View(AuiBaseFrame):    
     
-    def __init__(self, parent, title, code):
-        super(View, self).__init__(parent, wx.ID_ANY, title=title,
-            size=(min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])))
+    def __init__(self, parent, title, code):         
+        rect = utils.LoadReadWindowPosition()
+        
+        pos = 0,0
+        if rect is not None:
+            pos = rect[0], rect[1]
+
+        size = min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])
+        if rect is not None:
+            size = rect[2], rect[3]
+                
+        super(View, self).__init__(parent, wx.ID_ANY, title=title, size=size, pos=pos)
+            
+        if rect is None:
+            self.CenterOnScreen()            
             
         self._dataSource = None
         self._delegate = None
@@ -540,5 +552,4 @@ class View(AuiBaseFrame):
     def Start(self):
         self._PostInit()
         self._components.Filter(self)
-        self.CenterOnScreen()
         self.Show()        

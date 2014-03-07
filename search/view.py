@@ -95,9 +95,21 @@ class View(AuiBaseFrame):
         return self._deleteButton
 
     def __init__(self):
-        self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)
-        super(View, self).__init__(None, id=wx.ID_ANY, title=self.AppName(),
-            size=(min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])))
+        self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)        
+        rect = utils.LoadSearchWindowPosition()
+
+        pos = 0,0
+        if rect is not None:
+            pos = rect[0], rect[1]
+
+        size = min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])
+        if rect is not None:
+            size = rect[2], rect[3]
+            
+        super(View, self).__init__(None, id=wx.ID_ANY, title=self.AppName(), pos=pos, size=size)
+
+        if rect is None:
+            self.CenterOnScreen()
 
         icon = wx.IconBundle()
         icon.AddIconFromFile(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)
@@ -208,6 +220,5 @@ class View(AuiBaseFrame):
         return '%s (%s)' % (_('AppName'), 'E-Tipitaka' + ' v' + settings.VERSION)  
 
     def Start(self):
-        self.CenterOnScreen()
         self.Show()        
         self.App.MainLoop()
