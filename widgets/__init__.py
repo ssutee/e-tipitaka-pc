@@ -596,10 +596,12 @@ class ReadPanel(wx.Panel):
         
     def OnTextBodySetFocus(self, event):
         self.Delegate.SetFocus(True, self._code)
+        event.Skip()
         
     def OnTextBodyKillFocus(self, event):
         self.Delegate.SetFocus(False, self._code)        
-        
+        event.Skip()
+
     def OnTextBodySelect(self, event):
         self.Delegate.HandleTextSelection(self._body.GetStringSelection(), self._code)
         
