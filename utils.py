@@ -60,6 +60,9 @@ def LoadFont(path, code=None):
     return font
 
 def SaveWindowPosition(view, filename):
+    if not os.path.exists(constants.CONFIG_PATH):
+        os.mkdir(constants.CONFIG_PATH)
+
     with open(filename, 'w') as f:
         rect = view.GetScreenRect()
         displaySize = wx.GetDisplaySize()
