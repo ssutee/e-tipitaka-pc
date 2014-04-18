@@ -604,6 +604,7 @@ class ReadPanel(wx.Panel):
 
     def OnTextBodySelect(self, event):
         self.Delegate.HandleTextSelection(self._body.GetStringSelection(), self._code)
+        event.Skip()
         
     def OnTextCtrlMouseRightDown(self, event):
         self.Delegate.ShowContextMenu(event.GetEventObject(), event.GetPosition(), self._code)
