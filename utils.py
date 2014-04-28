@@ -87,8 +87,9 @@ def LoadWindowPosition(filename):
             return None
 
     if type(rect) is list and len(rect) == 4:
-        return rect if xScale == 1 and yScale == 1 else [currentScreen[0]/4, currentScreen[1]/4, currentScreen[0]/2, currentScreen[1]/2]
-        
+        reset_screen = xScale != 1 or yScale != 1 or rect[0]+20 > currentScreen[0] or rect[1]+20 > currentScreen[1]
+        return rect if not reset_screen else [currentScreen[0]/4, currentScreen[1]/4, currentScreen[0]/2, currentScreen[1]/2]
+
     return None
 
 
