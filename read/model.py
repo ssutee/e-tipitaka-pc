@@ -215,6 +215,11 @@ class ThaiMahaChulaEngine(Engine):
         self._conn = sqlite3.connect(constants.THAI_MAHACHULA_DB)
         self._searcher = self._conn.cursor()
 
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        args = ('%02d'%(volume), '%04d'%(page))
+        return select, args
+
     def GetContent(self, result):
         return None if result.get('content') is None else result.get('header', u'') + result.get('content') + result.get('footer', u'')
 
