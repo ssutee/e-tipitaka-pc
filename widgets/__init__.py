@@ -250,11 +250,18 @@ class MySearchCtrl(wx.SearchCtrl):
         
     def LoadSearches(self):
         if os.path.exists(self._logFile):
-            for text in codecs.open(self._logFile,'r','utf-8').readlines():
-                if text.strip() == '': continue 
-                self._searches.append(text.strip())
-                if len(self._searches) > self.MAX_SEARCH_HISTORY:
-                    del self._searches[0]
+            
+            try:
+                for text in codecs.open(self._logFile,'r','utf-8').readlines():
+                    if text.strip() == '': continue 
+                    self._searches.append(text.strip())
+                    if len(self._searches) > self.MAX_SEARCH_HISTORY:
+                        del self._searches[0]
+            except UnicodeDecodeError,e:
+                out = codecs.open(self._logFile, 'w','utf-8')
+                out.write('')
+                out.close()
+                    
             menu = self.MakeMenu()
             self.SetMenu(menu)        
 
