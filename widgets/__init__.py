@@ -249,8 +249,7 @@ class MySearchCtrl(wx.SearchCtrl):
         return menu
         
     def LoadSearches(self):
-        if os.path.exists(self._logFile):
-            
+        if os.path.exists(self._logFile):            
             try:
                 for text in codecs.open(self._logFile,'r','utf-8').readlines():
                     if text.strip() == '': continue 
@@ -258,22 +257,20 @@ class MySearchCtrl(wx.SearchCtrl):
                     if len(self._searches) > self.MAX_SEARCH_HISTORY:
                         del self._searches[0]
             except UnicodeDecodeError,e:
-                out = codecs.open(self._logFile, 'w','utf-8')
-                out.write('')
-                out.close()
-                    
+                with codecs.open(self._logFile, 'w','utf-8') as out:
+                    out.write('')
             menu = self.MakeMenu()
             self.SetMenu(menu)        
 
     def SaveSearches(self):
         if not os.path.exists(constants.CONFIG_PATH):
             os.makedirs(constants.CONFIG_PATH)
-        out = codecs.open(self._logFile, 'w', 'utf-8')
-        for search in self._searches:
-            if self._lang == constants.LANG_PALI:
-                search = utils.ConvertToPaliSearch(search)
-            out.write(u'%s\n' % (search))
-        out.close()    
+            
+        with codecs.open(self._logFile, 'w', 'utf-8') as out:    
+            for search in self._searches:
+                if self._lang == constants.LANG_PALI:
+                    search = utils.ConvertToPaliSearch(search)
+                out.write(u'%s\n' % (search))
         
     @property
     def Language(self):
