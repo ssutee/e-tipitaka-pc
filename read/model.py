@@ -189,6 +189,20 @@ class PaliSiamEngine(Engine):
         self._conn = sqlite3.connect(constants.PALI_SIAM_DB)
         self._searcher = self._conn.cursor()
 
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        args = ('%02d'%(volume), '%04d'%(page))
+        return select, args
+        
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+        return r
+        
     def GetTitle(self, volume=None):
         if not volume:
             return u'พระไตรปิฎก ฉบับสยามรัฐ (ภาษาบาลี)'

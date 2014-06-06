@@ -202,6 +202,18 @@ class ThaiRoyalSearchThread(SearchThread):
 
 class PaliSiamSearchThread(SearchThread):
 
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['content'] = result[4]
+        return r    
+
+    @property
+    def VolumeColumn(self):
+        return 'volume'
+
     @property
     def Code(self):
         return constants.PALI_SIAM_CODE
