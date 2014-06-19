@@ -3,6 +3,17 @@
 import wx
 import os, codecs, json
 import constants
+import sqlite3
+
+def UpdateDatabases():
+    if os.path.exists(constants.DATA_DB):
+        conn = sqlite3.connect(constants.DATA_DB)
+        cursor = conn.cursor()
+        if cursor.execute('PRAGMA user_version').fetchone()[0] < 2:
+            cursor.execute('ALTER TABLE History ADD COLUMN pages TEXT')
+            cursor.execute('PRAGMA user_version=2')
+        conn.commit()
+        conn.close()
 
 def ConvertToPaliSearch(search, force=False):
     return search.replace(u'ฐ', u'\uf700').replace(u'ญ', u'\uf70f').replace(u'\u0e4d', u'\uf711') if force or 'wxMac' not in wx.PlatformInfo else search

@@ -17,6 +17,7 @@ class History(db.Entity):
     code = Required(unicode)
     read = Optional(unicode)
     skimmed = Optional(unicode)
+    pages = Optional(unicode)
 
 db.generate_mapping(create_tables=True)
 
@@ -143,6 +144,16 @@ class Model(object):
             self._readItems.append(idx)
             self._ReloadDisplay()        
 
+    def Skim(self, volume, page, code):
+        if self.Code != code:
+            return
+
+        for idx, result in enumerate(self._results):
+            if int(result['volume']) == volume and int(result['page']) == page:
+                if (idx+1) not in self._skimmedItems and (idx+1) not in self._readItems:
+                    self._skimmedItems.append(idx+1)
+                    self._ReloadDisplay()
+
     def _ReloadDisplay(self):
         self.Display(self._currentPagination)
 
@@ -165,15 +176,17 @@ class Model(object):
         self.CreateDisplayThread(self._results, self._keywords, self._delegate, self.GetMark(current), current).start()
         if current not in self._clickedPages:
             self._clickedPages.append(current)
+        self.SaveHistory(self.Code)
         
     @db_session
     def LoadHistory(self, keywords, code, total):        
         history = History.get(keywords=keywords, code=code)
         if history is None:
-            history = History(keywords=keywords, code=code, total=total, read=u'', skimmed=u'')
+            history = History(keywords=keywords, code=code, total=total, read=u'', skimmed=u'', pages=u'')
 
         self._readItems = map(int, history.read.split(',')) if len(history.read) > 0 else []            
         self._skimmedItems = map(int, history.skimmed.split(',')) if len(history.skimmed) > 0 else []
+        self._clickedPages = map(int, history.pages.split(',')) if history.pages is not None and len(history.pages) > 0 else []
                         
     @db_session
     def SaveHistory(self, code):
@@ -181,17 +194,8 @@ class Model(object):
         if history and self.Code == code:
             history.read = ','.join(map(str, self._readItems))
             history.skimmed = ','.join(map(str, self._skimmedItems))
+            history.pages = ','.join(map(str, self._clickedPages))
                     
-    def Skim(self, volume, page, code):
-        if self.Code != code:
-            return
-        
-        for idx, result in enumerate(self._results):
-            if int(result['volume']) == volume and int(result['page']) == page:
-                if (idx+1) not in self._skimmedItems and (idx+1) not in self._readItems:
-                    self._skimmedItems.append(idx+1)
-                    self._ReloadDisplay()
-            
     def DisplayNext(self):
         self.Display(self._currentPagination+1)
 

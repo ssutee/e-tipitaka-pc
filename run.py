@@ -6,6 +6,10 @@ import constants
 if not os.path.exists(constants.DATA_PATH):
     os.makedirs(constants.DATA_PATH)
 
+import utils
+
+utils.UpdateDatabases()
+
 import search.view
 import search.interactor
 import search.presenter
