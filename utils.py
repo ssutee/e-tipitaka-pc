@@ -10,9 +10,12 @@ def UpdateDatabases():
         conn = sqlite3.connect(constants.DATA_DB)
         cursor = conn.cursor()
         if cursor.execute('PRAGMA user_version').fetchone()[0] < 2:
-            cursor.execute('ALTER TABLE History ADD COLUMN pages TEXT')
             cursor.execute('PRAGMA user_version=2')
-        conn.commit()
+            try:
+                cursor.execute('ALTER TABLE History ADD COLUMN pages TEXT')
+            except sqlite3.OperationalError,e:
+                pass
+            conn.commit()
         conn.close()
 
 def ConvertToPaliSearch(search, force=False):
