@@ -232,6 +232,10 @@ class ThaiMahaChulaSearchThread(SearchThread):
     def Database(self):
         return constants.THAI_MAHACHULA_DB    
         
+    @property
+    def VolumeColumn(self):
+        return 'volume'        
+        
     def ProcessResult(self, result):
         r = {}
         r['volume'] = result[0]
@@ -327,6 +331,7 @@ class ThaiMahaMakutDisplayThread(DisplayThread):
     
 class ThaiMahaChulaDisplayThread(DisplayThread):
     pass
+
     
 class ScriptDisplayThread(DisplayThread):
 
