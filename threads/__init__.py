@@ -28,11 +28,12 @@ class CheckNewUpdateThread(threading.Thread):
 
 class SearchThread(threading.Thread):
     
-    def __init__(self, keywords, volumes, delegate):
+    def __init__(self, keywords, volumes, delegate, queue=None):
         super(SearchThread, self).__init__()
         self._delegate = delegate
         self._keywords = keywords
         self._volumes = volumes    
+        self._queue = queue
     
     @property
     def TableName(self):
@@ -58,6 +59,9 @@ class SearchThread(threading.Thread):
         
         if hasattr(self._delegate, 'SearchDidFinish'):
             wx.CallAfter(self._delegate.SearchDidFinish, results, self._keywords)
+
+        if self._queue is not None:
+            self._queue.put((results, self._keywords))
         
     def ProcessResult(self, result):
         r = {}
