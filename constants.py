@@ -42,9 +42,10 @@ CMD_ZOOM_IN         = 1006
 CMD_ZOOM_OUT        = 1007
 CMD_FIND            = 1008
 
-ID_COPY         = 2000
-ID_SELECT_ALL   = 2001
-ID_SEARCH       = 2002
+ID_COPY           = 2000
+ID_SELECT_ALL     = 2001
+ID_SEARCH         = 2002
+ID_COPY_REFERENCE = 2003
 
 UP      = 0
 DOWN    = 1

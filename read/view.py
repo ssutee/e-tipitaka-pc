@@ -484,6 +484,20 @@ class View(AuiBaseFrame):
                 wx.TheClipboard.Close()
             elif isinstance(window, wx.TextCtrl):
                 window.Copy()
+
+        def OnCopyReference(event):
+            clipdata = wx.TextDataObject()
+
+            ref = self._delegate.GetReference(code)
+
+            if isinstance(window, wx.html.HtmlWindow):
+                clipdata.SetText(window.SelectionToText() + '\n\n\n' + ref)
+            elif isinstance(window, wx.TextCtrl):
+                clipdata.SetText(window.GetStringSelection() + '\n\n\n' + ref)
+
+            wx.TheClipboard.Open()
+            wx.TheClipboard.SetData(clipdata)
+            wx.TheClipboard.Close()
             
         def OnSelectAll(event):
             window.SelectAll()
@@ -500,12 +514,18 @@ class View(AuiBaseFrame):
         search = menu.Append(constants.ID_SEARCH, u'ค้นหา')
         menu.AppendSeparator()
         copy = menu.Append(constants.ID_COPY, u'คัดลอก')
+        copyref = menu.Append(constants.ID_COPY_REFERENCE, u'คัดลอก (อ้างอิง)')
+        menu.AppendSeparator()        
         if isinstance(window, wx.TextCtrl):
             copy.Enable(window.CanCopy())
+            copyref.Enable(window.CanCopy())
         elif isinstance(window, wx.html.HtmlWindow):
             copy.Enable(len(window.SelectionToText()) > 0)
+            copyref.Enable(len(window.SelectionToText()) > 0)            
+            
         selectAll = menu.Append(constants.ID_SELECT_ALL, u'เลือกทั้งหมด')
         wx.EVT_MENU(menu, constants.ID_COPY, OnCopy)
+        wx.EVT_MENU(menu, constants.ID_COPY_REFERENCE, OnCopyReference)
         wx.EVT_MENU(menu, constants.ID_SELECT_ALL, OnSelectAll)
         wx.EVT_MENU(menu, constants.ID_SEARCH, OnSearch)
         window.PopupMenu(menu, position)                        

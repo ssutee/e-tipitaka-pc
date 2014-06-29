@@ -5,6 +5,10 @@ import wx.richtext as rt
 from wx.html import HtmlEasyPrinting
 import constants, utils, dialogs, widgets
 import os, json, codecs
+import i18n
+
+_ = i18n.language.ugettext
+
 
 from pony.orm import Database, Required, Optional, db_session, select, desc
 
@@ -574,7 +578,29 @@ class Presenter(object):
             self._marks[key] = [(mark, s, t)]
         else:
             self._marks[key] += [(mark, s, t)]
-        
+            
+    def GetReference(self, code):
+        model = Model(self._lastFocus if self._lastFocus else self._model.Code)
+
+        volume = self._currentVolume if code is None else self._compareVolume[code]
+        page = self._currentPage if code is None else self._comparePage[code]
+        items = model.GetItems(volume, page)
+        titles = model.GetTitles(volume, None)        
+
+        ref = titles[0] + '\n'
+
+        if len(titles[1]) > 0:
+            ref += titles[1] + '\n'
+            
+        ref += _('Page') + ' ' + utils.ArabicToThai(unicode(page))
+
+        if len(items) != 0 and items[0] is not None:
+            ref += ' ' + _('Item') + ' ' + utils.ArabicToThai(unicode(items[0]))
+            if len(items) > 1:
+                ref += ' - ' + utils.ArabicToThai(unicode(items[-1]))
+
+        return ref                        
+    
     def UnmarkText(self, code):
         self.MarkText(code, False)
         
@@ -649,13 +675,13 @@ class Presenter(object):
         dlg.Destroy()
         
     def _CurrentMarkKey(self, code):
-        if code not in self._compareVolume or code not in self._comparePage: return None
+        if code is not None and (code not in self._compareVolume or code not in self._comparePage): return None
         volume = self._currentVolume if code is None else self._compareVolume[code]
         page = self._currentPage if code is None else self._comparePage[code]
         return self._MarkKey(code, volume, page)
               
     def _CurrentMarkFilename(self, code):
-        if code not in self._compareVolume or code not in self._comparePage: return None
+        if code is not None and (code not in self._compareVolume or code not in self._comparePage): return None
         volume = self._currentVolume if code is None else self._compareVolume[code]
         page = self._currentPage if code is None else self._comparePage[code]        
         path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)        
