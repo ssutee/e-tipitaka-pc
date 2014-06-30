@@ -565,6 +565,8 @@ class View(AuiBaseFrame):
                 
     def UpdateSlider(self, value, minimum, maximum, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
+        if readPanel.Slider is None: 
+            return                    
         readPanel.Slider.SetMin(minimum)
         readPanel.Slider.SetMax(maximum)
         readPanel.Slider.SetValue(value)

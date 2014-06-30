@@ -517,14 +517,15 @@ class ReadPanel(wx.Panel):
         self._body.SetFont(font)
         
     def _CreateAttributes(self):
+        divider = 2 if self._delegate.IsSmallScreen() else 1
         if 'wxMSW' in wx.PlatformInfo:
-            self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 80), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
+            self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 80/divider), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
             self._title.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
             self._title.SetForegroundColour(wx.BLUE)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
             self._title.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)            
         else:
-            self._title = wx.html.HtmlWindow(self, size=(-1, 80), style=wx.html.HW_SCROLLBAR_NEVER)
+            self._title = wx.html.HtmlWindow(self, size=(-1, 80/divider), style=wx.html.HW_SCROLLBAR_NEVER)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._page = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
@@ -539,10 +540,11 @@ class ReadPanel(wx.Panel):
         self._body.Bind(wx.EVT_MOTION if 'wxMac' in wx.PlatformInfo else wx.EVT_LEFT_UP, self.OnTextBodySelect)
         self._body.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
         self._body.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)
-        
-        self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)
-        
-        self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
+
+        self._slider = None
+        if not self._delegate.IsSmallScreen():
+            self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)        
+            self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
         
         self._paintPanel = wx.Panel(self, wx.ID_ANY)        
 
@@ -590,7 +592,8 @@ class ReadPanel(wx.Panel):
         
         self._mainSizer.Add(sizer, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.BOTTOM, 5)        
 
-        self._mainSizer.Add(self._slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
+        if self._slider is not None:
+            self._mainSizer.Add(self._slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
         
         self._mainSizer.Add(self._paintPanel, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
         
@@ -655,7 +658,9 @@ class ReadPanel(wx.Panel):
         
     def SetTitles(self, title1, title2):
         if 'wxMSW' in wx.PlatformInfo:
-            self._title.SetValue(title1 + '\n' + title2)
+            self._title.SetValue(title1 if self._delegate.IsSmallScreen() else title1 + '\n' + title2)
+        elif self._delegate.IsSmallScreen():
+            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>''' % (title1))            
         else:
             self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>
                 <div align="center"><font color="#0000FF" size="6">%s</font></div>''' % (title1, title2))

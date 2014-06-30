@@ -5,14 +5,12 @@ import wx.richtext as rt
 from wx.html import HtmlEasyPrinting
 import constants, utils, dialogs, widgets
 import os, json, codecs
-import i18n
-
-_ = i18n.language.ugettext
-
 
 from pony.orm import Database, Required, Optional, db_session, select, desc
-
 from read.model import Model
+
+import i18n
+_ = i18n.language.ugettext
 
 class Printer(HtmlEasyPrinting):
     def __init__(self):
@@ -851,3 +849,7 @@ class Presenter(object):
             getattr(self._view.BackwardButton, 'Disable' if self._comparePage[code] <= self._model.GetFirstPageNumber(volume) else 'Enable')()
             getattr(self._view.ForwardButton, 'Disable' if self._comparePage[code] >= self._model.GetTotalPages(volume) else 'Enable')()            
             self._model.Code = currentCode
+            
+    def IsSmallScreen(self):
+        currentScreen = wx.GetDisplaySize()
+        return currentScreen[1] < 800
