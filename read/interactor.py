@@ -19,7 +19,8 @@ class Interactor(object):
         self.View.SearchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
         self.View.PrintButton.Bind(wx.EVT_BUTTON, self.OnPrintButtonClick)
         self.View.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)
-        self.View.DictButton.Bind(wx.EVT_BUTTON, self.OnDictButtonClick)
+        self.View.PaliDictButton.Bind(wx.EVT_BUTTON, self.OnPaliDictButtonClick)
+        self.View.ThaiDictButton.Bind(wx.EVT_BUTTON, self.OnThaiDictButtonClick)
         self.View.NotesButton.Bind(wx.EVT_BUTTON, self.OnNotesButtonClick)
     
         if isinstance(self.View.BookList, wx.ListBox):
@@ -152,8 +153,11 @@ class Interactor(object):
     def OnSaveButtonClick(self, event):
         self.Presenter.ShowSaveDialog()
         
-    def OnDictButtonClick(self, event):
-        self.Presenter.OpenDict()
+    def OnPaliDictButtonClick(self, event):
+        self.Presenter.OpenPaliDict()
+
+    def OnThaiDictButtonClick(self, event):
+        self.Presenter.OpenThaiDict()
         
     def OnNotesButtonClick(self, event):
         self.Presenter.ShowNotesManager()

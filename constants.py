@@ -115,7 +115,9 @@ THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.db')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
 
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
-DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
+PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
+
+THAI_DICT_DB = os.path.join(RESOURCES_DIR, 'thaidict.db')
 
 THAI_FIVE_BOOKS_CODE = 'thaibt'
 THAI_ROYAL_CODE = 'thai'

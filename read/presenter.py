@@ -210,7 +210,8 @@ class Presenter(object):
 
         self._SetupPrinter()
         
-        self._dictWindow = None
+        self._paliDictWindow = None
+        self._thaiDictWindow = None
         
     @property
     def View(self):
@@ -421,8 +422,10 @@ class Presenter(object):
     def HandleTextSelection(self, text, code):
         text = text.strip().split('\n')[0]        
         self._view.StatusBar.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
-        if self._dictWindow is not None:            
-            self._dictWindow.SetInput(text)
+        if self._paliDictWindow is not None:            
+            self._paliDictWindow.SetInput(text)
+        if self._thaiDictWindow is not None:
+            self._thaiDictWindow.SetInput(text)
             
     def JumpToPage(self, page, code=None):
         if code is None:
@@ -807,28 +810,49 @@ class Presenter(object):
         self.Delegate.BringToFront()
         self.Delegate.Search(utils.ConvertToThaiSearch(keywords), code if code is not None else self._model.Code)
 
-    def OpenDict(self):
+    def OpenPaliDict(self):
         
         def OnDictClose(event):
-            self._dictWindow = None
+            self._paliDictWindow = None
             event.Skip()
         
-        if self._dictWindow is None:
-            self._dictWindow = widgets.DictWindow(self._view)
-            self._dictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._dictWindow.SetTitle(u'พจนานุกรม บาลี-ไทย')
+        if self._paliDictWindow is None:
+            self._paliDictWindow = widgets.PaliDictWindow(self._view)
+            self._paliDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._paliDictWindow.SetTitle(u'พจนานุกรม บาลี-ไทย')
             
-        self._dictWindow.Show()        
+        self._paliDictWindow.Show()        
+        self._paliDictWindow.Raise()
         text = self._view.GetStringSelection(self._lastFocus)
-        self._dictWindow.SetInput(text.strip().split('\n')[0].strip())
+        self._paliDictWindow.SetInput(text.strip().split('\n')[0].strip())
+
+    def OpenThaiDict(self):
+
+        def OnDictClose(event):
+            self._thaiDictWindow = None
+            event.Skip()
+
+        if self._thaiDictWindow is None:
+            self._thaiDictWindow = widgets.ThaiDictWindow(self._view)
+            self._thaiDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._thaiDictWindow.SetTitle(u'พจนานุกรม ไทย-ไทย')
+
+        self._thaiDictWindow.Show()        
+        self._thaiDictWindow.Raise()
+        text = self._view.GetStringSelection(self._lastFocus)
+        self._thaiDictWindow.SetInput(text.strip().split('\n')[0].strip())
         
     def ShowContextMenu(self, window, position, code):
         self._view.ShowContextMenu(window, position, code)
         
     def ShowNotesManager(self):
-        if self._dictWindow is not None:
-            self._dictWindow.Close()
-            self._dictWindow = None
+        if self._paliDictWindow is not None:
+            self._paliDictWindow.Close()
+            self._paliDictWindow = None
+
+        if self._thaiDictWindow is not None:
+            self._thaiDictWindow.Close()
+            self._thaiDictWindow = None        
             
         dlg = dialogs.NoteManagerDialog(self._view, self._model.Code)
         if dlg.ShowModal() == wx.ID_OK:

@@ -9,9 +9,13 @@ import wx.richtext as rt
 import wx.lib.buttons as buttons
 import constants, utils
 import i18n, images
+import abc
 _ = i18n.language.ugettext
 
 class DictWindow(wx.Frame):
+    
+    __metaclass__ = abc.ABCMeta
+    
     def __init__(self, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
         self.SetBackgroundColour('#EEEEEE')
@@ -70,13 +74,21 @@ class DictWindow(wx.Frame):
         
         self.SetSizer(mainSizer)
 
-        self.conn = sqlite3.connect(constants.DICT_DB)
-        cursor = self.conn.cursor()
-
-        cursor.execute('SELECT * FROM p2t')
-        self.all_items = cursor.fetchall()
+        self.conn = self.ConnectDatabase()
 
         self.input.SetValue('')
+                
+    @abc.abstractmethod
+    def LookupDictSQLite(self, word1, word2=None, prefix=False):
+        return
+
+    @abc.abstractmethod
+    def ConnectDatabase(self):
+        return
+        
+    @abc.abstractmethod
+    def OnTextEntered(self, event):        
+        return
 
     def SetContent(self,content):
         self.text.SetValue(content)
@@ -88,6 +100,54 @@ class DictWindow(wx.Frame):
         self.Hide()
         event.Skip()
 
+    def OnSelectWord(self, event):
+        self.currentItem =  event.m_itemIndex
+        word = self.wordList.GetItemText(self.currentItem)
+        item = self.LookupDictSQLite(word)
+        if item != None:
+            tran = item[1]
+            self.text.SetValue(word+u'\n\n'+tran)
+        event.Skip()
+
+    def OnDoubleClick(self, event):
+        word = self.wordList.GetItemText(self.currentItem)
+        self.input.SetValue(word)
+        event.Skip()
+
+class ThaiDictWindow(DictWindow):
+    
+    def ConnectDatabase(self):
+        return sqlite3.connect(constants.THAI_DICT_DB)
+
+    def OnTextEntered(self, event):
+        text = self.input.GetValue().strip()
+        self.wordList.DeleteAllItems()
+        if text != '':
+            items = self.LookupDictSQLite(text, None, prefix=True)
+            if len(items) > 0:
+                for i,item in enumerate(items):
+                    self.wordList.InsertStringItem(i,item[0])
+            else:
+                self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
+        else:
+            self.text.SetValue(text + u'\n'+u'กรุณาป้อนคำที่ต้องการค้นหา')
+        event.Skip()
+
+    def LookupDictSQLite(self, word1, word2=None, prefix=False):
+        cursor = self.conn.cursor()
+        if prefix:
+            cursor.execute("SELECT head,translation FROM thai WHERE head LIKE ?", (word1+'%',))
+            return cursor.fetchmany(size=50)
+        else:
+            cursor.execute("SELECT head,translation FROM thai WHERE head = ?", (word1,))
+            return cursor.fetchone()                        
+            
+
+class PaliDictWindow(DictWindow):
+    
+    def ConnectDatabase(self):
+        return sqlite3.connect(constants.PALI_DICT_DB)
+        
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
 
@@ -108,45 +168,23 @@ class DictWindow(wx.Frame):
                 self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
         else:
             self.text.SetValue(text + u'\n'+u'กรุณาป้อนคำที่ต้องการค้นหา')
-            
-        event.Skip()
 
+        event.Skip()
+        
     def LookupDictSQLite(self, word1, word2=None, prefix=False):
         cursor = self.conn.cursor()
         if prefix:
             if word2:                
-                cursor.execute("SELECT * FROM p2t WHERE headword LIKE '%s%%' OR headword LIKE '%s%%' "%(word1,word2))
+                cursor.execute("SELECT * FROM p2t WHERE headword LIKE ? OR headword LIKE ? ", (word1+'%', word2+'%'))
             else:
-                cursor.execute("SELECT * FROM p2t WHERE headword LIKE '%s%%' "%(word1))
-                
+                cursor.execute("SELECT * FROM p2t WHERE headword LIKE ?", (word1+'%', ))
             return cursor.fetchmany(size=50)
         else:
             if word2:
-                cursor.execute("SELECT * FROM p2t WHERE headword = '%s' OR headword = '%s'"%(word1,word2))
+                cursor.execute("SELECT * FROM p2t WHERE headword = ? OR headword = ?", (word1,word2))
             else:
-                cursor.execute("SELECT * FROM p2t WHERE headword = '%s' "%(word1))
-                
+                cursor.execute("SELECT * FROM p2t WHERE headword = ?", (word1, ))
             return cursor.fetchone()            
-
-    def LookupDict(self, word):
-        items = self.dbDict['dict'].items(word.encode('utf8','ignore'))
-        if len(items) > 0:
-            return items[0]
-        return None
-
-    def OnSelectWord(self, event):
-        self.currentItem =  event.m_itemIndex
-        word = self.wordList.GetItemText(self.currentItem)
-        item = self.LookupDictSQLite(word)
-        if item != None:
-            tran = item[1]
-            self.text.SetValue(word+u'\n\n'+tran)
-        event.Skip()
-
-    def OnDoubleClick(self, event):
-        word = self.wordList.GetItemText(self.currentItem)
-        self.input.SetValue(word)
-        event.Skip()
 
 
 class AuiBaseFrame(wx.Frame):
@@ -351,8 +389,12 @@ class ReadToolPanel(wx.Panel):
         return self._saveButton
         
     @property
-    def DictButton(self):
-        return self._dictButton
+    def PaliDictButton(self):
+        return self._paliDictButton
+        
+    @property
+    def ThaiDictButton(self):
+        return self._thaiDictButton
         
     @property
     def NotesButton(self):
@@ -447,11 +489,15 @@ class ReadToolPanel(wx.Panel):
         
         self._dictPanel = wx.Panel(self, wx.ID_ANY)
         dictSizer = wx.StaticBoxSizer(wx.StaticBox(self._dictPanel, wx.ID_ANY, u'พจนานุกรม'), orient=wx.HORIZONTAL)        
-        self._dictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
+        self._paliDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._dictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
-        dictSizer.Add(self._dictButton, flag=wx.ALIGN_CENTER)        
-        dictSizer.Add((15, -1))        
+        self._paliDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
+        self._thaiDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมไทย-ไทย'))        
+        dictSizer.Add(self._paliDictButton, flag=wx.ALIGN_CENTER)
+        dictSizer.Add(self._thaiDictButton, flag=wx.ALIGN_CENTER)                
+        dictSizer.Add((5, -1))        
         self._dictPanel.SetSizer(dictSizer)        
         self._dictPanel.Fit()
 

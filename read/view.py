@@ -226,8 +226,12 @@ class View(AuiBaseFrame):
         return self._toolPanel.SaveButton
 
     @property
-    def DictButton(self):
-        return self._toolPanel.DictButton
+    def PaliDictButton(self):
+        return self._toolPanel.PaliDictButton
+        
+    @property
+    def ThaiDictButton(self):
+        return self._toolPanel.ThaiDictButton
         
     @property
     def NotesButton(self):
