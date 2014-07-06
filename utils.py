@@ -5,6 +5,73 @@ import os, codecs, json
 import constants
 import sqlite3
 
+class BookmarkManager(object):
+    def __init__(self, view, code):
+        self._items = []
+        self._view = view
+        self._code = code
+        self.Load()
+                
+    def Load(self):
+        filename = os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code))
+        if not os.path.exists(filename): return
+        self._items = []
+        roots = [self._items]
+        with codecs.open(filename,'r','utf8') as f:
+            for text in f:
+                if text.strip() == '': continue
+                n_root = text.rstrip().count(u'\t')
+                if n_root > len(roots): continue
+                root = roots[n_root]
+                if text.strip()[0] == '~':
+                    child = []
+                    root.append({text.strip().strip(u'~') : child})
+                    try:
+                        roots[n_root+1] = child
+                    except IndexError,e:
+                        roots.append(child)
+                else:
+                    tokens = ArabicToThai(text.strip()).split()
+                    root.append((int(tokens[1]), int(tokens[3]), text.strip()))
+        map(lambda x:x.sort(), roots)
+        
+    def Save(self):
+        
+        def _Save(items, out, depth=0):
+            for item in items:
+                if isinstance(item, dict):
+                    folder = item.keys()[0]
+                    out.write(u'\t'*depth + '~' + folder + '\n')
+                    _Save(item[folder], out, depth+1)
+                elif isinstance(item, tuple):
+                    out.write(u'\t'*depth + item[2] + '\n')
+
+        if not os.path.exists(constants.BOOKMARKS_PATH):
+            os.makedirs(constants.BOOKMARKS_PATH)
+        
+        with codecs.open(os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code)),'w','utf8') as out:
+            _Save(self._items, out)
+
+        
+    def MakeMenu(self, menu, handler):
+        def _MakeMenu(root, items):
+            for item in items:
+                if isinstance(item, dict):
+                    child = wx.Menu()
+                    folder = item.keys()[0]
+                    _MakeMenu(child, item[folder])
+                    root.AppendMenu(-1, folder, child)
+                elif isinstance(item, tuple):
+                    menuItem = root.Append(-1, item[2])
+                    menuItem.volume = item[0]
+                    menuItem.page = item[1]
+                    self._view.Bind(wx.EVT_MENU, handler, menuItem)
+        _MakeMenu(menu, self._items)
+        
+    @property
+    def Items(self):
+        return self._items
+
 def UpdateDatabases():
     if os.path.exists(constants.DATA_DB):
         conn = sqlite3.connect(constants.DATA_DB)

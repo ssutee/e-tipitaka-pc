@@ -42,6 +42,7 @@ class Model(object):
         self._clickedPages = []
         self._readItems = []
         self._skimmedItems = []
+        self._selectedItem = -1
         self._data = {}
         self._spellChecker = None
         self._keywords = u''
@@ -137,12 +138,15 @@ class Model(object):
     def Read(self, code, volume, page, idx):
         if self.Code != code:
             return
-            
+
+        self._selectedItem = idx
+
         if idx > 0 and idx not in  self._readItems:
             if idx in self._skimmedItems:                
                 self._skimmedItems.remove(idx)            
             self._readItems.append(idx)
-            self._ReloadDisplay()        
+        
+        self._ReloadDisplay()        
 
     def Skim(self, volume, page, code):
         if self.Code != code:
@@ -162,17 +166,21 @@ class Model(object):
         self._currentPagination = 0        
         self._clickedPages = []
         self._readItems = []
+        self._skimmedItems = []
+        self._selectedItem = -1
         self._data = {}
                 
         self.CreateSearchThread(keywords, self._volumes if self._mode == constants.MODE_ALL else self._selectedVolumes, 
             self._delegate).start()
         
-    def Display(self, current):  
+    def Display(self, current):
+        if len(self._results) == 0:
+            return
+                        
         if current != self._currentPagination:
             self._currentPagination = current
             if hasattr(self._delegate, 'SaveScrollPosition'):
                 self._delegate.SaveScrollPosition(0)
-
         self.CreateDisplayThread(self._results, self._keywords, self._delegate, self.GetMark(current), current).start()
         if current not in self._clickedPages:
             self._clickedPages.append(current)
@@ -184,6 +192,7 @@ class Model(object):
         if history is None:
             history = History(keywords=keywords, code=code, total=total, read=u'', skimmed=u'', pages=u'')
 
+        self._selectedItem = -1
         self._readItems = map(int, history.read.split(',')) if len(history.read) > 0 else []            
         self._skimmedItems = map(int, history.skimmed.split(',')) if len(history.skimmed) > 0 else []
         self._clickedPages = map(int, history.pages.split(',')) if history.pages is not None and len(history.pages) > 0 else []
@@ -220,17 +229,25 @@ class Model(object):
             self.GetBookName(volume), _('Item'), self._MakeItemsLabel(items))                                
                 
     def _MakeHtmlEntry(self, idx, volume, page):
-        info = ''
+        info = ''        
         if idx in self._readItems:
             info = _('(read)')
         elif idx in self._skimmedItems:
             info = _('(skimmed)')
+
+        link = u'<font color="black"><b>%s</b></font>'        
+        if idx == self._selectedItem:
+            link = u'<table bgcolor="#4688DF"><tr><td><font color="white"><b>%s</b></font></td></tr></table>'
+            info = ''
+        elif idx in self._readItems or idx in self._skimmedItems:
+            link = u'<font color="grey" bgcolor="#00FF00">%s</font>'        
+            
         return u'''
             <font size="4">
                 <a href="p:%s_%s_%s_%d_%d_%d_%d">%s</a> <font color="red">%s</font><br>
             </font>''' % (volume, page, self.Code, self.CurrentPagination, 
                 constants.ITEMS_PER_PAGE, len(self._results), idx, 
-                self._GetEntry(idx, volume ,page), info)
+                link % (self._GetEntry(idx, volume ,page)), info)
     
     def _MakeHtmlPagination(self, pages, current):
         text = _('All results') + '<br>'

@@ -31,6 +31,9 @@ class Interactor(object):
         self.View.ThothanButton.Bind(wx.EVT_BUTTON, self.OnThothanButtonClick)
         self.View.YoyingButton.Bind(wx.EVT_BUTTON, self.OnYoyingButtonClick)
         
+        self.View.NotesButton.Bind(wx.EVT_BUTTON, self.OnNotesButtonClick)
+        self.View.StarButton.Bind(wx.EVT_BUTTON, self.OnStarButtonClick)
+        
         self.View.TopBar.CheckBox.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxChange)
         
         self.View.HistoryList.Bind(wx.EVT_LISTBOX, self.OnHistoryListSelect)
@@ -95,3 +98,11 @@ class Interactor(object):
         
     def OnUpdateDeleteButton(self, event):
         event.Enable(self.View.HistoryList.GetSelection() > -1)
+        
+    def OnStarButtonClick(self, event):
+        x,y = self.View.StarButton.GetPosition()
+        w,h = self.View.StarButton.GetSize()
+        self.Presenter.ShowBookmarkPopup(x, y+h+5)    
+        
+    def OnNotesButtonClick(self, event):
+        self.Presenter.ShowNotesManager()

@@ -89,12 +89,12 @@ class NoteManagerDialog(wx.Dialog):
         leftSizer.Add(self._searchCtrl, 0, wx.EXPAND|wx.ALL, 5)
         leftSizer.Add(self._noteListBox, 1, wx.EXPAND|wx.ALL, 5)
         leftSizer.Add(self._readButton, 0, wx.CENTER|wx.BOTTOM, 10)
-        sizer.Add(leftSizer, 2, wx.EXPAND)
-        sizer.Add(self._noteTextCtrl, 3, wx.EXPAND|wx.ALL, 5)        
+        sizer.Add(leftSizer, 1, wx.EXPAND)
+        sizer.Add(self._noteTextCtrl, 1, wx.EXPAND|wx.ALL, 5)        
         self.SetSizer(sizer)
         
     def OnNoteListBoxSelect(self, event):
-        text = self._searchCtrl.GetValue()
+        text = self._searchCtrl.GetValue()                
         with db_session:
             note = list(read.model.Model.GetNotes(self._code, text))[event.GetSelection()]
             self._noteTextCtrl.LoadFile(note.filename, rt.RICHTEXT_TYPE_XML)

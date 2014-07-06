@@ -8,6 +8,7 @@ import os, json, codecs
 
 from pony.orm import Database, Required, Optional, db_session, select, desc
 from read.model import Model
+from utils import BookmarkManager
 
 import i18n
 _ = i18n.language.ugettext
@@ -33,10 +34,12 @@ class KeyCommandHandler(object):
         self._filter = {3653:49, 47:50, 45:51, 3616:52, 3606:53, 3640:54, 3638:55, 3588:56, 3605:57, 3592:48, 3651:46}
         
     def Handle(self, event, code):
-        code = self._filter.get(code, code)        
+        code = self._filter.get(code, code) 
         if ((event.CmdDown() or event.ControlDown()) and code == 102) or code == 6:
             self._command = ''
             return constants.CMD_FIND
+        elif (event.CmdDown() or event.ControlDown()) and event.ShiftDown() and code == 99:
+            return constants.CMD_COPY_REFERENCE
         elif code == wx.WXK_LEFT:
             self._command = ''
             return constants.CMD_BACKWARD
@@ -109,73 +112,6 @@ class FindTextHandler(object):
 
         return n, self._position != 0
         
-class BookmarkManager(object):
-    def __init__(self, view, code):
-        self._items = []
-        self._view = view
-        self._code = code
-        self.Load()
-                
-    def Load(self):
-        filename = os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code))
-        if not os.path.exists(filename): return
-        self._items = []
-        roots = [self._items]
-        with codecs.open(filename,'r','utf8') as f:
-            for text in f:
-                if text.strip() == '': continue
-                n_root = text.rstrip().count(u'\t')
-                if n_root > len(roots): continue
-                root = roots[n_root]
-                if text.strip()[0] == '~':
-                    child = []
-                    root.append({text.strip().strip(u'~') : child})
-                    try:
-                        roots[n_root+1] = child
-                    except IndexError,e:
-                        roots.append(child)
-                else:
-                    tokens = utils.ArabicToThai(text.strip()).split()
-                    root.append((int(tokens[1]), int(tokens[3]), text.strip()))
-        map(lambda x:x.sort(), roots)
-        
-    def Save(self):
-        
-        def _Save(items, out, depth=0):
-            for item in items:
-                if isinstance(item, dict):
-                    folder = item.keys()[0]
-                    out.write(u'\t'*depth + '~' + folder + '\n')
-                    _Save(item[folder], out, depth+1)
-                elif isinstance(item, tuple):
-                    out.write(u'\t'*depth + item[2] + '\n')
-
-        if not os.path.exists(constants.BOOKMARKS_PATH):
-            os.makedirs(constants.BOOKMARKS_PATH)
-        
-        with codecs.open(os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code)),'w','utf8') as out:
-            _Save(self._items, out)
-
-        
-    def MakeMenu(self, menu, handler):
-        def _MakeMenu(root, items):
-            for item in items:
-                if isinstance(item, dict):
-                    child = wx.Menu()
-                    folder = item.keys()[0]
-                    _MakeMenu(child, item[folder])
-                    root.AppendMenu(-1, folder, child)
-                elif isinstance(item, tuple):
-                    menuItem = root.Append(-1, item[2])
-                    menuItem.volume = item[0]
-                    menuItem.page = item[1]
-                    self._view.Bind(wx.EVT_MENU, handler, menuItem)
-        _MakeMenu(menu, self._items)
-        
-    @property
-    def Items(self):
-        return self._items
-
 class Presenter(object):
     def __init__(self, model, view, interactor, code):
         self._stopOpen = False
@@ -205,8 +141,6 @@ class Presenter(object):
         self._keyCommandHandler = KeyCommandHandler()
         self._findTextHandler = FindTextHandler()
         self._bookmarkManager = BookmarkManager(self._view, code)
-        
-        rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
 
         self._SetupPrinter()
         
@@ -516,7 +450,24 @@ class Presenter(object):
             self.IncreaseFontSize()
         elif ret == constants.CMD_ZOOM_OUT:
             self.DecreaseFontSize()
+        elif ret == constants.CMD_COPY_REFERENCE:
+            self.CopyReference()
             
+    def CopyReference(self, window=None, code=None):
+        clipdata = wx.TextDataObject()        
+        code = self._lastFocus if code is None else code
+        ref = self.GetReference(code)        
+
+        window = self._view.FocusBody(code) if window is None else window        
+        if isinstance(window, wx.html.HtmlWindow):
+            clipdata.SetText(window.SelectionToText() + '\n\n\n' + ref)
+        elif isinstance(window, wx.TextCtrl):
+            clipdata.SetText(window.GetStringSelection() + '\n\n\n' + ref)
+            
+        wx.TheClipboard.Open()
+        wx.TheClipboard.SetData(clipdata)
+        wx.TheClipboard.Close()                
+    
     def Find(self, code):
         self._view.ShowFindDialog(code, self._findTextHandler.Text, self._findTextHandler.Direction)
         
@@ -588,15 +539,15 @@ class Presenter(object):
         items = model.GetItems(volume, page)
         titles = model.GetTitles(volume, None)        
 
-        ref = titles[0] + '\n'
+        ref = titles[0] + '  '
 
         if len(titles[1]) > 0:
-            ref += titles[1] + '\n'
+            ref += titles[1] + '  '
             
         ref += _('Page') + ' ' + utils.ArabicToThai(unicode(page))
 
         if len(items) != 0 and items[0] is not None:
-            ref += ' ' + _('Item') + ' ' + utils.ArabicToThai(unicode(items[0]))
+            ref += '  ' + _('Item') + ' ' + utils.ArabicToThai(unicode(items[0]))
             if len(items) > 1:
                 ref += ' - ' + utils.ArabicToThai(unicode(items[-1]))
 
@@ -748,8 +699,7 @@ class Presenter(object):
             for p in range(data['from'], data['to']+1) if data['from'] <= data['to'] else range(data['from'], data['to']-1, -1):
                 content = self._model.GetPage(volume, p+1).replace(u'\t', u'&nbsp;'*7).replace(u'\x0a', u'<br>')
                 content = content.replace(u'\x0b', u'<br>').replace(u'\x0c', u'<br>').replace(u'\x0d', u'<br>')
-                text += u'<div align=right>หน้าที่ %s</div><p>'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore')))
-                text += u'%s<p><p><p>'%(content)
+                text += u'%s<br>'%(content)
             text += u'</font>'
             self._printer.Print(text, "")
 
@@ -835,7 +785,7 @@ class Presenter(object):
         if self._thaiDictWindow is None:
             self._thaiDictWindow = widgets.ThaiDictWindow(self._view)
             self._thaiDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._thaiDictWindow.SetTitle(u'พจนานุกรม ไทย-ไทย')
+            self._thaiDictWindow.SetTitle(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน')
 
         self._thaiDictWindow.Show()        
         self._thaiDictWindow.Raise()

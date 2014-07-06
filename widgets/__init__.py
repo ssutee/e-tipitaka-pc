@@ -146,7 +146,9 @@ class ThaiDictWindow(DictWindow):
 class PaliDictWindow(DictWindow):
     
     def ConnectDatabase(self):
-        return sqlite3.connect(constants.PALI_DICT_DB)
+        conn = sqlite3.connect(constants.PALI_DICT_DB)
+        conn.text_factory = str
+        return conn
         
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
@@ -181,7 +183,7 @@ class PaliDictWindow(DictWindow):
             return cursor.fetchmany(size=50)
         else:
             if word2:
-                cursor.execute("SELECT * FROM p2t WHERE headword = ? OR headword = ?", (word1,word2))
+                cursor.execute("SELECT * FROM p2t WHERE headword = ? OR headword = ?", (word1, word2))
             else:
                 cursor.execute("SELECT * FROM p2t WHERE headword = ?", (word1, ))
             return cursor.fetchone()            
@@ -490,11 +492,11 @@ class ReadToolPanel(wx.Panel):
         self._dictPanel = wx.Panel(self, wx.ID_ANY)
         dictSizer = wx.StaticBoxSizer(wx.StaticBox(self._dictPanel, wx.ID_ANY, u'พจนานุกรม'), orient=wx.HORIZONTAL)        
         self._paliDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.BitmapFromImage(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._paliDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
         self._thaiDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมไทย-ไทย'))        
+            wx.BitmapFromImage(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))        
         dictSizer.Add(self._paliDictButton, flag=wx.ALIGN_CENTER)
         dictSizer.Add(self._thaiDictButton, flag=wx.ALIGN_CENTER)                
         dictSizer.Add((5, -1))        
@@ -931,6 +933,14 @@ class SearchToolPanel(wx.Panel):
     @property
     def YoyingButton(self):
         return self._yoyingButton
+
+    @property
+    def NotesButton(self):
+        return self._notesButton
+        
+    @property
+    def StarButton(self):
+        return self._starButton
         
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -955,10 +965,14 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add((5,5))
         bottomSizer.Add(self._prevButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)    
         bottomSizer.Add(self._nextButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
-        bottomSizer.Add((20,-1), 0)
+        bottomSizer.Add((10,-1), 0)
+        bottomSizer.Add(self._starButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
+        bottomSizer.Add(self._notesButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)        
+        bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._exportButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
-        bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)    
-        
+        bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
+        bottomSizer.Add((5,-1), 0)
+                        
         mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         
@@ -1019,19 +1033,26 @@ class SearchToolPanel(wx.Panel):
         self._nextButton.Disable()
         
         self._importButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.IMPORT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+            wx.BitmapFromImage(wx.Image(constants.IMPORT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._importButton.SetToolTip(wx.ToolTip(_('Import data')))
         
         self._exportButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))         
+            wx.BitmapFromImage(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))         
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
         
-        self._readButton = buttons.GenBitmapTextButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.BOOKS_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)), _('Read'), size=(-1, 57))
+        self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.READ_IMAGE, wx.BITMAP_TYPE_PNG)))
+            
         self._aboutButton = wx.Button(self, wx.ID_ANY, _('About'), size=wx.DefaultSize)        
         self._aboutButton.SetToolTip(wx.ToolTip(_('About E-Tipitaka')))        
         
         self._checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'เปิดหน้าใหม่ทุกครั้ง')
+                
+        self._starButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._starButton.SetToolTip(wx.ToolTip(u'ที่คั่นหน้า'))
+
+        self._notesButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+        self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
+        
                 
 class ResultsWindow(wx.html.HtmlWindow):
     

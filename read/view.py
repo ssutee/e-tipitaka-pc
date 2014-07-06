@@ -280,6 +280,10 @@ class View(AuiBaseFrame):
     @property
     def StatusBar(self):
         return self._statusBar
+        
+    def FocusBody(self, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        return readPanel.Body
 
     def _SetupStatusBar(self):
         self._statusBar = self.CreateStatusBar()
@@ -490,18 +494,7 @@ class View(AuiBaseFrame):
                 window.Copy()
 
         def OnCopyReference(event):
-            clipdata = wx.TextDataObject()
-
-            ref = self._delegate.GetReference(code)
-
-            if isinstance(window, wx.html.HtmlWindow):
-                clipdata.SetText(window.SelectionToText() + '\n\n\n' + ref)
-            elif isinstance(window, wx.TextCtrl):
-                clipdata.SetText(window.GetStringSelection() + '\n\n\n' + ref)
-
-            wx.TheClipboard.Open()
-            wx.TheClipboard.SetData(clipdata)
-            wx.TheClipboard.Close()
+            self._delegate.CopyReference(window, code)
             
         def OnSelectAll(event):
             window.SelectAll()
@@ -513,12 +506,13 @@ class View(AuiBaseFrame):
             elif isinstance(window, wx.TextCtrl):
                 text = window.GetStringSelection()
             self._delegate.SearchSelection(text)
-                    
+
+        cmd = u'⌘' if 'wxMac' in wx.PlatformInfo else u'⌃'
         menu = wx.Menu()
-        search = menu.Append(constants.ID_SEARCH, u'ค้นหา')
+        search = menu.Append(constants.ID_SEARCH, u'ค้นหา' + 19*' ' + cmd + u'F')
         menu.AppendSeparator()
-        copy = menu.Append(constants.ID_COPY, u'คัดลอก')
-        copyref = menu.Append(constants.ID_COPY_REFERENCE, u'คัดลอก (อ้างอิง)')
+        copy = menu.Append(constants.ID_COPY, u'คัดลอก' + 17*' ' + cmd + u'C')
+        copyref = menu.Append(constants.ID_COPY_REFERENCE, u'คัดลอก (อ้างอิง)' + 6*' ' + cmd + u'⇧C')
         menu.AppendSeparator()        
         if isinstance(window, wx.TextCtrl):
             copy.Enable(window.CanCopy())
@@ -527,7 +521,7 @@ class View(AuiBaseFrame):
             copy.Enable(len(window.SelectionToText()) > 0)
             copyref.Enable(len(window.SelectionToText()) > 0)            
             
-        selectAll = menu.Append(constants.ID_SELECT_ALL, u'เลือกทั้งหมด')
+        selectAll = menu.Append(constants.ID_SELECT_ALL, u'เลือกทั้งหมด' + 11*' ' + cmd + u'A')
         wx.EVT_MENU(menu, constants.ID_COPY, OnCopy)
         wx.EVT_MENU(menu, constants.ID_COPY_REFERENCE, OnCopyReference)
         wx.EVT_MENU(menu, constants.ID_SELECT_ALL, OnSelectAll)

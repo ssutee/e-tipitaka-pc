@@ -1,3 +1,5 @@
+#-*- coding:utf-8 -*-
+
 import wx
 import os, sys, os.path
 import widgets
@@ -8,7 +10,7 @@ _ = i18n.language.ugettext
 
 from widgets import AuiBaseFrame
 import settings, constants, utils
-from dialogs import VolumesDialog
+from dialogs import VolumesDialog, BookmarkManagerDialog
 
 class View(AuiBaseFrame):
     
@@ -31,6 +33,14 @@ class View(AuiBaseFrame):
     @property
     def ImportButton(self):
         return self._topBar.ImportButton
+        
+    @property
+    def StarButton(self):
+        return self._topBar.StarButton
+        
+    @property
+    def NotesButton(self):
+        return self._topBar.NotesButton
         
     @property
     def SearchCtrl(self):
@@ -97,6 +107,8 @@ class View(AuiBaseFrame):
     def __init__(self):
         self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)        
         rect = utils.LoadSearchWindowPosition()
+
+        self._bookmarkMenu = None
 
         pos = 0,0
         if rect is not None:
@@ -202,6 +214,23 @@ class View(AuiBaseFrame):
             self._resultsWindow.ScrollLines(position)
         else:
             self._resultsWindow.Scroll(0, position)
+        
+    def ShowBookmarkPopup(self, x, y):
+        if self._bookmarkMenu is not None:
+            self._bookmarkMenu.Destroy()
+        self._bookmarkMenu = wx.Menu()
+        self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, u'จัดการคั่นหน้า'))        
+        self._bookmarkMenu.AppendSeparator()        
+        self._delegate.LoadBookmarks(self._bookmarkMenu)
+        self._topBar.PopupMenu(self._bookmarkMenu, (x,y))        
+    
+    def GetBookmarkMenuItem(self, itemId):
+        return self._bookmarkMenu.FindItemById(itemId)
+                
+    def OnMenuManageBookmarkSelected(self, event):
+        dlg = BookmarkManagerDialog(self, self._delegate.BookmarkItems)
+        dlg.ShowModal()
+        dlg.Destroy()        
         
     def ShowVolumesDialog(self, dataSource, volumes, OnDismiss):
         dialog = VolumesDialog(self, volumes, dataSource)

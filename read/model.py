@@ -464,7 +464,11 @@ class Model(object):
 
     @staticmethod
     def GetNoteListItems(code, text=u'', creation=False):
-        return [utils.ArabicToThai(u'เล่มที่ %2s ข้อที่ %2s' % (note.volume, note.page)) for note in Model.GetNotes(code, text, creation)]
+        
+        def trim(text):
+            return text if len(text) < 25 else text[:25] + u'...'
+        
+        return [utils.ArabicToThai(u'เล่มที่ %2s ข้อที่ %2s : %s' % (note.volume, note.page, trim(note.text))) for note in Model.GetNotes(code, text, creation)]
         
     @staticmethod
     def GetNotes(code, text=u'', creation=False):

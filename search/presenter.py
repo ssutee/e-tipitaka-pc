@@ -1,6 +1,10 @@
+#-*- coding:utf-8 -*-
+
 import search.model
-from dialogs import AboutDialog, UpdateDialog
+from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog
 import wx, zipfile, os, json
+import wx.richtext as rt
+from utils import BookmarkManager
 import i18n
 _ = i18n.language.ugettext
 
@@ -19,6 +23,7 @@ import read.presenter
 
 class Presenter(object):
     def __init__(self, model, view, interactor):
+        rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
         self._presenters = {}
         self._scrollPosition = 0
         self._shouldOpenNewWindow = False
@@ -27,11 +32,16 @@ class Presenter(object):
         self._model.Delegate = self
         self._view = view
         self._view.Delegate = self
+        self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
         interactor.Install(self, view)
         self.RefreshHistoryList(0)
         self.CheckNewUpdate()
         self._view.Start()
          
+    @property
+    def BookmarkItems(self):
+        return self._bookmarkManager.Items
+                  
     def ShowAboutDialog(self):
         dialog = AboutDialog(self._view)
         dialog.Center()
@@ -76,9 +86,9 @@ class Presenter(object):
         self._model.Search(keywords)
         
         return True
-        
-    def OpenBook(self):
-        self.Read(self._model.Code, 1, 0, 0, section=1, shouldHighlight=False, showBookList=True)
+                
+    def OpenBook(self, volume=1, page=0):
+        self.Read(self._model.Code, volume, page, 0, section=1, shouldHighlight=False, showBookList=True)
 
     def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):
         self._model.Read(code, volume, page, idx)
@@ -144,6 +154,8 @@ class Presenter(object):
         self._model = search.model.SearchModelCreator.Create(self, index)
         self._view.VolumesRadio.Disable() if index == 4 or index == 5 or index == 6 else self._view.VolumesRadio.Enable()
         self.RefreshHistoryList(index, self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
+        self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
+
         
     def SelectVolumes(self, index):
         
@@ -203,8 +215,12 @@ class Presenter(object):
     
     @db_session
     def RefreshHistoryList(self, index, alphabetSort=True, text=''):
+        selected = self._view.HistoryList.GetStringSelection()
         items = search.model.Model.GetHistoryListItems(index, alphabetSort, text)
         self._view.SetHistoryListItems(items)
+        if selected in items:
+            self._view.HistoryList.EnsureVisible(items.index(selected))
+            self._view.HistoryList.SetSelection(items.index(selected))        
     
     @db_session                
     def ReloadHistory(self, position):
@@ -228,12 +244,12 @@ class Presenter(object):
         dlg.Destroy()
         
     def ImportData(self):
+        ret = 0
         dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:        
             with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'r') as fz:
-                fz.extractall(constants.DATA_PATH)
-            
+                fz.extractall(constants.DATA_PATH)            
             # relocate old version data file
             for filename in os.listdir(constants.DATA_PATH):
                 fullpath = os.path.join(constants.DATA_PATH, filename)
@@ -241,10 +257,10 @@ class Presenter(object):
                     os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, filename))
                 elif os.path.isfile(fullpath) and filename.split('.')[-1] == 'log':
                     os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, '.'.join(filename.split('.')[:-1])+'.cfg'))
-                elif os.path.isfile(fullpath):
-                    os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))
-
+                elif os.path.isfile(fullpath) and not fullpath.endswith('.sqlite'):
+                    os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))                                            
             wx.MessageBox(_('Import data complete'), u'E-Tipitaka')
+            self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())                    
         dlg.Destroy()
         
     def InputSpecialCharacter(self, charCode):
@@ -309,3 +325,25 @@ class Presenter(object):
             utils.SaveReadWindowPosition(self._presenters[code][0].View)
             self._model.SaveHistory(code)
         self._view.SearchCtrl.SaveSearches()
+
+    def ShowBookmarkPopup(self, x, y):
+        self._view.ShowBookmarkPopup(x,y)
+        
+    def ShowNotesManager(self):        
+        dlg = NoteManagerDialog(self._view, self._model.Code)
+        if dlg.ShowModal() == wx.ID_OK:
+            volume, page = dlg.Result
+            self.OpenBook(volume, page)
+        dlg.Destroy()
+        
+        
+    def LoadBookmarks(self, menu):
+
+        def OnBookmark(event):
+            item = self._view.GetBookmarkMenuItem(event.GetId())
+            text = utils.ThaiToArabic(item.GetText())
+            tokens = text.split(' ')
+            volume, page = int(tokens[1]), int(tokens[3])            
+            self.OpenBook(volume, page)
+
+        self._bookmarkManager.MakeMenu(menu, OnBookmark)
