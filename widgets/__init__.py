@@ -983,7 +983,7 @@ class SearchToolPanel(wx.Panel):
         else:   
             self._text.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, u''))
 
-        langs = [_('Thai Royal'), _('Pali Siam'), _('Thai Mahamakut'), _('Thai Mahachula'), _('Thai Five Books'), _('Roman Script'), _('Thai Script')] 
+        langs = [_('Thai Royal'), _('Pali Siam'), _('Thai Mahamakut'), _('Thai Mahachula'), _('Thai Five Books'), _('Roman Script')] 
         self._langPanel = wx.Panel(self, wx.ID_ANY)
         langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, _('Languages')), orient=wx.HORIZONTAL)
         self._langComboBox = wx.ComboBox(self._langPanel, wx.ID_ANY, choices=langs, style=wx.CB_DROPDOWN|wx.CB_READONLY)
