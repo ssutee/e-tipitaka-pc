@@ -147,17 +147,13 @@ class PaliDictWindow(DictWindow):
     
     def ConnectDatabase(self):
         conn = sqlite3.connect(constants.PALI_DICT_DB)
-        conn.text_factory = str
         return conn
         
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
 
         text1 = text.replace(u'\u0e0d',u'\uf70f').replace(u'\u0e4d',u'\uf711').replace(u'ฐ',u'\uf700')
-        text1 = text1.encode('utf8','ignore')
-
         text2 = text.replace(u'\u0e0d',u'\uf70f').replace(u'\u0e4d',u'\uf711')
-        text2 = text2.encode('utf8','ignore')
 
         self.wordList.DeleteAllItems()
 
