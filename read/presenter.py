@@ -685,21 +685,30 @@ class Presenter(object):
         title1, title2 = self._model.GetTitles(volume)
         total = self._model.GetTotalPages(volume)
 
-        data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0}
+        data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0, 'sep':False}
         dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการพิมพ์', title1, title2, total, data)
         
         if dlg.ShowModal() == wx.ID_OK:
             font = utils.LoadFont(constants.READ_FONT, self._model.Code)
             text = u'<font face="%s" size=+2>' % ('TF Chiangsaen' if font is None else font.GetFaceName())
-            text += u"<div align=center><b>%s</b><br><b>%s</b><br><b>%s</b><br>หน้าที่ %s ถึง %s</div><hr>" % \
-                (self._model.GetTitle(), title1, title2, 
-                 utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')), 
-                 utils.ArabicToThai(str(data['to']+1).decode('utf8','ignore')))
+            
+            ptext = u'หน้าที่ %s ถึง %s' % (utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')), 
+                utils.ArabicToThai(str(data['to']+1).decode('utf8','ignore')))
+            if data['from'] == data['to']:
+                ptext = u'หน้าที่ %s' % (utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')))                
+            
+            text += u"<div align=center><b>%s</b><br><b>%s</b><br>%s</div><hr>" % (title1, title2, ptext)
             
             for p in range(data['from'], data['to']+1) if data['from'] <= data['to'] else range(data['from'], data['to']-1, -1):
                 content = self._model.GetPage(volume, p+1).replace(u'\t', u'&nbsp;'*7).replace(u'\x0a', u'<br>')
                 content = content.replace(u'\x0b', u'<br>').replace(u'\x0c', u'<br>').replace(u'\x0d', u'<br>')
-                text += u'%s<br>'%(content)
+
+                if data['sep']:
+                    text += u'<div align=right>หน้าที่ %s</div>'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore')))
+                    text += u'%s<br><br>'%(content)
+                else:
+                    text += u'%s<br>'%(content)
+                    
             text += u'</font>'
             self._printer.Print(text, "")
 

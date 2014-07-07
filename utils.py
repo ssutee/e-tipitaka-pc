@@ -119,6 +119,37 @@ def ArabicToThai(number):
             result += c
     return result
 
+def SaveTheme(theme=0):
+    with codecs.open(constants.THEME_CFG, 'w', 'utf8') as f:
+        f.write(unicode(theme))
+
+def LoadTheme():
+    theme = 0
+    if os.path.exists(constants.THEME_CFG):
+        with codecs.open(constants.THEME_CFG, 'r', 'utf8') as f:
+            theme = int(f.read().strip())
+    return theme    
+
+def LoadThemeForegroundHex():
+    if LoadTheme() == 1:
+        return '#5E4933'
+    return '#000000'
+
+def LoadThemeBackgroundHex():
+    if LoadTheme() == 1:
+        return '#F9EFD8'
+    return '#FFFFFF'
+    
+def LoadThemeForegroundColour():
+    if LoadTheme() == 1:
+        return wx.Colour(0x5E,0x49,0x33,0xFF)
+    return wx.BLACK
+
+def LoadThemeBackgroundColour():
+    if LoadTheme() == 1:
+        return wx.Colour(0xF9,0xEF,0xD8,0xFF)
+    return wx.WHITE
+
 def SaveFont(font, path, code=None):
     t = u'%s,%d,%d,%d,%d' % (font.GetFaceName(),font.GetFamily(),font.GetStyle(),font.GetWeight(),font.GetPointSize())
     path = path if code is None else path + '.' + code

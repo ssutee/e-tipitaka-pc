@@ -12,6 +12,28 @@ import read.model
 
 from pony.orm import db_session
 
+class DataXferCheckboxValidator(wx.PyValidator):
+    def __init__(self, data, key):
+        wx.PyValidator.__init__(self)
+        self.data = data
+        self.key = key
+
+    def Clone(self):
+        return DataXferCheckboxValidator(self.data, self.key)
+        
+    def TransferToWindow(self):
+        checkbox = self.GetWindow()
+        checkbox.SetValue(self.data.get(self.key, False))
+        return True
+
+    def TransferFromWindow(self):
+        checkbox = self.GetWindow()
+        self.data[self.key] = checkbox.GetValue()
+        return True
+
+    def Validate(self, win):
+        return True
+
 class DataXferPagesValidator(wx.PyValidator):
     def __init__(self, data, key):
         wx.PyValidator.__init__(self)
@@ -165,6 +187,8 @@ class PageRangeDialog(wx.Dialog):
         rangeSizer.Add(toChoice)
         rangeSizer.Add((20,-1), 1, flag=wx.EXPAND)
         
+        checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'แสดงเลขคั่นหน้า', validator=DataXferCheckboxValidator(data,'sep'))
+        
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
         btnOk = wx.Button(self, wx.ID_OK, u'ตกลง',size=(-1,-1))
         btnCancel = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก', size=(-1,-1))
@@ -183,6 +207,8 @@ class PageRangeDialog(wx.Dialog):
         mainSizer.Add(s3, flag=wx.EXPAND)
         mainSizer.Add((-1,5),flag=wx.EXPAND)
         mainSizer.Add(rangeSizer, flag=wx.EXPAND)
+        mainSizer.Add((-1,5),flag=wx.EXPAND)
+        mainSizer.Add(checkBox,flag=wx.ALIGN_CENTER)
         mainSizer.Add((-1,15),flag=wx.EXPAND)
         mainSizer.Add(btnSizer, flag=wx.EXPAND)
         mainSizer.Add((-1,10), 1, flag=wx.EXPAND)

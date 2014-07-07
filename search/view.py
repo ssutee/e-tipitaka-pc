@@ -79,6 +79,18 @@ class View(AuiBaseFrame):
     @property
     def YoyingButton(self):
         return self._topBar.YoyingButton
+        
+    @property
+    def PaliDictButton(self):
+        return self._topBar.PaliDictButton
+        
+    @property
+    def ThaiDictButton(self):
+        return self._topBar.ThaiDictButton
+                
+    @property
+    def ThemeComboBox(self):
+        return self._topBar.ThemeComboBox
                 
     @property
     def Font(self):
@@ -103,7 +115,7 @@ class View(AuiBaseFrame):
     @property
     def DeleteButton(self):
         return self._deleteButton
-
+        
     def __init__(self):
         self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)        
         rect = utils.LoadSearchWindowPosition()
@@ -128,6 +140,7 @@ class View(AuiBaseFrame):
         self.SetIcons(icon)
 
         self._resultsWindow = widgets.ResultsWindow(self)
+        self._resultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex()))
         
         self._font = utils.LoadFont(constants.SEARCH_FONT)
         if self._font and self._font.IsOk():

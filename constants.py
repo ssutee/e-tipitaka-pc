@@ -78,6 +78,8 @@ READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')
 SEARCH_RECT = os.path.join(CONFIG_PATH, 'rect_search.cfg')
 READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 
+THEME_CFG = os.path.join(CONFIG_PATH, 'theme.cfg')
+
 SEARCH_IMAGE = os.path.join(RESOURCES_DIR, 'search.png')
 NIKHAHIT_IMAGE = os.path.join(RESOURCES_DIR, 'nikhahit.gif')
 THOTHAN_IMAGE = os.path.join(RESOURCES_DIR, 'thothan.gif')

@@ -14,6 +14,7 @@ class Interactor(object):
         self.View.TopBar.ReadButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
         
         self.View.TopBar.LanguagesComboBox.Bind(wx.EVT_COMBOBOX, self.OnLanguagesComboBoxSelect)
+        self.View.ThemeComboBox.Bind(wx.EVT_COMBOBOX, self.OnThemeComboBoxSelect)
         
         self.View.ForwardButton.Bind(wx.EVT_BUTTON, self.OnForwardButtonClick)
         self.View.BackwardButton.Bind(wx.EVT_BUTTON, self.OnBackwardButtonClick)
@@ -34,6 +35,9 @@ class Interactor(object):
         self.View.NotesButton.Bind(wx.EVT_BUTTON, self.OnNotesButtonClick)
         self.View.StarButton.Bind(wx.EVT_BUTTON, self.OnStarButtonClick)
         
+        self.View.PaliDictButton.Bind(wx.EVT_BUTTON, self.OnPaliDictButtonClick)
+        self.View.ThaiDictButton.Bind(wx.EVT_BUTTON, self.OnThaiDictButtonClick)
+        
         self.View.TopBar.CheckBox.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxChange)
         
         self.View.HistoryList.Bind(wx.EVT_LISTBOX, self.OnHistoryListSelect)
@@ -50,6 +54,9 @@ class Interactor(object):
         
     def OnLanguagesComboBoxSelect(self, event):
         self.Presenter.SelectLanguage(event.GetSelection())
+
+    def OnThemeComboBoxSelect(self, event):
+        self.Presenter.SelectTheme(event.GetSelection())
 
     def OnForwardButtonClick(self, event):
         self.Presenter.NextPagination()
@@ -106,3 +113,9 @@ class Interactor(object):
         
     def OnNotesButtonClick(self, event):
         self.Presenter.ShowNotesManager()
+
+    def OnPaliDictButtonClick(self, event):
+        self.Presenter.OpenPaliDict()
+        
+    def OnThaiDictButtonClick(self, event):
+        self.Presenter.OpenThaiDict()

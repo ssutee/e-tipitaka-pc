@@ -578,6 +578,8 @@ class ReadPanel(wx.Panel):
         self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
+        self._body.SetForegroundColour(utils.LoadThemeForegroundColour())
+        self._body.SetBackgroundColour(utils.LoadThemeBackgroundColour())
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
         self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
@@ -590,7 +592,7 @@ class ReadPanel(wx.Panel):
             self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)        
             self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
         
-        self._paintPanel = wx.Panel(self, wx.ID_ANY)        
+        self._paintPanel = wx.Panel(self, wx.ID_ANY)                
 
         self._markButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
@@ -903,6 +905,10 @@ class SearchToolPanel(wx.Panel):
         return self._langComboBox
 
     @property
+    def ThemeComboBox(self):
+        return self._themeComboBox
+
+    @property
     def ReadButton(self):
         return self._readButton
         
@@ -938,6 +944,14 @@ class SearchToolPanel(wx.Panel):
     def StarButton(self):
         return self._starButton
         
+    @property
+    def PaliDictButton(self):
+        return self._paliDictButton
+        
+    @property
+    def ThaiDictButton(self):
+        return self._thaiDictButton
+        
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -947,18 +961,17 @@ class SearchToolPanel(wx.Panel):
         topSizer.Add((5,5))
         topSizer.Add(self._text, 1, wx.ALIGN_CENTER|wx.RIGHT, 3)
         topSizer.Add(self._findButton, flag=wx.ALIGN_CENTER)
+        topSizer.Add(self._volumesRadio, 0 ,wx.ALIGN_CENTER|wx.EXPAND|wx.LEFT|wx.RIGHT, 5)        
         topSizer.Add((5,5))
         topSizer.Add(self._aboutButton, 0, flag=wx.ALIGN_CENTER)
         
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
+        bottomSizer.Add(self._langPanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
+        bottomSizer.Add((5,5))
         bottomSizer.Add(self._readButton, flag=wx.ALIGN_BOTTOM)
         bottomSizer.Add((5,5))        
         bottomSizer.Add(self._checkBox, flag=wx.ALIGN_CENTER)
         bottomSizer.Add((10,5))
-        bottomSizer.Add(self._langPanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
-        bottomSizer.Add((5,5))
-        bottomSizer.Add(self._volumesRadio, 0 ,flag=wx.ALIGN_BOTTOM|wx.EXPAND)
-        bottomSizer.Add((5,5))
         bottomSizer.Add(self._prevButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)    
         bottomSizer.Add(self._nextButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add((10,-1), 0)
@@ -967,8 +980,12 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._exportButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
-        bottomSizer.Add((5,-1), 0)
-                        
+        bottomSizer.Add((10,-1), 0)
+        bottomSizer.Add(self._paliDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
+        bottomSizer.Add(self._thaiDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
+        bottomSizer.Add((10,-1), 0)
+        bottomSizer.Add(self._themePanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
+        
         mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         
@@ -985,7 +1002,7 @@ class SearchToolPanel(wx.Panel):
 
         langs = [_('Thai Royal'), _('Pali Siam'), _('Thai Mahamakut'), _('Thai Mahachula'), _('Thai Five Books'), _('Roman Script')] 
         self._langPanel = wx.Panel(self, wx.ID_ANY)
-        langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, _('Languages')), orient=wx.HORIZONTAL)
+        langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, u'เลือก'), orient=wx.HORIZONTAL)
         self._langComboBox = wx.ComboBox(self._langPanel, wx.ID_ANY, choices=langs, style=wx.CB_DROPDOWN|wx.CB_READONLY)
         self._langComboBox.SetStringSelection(langs[0])
         langSizer.Add(self._langComboBox)
@@ -1036,7 +1053,7 @@ class SearchToolPanel(wx.Panel):
             wx.BitmapFromImage(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))         
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
         
-        self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.READ_IMAGE, wx.BITMAP_TYPE_PNG)))
+        self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.BOOKS_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
             
         self._aboutButton = wx.Button(self, wx.ID_ANY, _('About'), size=wx.DefaultSize)        
         self._aboutButton.SetToolTip(wx.ToolTip(_('About E-Tipitaka')))        
@@ -1048,7 +1065,23 @@ class SearchToolPanel(wx.Panel):
 
         self._notesButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
+                                
+        self._paliDictButton = wx.BitmapButton(self, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._paliDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
         
+        self._thaiDictButton = wx.BitmapButton(self, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))                        
+                
+        themes = [u'ขาว', u'น้ำตาลอ่อน'] 
+        self._themePanel = wx.Panel(self, wx.ID_ANY)
+        themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, u'สีพื้นหลัง'), orient=wx.HORIZONTAL)
+        self._themeComboBox = wx.ComboBox(self._themePanel, wx.ID_ANY, choices=themes, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+        self._themeComboBox.SetStringSelection(themes[utils.LoadTheme()])
+        themeSizer.Add(self._themeComboBox)
+        self._themePanel.SetSizer(themeSizer)
+        themeSizer.Fit(self._themePanel)                
                 
 class ResultsWindow(wx.html.HtmlWindow):
     

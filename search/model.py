@@ -146,7 +146,7 @@ class Model(object):
                 self._skimmedItems.remove(idx)            
             self._readItems.append(idx)
         
-        self._ReloadDisplay()        
+        self.ReloadDisplay()        
 
     def Skim(self, volume, page, code):
         if self.Code != code:
@@ -156,9 +156,9 @@ class Model(object):
             if int(result['volume']) == volume and int(result['page']) == page:
                 if (idx+1) not in self._skimmedItems and (idx+1) not in self._readItems:
                     self._skimmedItems.append(idx+1)
-                    self._ReloadDisplay()
+                    self.ReloadDisplay()
 
-    def _ReloadDisplay(self):
+    def ReloadDisplay(self):
         self.Display(self._currentPagination)
 
     def Search(self, keywords):
@@ -250,15 +250,17 @@ class Model(object):
                 link % (self._GetEntry(idx, volume ,page)), info)
     
     def _MakeHtmlPagination(self, pages, current):
-        text = _('All results') + '<br>'
+        text = u'<tr>'
         for idx in range(1, pages+1):            
             if idx == current:
-                text += u'<b>%s</b> '%(utils.ArabicToThai(unicode(idx)))
+                text += u'<td bgcolor="#4688DF"><b><font color="white">%s</font></b></td> '%(utils.ArabicToThai(unicode(idx)))
             else:
-                p = u'<a href="n:%d_%d_%d">%s</a> ' % \
-                    (idx, constants.ITEMS_PER_PAGE, len(self._results), utils.ArabicToThai(unicode(idx)))
-                text += p if idx not in self._clickedPages else ('<b><i>%s</i></b>' % (p))                    
-        return '<div align="center">' + text + '</div>'        
+                p = u'<a href="n:%d_%d_%d"><font color="%s">%s</font></a>' % \
+                    (idx, constants.ITEMS_PER_PAGE, len(self._results), 
+                    "black" if idx not in self._clickedPages else "#BFBFBF", utils.ArabicToThai(unicode(idx)))
+                text += u'<td>' + p + u'</td>'                
+        text += '</tr>'
+        return '<div align="center">'+_('All results') + '<table cellspacing="1" cellpadding="2"><tr>' + text + '</tr></table></div>'
                 
     def _MakeHtmlSummary(self):
         counts = self._GetResultSectionCounts()
@@ -352,8 +354,8 @@ class Model(object):
             text += u'<div>' + self._MakeHtmlEntry(idx, volume, page) + \
                 self._MakeHtmlExcerpts(excerpts) + self._MakeHtmlItemInfo(volume, items) + u'</div><br>'
                 
-        return self._MakeHtmlSummary() + self._MakeHtmlHeader(mark) + self.MakeHtmlSuggestion(found=True) \
-            + text + '<br>' + self._MakeHtmlPagination(pages, current);
+        return u'<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex()) + self._MakeHtmlSummary() + self._MakeHtmlHeader(mark) + self.MakeHtmlSuggestion(found=True) \
+            + text + '<br>' + self._MakeHtmlPagination(pages, current) + '</body></html>'
         
     def GetSuggestion(self):
         keywords = self._keywords.replace('+',' ')

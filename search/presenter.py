@@ -14,7 +14,7 @@ import pony.orm
 from pony.orm import db_session
 
 from distutils.version import LooseVersion, StrictVersion
-import settings
+import settings, widgets
 
 import read.model
 import read.interactor
@@ -28,6 +28,8 @@ class Presenter(object):
         self._scrollPosition = 0
         self._shouldOpenNewWindow = False
         self._refreshHistoryList = True
+        self._paliDictWindow = None
+        self._thaiDictWindow = None
         self._model = model        
         self._model.Delegate = self
         self._view = view
@@ -122,7 +124,7 @@ class Presenter(object):
 
     def SearchWillStart(self, keywords):
         self._view.DisableSearchControls()
-        self._view.SetPage(_('Searching data, please wait...'))
+        self._view.SetPage('<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex()) + _('Searching data, please wait...') + '</body></html>')
         self._view.SetStatusText(_('Searching data'), 0)
         self._view.SetStatusText('', 1)
         self._view.SetStatusText('', 2)
@@ -136,7 +138,8 @@ class Presenter(object):
         if len(results) > 0:
            self.ShowResults(1)
         else:
-            self._view.SetPage(self._model.NotFoundMessage()+self._model.MakeHtmlSuggestion(found=False))
+            html = '<html><body bgcolor="%s">%s</body></html>' % (utils.LoadThemeBackgroundHex(), self._model.NotFoundMessage()+self._model.MakeHtmlSuggestion(found=False))
+            self._view.SetPage(html)
             self._view.EnableSearchControls()
             self._view.EnableHistoryControls()                
             
@@ -156,6 +159,10 @@ class Presenter(object):
         self.RefreshHistoryList(index, self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
         self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
 
+    def SelectTheme(self, index):
+        utils.SaveTheme(index)
+        self._view.ResultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex()))
+        self._model.ReloadDisplay()
         
     def SelectVolumes(self, index):
         
@@ -186,12 +193,13 @@ class Presenter(object):
         self._view.SetProgress((progress * 100.0) / constants.ITEMS_PER_PAGE)
         
     def DisplayWillStart(self):
-        self._view.SetPage(u'')
+        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex()))
         self._view.SetProgress(0)
         self._view.SetStatusText(_('Displaying results'), 0)
         
     def DisplayDidFinish(self, key, current):
-        self._view.SetPage(self._model.MakeHtmlResults(current))
+        html = self._model.MakeHtmlResults(current)
+        self._view.SetPage(html)
         self._view.SetProgress(0)        
         mark = self._model.GetMark(current)
         self._view.SetStatusText('', 0)        
@@ -347,3 +355,31 @@ class Presenter(object):
             self.OpenBook(volume, page)
 
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
+        
+    def OpenPaliDict(self):
+
+        def OnDictClose(event):
+            self._paliDictWindow = None
+            event.Skip()
+
+        if self._paliDictWindow is None:
+            self._paliDictWindow = widgets.PaliDictWindow(self._view)
+            self._paliDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._paliDictWindow.SetTitle(u'พจนานุกรม บาลี-ไทย')
+
+        self._paliDictWindow.Show()        
+        self._paliDictWindow.Raise()
+
+    def OpenThaiDict(self):
+
+        def OnDictClose(event):
+            self._thaiDictWindow = None
+            event.Skip()
+
+        if self._thaiDictWindow is None:
+            self._thaiDictWindow = widgets.ThaiDictWindow(self._view)
+            self._thaiDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._thaiDictWindow.SetTitle(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน')
+
+        self._thaiDictWindow.Show()        
+        self._thaiDictWindow.Raise()
