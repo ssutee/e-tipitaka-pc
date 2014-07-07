@@ -961,7 +961,7 @@ class SearchToolPanel(wx.Panel):
         topSizer.Add((5,5))
         topSizer.Add(self._text, 1, wx.ALIGN_CENTER|wx.RIGHT, 3)
         topSizer.Add(self._findButton, flag=wx.ALIGN_CENTER)
-        topSizer.Add(self._volumesRadio, 0 ,wx.ALIGN_CENTER|wx.EXPAND|wx.LEFT|wx.RIGHT, 5)        
+        topSizer.Add(self._volumesRadio, 0 ,wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, 5)        
         topSizer.Add((5,5))
         topSizer.Add(self._aboutButton, 0, flag=wx.ALIGN_CENTER)
         
@@ -984,7 +984,7 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add(self._paliDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._thaiDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
         bottomSizer.Add((10,-1), 0)
-        bottomSizer.Add(self._themePanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
+        bottomSizer.Add(self._themePanel, 0, flag=wx.ALIGN_BOTTOM)
         
         mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
