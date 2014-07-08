@@ -119,6 +119,9 @@ class Presenter(object):
         self._currentVolume = 0
         self._code = code
         self._keywords = None
+        self._paliDictWindow = None
+        self._thaiDictWindow = None
+        
         self._comparePage = {}
         self._compareVolume = {}
         
@@ -144,8 +147,6 @@ class Presenter(object):
 
         self._SetupPrinter()
         
-        self._paliDictWindow = None
-        self._thaiDictWindow = None
         
     @property
     def View(self):
@@ -158,6 +159,18 @@ class Presenter(object):
     @property
     def CurrentPage(self):
         return self._currentPage
+        
+    @property
+    def FocusVolume(self):
+        return self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
+        
+    @property
+    def FocusPage(self):
+        return self._currentPage if self._lastFocus is None else self._comparePage[self._lastFocus]        
+        
+    @property
+    def LastFocus(self):
+        return self._lastFocus
         
     @property
     def BookmarkItems(self):
@@ -190,18 +203,21 @@ class Presenter(object):
         self._view.Raise()
         self._view.Iconize(False)
 
-    def _LoadNoteText(self, volume, page):
-        self._view.NoteTextCtrl.SelectAll()
-        self._view.NoteTextCtrl.DeleteSelection()        
-        self._view.NoteTextCtrl.EndAllStyles()
+    def _LoadNoteText(self, volume, page, code=None):
+        textCtrl = self._view.NoteTextCtrl(code)
+
+        textCtrl.SelectAll()
+        textCtrl.DeleteSelection()        
+        textCtrl.EndAllStyles()
+
         path = os.path.join(constants.NOTES_PATH, self._model.Code)
         if not os.path.exists(path):
             os.makedirs(path)  
         filename = os.path.join(path, '%02d-%04d.xml'%(volume, page))
-        self._view.NoteTextCtrl.SetFilename(filename)
+        textCtrl.SetFilename(filename)
         if os.path.exists(filename):
-            self._view.NoteTextCtrl.LoadFile(filename, rt.RICHTEXT_TYPE_XML)        
-        self._view.NoteTextCtrl.SetModified(False)
+            textCtrl.LoadFile(filename, rt.RICHTEXT_TYPE_XML)        
+        textCtrl.SetModified(False)
 
     def _MarkKey(self, code, volume, page):
         code = self._model.Code if code is None else code
@@ -272,11 +288,13 @@ class Presenter(object):
         self._findTextHandler.Reset()        
         currentCode = self._model.Code
         self._model.Code = code
-
+        
         if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
 
         self._compareVolume[code] = volume        
-        self._comparePage[code] = page
+        self._comparePage[code] = page        
+        
+        self._LoadNoteText(volume, page, code)
                 
         self._ToggleNavigationButtons(self._compareVolume[code], code)
                 
@@ -489,6 +507,9 @@ class Presenter(object):
     def ToggleBookList(self):
         self._view.ToggleBookList()
         
+    def ToggleNotePanel(self, code):
+        self._view.ToggleNotePanel(code)
+        
     def ShowFontDialog(self):
         code = self._lastFocus if self._lastFocus else self._model.Code
         curFont = utils.LoadFont(constants.READ_FONT, code)
@@ -556,43 +577,43 @@ class Presenter(object):
     def UnmarkText(self, code):
         self.MarkText(code, False)
         
-    def IndentLessNoteText(self):
+    def IndentLessNoteText(self, textCtrl):
         attr = rt.TextAttrEx()
         attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
-        ip = self._view.NoteTextCtrl.GetInsertionPoint()
-        if self._view.NoteTextCtrl.GetStyle(ip, attr):
+        ip = textCtrl.GetInsertionPoint()
+        if textCtrl.GetStyle(ip, attr):
             r = rt.RichTextRange(ip, ip)
-            if self._view.NoteTextCtrl.HasSelection():
-                r = self._view.NoteTextCtrl.GetSelectionRange()
+            if textCtrl.HasSelection():
+                r = textCtrl.GetSelectionRange()
 
         if attr.GetLeftIndent() >= 100:
             attr.SetLeftIndent(attr.GetLeftIndent() - 100)
             attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
-            self._view.NoteTextCtrl.SetStyle(r, attr)
+            textCtrl.SetStyle(r, attr)
     
-    def IndentMoreNoteText(self):
+    def IndentMoreNoteText(self, textCtrl):
         attr = rt.TextAttrEx()
         attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
-        ip = self._view.NoteTextCtrl.GetInsertionPoint()
-        if self._view.NoteTextCtrl.GetStyle(ip, attr):
+        ip = textCtrl.GetInsertionPoint()
+        if textCtrl.GetStyle(ip, attr):
             r = rt.RichTextRange(ip, ip)
-            if self._view.NoteTextCtrl.HasSelection():
-                r = self._view.NoteTextCtrl.GetSelectionRange()
+            if textCtrl.HasSelection():
+                r = textCtrl.GetSelectionRange()
 
             attr.SetLeftIndent(attr.GetLeftIndent() + 100)
             attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
-            self._view.NoteTextCtrl.SetStyle(r, attr)
+            textCtrl.SetStyle(r, attr)
             
-    def ApplyFontToNoteText(self):
-        if not self._view.NoteTextCtrl.HasSelection():
+    def ApplyFontToNoteText(self, textCtrl):
+        if not textCtrl.HasSelection():
             return
 
-        r = self._view.NoteTextCtrl.GetSelectionRange()
+        r = textCtrl.GetSelectionRange()
         fontData = wx.FontData()
         fontData.EnableEffects(False)
         attr = rt.TextAttrEx()
         attr.SetFlags(rt.TEXT_ATTR_FONT)
-        if self._view.NoteTextCtrl.GetStyle(self._view.NoteTextCtrl.GetInsertionPoint(), attr):
+        if textCtrl.GetStyle(textCtrl.GetInsertionPoint(), attr):
             fontData.SetInitialFont(attr.GetFont())
 
         dlg = wx.FontDialog(self._view, fontData)
@@ -602,14 +623,14 @@ class Presenter(object):
             if font:
                 attr.SetFlags(rt.TEXT_ATTR_FONT)
                 attr.SetFont(font)
-                self._view.NoteTextCtrl.SetStyle(r, attr)
+                textCtrl.SetStyle(r, attr)
         dlg.Destroy()
 
-    def ApplyFontColorToNoteText(self):
+    def ApplyFontColorToNoteText(self, textCtrl):
         colourData = wx.ColourData()
         attr = rt.TextAttrEx()
         attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
-        if self._view.NoteTextCtrl.GetStyle(self._view.NoteTextCtrl.GetInsertionPoint(), attr):
+        if textCtrl.GetStyle(textCtrl.GetInsertionPoint(), attr):
             colourData.SetColour(attr.GetTextColour())
 
         dlg = wx.ColourDialog(self._view, colourData)
@@ -617,13 +638,13 @@ class Presenter(object):
             colourData = dlg.GetColourData()
             colour = colourData.GetColour()
             if colour:
-                if not self._view.NoteTextCtrl.HasSelection():
-                    self._view.NoteTextCtrl.BeginTextColour(colour)
+                if not textCtrl.HasSelection():
+                    textCtrl.BeginTextColour(colour)
                 else:
-                    r = self._view.NoteTextCtrl.GetSelectionRange()
+                    r = textCtrl.GetSelectionRange()
                     attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
                     attr.SetTextColour(colour)
-                    self._view.NoteTextCtrl.SetStyle(r, attr)
+                    textCtrl.SetStyle(r, attr)
         dlg.Destroy()
         
     def _CurrentMarkKey(self, code):
@@ -640,11 +661,16 @@ class Presenter(object):
         return os.path.join(path, '%02d-%04d.json'%(volume, page))        
     
     @db_session            
-    def SaveNoteText(self):
-        self._view.NoteTextCtrl.SaveFile(self._view.NoteTextCtrl.GetFilename(), rt.RICHTEXT_TYPE_XML)
-        self._view.NoteTextCtrl.SetModified(False)
-        note = Model.Note(volume=self._currentVolume, page=self._currentPage, code=self._model.Code, 
-            text=self._view.NoteTextCtrl.GetValue(), filename=self._view.NoteTextCtrl.GetFilename())
+    def SaveNoteText(self, code, textCtrl):        
+        textCtrl.SaveFile(textCtrl.GetFilename(), rt.RICHTEXT_TYPE_XML)
+        textCtrl.SetModified(False)
+
+        volume = self._currentVolume if code is None else self._compareVolume[code]
+        page = self._currentPage if code is None else self._comparePage[code]        
+
+        note = Model.Note(volume=volume, page=page, 
+            code=code if code is not None else self._model.Code, 
+            text=textCtrl.GetValue(), filename=textCtrl.GetFilename())
                         
     def SaveMarkedText(self, code):
         key = self._CurrentMarkKey(code)                
@@ -673,7 +699,7 @@ class Presenter(object):
         return any(map(lambda x:x[0], self._marks.get(self._CurrentMarkKey(code), [])))
         
     def ShowBookmarkPopup(self, x, y):
-        self._view.ShowBookmarkPopup(x,y)
+        self._view.ShowBookmarkPopup(x, y, self._lastFocus)
         
     def ShowPrintDialog(self):
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
@@ -749,15 +775,20 @@ class Presenter(object):
     
         self._model.Code = currentCode        
         
-    def LoadBookmarks(self, menu):
+    def LoadBookmarks(self, menu, code):
         
         def OnBookmark(event):
             item = self._view.GetBookmarkMenuItem(event.GetId())
             text = utils.ThaiToArabic(item.GetText())
             tokens = text.split(' ')
-            volume, page = int(tokens[1]), int(tokens[3])            
-            self.OpenBook(volume, page, selectItem=True)
-        
+            volume, page = int(tokens[1]), int(tokens[3])    
+            if code is None:        
+                self.OpenBook(volume, page, selectItem=True)
+            else:
+                self.OpenAnotherBook(code, volume, page)
+                
+        self._bookmarkManager.Save()                
+        self._bookmarkManager = BookmarkManager(self._view, code)
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
         
     def SearchSelection(self, selection=None):
@@ -812,11 +843,16 @@ class Presenter(object):
         if self._thaiDictWindow is not None:
             self._thaiDictWindow.Close()
             self._thaiDictWindow = None        
-            
-        dlg = dialogs.NoteManagerDialog(self._view, self._model.Code)
+        
+        code = self._lastFocus if self._lastFocus is not None else self._model.Code
+                
+        dlg = dialogs.NoteManagerDialog(self._view.ReadPanel(self._lastFocus), code)
         if dlg.ShowModal() == wx.ID_OK:
             volume, page = dlg.Result
-            self.OpenBook(volume, page)
+            if self._lastFocus is not None:
+                self.OpenAnotherBook(code, volume, page)  
+            else:
+                self.OpenBook(volume, page, selectItem=True)
         dlg.Destroy()
 
     def _ToggleCompareComboBox(self, volume):

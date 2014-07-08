@@ -7,6 +7,7 @@ import wx.html
 import sys, os, os.path, sys, codecs, re, cPickle, sqlite3
 import wx.richtext as rt
 import wx.lib.buttons as buttons
+from wx.lib.splitter import MultiSplitterWindow
 import constants, utils
 import i18n, images
 import abc
@@ -514,6 +515,8 @@ class ReadPanel(wx.Panel):
     def __init__(self, parent, code, font, delegate, *args, **kwargs):
         super(ReadPanel, self).__init__(parent, *args, **kwargs)
 
+        self._parentSize = parent.GetSize()
+
         self._delegate = delegate
         self._code = code
         
@@ -550,26 +553,34 @@ class ReadPanel(wx.Panel):
         return self._body
 
     @property
+    def NotePanel(self):
+        return self._notePanel
+
+    @property
     def MarkButton(self):
         return self._markButton
 
     @property
     def UnmarkButton(self):
         return self._unmarkButton
+        
+    @property
+    def ToggleNoteButton(self):
+        return self._toggleNoteButton
 
     def SetContentFont(self, font):
         self._body.SetFont(font)
         
     def _CreateAttributes(self):
-        divider = 2 if self._delegate.IsSmallScreen() else 1
+        divider = 2.0 if self._delegate.IsSmallScreen() else 1
         if 'wxMSW' in wx.PlatformInfo:
-            self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 80/divider), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
-            self._title.SetFont(wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
+            self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 58/divider), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
+            self._title.SetFont(wx.Font(17, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
             self._title.SetForegroundColour(wx.BLUE)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
             self._title.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)            
         else:
-            self._title = wx.html.HtmlWindow(self, size=(-1, 80/divider), style=wx.html.HW_SCROLLBAR_NEVER)
+            self._title = wx.html.HtmlWindow(self, size=(-1, 58/divider), style=wx.html.HW_SCROLLBAR_NEVER)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._page = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
@@ -615,15 +626,27 @@ class ReadPanel(wx.Panel):
         self._clearButton.SetToolTip(wx.ToolTip(u'ลบบันทึกการระบายสีข้อความทั้งหมด'))
         self._clearButton.Bind(wx.EVT_BUTTON, self.OnClearButtonClick)
         self._clearButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateClearButton)
-
+        
+        self._toggleNoteButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))        
+        self._toggleNoteButton.SetToolTip(wx.ToolTip(u'เปิด/ปิด บันทึกข้อความเพิ่มเติม'))
+        self._toggleNoteButton.Bind(wx.EVT_BUTTON, self.OnToggleNoteButtonClick)
+        
         paintSizer = wx.BoxSizer(wx.HORIZONTAL)
         paintSizer.Add(self._markButton)
         paintSizer.Add(self._unmarkButton)
         paintSizer.Add((10,-1))
         paintSizer.Add(self._saveButton)
         paintSizer.Add(self._clearButton)
-        self._paintPanel.SetSizer(paintSizer)      
+        paintSizer.Add((10,-1))
+        paintSizer.Add(self._toggleNoteButton)                
+        self._paintPanel.SetSizer(paintSizer)     
         
+        self._notePanel = NotePanel(self, self._code)
+              
+    def ExtraLayout(self):
+        pass
+                        
     def _DoLayout(self):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
         
@@ -643,10 +666,12 @@ class ReadPanel(wx.Panel):
         
         self._mainSizer.Add(self._paintPanel, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
         
-        self._mainSizer.Add(self._body, 10, wx.EXPAND|wx.LEFT, 15)
+        self._mainSizer.Add(self._body, 1, wx.EXPAND|wx.LEFT, 15)
+        self.ExtraLayout()
+        self._mainSizer.Add(self._notePanel, 0, wx.EXPAND)
         
         self.SetSizer(self._mainSizer)
-        
+
     def OnTextBodySetFocus(self, event):
         self.Delegate.SetFocus(True, self._code)
         event.Skip()
@@ -673,6 +698,9 @@ class ReadPanel(wx.Panel):
         
     def OnClearButtonClick(self, event):
         self.Delegate.ClearMarkedText(self._code)
+        
+    def OnToggleNoteButtonClick(self, event):
+        self.Delegate.ToggleNotePanel(self._code)
         
     def OnSaveButtonClick(self, event):
         self.Delegate.SaveMarkedText(self._code)
@@ -706,10 +734,10 @@ class ReadPanel(wx.Panel):
         if 'wxMSW' in wx.PlatformInfo:
             self._title.SetValue(title1 if self._delegate.IsSmallScreen() else title1 + '\n' + title2)
         elif self._delegate.IsSmallScreen():
-            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>''' % (title1))            
+            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="5">%s</font></div>''' % (title1))            
         else:
-            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="6">%s</font></div>
-                <div align="center"><font color="#0000FF" size="6">%s</font></div>''' % (title1, title2))
+            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="5">%s</font></div>
+                <div align="center"><font color="#0000FF" size="5">%s</font></div>''' % (title1, title2))
     
     def SetPageNumber(self, number):        
         if number is None:
@@ -745,11 +773,10 @@ class ReadWithReferencesPanel(ReadPanel):
     def _CreateAttributes(self):
         super(ReadWithReferencesPanel, self)._CreateAttributes()
         self._refs = ReferencesWindow(self, size=(-1, 40))
-        
-    def _DoLayout(self):
-        super(ReadWithReferencesPanel, self)._DoLayout()        
+
+    def ExtraLayout(self):
         self._mainSizer.Add(self._refs, 0, wx.EXPAND|wx.ALL, 5)
-        
+                
     def SetBody(self, text):
         super(ReadWithReferencesPanel, self).SetBody(text)
         refs = re.findall(ur'[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+', text, re.U)
@@ -758,14 +785,19 @@ class ReadWithReferencesPanel(ReadPanel):
             for ref in refs:
                 ref = ref.strip().strip(u')').strip(u'(').strip(u',').strip()
                 html += u'<a href="%s">%s</a>  '%(ref, ref)
+            self._refs.Show()
             self._refs.SetPage(html)
         else:
+            self._refs.Hide()
             self._refs.SetPage(u'')    
+        self.Layout()
 
 class NotePanel(wx.Panel):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, code, *args, **kwargs):
         super(NotePanel, self).__init__(parent, *args, **kwargs)
+        self._code = code
         self._CreateAttributes()
+        self._BindAttributes()
         
     @property
     def BoldItem(self):
@@ -818,11 +850,28 @@ class NotePanel(wx.Panel):
     @property
     def NoteTextCtrl(self):
         return self._noteTextCtrl
+
+    @property
+    def View(self):
+        return self.GetParent().GetParent()
+        
+    @property
+    def Parent(self):
+        return self.GetParent()
+        
+    @property
+    def Delegate(self):
+        return self.Parent.Delegate
+
+    def _DoBind(self, item, handler, updateUI=None):
+        self.View.Bind(wx.EVT_TOOL, handler, item)
+        if updateUI is not None:
+            self.View.Bind(wx.EVT_UPDATE_UI, updateUI, item)
         
     def _CreateAttributes(self):
         self.SetBackgroundColour('white')
         self._sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Notes')), orient=wx.VERTICAL)
-        self._noteTextCtrl = rt.RichTextCtrl(self, style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
+        self._noteTextCtrl = rt.RichTextCtrl(self, size=(-1, 100), style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
         self._noteTextCtrl.SetModified(False)
         
         self._toolBar = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
@@ -853,6 +902,80 @@ class NotePanel(wx.Panel):
         self._keyEnterItem = self._toolBar.AddTool(-1, images._rt_enter.GetBitmap(), shortHelpString=_("Newline"))
         
         self._toolBar.Realize()
+        
+    def _BindAttributes(self):
+        self._DoBind(self._keyEnterItem, self.OnEnter)
+        self._DoBind(self._indentLessItem, self.OnIndentLess)
+        self._DoBind(self._indentMoreItem, self.OnIndentMore)
+        self._DoBind(self._fontItem, self.OnFont)
+        self._DoBind(self._fontColorItem, self.OnFontColor)                
+    
+        self._DoBind(self._saveItem, self.OnSave, self.OnUpdateSave)    
+        self._DoBind(self._boldItem, self.OnBold, self.OnUpdateBold)
+        self._DoBind(self._italicItem, self.OnItalic, self.OnUpdateItalic)
+        self._DoBind(self._underlineItem, self.OnUnderline, self.OnUpdateUnderline)
+
+        self._DoBind(self._alignLeftItem, self.OnAlignLeft, self.OnUpdateAlignLeft)
+        self._DoBind(self._alignRightItem, self.OnAlignRight, self.OnUpdateAlignRight)
+        self._DoBind(self._centerItem, self.OnCenter, self.OnUpdateCenter)
+                    
+    def OnSave(self, event):
+        self.Delegate.SaveNoteText(self._code, self.Parent.NotePanel.NoteTextCtrl)
+        
+    def OnUpdateSave(self, event):
+        event.Enable(self.Parent.NotePanel.NoteTextCtrl.IsModified())
+                                        
+    def OnBold(self, event):
+        self.Parent.NotePanel.NoteTextCtrl.ApplyBoldToSelection()
+
+    def OnUpdateBold(self, event):
+        event.Check(self.Parent.NotePanel.NoteTextCtrl.IsSelectionBold())        
+
+    def OnEnter(self, event):
+        self.Parent.NotePanel.NoteTextCtrl.Newline()
+        
+    def OnItalic(self, event):
+        self.Parent.NotePanel.NoteTextCtrl.ApplyItalicToSelection()
+
+    def OnUpdateItalic(self, event):
+        event.Check(self.Parent.NotePanel.NoteTextCtrl.IsSelectionItalics())
+
+    def OnUnderline(self, event):
+        self.Parent.NotePanel.NoteTextCtrl.ApplyUnderlineToSelection()
+
+    def OnUpdateUnderline(self, event):
+        event.Check(self.Parent.NotePanel.NoteTextCtrl.IsSelectionUnderlined())
+
+    def OnAlignLeft(self, event):
+        self.Parent.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_LEFT)
+
+    def OnUpdateAlignLeft(self, event):
+        event.Check(self.Parent.NotePanel.NoteTextCtrl.IsSelectionAligned(wx.TEXT_ALIGNMENT_LEFT))
+
+    def OnAlignRight(self, event):
+        self.Parent.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_RIGHT)
+
+    def OnUpdateAlignRight(self, event):
+        event.Check(self.Parent.NotePanel.NoteTextCtrl.IsSelectionAligned(wx.TEXT_ALIGNMENT_RIGHT))
+
+    def OnCenter(self, event):
+        self.Parent.NotePanel.NoteTextCtrl.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_CENTRE)
+
+    def OnUpdateCenter(self, event):
+        event.Check(self.Parent.NotePanel.NoteTextCtrl.IsSelectionAligned(wx.TEXT_ALIGNMENT_CENTRE))
+
+    def OnIndentLess(self, event):
+        self.Delegate.IndentLessNoteText(self.Parent.NotePanel.NoteTextCtrl)
+
+    def OnIndentMore(self, event):
+        self.Delegate.IndentMoreNoteText(self.Parent.NotePanel.NoteTextCtrl)
+
+    def OnFont(self, event):
+        self.Delegate.ApplyFontToNoteText(self.Parent.NotePanel.NoteTextCtrl)
+
+    def OnFontColor(self, event):
+        self.Delegate.ApplyFontColorToNoteText(self.Parent.NotePanel.NoteTextCtrl)    
+        
         
 class SearchToolPanel(wx.Panel):
     

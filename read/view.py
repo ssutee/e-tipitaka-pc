@@ -270,20 +270,17 @@ class View(AuiBaseFrame):
         return self._readPanel.Body
         
     @property
-    def NotePanel(self):
-        return self._notePanel
-        
-    @property
-    def NoteTextCtrl(self):
-        return self._notePanel.NoteTextCtrl
-        
-    @property
     def StatusBar(self):
         return self._statusBar
         
+    def ReadPanel(self, code):
+        return self._readPanel if code is None else self._comparePanel[code]
+        
+    def NoteTextCtrl(self, code):
+        return self.ReadPanel(code).NotePanel.NoteTextCtrl
+        
     def FocusBody(self, code):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
-        return readPanel.Body
+        return self.ReadPanel(code).Body
 
     def _SetupStatusBar(self):
         self._statusBar = self.CreateStatusBar()
@@ -308,9 +305,10 @@ class View(AuiBaseFrame):
         info = info.FloatingSize((740, 65)).MinSize((740, 65)).Top().Layer(0)
         self.AddPane(self._toolPanel, info.Name('Tool'))
 
-        self._notePanel = widgets.NotePanel(self)
-        info = AuiPaneInfo().CaptionVisible(False).Resizable(True).BestSize((740, 110)).Bottom()        
-        self.AddPane(self._notePanel, info.Name('Note'))
+        self._notePanel = None
+        # self._notePanel = widgets.NotePanel(self)
+        # info = AuiPaneInfo().CaptionVisible(False).Resizable(True).BestSize((740, 110)).Bottom()        
+        # self.AddPane(self._notePanel, info.Name('Note'))
 
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
         info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 0)).Left().Layer(1)        
@@ -354,7 +352,7 @@ class View(AuiBaseFrame):
         if code not in self._comparePanel:
             self._comparePanel[code] = ReadPanelCreator.Create(self, code, self._font, self._delegate)
             info = AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
-            self.AddPane(self._comparePanel[code], info.Name(code))
+            self.AddPane(self._comparePanel[code], info.Name(code))                                    
         else:
             info = self.AuiManager.GetPane(self._comparePanel[code])
             info.Show()
@@ -387,6 +385,14 @@ class View(AuiBaseFrame):
         info = self.AuiManager.GetPane('Note')
         info.Hide() if flag else info.Show()   
         self.AuiManager.Update()
+        
+    def ToggleNotePanel(self, code):
+        readPanel = self._readPanel if code is None else self._comparePanel[code]
+        if readPanel.NotePanel.IsShown():
+            readPanel.NotePanel.Hide()
+        else:
+            readPanel.NotePanel.Show()
+        readPanel.Layout()
 
     def SetPageNumber(self, number, code=None):
         readPanel = self._readPanel if code is None else self._comparePanel[code]
@@ -470,14 +476,14 @@ class View(AuiBaseFrame):
         dlg.data = data
         dlg.Show(True)
         
-    def ShowBookmarkPopup(self, x, y):
+    def ShowBookmarkPopup(self, x, y, code):
         if self._bookmarkMenu is not None:
             self._bookmarkMenu.Destroy()
         self._bookmarkMenu = wx.Menu()
         self.Bind(wx.EVT_MENU, self.OnMenuAddBookmarkSelected, self._bookmarkMenu.Append(-1, u'คั่นหน้านี้'))
         self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, u'จัดการคั่นหน้า'))        
         self._bookmarkMenu.AppendSeparator()        
-        self._delegate.LoadBookmarks(self._bookmarkMenu)
+        self._delegate.LoadBookmarks(self._bookmarkMenu, code)
         self._toolPanel.PopupMenu(self._bookmarkMenu, (x,y))
         
     def ShowContextMenu(self, window, position, code):
@@ -507,12 +513,13 @@ class View(AuiBaseFrame):
                 text = window.GetStringSelection()
             self._delegate.SearchSelection(text)
 
-        cmd = u'⌘' if 'wxMac' in wx.PlatformInfo else u'⌃'
+        cmd = u'⌘' if 'wxMac' in wx.PlatformInfo else u'Ctrl+'
+        aux = u'⇧' if 'wxMac' in wx.PlatformInfo else u'Shift+'
         menu = wx.Menu()
-        search = menu.Append(constants.ID_SEARCH, u'ค้นหา' + 19*' ' + cmd + u'F')
+        search = menu.Append(constants.ID_SEARCH, u'ค้นหา')
         menu.AppendSeparator()
         copy = menu.Append(constants.ID_COPY, u'คัดลอก' + 17*' ' + cmd + u'C')
-        copyref = menu.Append(constants.ID_COPY_REFERENCE, u'คัดลอก (อ้างอิง)' + 6*' ' + cmd + u'⇧C')
+        copyref = menu.Append(constants.ID_COPY_REFERENCE, u'คัดลอก (อ้างอิง)' + 6*' ' + cmd + aux + u'C')
         menu.AppendSeparator()        
         if isinstance(window, wx.TextCtrl):
             copy.Enable(window.CanCopy())
@@ -533,11 +540,11 @@ class View(AuiBaseFrame):
         return self._bookmarkMenu.FindItemById(itemId)
         
     def OnMenuAddBookmarkSelected(self, event):
-        volume, page = self._delegate.CurrentVolume, self._delegate.CurrentPage
+        volume, page = self._delegate.FocusVolume, self._delegate.FocusPage        
         if page != 0:
             x,y = self.StarButton.GetScreenPosition()
             w,h = self.StarButton.GetSize()        
-            dialog = BookMarkDialog(self._readPanel, self._delegate.BookmarkItems)
+            dialog = BookMarkDialog(self.ReadPanel(self._delegate.LastFocus), self._delegate.BookmarkItems)
             if dialog.ShowModal() == wx.ID_OK:
                 result = dialog.GetValue()
                 if result != None and len(result) == 2:
@@ -553,7 +560,7 @@ class View(AuiBaseFrame):
             self._bookList.SetSelection(volume-1)
         
     def OnMenuManageBookmarkSelected(self, event):
-        dlg = BookmarkManagerDialog(self._readPanel, self._delegate.BookmarkItems)
+        dlg = BookmarkManagerDialog(self.ReadPanel(self._delegate.LastFocus), self._delegate.BookmarkItems)
         dlg.ShowModal()
         dlg.Destroy()
         
