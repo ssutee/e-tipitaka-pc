@@ -140,7 +140,7 @@ class View(AuiBaseFrame):
         self.SetIcons(icon)
 
         self._resultsWindow = widgets.ResultsWindow(self)
-        self._resultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex()))
+        self._resultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         
         self._font = utils.LoadFont(constants.SEARCH_FONT)
         if self._font and self._font.IsOk():

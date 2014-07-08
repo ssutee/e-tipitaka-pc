@@ -354,7 +354,7 @@ class Model(object):
             text += u'<div>' + self._MakeHtmlEntry(idx, volume, page) + \
                 self._MakeHtmlExcerpts(excerpts) + self._MakeHtmlItemInfo(volume, items) + u'</div><br>'
                 
-        return u'<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex()) + self._MakeHtmlSummary() + self._MakeHtmlHeader(mark) + self.MakeHtmlSuggestion(found=True) \
+        return u'<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex(constants.SEARCH)) + self._MakeHtmlSummary() + self._MakeHtmlHeader(mark) + self.MakeHtmlSuggestion(found=True) \
             + text + '<br>' + self._MakeHtmlPagination(pages, current) + '</body></html>'
         
     def GetSuggestion(self):

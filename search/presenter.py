@@ -124,7 +124,7 @@ class Presenter(object):
 
     def SearchWillStart(self, keywords):
         self._view.DisableSearchControls()
-        self._view.SetPage('<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex()) + _('Searching data, please wait...') + '</body></html>')
+        self._view.SetPage('<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex(constants.SEARCH)) + _('Searching data, please wait...') + '</body></html>')
         self._view.SetStatusText(_('Searching data'), 0)
         self._view.SetStatusText('', 1)
         self._view.SetStatusText('', 2)
@@ -138,7 +138,7 @@ class Presenter(object):
         if len(results) > 0:
            self.ShowResults(1)
         else:
-            html = '<html><body bgcolor="%s">%s</body></html>' % (utils.LoadThemeBackgroundHex(), self._model.NotFoundMessage()+self._model.MakeHtmlSuggestion(found=False))
+            html = '<html><body bgcolor="%s">%s</body></html>' % (utils.LoadThemeBackgroundHex(constants.SEARCH), self._model.NotFoundMessage()+self._model.MakeHtmlSuggestion(found=False))
             self._view.SetPage(html)
             self._view.EnableSearchControls()
             self._view.EnableHistoryControls()                
@@ -160,8 +160,8 @@ class Presenter(object):
         self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
 
     def SelectTheme(self, index):
-        utils.SaveTheme(index)
-        self._view.ResultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex()))
+        utils.SaveTheme(index, constants.SEARCH)
+        self._view.ResultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         self._model.ReloadDisplay()
         
     def SelectVolumes(self, index):
@@ -193,7 +193,7 @@ class Presenter(object):
         self._view.SetProgress((progress * 100.0) / constants.ITEMS_PER_PAGE)
         
     def DisplayWillStart(self):
-        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex()))
+        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         self._view.SetProgress(0)
         self._view.SetStatusText(_('Displaying results'), 0)
         

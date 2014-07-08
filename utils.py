@@ -119,34 +119,38 @@ def ArabicToThai(number):
             result += c
     return result
 
-def SaveTheme(theme=0):
-    with codecs.open(constants.THEME_CFG, 'w', 'utf8') as f:
+def SaveTheme(theme, prefix):
+    tokens = list(os.path.split(constants.THEME_CFG))
+    path = os.path.join(* tokens[:-1] + [prefix + '_' + tokens[-1]])
+    with codecs.open(path, 'w', 'utf8') as f:
         f.write(unicode(theme))
 
-def LoadTheme():
-    theme = 0
-    if os.path.exists(constants.THEME_CFG):
-        with codecs.open(constants.THEME_CFG, 'r', 'utf8') as f:
+def LoadTheme(prefix):
+    tokens = list(os.path.split(constants.THEME_CFG))
+    path = os.path.join(* tokens[:-1] + [prefix + '_' + tokens[-1]])    
+    if os.path.exists(path):
+        with codecs.open(path, 'r', 'utf8') as f:
             theme = int(f.read().strip())
-    return theme    
+        return theme    
+    return 0
 
-def LoadThemeForegroundHex():
-    if LoadTheme() == 1:
+def LoadThemeForegroundHex(prefix):
+    if LoadTheme(prefix) == 1:
         return '#5E4933'
     return '#000000'
 
-def LoadThemeBackgroundHex():
-    if LoadTheme() == 1:
+def LoadThemeBackgroundHex(prefix):
+    if LoadTheme(prefix) == 1:
         return '#F9EFD8'
     return '#FFFFFF'
     
-def LoadThemeForegroundColour():
-    if LoadTheme() == 1:
+def LoadThemeForegroundColour(prefix):
+    if LoadTheme(prefix) == 1:
         return wx.Colour(0x5E,0x49,0x33,0xFF)
     return wx.BLACK
 
-def LoadThemeBackgroundColour():
-    if LoadTheme() == 1:
+def LoadThemeBackgroundColour(prefix):
+    if LoadTheme(prefix) == 1:
         return wx.Colour(0xF9,0xEF,0xD8,0xFF)
     return wx.WHITE
 

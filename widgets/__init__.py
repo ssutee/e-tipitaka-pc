@@ -399,6 +399,10 @@ class ReadToolPanel(wx.Panel):
     def NotesButton(self):
         return self._notesButton
         
+    @property
+    def ThemeComboBox(self):
+        return self._themeComboBox
+        
     def __init__(self, parent, dataSource, *args, **kwargs):
         super(ReadToolPanel, self).__init__(parent, *args, **kwargs)
 
@@ -499,7 +503,16 @@ class ReadToolPanel(wx.Panel):
         dictSizer.Add((5, -1))        
         self._dictPanel.SetSizer(dictSizer)        
         self._dictPanel.Fit()
-
+        
+        themes = [u'ขาว', u'น้ำตาลอ่อน'] 
+        self._themePanel = wx.Panel(self, wx.ID_ANY)
+        themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, u'สีพื้นหลัง'), orient=wx.HORIZONTAL)
+        self._themeComboBox = wx.ComboBox(self._themePanel, wx.ID_ANY, choices=themes, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+        self._themeComboBox.SetStringSelection(themes[utils.LoadTheme(constants.READ)])
+        themeSizer.Add(self._themeComboBox)
+        self._themePanel.SetSizer(themeSizer)
+        themeSizer.Fit(self._themePanel)                
+        
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -507,6 +520,7 @@ class ReadToolPanel(wx.Panel):
         mainSizer.Add(self._comparePanel, 0, wx.EXPAND)
         mainSizer.Add(self._toolsPanel, 0, wx.EXPAND)
         mainSizer.Add(self._dictPanel, 0, wx.EXPAND)
+        mainSizer.Add(self._themePanel, 0, wx.EXPAND)        
 
         self.SetSizer(mainSizer)
         
@@ -589,8 +603,8 @@ class ReadPanel(wx.Panel):
         self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
-        self._body.SetForegroundColour(utils.LoadThemeForegroundColour())
-        self._body.SetBackgroundColour(utils.LoadThemeBackgroundColour())
+        self._body.SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
+        self._body.SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
         self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
@@ -1201,7 +1215,7 @@ class SearchToolPanel(wx.Panel):
         self._themePanel = wx.Panel(self, wx.ID_ANY)
         themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, u'สีพื้นหลัง'), orient=wx.HORIZONTAL)
         self._themeComboBox = wx.ComboBox(self._themePanel, wx.ID_ANY, choices=themes, style=wx.CB_DROPDOWN|wx.CB_READONLY)
-        self._themeComboBox.SetStringSelection(themes[utils.LoadTheme()])
+        self._themeComboBox.SetStringSelection(themes[utils.LoadTheme(constants.SEARCH)])
         themeSizer.Add(self._themeComboBox)
         self._themePanel.SetSizer(themeSizer)
         themeSizer.Fit(self._themePanel)                

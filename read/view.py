@@ -248,6 +248,10 @@ class View(AuiBaseFrame):
     @property
     def CompareComboBox(self):
         return self._toolPanel.CompareComboBox
+        
+    @property
+    def ThemeComboBox(self):
+        return self._toolPanel.ThemeComboBox
 
     @property
     def BookList(self):
@@ -304,11 +308,6 @@ class View(AuiBaseFrame):
         info = AuiPaneInfo().CaptionVisible(False).Resizable(False)
         info = info.FloatingSize((740, 65)).MinSize((740, 65)).Top().Layer(0)
         self.AddPane(self._toolPanel, info.Name('Tool'))
-
-        self._notePanel = None
-        # self._notePanel = widgets.NotePanel(self)
-        # info = AuiPaneInfo().CaptionVisible(False).Resizable(True).BestSize((740, 110)).Bottom()        
-        # self.AddPane(self._notePanel, info.Name('Note'))
 
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
         info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 0)).Left().Layer(1)        

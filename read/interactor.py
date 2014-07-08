@@ -34,6 +34,7 @@ class Interactor(object):
         self.View.InputItem.Bind(wx.EVT_TEXT, self.OnInputItemEnter)
         
         self.View.CompareComboBox.Bind(wx.EVT_COMBOBOX, self.OnCompareComboBoxSelect)
+        self.View.ThemeComboBox.Bind(wx.EVT_COMBOBOX, self.OnThemeComboBoxSelect)            
             
     def OnClose(self, event):
         self.Presenter.Close()
@@ -97,3 +98,6 @@ class Interactor(object):
         
     def OnToggleNoteButtonClick(self, event):
         self.Presenter.ToggleNotePanel()
+        
+    def OnThemeComboBoxSelect(self, event):
+        self.Presenter.SelectTheme(event.GetSelection())

@@ -17,6 +17,9 @@ CODES = ['thai', 'pali', 'thaimm', 'thaimc', 'thaibt', 'romanct', 'thaict']
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
 
+SEARCH = 'search'
+READ = 'read'
+
 DEFAULT_FONT = 'TF Chiangsaen'
 ROMAN_SCRIPT_DEFAULT_FONT = 'Times New Roman'
 

@@ -872,3 +872,16 @@ class Presenter(object):
     def IsSmallScreen(self):
         currentScreen = wx.GetDisplaySize()
         return currentScreen[1] < 800
+
+    def SelectTheme(self, index):
+        utils.SaveTheme(index, constants.READ)
+        self._view.FocusBody(None).SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
+        self._view.FocusBody(None).SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
+        self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))        
+        for code in self._compareVolume:
+            self._view.FocusBody(code).SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
+            self._view.FocusBody(code).SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
+            self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code])
+            
+        
+        
