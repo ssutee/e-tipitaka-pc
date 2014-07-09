@@ -526,13 +526,14 @@ class ReadToolPanel(wx.Panel):
         
 class ReadPanel(wx.Panel):
 
-    def __init__(self, parent, code, font, delegate, *args, **kwargs):
+    def __init__(self, parent, code, index, font, delegate, *args, **kwargs):
         super(ReadPanel, self).__init__(parent, *args, **kwargs)
 
         self._parentSize = parent.GetSize()
 
         self._delegate = delegate
         self._code = code
+        self._index = index
         
         self.Bind(wx.EVT_FIND, self.OnFind)
         self.Bind(wx.EVT_FIND_NEXT, self.OnFind)
@@ -597,9 +598,9 @@ class ReadPanel(wx.Panel):
             self._title = wx.html.HtmlWindow(self, size=(-1, 58/divider), style=wx.html.HW_SCROLLBAR_NEVER)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
-        self._page = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
+        self._page = wx.html.HtmlWindow(self, size=(-1, 28), style=wx.html.HW_SCROLLBAR_NEVER)
         self._page.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
-        self._item = wx.html.HtmlWindow(self, size=(-1, 40), style=wx.html.HW_SCROLLBAR_NEVER)
+        self._item = wx.html.HtmlWindow(self, size=(-1, 28), style=wx.html.HW_SCROLLBAR_NEVER)
         self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
@@ -656,7 +657,7 @@ class ReadPanel(wx.Panel):
         paintSizer.Add(self._toggleNoteButton)                
         self._paintPanel.SetSizer(paintSizer)     
         
-        self._notePanel = NotePanel(self, self._code)
+        self._notePanel = NotePanel(self, self._code, self._index)
               
     def ExtraLayout(self):
         pass
@@ -687,42 +688,42 @@ class ReadPanel(wx.Panel):
         self.SetSizer(self._mainSizer)
 
     def OnTextBodySetFocus(self, event):
-        self.Delegate.SetFocus(True, self._code)
+        self.Delegate.SetFocus(True, self._code, self._index)
         event.Skip()
         
     def OnTextBodyKillFocus(self, event):
-        self.Delegate.SetFocus(False, self._code)        
+        self.Delegate.SetFocus(False, self._code, self._index)        
         event.Skip()
 
     def OnTextBodySelect(self, event):
-        self.Delegate.HandleTextSelection(self._body.GetStringSelection(), self._code)
+        self.Delegate.HandleTextSelection(self._body.GetStringSelection(), self._code, self._index)
         event.Skip()
         
     def OnTextCtrlMouseRightDown(self, event):
-        self.Delegate.ShowContextMenu(event.GetEventObject(), event.GetPosition(), self._code)
+        self.Delegate.ShowContextMenu(event.GetEventObject(), event.GetPosition(), self._code, self._index)
         
     def OnSliderValueChange(self, event):
-        self.Delegate.JumpToPage(event.GetSelection(), self._code)
+        self.Delegate.JumpToPage(event.GetSelection(), self._code, self._index)
         
     def OnMarkButtonClick(self, event):
-        self.Delegate.MarkText(self._code)
+        self.Delegate.MarkText(self._code, self._index)
         
     def OnUnmarkButtonClick(self, event):
-        self.Delegate.UnmarkText(self._code)
+        self.Delegate.UnmarkText(self._code, self._index)
         
     def OnClearButtonClick(self, event):
-        self.Delegate.ClearMarkedText(self._code)
+        self.Delegate.ClearMarkedText(self._code, self._index)
         
     def OnToggleNoteButtonClick(self, event):
-        self.Delegate.ToggleNotePanel(self._code)
+        self.Delegate.ToggleNotePanel(self._code, self._index)
         
     def OnSaveButtonClick(self, event):
-        self.Delegate.SaveMarkedText(self._code)
+        self.Delegate.SaveMarkedText(self._code, self._index)
         
     def OnFind(self, event):
         event.GetDialog().Destroy()       
         self._body.SetFocus()
-        self.Delegate.DoFind(self._code, event.GetFindString(), self._body.GetValue(), event.GetFlags())
+        self.Delegate.DoFind(self._code, self._index, event.GetFindString(), self._body.GetValue(), event.GetFlags())
         
     def OnFindClose(self, event):
         event.GetDialog().Destroy()
@@ -730,16 +731,16 @@ class ReadPanel(wx.Panel):
 
     def OnCharKeyPress(self, event):
         try:
-            self.Delegate.ProcessKeyCommand(event, event.GetKeyCode(), self._code)
+            self.Delegate.ProcessKeyCommand(event, event.GetKeyCode(), self._code, self._index)
         except ValueError, e:
             pass
         event.Skip()
             
     def OnUpdateClearButton(self, event):
-        event.Enable(self.Delegate.HasSavedMark(self._code))
+        event.Enable(self.Delegate.HasSavedMark(self._code, self._index))
         
     def OnUpdateSaveButton(self, event):
-        event.Enable(self.Delegate.HasMarkText(self._code))
+        event.Enable(self.Delegate.HasMarkText(self._code, self._index))
 
     def SetBody(self, text):
         self._body.SetValue(text)
@@ -758,7 +759,7 @@ class ReadPanel(wx.Panel):
             self._page.SetPage('')
         else:
             text = _('Page') + ' ' + utils.ArabicToThai(unicode(number))
-            self._page.SetPage(u'<div align="left"><font color="#378000" size="5">%s</font></div>' % (text))
+            self._page.SetPage(u'<div align="left"><font color="#378000" size="4">%s</font></div>' % (text))
         
     def SetItemNumber(self, *numbers):
         if len(numbers) == 0 or numbers[0] is None:
@@ -767,7 +768,7 @@ class ReadPanel(wx.Panel):
             text = _('Item') + ' ' + utils.ArabicToThai(unicode(numbers[0]))
             if len(numbers) > 1:
                 text += ' - ' + utils.ArabicToThai(unicode(numbers[-1]))
-            self._item.SetPage(u'<div align="right"><font color="#378000" size="5">%s</font></div>' % (text))
+            self._item.SetPage(u'<div align="right"><font color="#378000" size="4">%s</font></div>' % (text))
 
 class ReadWithReferencesPanel(ReadPanel):
     
@@ -807,9 +808,10 @@ class ReadWithReferencesPanel(ReadPanel):
         self.Layout()
 
 class NotePanel(wx.Panel):
-    def __init__(self, parent, code, *args, **kwargs):
+    def __init__(self, parent, code, index, *args, **kwargs):
         super(NotePanel, self).__init__(parent, *args, **kwargs)
         self._code = code
+        self._index = index
         self._CreateAttributes()
         self._BindAttributes()
         
@@ -934,7 +936,7 @@ class NotePanel(wx.Panel):
         self._DoBind(self._centerItem, self.OnCenter, self.OnUpdateCenter)
                     
     def OnSave(self, event):
-        self.Delegate.SaveNoteText(self._code, self.Parent.NotePanel.NoteTextCtrl)
+        self.Delegate.SaveNoteText(self._code, self._index, self.Parent.NotePanel.NoteTextCtrl)
         
     def OnUpdateSave(self, event):
         event.Enable(self.Parent.NotePanel.NoteTextCtrl.IsModified())
@@ -1099,7 +1101,6 @@ class SearchToolPanel(wx.Panel):
         topSizer.Add(self._text, 1, wx.ALIGN_CENTER|wx.RIGHT, 3)
         topSizer.Add(self._findButton, flag=wx.ALIGN_CENTER)
         topSizer.Add(self._volumesRadio, 0 ,wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, 5)        
-        topSizer.Add((5,5))
         topSizer.Add(self._aboutButton, 0, flag=wx.ALIGN_CENTER)
         
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1190,9 +1191,9 @@ class SearchToolPanel(wx.Panel):
             wx.BitmapFromImage(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))         
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
         
-        self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.BOOKS_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
+        self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.READ_IMAGE, wx.BITMAP_TYPE_PNG)))
             
-        self._aboutButton = wx.Button(self, wx.ID_ANY, _('About'), size=wx.DefaultSize)        
+        self._aboutButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.ABOUT_IMAGE, wx.BITMAP_TYPE_PNG)))
         self._aboutButton.SetToolTip(wx.ToolTip(_('About E-Tipitaka')))        
         
         self._checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'เปิดหน้าใหม่ทุกครั้ง')

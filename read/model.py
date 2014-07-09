@@ -483,7 +483,7 @@ class Model(object):
         
     @Code.setter
     def Code(self, code):
-        self._code = code
+        self._code = code.split(":")[0]
         if constants.THAI_ROYAL_CODE == code:
             self._engine[code] = ThaiRoyalEngine()
         elif constants.PALI_SIAM_CODE == code:

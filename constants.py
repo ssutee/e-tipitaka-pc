@@ -112,6 +112,7 @@ PRINT_IMAGE = os.path.join(RESOURCES_DIR, 'print.png')
 YELLOW_IMAGE = os.path.join(RESOURCES_DIR, 'yellow.png')
 WHITE_IMAGE = os.path.join(RESOURCES_DIR, 'white.png')
 CLEAR_IMAGE = os.path.join(RESOURCES_DIR, 'clear.png')
+ABOUT_IMAGE = os.path.join(RESOURCES_DIR, 'about.png')
 
 DATA_DB = os.path.join(DATA_PATH, 'data.sqlite')
 NOTE_DB = os.path.join(DATA_PATH, 'note.sqlite')

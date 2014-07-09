@@ -559,7 +559,7 @@ class AboutDialog(wx.Dialog):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, _('About E-Tipitaka'))
         
         label1 = wx.StaticText(self, wx.ID_ANY, 
-            _('E-Tipitaka %s - developed by Sutee Sudprasert Copyright (C) 2010\n written by Python 2.7.3 and wxPython 2.8 (unicode)') % (settings.VERSION))
+            _('E-Tipitaka %s - developed by Sutee Sudprasert Copyright (C) 2010\n written by Python 2.7.5 and wxPython 2.8.12.1 (unicode)') % (settings.VERSION))
         label2 = wx.StaticText(self, wx.ID_ANY, 
             _('This program is free software distributed under Apache License, Version 2.0'))
         label3 = wx.StaticText(self, wx.ID_ANY, 

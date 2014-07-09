@@ -208,10 +208,17 @@ def LoadWindowPosition(filename):
 
     return None
 
-
 def LoadReadWindowPosition():
     return LoadWindowPosition(constants.READ_RECT)
     
 def LoadSearchWindowPosition():
     return LoadWindowPosition(constants.SEARCH_RECT)
 
+def MakeKey(code, index):
+    return '%s:%d'%(code, index)
+    
+def SplitKey(key):
+    if key is not None:
+        tokens = key.split(':')
+        return tokens[0], int(tokens[1])
+    return None, 0

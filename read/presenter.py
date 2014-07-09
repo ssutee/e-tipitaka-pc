@@ -203,8 +203,8 @@ class Presenter(object):
         self._view.Raise()
         self._view.Iconize(False)
 
-    def _LoadNoteText(self, volume, page, code=None):
-        textCtrl = self._view.NoteTextCtrl(code)
+    def _LoadNoteText(self, volume, page, code=None, index=1):
+        textCtrl = self._view.NoteTextCtrl(code, index)
 
         textCtrl.SelectAll()
         textCtrl.DeleteSelection()        
@@ -223,7 +223,7 @@ class Presenter(object):
         code = self._model.Code if code is None else code
         return '%s-%02d-%04d' % (code, volume, page)
 
-    def _LoadMarks(self, volume, page, code=None):
+    def _LoadMarks(self, volume, page, code=None, index=1):
         path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)
         if not os.path.exists(path):
             os.makedirs(path)        
@@ -236,7 +236,7 @@ class Presenter(object):
             self._marks[key] = []
                 
         for marked, s, t in self._marks[key]:
-            self._view.MarkText(code, (s,t)) if marked else self._view.UnmarkText(code, (s,t))                
+            self._view.MarkText(code, index, (s,t)) if marked else self._view.UnmarkText(code, index, (s,t))
 
     def OpenBook(self, volume, page, section=None, selectItem=False, showBookList=None):
         self._findTextHandler.Reset()
@@ -284,29 +284,30 @@ class Presenter(object):
         elif showBookList != None and showBookList == False:
             self._view.HideBookList()
 
-    def OpenAnotherBook(self, code, volume, page):
+    def OpenAnotherBook(self, code, index, volume, page):
         self._findTextHandler.Reset()        
         currentCode = self._model.Code
         self._model.Code = code
         
         if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
 
-        self._compareVolume[code] = volume        
-        self._comparePage[code] = page        
+        key = utils.MakeKey(code, index)
+        self._compareVolume[key] = volume        
+        self._comparePage[key] = page        
         
-        self._LoadNoteText(volume, page, code)
+        self._LoadNoteText(volume, page, code, index)
                 
-        self._ToggleNavigationButtons(self._compareVolume[code], code)
+        self._ToggleNavigationButtons(self._compareVolume[key], code, index)
                 
-        self._view.SetTitles(*self._model.GetTitles(volume, None), code=code)        
-        self._view.SetPageNumber(page if page > 0 else None, code=code)
-        self._view.SetItemNumber(*self._model.GetItems(volume, page), code=code)
-        self._view.UpdateSlider(page, self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code)        
+        self._view.SetTitles(*self._model.GetTitles(volume, None), code=code, index=index)        
+        self._view.SetPageNumber(page if page > 0 else None, code=code, index=index)
+        self._view.SetItemNumber(*self._model.GetItems(volume, page), code=code, index=index)
+        self._view.UpdateSlider(page, self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code, index)
         
         content = self._model.GetPage(volume, page)
-        self._view.SetText(content, code=code)       
-        self._view.FormatText(self._model.GetFormatter(volume, page), code=code)        
-        self._LoadMarks(volume, page, code)        
+        self._view.SetText(content, code=code, index=index)
+        self._view.FormatText(self._model.GetFormatter(volume, page), code=code, index=index)        
+        self._LoadMarks(volume, page, code, index)        
 
         self._model.Code = currentCode                
 
@@ -344,23 +345,27 @@ class Presenter(object):
     def GetCompareChoices(self):
         return self._model.GetCompareChoices()
 
-    def _DoForward(self, code=None):
+    def _DoForward(self, code=None, index=1):
         if code is None:
             self.OpenBook(self._currentVolume, self._currentPage+1, self._model.GetSection(self._currentVolume, self._currentPage))
-        else:
-            self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] + 1)
+        else:            
+            key = utils.MakeKey(code, index)
+            self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] + 1)
 
-    def Forward(self):
-        self._DoForward(self._lastFocus)
+    def Forward(self, code=None):
+        code, index = utils.SplitKey(self._lastFocus) if code is not None else code,1
+        self._DoForward(code, index)
         
-    def _DoBackward(self, code=None):
+    def _DoBackward(self, code=None, index=1):
         if code is None:
             self.OpenBook(self._currentVolume, self._currentPage-1, self._model.GetSection(self._currentVolume, self._currentPage))
         else:
-            self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code] - 1)
+            key = utils.MakeKey(code, index)
+            self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] - 1)
                 
     def Backward(self, code=None):
-        self._DoBackward(self._lastFocus)
+        code, index = utils.SplitKey(self._lastFocus) if code is not None else code,1
+        self._DoBackward(code, index)
 
     def HandleBookSelection(self, event):
         if self._stopOpen: return
@@ -371,7 +376,7 @@ class Presenter(object):
         elif isinstance(event, wx.CommandEvent):
             self.OpenBook(event.GetSelection()+1, self._model.GetFirstPageNumber(event.GetSelection()+1))
             
-    def HandleTextSelection(self, text, code):
+    def HandleTextSelection(self, text, code, index):
         text = text.strip().split('\n')[0]        
         self._view.StatusBar.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
         if self._paliDictWindow is not None:            
@@ -379,14 +384,14 @@ class Presenter(object):
         if self._thaiDictWindow is not None:
             self._thaiDictWindow.SetInput(text)
             
-    def JumpToPage(self, page, code=None):
+    def JumpToPage(self, page, code=None, index=1):
         if code is None:
             page = page if page > 0 and page <= self._model.GetTotalPages(self._currentVolume) else self._model.GetFirstPageNumber(self._currentVolume)
             self.OpenBook(self._currentVolume, page, self._model.GetSection(self._currentVolume, page))
-        else:
-            self.OpenAnotherBook(code, self._compareVolume[code], page)
+        else:            
+            self.OpenAnotherBook(code, index, self._compareVolume[utils.MakeKey(code, index)], page)
         
-    def JumpToItem(self, item, code=None):
+    def JumpToItem(self, item, code=None, index=1):
         page, sub = 0, 0
 
         try:
@@ -399,13 +404,13 @@ class Presenter(object):
 
         try:
             currentCode = self._model.Code                
-            self._model.Code = code if code is not None else currentCode
-            page = self._model.ConvertItemToPage(self._currentVolume if code is None else self._compareVolume[code], item, sub, self._view.CheckBox.IsChecked())
+            self._model.Code = code if code is not None else currentCode            
+            page = self._model.ConvertItemToPage(self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code, index)], item, sub, self._view.CheckBox.IsChecked())
             self._model.Code = currentCode
         except ValueError, e:
             pass
             
-        self.JumpToPage(page, code)
+        self.JumpToPage(page, code, index)
 
     def CompareTo(self, index):
         item = None    
@@ -428,42 +433,46 @@ class Presenter(object):
         if item is None: return
         
         self._view.HideBookList()
-        self._view.AddReadPanel(code)
+        index = self._view.AddReadPanel(code)
         currentCode = self._model.Code
         self._model.Code = code
         volume = self._model.ConvertVolume(volume, item, sub)
         page = self._model.ConvertItemToPage(volume, item, sub, code == constants.THAI_MAHACHULA_CODE)
         self._model.Code = currentCode
-        self.OpenAnotherBook(code, volume, page)
+        self.OpenAnotherBook(code, index, volume, page)
 
-    def SetFocus(self, flag, code):
-        if flag and code is not None:
-            self._focusList.append(code)
-            self._lastFocus = code
+    def SetFocus(self, flag, code, index):
+        if flag and code is not None:            
+            self._focusList.append(utils.MakeKey(code, index))
+            self._lastFocus = utils.MakeKey(code, index)
         elif not flag and code is not None:
-            self._focusList.remove(code)
+            self._focusList.remove(utils.MakeKey(code, index))
         elif flag and code is None:
             self._focusList = []
-            self._lastFocus = None                 
-            
+            self._lastFocus = None        
+                        
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
-        self._ToggleNavigationButtons(volume, self._lastFocus)
+        if self._lastFocus is None:
+            self._ToggleNavigationButtons(volume, self._lastFocus, 1)
+        else:
+            c,idx = utils.SplitKey(self._lastFocus)
+            self._ToggleNavigationButtons(volume, c, idx)
     
-    def ProcessKeyCommand(self, event, keyCode, code):
+    def ProcessKeyCommand(self, event, keyCode, code, index):
         ret = self._keyCommandHandler.Handle(event, keyCode)        
         if ret == constants.CMD_FIND:
-            self.Find(code)
+            self.Find(code, index)
         elif ret == constants.CMD_FORWARD:
-            self._DoForward(code)
+            self._DoForward(code, index)
         elif ret == constants.CMD_BACKWARD:
-            self._DoBackward(code)
+            self._DoBackward(code, index)
         elif ret == constants.CMD_JUMP_TO_PAGE:
-            self.JumpToPage(int(self._keyCommandHandler.Result), code)
+            self.JumpToPage(int(self._keyCommandHandler.Result), code, index)
         elif ret == constants.CMD_JUMP_TO_ITEM:
-            self.JumpToItem(self._keyCommandHandler.Result, code)
+            self.JumpToItem(self._keyCommandHandler.Result, code, index)
         elif ret == constants.CMD_JUMP_TO_VOLUME:
             volume = int(self._keyCommandHandler.Result)
-            self.OpenAnotherBook(code, volume, 1) if code is not None else self.OpenBook(volume, 1, selectItem=True)
+            self.OpenAnotherBook(code, index, volume, 1) if code is not None else self.OpenBook(volume, 1, selectItem=True)
         elif ret == constants.CMD_ZOOM_IN:
             self.IncreaseFontSize()
         elif ret == constants.CMD_ZOOM_OUT:
@@ -473,10 +482,10 @@ class Presenter(object):
             
     def CopyReference(self, window=None, code=None):
         clipdata = wx.TextDataObject()        
-        code = self._lastFocus if code is None else code
-        ref = self.GetReference(code)        
+        code, index = utils.SplitKey(self._lastFocus)
+        ref = self.GetReference(code, index)        
 
-        window = self._view.FocusBody(code) if window is None else window        
+        window = self._view.FocusBody(code, index) if window is None else window        
         if isinstance(window, wx.html.HtmlWindow):
             clipdata.SetText(window.SelectionToText() + '\n\n\n' + ref)
         elif isinstance(window, wx.TextCtrl):
@@ -486,13 +495,13 @@ class Presenter(object):
         wx.TheClipboard.SetData(clipdata)
         wx.TheClipboard.Close()                
     
-    def Find(self, code):
-        self._view.ShowFindDialog(code, self._findTextHandler.Text, self._findTextHandler.Direction)
+    def Find(self, code, index):
+        self._view.ShowFindDialog(code, index, self._findTextHandler.Text, self._findTextHandler.Direction)
         
-    def DoFind(self, code, text, content, flags):
+    def DoFind(self, code, index, text, content, flags):
         n, found = self._findTextHandler.Handle(text, content, flags)
         if n > -1:
-            self._view.SetSelection(content, n, n+len(text), code)
+            self._view.SetSelection(content, n, n+len(text), code, index)
         elif found:
             dlg = wx.MessageDialog(self._view, u'การค้นหาสิ้นสุดแล้ว', 'Find', style=wx.ICON_INFORMATION)
             dlg.ShowModal()
@@ -507,8 +516,8 @@ class Presenter(object):
     def ToggleBookList(self):
         self._view.ToggleBookList()
         
-    def ToggleNotePanel(self, code):
-        self._view.ToggleNotePanel(code)
+    def ToggleNotePanel(self, code, index):
+        self._view.ToggleNotePanel(code, index)
         
     def ShowFontDialog(self):
         code = self._lastFocus if self._lastFocus else self._model.Code
@@ -541,22 +550,26 @@ class Presenter(object):
         utils.SaveFont(font, constants.READ_FONT, code)
         self._view.SetFont(font, self._lastFocus)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
-        
-    def MarkText(self, code, mark=True):
-        s,t = self._view.MarkText(code) if mark else self._view.UnmarkText(code)
-        volume = self._currentVolume if code is None else self._compareVolume[code]
-        page = self._currentPage if code is None else self._comparePage[code]
+
+    def MarkText(self, code, index, mark=True):
+        s,t = self._view.MarkText(code, index) if mark else self._view.UnmarkText(code, index)
+        volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code,index)]
+        page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code,index)]
         key = self._MarkKey(code, volume, page)
         if key not in self._marks:
             self._marks[key] = [(mark, s, t)]
         else:
             self._marks[key] += [(mark, s, t)]
-            
-    def GetReference(self, code):
-        model = Model(self._lastFocus if self._lastFocus else self._model.Code)
 
-        volume = self._currentVolume if code is None else self._compareVolume[code]
-        page = self._currentPage if code is None else self._comparePage[code]
+    def UnmarkText(self, code, index):
+        self.MarkText(code, index, False)        
+            
+    def GetReference(self, code, index):
+        
+        model = Model(code if code is not None else self._model.Code)
+
+        volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code,index)]
+        page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code,index)]
         items = model.GetItems(volume, page)
         titles = model.GetTitles(volume, None)        
 
@@ -574,9 +587,6 @@ class Presenter(object):
 
         return ref                        
     
-    def UnmarkText(self, code):
-        self.MarkText(code, False)
-        
     def IndentLessNoteText(self, textCtrl):
         attr = rt.TextAttrEx()
         attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
@@ -647,34 +657,36 @@ class Presenter(object):
                     textCtrl.SetStyle(r, attr)
         dlg.Destroy()
         
-    def _CurrentMarkKey(self, code):
-        if code is not None and (code not in self._compareVolume or code not in self._comparePage): return None
-        volume = self._currentVolume if code is None else self._compareVolume[code]
-        page = self._currentPage if code is None else self._comparePage[code]
+    def _CurrentMarkKey(self, code, index):
+        if code is not None and (utils.MakeKey(code, index) not in self._compareVolume or utils.MakeKey(code, index) not in self._comparePage): 
+            return None
+        volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code, index)]
+        page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code, index)]
         return self._MarkKey(code, volume, page)
               
-    def _CurrentMarkFilename(self, code):
-        if code is not None and (code not in self._compareVolume or code not in self._comparePage): return None
-        volume = self._currentVolume if code is None else self._compareVolume[code]
-        page = self._currentPage if code is None else self._comparePage[code]        
+    def _CurrentMarkFilename(self, code, index):
+        if code is not None and (utils.MakeKey(code, index) not in self._compareVolume or utils.MakeKey(code, index) not in self._comparePage): 
+            return None
+        volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code, index)]
+        page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code, index)]        
         path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)        
         return os.path.join(path, '%02d-%04d.json'%(volume, page))        
     
     @db_session            
-    def SaveNoteText(self, code, textCtrl):        
+    def SaveNoteText(self, code, index, textCtrl):        
         textCtrl.SaveFile(textCtrl.GetFilename(), rt.RICHTEXT_TYPE_XML)
         textCtrl.SetModified(False)
 
-        volume = self._currentVolume if code is None else self._compareVolume[code]
-        page = self._currentPage if code is None else self._comparePage[code]        
+        volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code,index)]
+        page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code,index)]        
 
         note = Model.Note(volume=volume, page=page, 
             code=code if code is not None else self._model.Code, 
             text=textCtrl.GetValue(), filename=textCtrl.GetFilename())
                         
-    def SaveMarkedText(self, code):
-        key = self._CurrentMarkKey(code)                
-        filename = self._CurrentMarkFilename(code)
+    def SaveMarkedText(self, code, index):
+        key = self._CurrentMarkKey(code, index)                
+        filename = self._CurrentMarkFilename(code, index)
 
         if filename is None or key is None: return
         
@@ -683,23 +695,24 @@ class Presenter(object):
         else:
             with open(filename, 'w') as f: json.dump(self._marks[key], f)
         
-    def ClearMarkedText(self, code):
-        dlg = wx.MessageDialog(self._view, u'คุณต้องการลบการระบายสีข้อความทั้งหมดหรือไม่?', u'ยืนยันการลบ', 
+    def ClearMarkedText(self, code, index):
+        dlg = wx.MessageDialog(self._view.ReadPanel(code, index), u'คุณต้องการลบการระบายสีข้อความทั้งหมดหรือไม่?', u'ยืนยันการลบ', 
             wx.YES_NO|wx.ICON_EXCLAMATION)
         if dlg.ShowModal() == wx.ID_YES:
-            self._marks[self._CurrentMarkKey(code)] = []
-            self._view.ClearMarks(code)
-            self.SaveMarkedText(code)
+            self._marks[self._CurrentMarkKey(code, index)] = []
+            self._view.ClearMarks(code, index)
+            self.SaveMarkedText(code, index)
         dlg.Destroy()
         
-    def HasSavedMark(self, code):        
-        return os.path.exists(self._CurrentMarkFilename(code)) if self._CurrentMarkFilename(code) is not None else False
+    def HasSavedMark(self, code, index):        
+        return os.path.exists(self._CurrentMarkFilename(code, index)) if self._CurrentMarkFilename(code, index) is not None else False
         
-    def HasMarkText(self, code):
-        return any(map(lambda x:x[0], self._marks.get(self._CurrentMarkKey(code), [])))
+    def HasMarkText(self, code, index):
+        return any(map(lambda x:x[0], self._marks.get(self._CurrentMarkKey(code, index), [])))
         
     def ShowBookmarkPopup(self, x, y):
-        self._view.ShowBookmarkPopup(x, y, self._lastFocus)
+        code, index = utils.SplitKey(self._lastFocus)
+        self._view.ShowBookmarkPopup(x, y, code, index)
         
     def ShowPrintDialog(self):
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
@@ -775,7 +788,7 @@ class Presenter(object):
     
         self._model.Code = currentCode        
         
-    def LoadBookmarks(self, menu, code):
+    def LoadBookmarks(self, menu, code, index):
         
         def OnBookmark(event):
             item = self._view.GetBookmarkMenuItem(event.GetId())
@@ -785,15 +798,15 @@ class Presenter(object):
             if code is None:        
                 self.OpenBook(volume, page, selectItem=True)
             else:
-                self.OpenAnotherBook(code, volume, page)
+                self.OpenAnotherBook(code, index, volume, page)
                 
         self._bookmarkManager.Save()                
-        self._bookmarkManager = BookmarkManager(self._view, code)
+        self._bookmarkManager = BookmarkManager(self._view, code if code is not None else self._model.Code)
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
         
     def SearchSelection(self, selection=None):
-        code = self._lastFocus
-        keywords = self._view.GetStringSelection(code) if selection is None else selection
+        code, index = utils.SplitKey(self._lastFocus)
+        keywords = self._view.GetStringSelection(code, index) if selection is None else selection
         
         if len(keywords.strip()) == 0: return
 
@@ -832,8 +845,8 @@ class Presenter(object):
         text = self._view.GetStringSelection(self._lastFocus)
         self._thaiDictWindow.SetInput(text.strip().split('\n')[0].strip())
         
-    def ShowContextMenu(self, window, position, code):
-        self._view.ShowContextMenu(window, position, code)
+    def ShowContextMenu(self, window, position, code, index):
+        self._view.ShowContextMenu(window, position, code, index)
         
     def ShowNotesManager(self):
         if self._paliDictWindow is not None:
@@ -844,13 +857,12 @@ class Presenter(object):
             self._thaiDictWindow.Close()
             self._thaiDictWindow = None        
         
-        code = self._lastFocus if self._lastFocus is not None else self._model.Code
-                
-        dlg = dialogs.NoteManagerDialog(self._view.ReadPanel(self._lastFocus), code)
+        code, index = utils.SplitKey(self._lastFocus)                
+        dlg = dialogs.NoteManagerDialog(self._view.ReadPanel(code, index), code if code is not None else self._model.Code)
         if dlg.ShowModal() == wx.ID_OK:
             volume, page = dlg.Result
             if self._lastFocus is not None:
-                self.OpenAnotherBook(code, volume, page)  
+                self.OpenAnotherBook(code, index, volume, page)  
             else:
                 self.OpenBook(volume, page, selectItem=True)
         dlg.Destroy()
@@ -858,30 +870,29 @@ class Presenter(object):
     def _ToggleCompareComboBox(self, volume):
         getattr(self._view.CompareComboBox, 'Disable' if self._currentPage == 0 else 'Enable')()
     
-    def _ToggleNavigationButtons(self, volume, code=None):
+    def _ToggleNavigationButtons(self, volume, code=None, index=1):
         if code == None:
             getattr(self._view.BackwardButton, 'Disable' if self._currentPage <= self._model.GetFirstPageNumber(volume) else 'Enable')()
             getattr(self._view.ForwardButton, 'Disable' if self._currentPage >= self._model.GetTotalPages(volume) else 'Enable')()
         else:
             currentCode = self._model.Code
             self._model.Code = code
-            getattr(self._view.BackwardButton, 'Disable' if self._comparePage[code] <= self._model.GetFirstPageNumber(volume) else 'Enable')()
-            getattr(self._view.ForwardButton, 'Disable' if self._comparePage[code] >= self._model.GetTotalPages(volume) else 'Enable')()            
+            key = utils.MakeKey(code,index)
+            getattr(self._view.BackwardButton, 'Disable' if self._comparePage[key] <= self._model.GetFirstPageNumber(volume) else 'Enable')()
+            getattr(self._view.ForwardButton, 'Disable' if self._comparePage[key] >= self._model.GetTotalPages(volume) else 'Enable')()            
             self._model.Code = currentCode
             
     def IsSmallScreen(self):
         currentScreen = wx.GetDisplaySize()
         return currentScreen[1] < 800
 
-    def SelectTheme(self, index):
-        utils.SaveTheme(index, constants.READ)
-        self._view.FocusBody(None).SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
-        self._view.FocusBody(None).SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
-        self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))        
-        for code in self._compareVolume:
-            self._view.FocusBody(code).SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
-            self._view.FocusBody(code).SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
-            self.OpenAnotherBook(code, self._compareVolume[code], self._comparePage[code])
-            
-        
-        
+    def SelectTheme(self, theme):
+        utils.SaveTheme(theme, constants.READ)
+        for key in [None]+self._compareVolume.keys():
+            code, index = utils.SplitKey(key)
+            self._view.FocusBody(code, index).SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
+            self._view.FocusBody(code, index).SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
+            if code is None:            
+                self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))        
+            else:
+                self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key])            

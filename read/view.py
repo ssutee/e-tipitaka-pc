@@ -12,11 +12,11 @@ _ = i18n.language.ugettext
 
 class ReadPanelCreator(object):
     @staticmethod
-    def Create(parent, code, font, delegate, mainWindow=False):
+    def Create(parent, code, index, font, delegate, mainWindow=False):
         if code == constants.THAI_FIVE_BOOKS_CODE:
             return widgets.ReadWithReferencesPanel(parent, code if not mainWindow else None, font, delegate)
         font = utils.LoadFont(constants.READ_FONT, code)
-        return widgets.ReadPanel(parent, code if not mainWindow else None, font, delegate)
+        return widgets.ReadPanel(parent, code if not mainWindow else None, index, font, delegate)
 
 class ViewComponentsCreator(object):
     @staticmethod
@@ -165,8 +165,8 @@ class View(AuiBaseFrame):
     def Font(self, font):
         self._font = font
             
-    def SetFont(self, font, code):
-        self._readPanel.SetContentFont(font) if code is None else self._comparePanel[code].SetContentFont(font)
+    def SetFont(self, font, code, index):
+        self._readPanel.SetContentFont(font) if code is None else self._comparePanel[utils.MakeKey(code, index)].SetContentFont(font)
 
     @property
     def DataSource(self):
@@ -277,14 +277,14 @@ class View(AuiBaseFrame):
     def StatusBar(self):
         return self._statusBar
         
-    def ReadPanel(self, code):
-        return self._readPanel if code is None else self._comparePanel[code]
+    def ReadPanel(self, code, index):
+        return self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         
-    def NoteTextCtrl(self, code):
-        return self.ReadPanel(code).NotePanel.NoteTextCtrl
+    def NoteTextCtrl(self, code, index):
+        return self.ReadPanel(code, index).NotePanel.NoteTextCtrl
         
-    def FocusBody(self, code):
-        return self.ReadPanel(code).Body
+    def FocusBody(self, code, index):
+        return self.ReadPanel(code, index).Body
 
     def _SetupStatusBar(self):
         self._statusBar = self.CreateStatusBar()
@@ -295,7 +295,7 @@ class View(AuiBaseFrame):
         self._statusBar.SetFont(font)                
 
     def _PostInit(self):            
-        self._readPanel = ReadPanelCreator.Create(self, self._code, self._font, self._delegate, mainWindow=True)
+        self._readPanel = ReadPanelCreator.Create(self, self._code, 1, self._font, self._delegate, mainWindow=True)
         self._readPanel.Delegate = self._delegate
         self._readPanel.SetPageNumber(None)
         self._readPanel.SetItemNumber(None)
@@ -348,15 +348,14 @@ class View(AuiBaseFrame):
         return panel        
         
     def AddReadPanel(self, code):
-        if code not in self._comparePanel:
-            self._comparePanel[code] = ReadPanelCreator.Create(self, code, self._font, self._delegate)
-            info = AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
-            self.AddPane(self._comparePanel[code], info.Name(code))                                    
-        else:
-            info = self.AuiManager.GetPane(self._comparePanel[code])
-            info.Show()
-            self.AuiManager.Update()
-            
+        index = 1 if len(self._comparePanel.keys()) == 0 else sum(map(lambda k:int(k.startswith(code)), self._comparePanel.keys()))+1
+        
+        self._comparePanel[utils.MakeKey(code,index)] = ReadPanelCreator.Create(self, code, index, self._font, self._delegate)
+        info = AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
+        self.AddPane(self._comparePanel[utils.MakeKey(code,index)], info.Name(utils.MakeKey(code,index)))
+        
+        return index
+        
     def HideBookList(self):
         info = self.AuiManager.GetPane('BookList')
         info.Hide()
@@ -385,36 +384,36 @@ class View(AuiBaseFrame):
         info.Hide() if flag else info.Show()   
         self.AuiManager.Update()
         
-    def ToggleNotePanel(self, code):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def ToggleNotePanel(self, code, index):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         if readPanel.NotePanel.IsShown():
             readPanel.NotePanel.Hide()
         else:
             readPanel.NotePanel.Show()
         readPanel.Layout()
 
-    def SetPageNumber(self, number, code=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def SetPageNumber(self, number, code=None, index=1):        
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         readPanel.SetPageNumber(number)
         
     def SetItemNumber(self, *numbers, **kwargs):
-        readPanel = self._readPanel if 'code' not in kwargs else self._comparePanel[kwargs['code']]
+        readPanel = self._readPanel if 'code' not in kwargs else self._comparePanel[utils.MakeKey(kwargs['code'], kwargs['index'])]
         readPanel.SetItemNumber(*numbers)
         
-    def SetTitles(self, title1, title2, code=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def SetTitles(self, title1, title2, code=None, index=1):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         readPanel.SetTitles(title1, title2)
         
-    def SetText(self, text, code=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def SetText(self, text, code=None, index=1):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         readPanel.SetBody(text)
         
-    def GetStringSelection(self, code=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def GetStringSelection(self, code=None, index=1):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         return readPanel.Body.GetStringSelection()
         
-    def MarkText(self, code, selection=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def MarkText(self, code, index, selection=None):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         s,t = readPanel.Body.GetSelection() if selection is None else selection
         font = readPanel.Body.GetFont()
 
@@ -426,23 +425,23 @@ class View(AuiBaseFrame):
             
         return s,t
             
-    def UnmarkText(self, code, selection=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def UnmarkText(self, code, index, selection=None):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         s,t = readPanel.Body.GetSelection() if selection is None else selection
         font = readPanel.Body.GetFont()
         readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'white', font))    
 
         return s,t
         
-    def ClearMarks(self, code):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def ClearMarks(self, code, index):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         font = readPanel.Body.GetFont()
         text = readPanel.Body.GetValue()
         readPanel.Body.SetFont(font)   
         readPanel.Body.SetStyle(0, len(text)+1, wx.TextAttr(wx.NullColour, 'white', font))    
                 
-    def FormatText(self, formatter, code=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def FormatText(self, formatter, code=None, index=1):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         font = readPanel.Body.GetFont()
         fontSize = font.GetPointSize()
         readPanel.Body.Freeze()
@@ -466,8 +465,8 @@ class View(AuiBaseFrame):
                     readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))  
         readPanel.Body.Thaw()     
         
-    def ShowFindDialog(self, code, text, flags):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def ShowFindDialog(self, code, index, text, flags):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         data = wx.FindReplaceData()
         data.SetFlags(flags)
         data.SetFindString(text)
@@ -475,18 +474,18 @@ class View(AuiBaseFrame):
         dlg.data = data
         dlg.Show(True)
         
-    def ShowBookmarkPopup(self, x, y, code):
+    def ShowBookmarkPopup(self, x, y, code, index):
         if self._bookmarkMenu is not None:
             self._bookmarkMenu.Destroy()
         self._bookmarkMenu = wx.Menu()
         self.Bind(wx.EVT_MENU, self.OnMenuAddBookmarkSelected, self._bookmarkMenu.Append(-1, u'คั่นหน้านี้'))
         self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, u'จัดการคั่นหน้า'))        
         self._bookmarkMenu.AppendSeparator()        
-        self._delegate.LoadBookmarks(self._bookmarkMenu, code)
+        self._delegate.LoadBookmarks(self._bookmarkMenu, code, index)
         self._toolPanel.PopupMenu(self._bookmarkMenu, (x,y))
         
-    def ShowContextMenu(self, window, position, code):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def ShowContextMenu(self, window, position, code, index):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         
         def OnCopy(event):
             if isinstance(window, wx.html.HtmlWindow):
@@ -543,7 +542,7 @@ class View(AuiBaseFrame):
         if page != 0:
             x,y = self.StarButton.GetScreenPosition()
             w,h = self.StarButton.GetSize()        
-            dialog = BookMarkDialog(self.ReadPanel(self._delegate.LastFocus), self._delegate.BookmarkItems)
+            dialog = BookMarkDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.BookmarkItems)
             if dialog.ShowModal() == wx.ID_OK:
                 result = dialog.GetValue()
                 if result != None and len(result) == 2:
@@ -559,16 +558,16 @@ class View(AuiBaseFrame):
             self._bookList.SetSelection(volume-1)
         
     def OnMenuManageBookmarkSelected(self, event):
-        dlg = BookmarkManagerDialog(self.ReadPanel(self._delegate.LastFocus), self._delegate.BookmarkItems)
+        dlg = BookmarkManagerDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.BookmarkItems)
         dlg.ShowModal()
         dlg.Destroy()
         
-    def SetSelection(self, content, start, end, code):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def SetSelection(self, content, start, end, code, index):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         readPanel.Body.SetSelection(start, end)
                 
-    def UpdateSlider(self, value, minimum, maximum, code=None):
-        readPanel = self._readPanel if code is None else self._comparePanel[code]
+    def UpdateSlider(self, value, minimum, maximum, code=None, index=1):
+        readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         if readPanel.Slider is None: 
             return                    
         readPanel.Slider.SetMin(minimum)
