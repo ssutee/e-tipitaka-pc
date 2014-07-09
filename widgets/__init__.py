@@ -471,15 +471,15 @@ class ReadToolPanel(wx.Panel):
         self._printButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.PRINT_IMAGE, wx.BITMAP_TYPE_PNG)))
         self._printButton.SetToolTip(wx.ToolTip(u'พิมพ์หน้าที่ต้องการ'))                        
-                
+        
+        toolsSizer.Add(self._bookListButton, flag=wx.ALIGN_CENTER)
+        toolsSizer.Add((5,-1))                
         toolsSizer.Add(self._searchButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
         toolsSizer.Add(self._starButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
         toolsSizer.Add(self._notesButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
-        toolsSizer.Add(self._bookListButton, flag=wx.ALIGN_CENTER)
-        toolsSizer.Add((5,-1))                
         toolsSizer.Add(self._fontsButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add(self._incFontButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add(self._decFontButton, flag=wx.ALIGN_CENTER)
