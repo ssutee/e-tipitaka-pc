@@ -329,7 +329,7 @@ class Presenter(object):
     def OnLinkToReference(self, code, volume, item):
         self._DoCompare(code, volume, 1, item)
 
-    def SaveBookmark(self):
+    def SaveBookmark(self):        
         self._bookmarkManager.Save()
 
     def Close(self):
@@ -803,7 +803,6 @@ class Presenter(object):
             else:
                 self.OpenAnotherBook(code, index, volume, page)
                 
-        self._bookmarkManager.Save()                
         self._bookmarkManager = BookmarkManager(self._view, code if code is not None else self._model.Code)
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
         

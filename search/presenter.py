@@ -354,6 +354,7 @@ class Presenter(object):
             volume, page = int(tokens[1]), int(tokens[3])            
             self.OpenBook(volume, page)
 
+        self._bookmarkManager.Load()
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
         
     def OpenPaliDict(self):

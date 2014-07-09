@@ -13,6 +13,8 @@ class BookmarkManager(object):
         self.Load()
                 
     def Load(self):
+        print 'load'
+        
         filename = os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code))
         if not os.path.exists(filename): return
         self._items = []
@@ -36,7 +38,8 @@ class BookmarkManager(object):
         map(lambda x:x.sort(), roots)
         
     def Save(self):
-        
+        print 'save'
+
         def _Save(items, out, depth=0):
             for item in items:
                 if isinstance(item, dict):
@@ -65,8 +68,7 @@ class BookmarkManager(object):
                     menuItem = root.Append(-1, item[2])
                     menuItem.volume = item[0]
                     menuItem.page = item[1]
-                    self._view.Bind(wx.EVT_MENU, handler, menuItem)                    
-        self.Load()
+                    self._view.Bind(wx.EVT_MENU, handler, menuItem)
         _MakeMenu(menu, self._items)
         
     @property

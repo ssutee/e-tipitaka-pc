@@ -548,7 +548,8 @@ class View(AuiBaseFrame):
                 if result != None and len(result) == 2:
                     container, note = result
                     note = u'%s : %s' %(utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d'%(volume, page)), note)
-                    container.append((volume, page, note))
+                    container.append((volume, page, note))                    
+                    self._delegate.SaveBookmark()
             dialog.Destroy()
         else:
             wx.MessageBox(u'หน้ายังไม่ได้ถูกเลือก',u'พบข้อผิดพลาด')
