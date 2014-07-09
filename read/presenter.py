@@ -520,8 +520,8 @@ class Presenter(object):
         self._view.ToggleNotePanel(code, index)
         
     def ShowFontDialog(self):
-        code = self._lastFocus if self._lastFocus else self._model.Code
-        curFont = utils.LoadFont(constants.READ_FONT, code)
+        code, index = utils.SplitKey(self._lastFocus)
+        curFont = utils.LoadFont(constants.READ_FONT, code if code else self._model.Code)
         fontData = wx.FontData()
         fontData.EnableEffects(False)
         if curFont != None:
@@ -531,24 +531,24 @@ class Presenter(object):
             data = dialog.GetFontData()
             font = data.GetChosenFont()
             if font.IsOk():
-                utils.SaveFont(font, constants.READ_FONT, code)                
-                self._view.SetFont(font, self._lastFocus)        
+                utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)                
+                self._view.SetFont(font, code, index)        
         dialog.Destroy()
 
     def IncreaseFontSize(self):
-        code = self._lastFocus if self._lastFocus else self._model.Code
-        font = utils.LoadFont(constants.READ_FONT, code)
+        code, index = utils.SplitKey(self._lastFocus)
+        font = utils.LoadFont(constants.READ_FONT, code if code else self._model.Code)
         font.SetPointSize(font.GetPointSize()+1)
-        utils.SaveFont(font, constants.READ_FONT, code)        
-        self._view.SetFont(font, self._lastFocus)        
+        utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)        
+        self._view.SetFont(font, code, index)        
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         
     def DecreaseFontSize(self):
-        code = self._lastFocus if self._lastFocus else self._model.Code
-        font = utils.LoadFont(constants.READ_FONT, code)
+        code, index = utils.SplitKey(self._lastFocus)
+        font = utils.LoadFont(constants.READ_FONT, code if code else self._model.Code)
         font.SetPointSize(font.GetPointSize()-1)
-        utils.SaveFont(font, constants.READ_FONT, code)
-        self._view.SetFont(font, self._lastFocus)
+        utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)
+        self._view.SetFont(font, code, index)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
 
     def MarkText(self, code, index, mark=True):
