@@ -468,11 +468,15 @@ class Model(object):
         def trim(text):
             return text if len(text) < 25 else text[:25] + u'...'
         
-        return [utils.ArabicToThai(u'เล่มที่ %2s ข้อที่ %2s : %s' % (note.volume, note.page, trim(note.text))) for note in Model.GetNotes(code, text, creation)]
+        return [utils.ArabicToThai(u'%s เล่มที่ %2s ข้อที่ %2s : %s' % (utils.ShortName(note.code) if code is None else u'', note.volume, note.page, trim(note.text))) for note in Model.GetNotes(code, text, creation)]
         
     @staticmethod
     def GetNotes(code, text=u'', creation=False):
-        if creation:
+        if code is None and creation:
+            return select(note for note in Note if text in note.text).order_by(desc(Note.id))
+        elif code is None:
+            return select(note for note in Note if text in note.text).order_by(Note.volume, Note.page)
+        elif creation:
             return select(note for note in Note if note.code == code and text in note.text).order_by(desc(Note.id))
         else:
             return select(note for note in Note if note.code == code and text in note.text).order_by(Note.volume, Note.page)

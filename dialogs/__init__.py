@@ -85,8 +85,8 @@ class DataXferPagesValidator(wx.PyValidator):
         event.Skip()
 
 class NoteManagerDialog(wx.Dialog):
-    def __init__(self, parent, code):
-        super(NoteManagerDialog, self).__init__(parent, wx.ID_ANY, u'ค้นหาบันทึกข้อความเพิ่มเติม', size=(600,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+    def __init__(self, parent, code=None):
+        super(NoteManagerDialog, self).__init__(parent, wx.ID_ANY, u'ค้นหาบันทึกข้อความเพิ่มเติม', size=(700,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
         self._result = None
         self._code = code
         self.Center()        
@@ -145,7 +145,7 @@ class NoteManagerDialog(wx.Dialog):
         
         with db_session:
             note = list(read.model.Model.GetNotes(self._code, self._searchCtrl.GetValue()))[self._noteListBox.GetSelection()]
-            self._result = note.volume, note.page
+            self._result = note.volume, note.page, note.code
             self.EndModal(wx.ID_OK)
     
     @property

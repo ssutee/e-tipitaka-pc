@@ -222,3 +222,17 @@ def SplitKey(key):
         tokens = key.split(':')
         return tokens[0], int(tokens[1])
     return None, 0
+
+def ShortName(code):    
+    if code == constants.THAI_ROYAL_CODE:
+        return u'ฉบับหลวง'
+    if code == constants.PALI_SIAM_CODE:
+        return u'สยามรัฐ'
+    if code == constants.THAI_MAHAMAKUT_CODE:
+        return u'มหามกุฏ'
+    if code == constants.THAI_MAHACHULA_CODE:
+        return u'มหาจุฬา'
+    if code == constants.ROMAN_SCRIPT_CODE:
+        return u'roman'
+    if code == constants.THAI_FIVE_BOOKS_CODE:
+        return u'จากพระโอษฐ์'

@@ -89,8 +89,8 @@ class Presenter(object):
         
         return True
                 
-    def OpenBook(self, volume=1, page=0):
-        self.Read(self._model.Code, volume, page, 0, section=1, shouldHighlight=False, showBookList=True)
+    def OpenBook(self, volume=1, page=0, code=None):
+        self.Read(self._model.Code if code is None else code, volume, page, 0, section=1, shouldHighlight=False, showBookList=True)
 
     def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):
         self._model.Read(code, volume, page, idx)
@@ -338,10 +338,10 @@ class Presenter(object):
         self._view.ShowBookmarkPopup(x,y)
         
     def ShowNotesManager(self):        
-        dlg = NoteManagerDialog(self._view, self._model.Code)
+        dlg = NoteManagerDialog(self._view)
         if dlg.ShowModal() == wx.ID_OK:
-            volume, page = dlg.Result
-            self.OpenBook(volume, page)
+            volume, page, code = dlg.Result
+            self.OpenBook(volume, page, code)
         dlg.Destroy()
         
         

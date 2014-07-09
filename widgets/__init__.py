@@ -658,6 +658,9 @@ class ReadPanel(wx.Panel):
         self._paintPanel.SetSizer(paintSizer)     
         
         self._notePanel = NotePanel(self, self._code, self._index)
+        
+        if self.Delegate.IsSmallScreen():
+            self._notePanel.Hide()
               
     def ExtraLayout(self):
         pass
@@ -886,10 +889,10 @@ class NotePanel(wx.Panel):
         
     def _CreateAttributes(self):
         self.SetBackgroundColour('white')
-        self._sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Notes')), orient=wx.VERTICAL)
-        self._noteTextCtrl = rt.RichTextCtrl(self, size=(-1, 100), style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
-        self._noteTextCtrl.SetModified(False)
-        
+        self._sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Notes')), orient=wx.VERTICAL)        
+        self._noteTextCtrl = rt.RichTextCtrl(self, size=(-1, 50 if self.Parent.Delegate.IsSmallScreen() else 100), style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
+        self._noteTextCtrl.SetModified(False)        
+
         self._toolBar = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
                 
         self._sizer.Add(self._noteTextCtrl, 1, wx.EXPAND)        

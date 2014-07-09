@@ -860,7 +860,7 @@ class Presenter(object):
         code, index = utils.SplitKey(self._lastFocus)                
         dlg = dialogs.NoteManagerDialog(self._view.ReadPanel(code, index), code if code is not None else self._model.Code)
         if dlg.ShowModal() == wx.ID_OK:
-            volume, page = dlg.Result
+            volume, page, c = dlg.Result
             if self._lastFocus is not None:
                 self.OpenAnotherBook(code, index, volume, page)  
             else:
