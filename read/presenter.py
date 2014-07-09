@@ -679,10 +679,13 @@ class Presenter(object):
 
         volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code,index)]
         page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code,index)]        
-
+        
         note = Model.Note(volume=volume, page=page, 
             code=code if code is not None else self._model.Code, 
             text=textCtrl.GetValue(), filename=textCtrl.GetFilename())
+        
+        if textCtrl.GetValue() == u'':
+            note.delete()
                         
     def SaveMarkedText(self, code, index):
         key = self._CurrentMarkKey(code, index)                

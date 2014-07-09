@@ -53,7 +53,7 @@ class BookmarkManager(object):
             _Save(self._items, out)
 
         
-    def MakeMenu(self, menu, handler):
+    def MakeMenu(self, menu, handler):        
         def _MakeMenu(root, items):
             for item in items:
                 if isinstance(item, dict):
@@ -65,7 +65,8 @@ class BookmarkManager(object):
                     menuItem = root.Append(-1, item[2])
                     menuItem.volume = item[0]
                     menuItem.page = item[1]
-                    self._view.Bind(wx.EVT_MENU, handler, menuItem)
+                    self._view.Bind(wx.EVT_MENU, handler, menuItem)                    
+        self.Load()
         _MakeMenu(menu, self._items)
         
     @property

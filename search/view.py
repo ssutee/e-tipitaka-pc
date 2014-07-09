@@ -233,7 +233,7 @@ class View(AuiBaseFrame):
             self._bookmarkMenu.Destroy()
         self._bookmarkMenu = wx.Menu()
         self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, u'จัดการคั่นหน้า'))        
-        self._bookmarkMenu.AppendSeparator()        
+        self._bookmarkMenu.AppendSeparator()                
         self._delegate.LoadBookmarks(self._bookmarkMenu)
         self._topBar.PopupMenu(self._bookmarkMenu, (x,y))        
     
