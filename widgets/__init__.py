@@ -509,7 +509,7 @@ class ReadToolPanel(wx.Panel):
         themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, u'สีพื้นหลัง'), orient=wx.HORIZONTAL)
         self._themeComboBox = wx.ComboBox(self._themePanel, wx.ID_ANY, choices=themes, style=wx.CB_DROPDOWN|wx.CB_READONLY)
         self._themeComboBox.SetStringSelection(themes[utils.LoadTheme(constants.READ)])
-        themeSizer.Add(self._themeComboBox)
+        themeSizer.Add(self._themeComboBox, flag=wx.ALIGN_CENTER)
         self._themePanel.SetSizer(themeSizer)
         themeSizer.Fit(self._themePanel)                
         
@@ -1122,7 +1122,7 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add(self._paliDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._thaiDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
         bottomSizer.Add((10,-1), 0)
-        bottomSizer.Add(self._themePanel, 0, flag=wx.ALIGN_BOTTOM)
+        bottomSizer.Add(self._themePanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
         
         mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
         mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
@@ -1217,7 +1217,7 @@ class SearchToolPanel(wx.Panel):
         themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, u'สีพื้นหลัง'), orient=wx.HORIZONTAL)
         self._themeComboBox = wx.ComboBox(self._themePanel, wx.ID_ANY, choices=themes, style=wx.CB_DROPDOWN|wx.CB_READONLY)
         self._themeComboBox.SetStringSelection(themes[utils.LoadTheme(constants.SEARCH)])
-        themeSizer.Add(self._themeComboBox)
+        themeSizer.Add(self._themeComboBox, flag=wx.ALIGN_CENTER)
         self._themePanel.SetSizer(themeSizer)
         themeSizer.Fit(self._themePanel)                
                 
