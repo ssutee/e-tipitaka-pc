@@ -418,18 +418,19 @@ class View(AuiBaseFrame):
         font = readPanel.Body.GetFont()
 
         if 'wxMac' in wx.PlatformInfo:
-            readPanel.Body.SetStyle(s, t, wx.TextAttr('blue', wx.NullColour, 
+            readPanel.Body.SetStyle(s, t, wx.TextAttr('blue', utils.LoadThemeBackgroundHex(constants.READ), 
                 wx.Font(font.GetPointSize()+2, font.GetFamily(), font.GetStyle(), wx.FONTWEIGHT_BOLD, False, font.GetFaceName())))
         else:
-            readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'yellow', font))
+            readPanel.Body.SetStyle(s, t, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 'yellow', font))
             
         return s,t
             
     def UnmarkText(self, code, index, selection=None):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         s,t = readPanel.Body.GetSelection() if selection is None else selection
-        font = readPanel.Body.GetFont()
-        readPanel.Body.SetStyle(s, t, wx.TextAttr(wx.NullColour, 'white', font))    
+        font = readPanel.Body.GetFont()        
+        readPanel.Body.SetStyle(s, t, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
+            utils.LoadThemeBackgroundHex(constants.READ), font))    
 
         return s,t
         
@@ -438,7 +439,8 @@ class View(AuiBaseFrame):
         font = readPanel.Body.GetFont()
         text = readPanel.Body.GetValue()
         readPanel.Body.SetFont(font)   
-        readPanel.Body.SetStyle(0, len(text)+1, wx.TextAttr(wx.NullColour, 'white', font))    
+        readPanel.Body.SetStyle(0, len(text)+1, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
+            utils.LoadThemeBackgroundHex(constants.READ), font))    
                 
     def FormatText(self, formatter, code=None, index=1):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]

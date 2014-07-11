@@ -13,8 +13,6 @@ class BookmarkManager(object):
         self.Load()
                 
     def Load(self):
-        print 'load'
-        
         filename = os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code))
         if not os.path.exists(filename): return
         self._items = []
@@ -38,7 +36,6 @@ class BookmarkManager(object):
         map(lambda x:x.sort(), roots)
         
     def Save(self):
-        print 'save'
 
         def _Save(items, out, depth=0):
             for item in items:
