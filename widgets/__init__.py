@@ -603,7 +603,7 @@ class ReadPanel(wx.Panel):
         self._item = wx.html.HtmlWindow(self, size=(-1, 28), style=wx.html.HW_SCROLLBAR_NEVER)
         self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
-        self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
+        self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)        
         self._body.SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
         self._body.SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
@@ -747,6 +747,9 @@ class ReadPanel(wx.Panel):
 
     def SetBody(self, text):
         self._body.SetValue(text)
+        font = self._body.GetFont()
+        self._body.SetStyle(0, len(text)+1, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
+            utils.LoadThemeBackgroundHex(constants.READ), font))    
         
     def SetTitles(self, title1, title2):
         if 'wxMSW' in wx.PlatformInfo:
