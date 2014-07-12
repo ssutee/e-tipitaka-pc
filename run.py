@@ -57,6 +57,10 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         wx.aui.AuiMDIParentFrame.__init__(self, parent, wx.ID_ANY, title=appname, 
             pos=pos, size=size, style=wx.DEFAULT_FRAME_STYLE)
 
+        icon = wx.IconBundle()
+        icon.AddIconFromFile(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)
+        self.SetIcons(icon)
+
         self.Bind(wx.EVT_CLOSE, self.OnFrameClose)
         self._CreateStatusBar()
 

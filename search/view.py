@@ -123,10 +123,7 @@ class View(AuiBaseFrame):
         self._bookmarkMenu = None
 
         self.SetBackgroundColour(wx.Colour(0xED,0xED,0xED,0xFF))
-        icon = wx.IconBundle()
-        icon.AddIconFromFile(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)
-        self.SetIcons(icon)
-
+        
         self._resultsWindow = widgets.ResultsWindow(self)
         self._resultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         
