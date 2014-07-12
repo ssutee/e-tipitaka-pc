@@ -129,23 +129,11 @@ class RomanScriptViewComponents(ScriptViewComponents):
 class View(AuiBaseFrame):    
     
     def __init__(self, parent, title, code):         
-        rect = utils.LoadReadWindowPosition()
-        
-        pos = 0,0
-        if rect is not None:
-            pos = rect[0], rect[1]
-
-        size = min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])
-        if rect is not None:
-            size = rect[2], rect[3]
-                
-        super(View, self).__init__(parent, wx.ID_ANY, title=title, size=size, pos=pos)
-            
-        if rect is None:
-            self.CenterOnScreen()            
-            
+        super(View, self).__init__(parent, wx.ID_ANY, title=title, style=wx.CAPTION)
+                        
         self._dataSource = None
         self._delegate = None
+        self._parent = parent
         
         self._components = ViewComponentsCreator.Create(code, self)
         self._code = code                
@@ -155,7 +143,7 @@ class View(AuiBaseFrame):
         self._font = utils.LoadFont(constants.READ_FONT, code)
         
         self._bookmarkMenu = None
-        self._SetupStatusBar()
+        self.SetBackgroundColour(wx.Colour(0xED,0xED,0xED,0xFF))
         
     @property
     def Font(self):
@@ -273,10 +261,10 @@ class View(AuiBaseFrame):
     def Body(self):
         return self._readPanel.Body
         
-    @property
-    def StatusBar(self):
-        return self._statusBar
-        
+    def SetStatusText(self, text, field):
+        self._parent.StatusBar.SetStatusText(u'', 2)
+        self._parent.StatusBar.SetStatusText(text, field)
+
     def ReadPanel(self, code, index):
         return self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         
@@ -287,12 +275,13 @@ class View(AuiBaseFrame):
         return self.ReadPanel(code, index).Body
 
     def _SetupStatusBar(self):
-        self._statusBar = self.CreateStatusBar()
-        self._statusBar.SetFieldsCount(2)
-        self._statusBar.SetStatusWidths([-1,-1])
-        font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-        font.SetFaceName('TF Chiangsaen')
-        self._statusBar.SetFont(font)                
+        pass
+        # self._statusBar = self.CreateStatusBar()
+        # self._statusBar.SetFieldsCount(2)
+        # self._statusBar.SetStatusWidths([-1,-1])
+        # font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+        # font.SetFaceName('TF Chiangsaen')
+        # self._statusBar.SetFont(font)                
 
     def _PostInit(self):            
         self._readPanel = ReadPanelCreator.Create(self, self._code, 1, self._font, self._delegate, mainWindow=True)

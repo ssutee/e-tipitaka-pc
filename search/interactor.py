@@ -48,9 +48,8 @@ class Interactor(object):
     def OnSearchButtonClick(self, event):
         self.Presenter.Search()
 
-    def OnFrameClose(self, event):
-        self.Presenter.Close()
-        event.Skip()
+    def OnFrameClose(self, event):        
+        pass
         
     def OnLanguagesComboBoxSelect(self, event):
         self.Presenter.SelectLanguage(event.GetSelection())

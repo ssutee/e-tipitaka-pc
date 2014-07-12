@@ -30,6 +30,7 @@ class Presenter(object):
         self._refreshHistoryList = True
         self._paliDictWindow = None
         self._thaiDictWindow = None
+        self._delegate = None
         self._model = model        
         self._model.Delegate = self
         self._view = view
@@ -41,9 +42,21 @@ class Presenter(object):
         self._view.Start()
          
     @property
+    def Delegate(self):
+        return self._delegate
+
+    @Delegate.setter
+    def Delegate(self, value):
+        self._delegate = value
+
+    @property
     def BookmarkItems(self):
         return self._bookmarkManager.Items
-                  
+                
+    @property
+    def Model(self):
+        return self._model
+
     def ShowAboutDialog(self):
         dialog = AboutDialog(self._view)
         dialog.Center()
@@ -89,36 +102,24 @@ class Presenter(object):
         
         return True
                 
-    def OpenBook(self, volume=1, page=0, code=None):
+    def OpenBook(self, volume=1, page=0, code=None):        
         self.Read(self._model.Code if code is None else code, volume, page, 0, section=1, shouldHighlight=False, showBookList=True)
 
-    def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):
+    def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):        
         self._model.Read(code, volume, page, idx)
-        presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
-        if not presenter or self._shouldOpenNewWindow:
-            model = read.model.Model(code)
-            view = read.view.View(self._view, self._model.Code, code)
-            interactor = read.interactor.Interactor()
-            presenter = read.presenter.Presenter(model, view, interactor, code)
-            presenter.Delegate = self
-            if code not in self._presenters:
-                self._presenters[code] = [presenter]
-            else:
-                self._presenters[code] += [presenter]
-        else:
-            presenter.BringToFront() 
-        presenter.Keywords = self._model.Keywords if shouldHighlight else None
-        presenter.OpenBook(volume, page, section, selectItem=True, showBookList=showBookList)
-        
+        self._delegate.Read(code, volume, page, idx, section, shouldHighlight, showBookList, self._shouldOpenNewWindow)        
+
     def BringToFront(self):
         self._view.Raise()
         self._view.Iconize(False)        
             
-    def OnReadWindowClose(self, code):
-        if code in self._presenters:
-            self._model.SaveHistory(code)
-            del self._presenters[code]  
-            
+    def SaveHistory(self, code):
+        self._model.SaveHistory(code)
+
+    def OnReadWindowClose(self, code, presenter):
+        self.SaveHistory(code)
+        self._delegate.OnReadWindowClose(code, presenter)
+
     def OnReadWindowOpenPage(self, volume, page, code):
         self._model.Skim(volume, page, code)
 
@@ -327,12 +328,14 @@ class Presenter(object):
     def CheckNewUpdate(self):
         threads.CheckNewUpdateThread(self).start()
         
-    def Close(self):
-        utils.SaveSearchWindowPosition(self._view)
-        for code in self._presenters:
-            utils.SaveReadWindowPosition(self._presenters[code][0].View)
-            self._model.SaveHistory(code)
+    def SaveSearches(self):
         self._view.SearchCtrl.SaveSearches()
+
+    # def Close(self):
+    #     utils.SaveSearchWindowPosition(self._view)
+    #     for code in self._presenters:
+    #         utils.SaveReadWindowPosition(self._presenters[code][0].View)
+    #         self._model.SaveHistory(code)
 
     def ShowBookmarkPopup(self, x, y):
         self._view.ShowBookmarkPopup(x,y)

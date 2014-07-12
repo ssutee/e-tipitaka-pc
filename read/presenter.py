@@ -136,8 +136,7 @@ class Presenter(object):
         self._delegate = None
         self._view = view
         self._view.DataSource = self
-        self._view.Delegate = self
-        self._view.SetTitle(self._model.GetTitle())
+        self._view.Delegate = self        
         self._view.Start()
         interactor.Install(self, view)     
         
@@ -200,8 +199,7 @@ class Presenter(object):
         data.SetMarginBottomRight((10,10))        
 
     def BringToFront(self):
-        self._view.Raise()
-        self._view.Iconize(False)
+        self._view.Activate()
 
     def _LoadNoteText(self, volume, page, code=None, index=1):
         textCtrl = self._view.NoteTextCtrl(code, index)
@@ -264,8 +262,8 @@ class Presenter(object):
         # work around for fixing font size problem on win32
         self._view.SetText(content)        
         self._view.SetText(content)
-        self._view.StatusBar.SetStatusText(u'', 0)
-        self._view.StatusBar.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
+        self.SetStatusText(u'', 0)        
+        self.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
 
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
 
@@ -334,10 +332,9 @@ class Presenter(object):
 
     def Close(self):
         self._stopOpen = True
-        self.SaveBookmark()
-        utils.SaveReadWindowPosition(self._view)
+        self.SaveBookmark()        
         if hasattr(self._delegate, 'OnReadWindowClose'):
-            self._delegate.OnReadWindowClose(self._code)
+            self._delegate.OnReadWindowClose(self._code, self)
             
     def GetBookListItems(self):
         return self._model.GetBookListItems()
@@ -375,10 +372,10 @@ class Presenter(object):
             self.OpenBook(volume, page, section if section is not None else self._model.GetSection(volume, page))
         elif isinstance(event, wx.CommandEvent):
             self.OpenBook(event.GetSelection()+1, self._model.GetFirstPageNumber(event.GetSelection()+1))
-            
+
     def HandleTextSelection(self, text, code, index):
         text = text.strip().split('\n')[0]        
-        self._view.StatusBar.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
+        self.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
         if self._paliDictWindow is not None:            
             self._paliDictWindow.SetInput(text)
         if self._thaiDictWindow is not None:
@@ -898,3 +895,6 @@ class Presenter(object):
                 self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))        
             else:
                 self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key])            
+
+    def SetStatusText(self, text, field):
+        self._view.SetStatusText(text, field)

@@ -186,7 +186,7 @@ class PaliDictWindow(DictWindow):
             return cursor.fetchone()            
 
 
-class AuiBaseFrame(wx.Frame):
+class AuiBaseFrame(aui.AuiMDIChildFrame):
     
     def __init__(self, parent, *args, **kwargs):
         super(AuiBaseFrame, self).__init__(parent, *args, **kwargs)
