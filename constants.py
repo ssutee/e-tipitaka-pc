@@ -72,6 +72,8 @@ NOTES_PATH = os.path.join(DATA_PATH, NOTES_DIR)
 MARKS_PATH = os.path.join(DATA_PATH, MARKS_DIR)
 BOOKMARKS_PATH = os.path.join(DATA_PATH, BOOKMARKS_DIR)
 
+ERROR_LOG_PATH = os.path.join('./', 'error.log')
+
 CONFIG_PATH = os.path.join(DATA_PATH, CONFIG_DIR)
 LOG_FILE = os.path.join(CONFIG_PATH, 'history.log')
 SKIP_VERSION_FILE = os.path.join(CONFIG_PATH, 'skip_version')

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, traceback
 import constants
 
 if not os.path.exists(constants.DATA_PATH):
@@ -123,6 +123,15 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
             self._presenters[code].remove(presenter)
             if len(self._presenters[code]) == 0:
                 del self._presenters[code]
+
+def excepthook(type, value, tb):
+    message = 'Uncaught exception:\n'
+    message += ''.join(traceback.format_exception(type, value, tb))
+    with open(constants.ERROR_LOG_PATH, 'a') as log:
+        log.write(message+'\n')
+    print message
+
+sys.excepthook = excepthook
 
 wx.Log.SetLogLevel(0)
 

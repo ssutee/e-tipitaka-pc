@@ -1,0 +1,6 @@
+Uncaught exception:
+Traceback (most recent call last):
+  File "./run.py", line 139, in <module>
+    open('xxxx.txt', 'r')
+IOError: [Errno 2] No such file or directory: 'xxxx.txt'
+
