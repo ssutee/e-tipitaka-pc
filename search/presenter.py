@@ -331,12 +331,6 @@ class Presenter(object):
     def SaveSearches(self):
         self._view.SearchCtrl.SaveSearches()
 
-    # def Close(self):
-    #     utils.SaveSearchWindowPosition(self._view)
-    #     for code in self._presenters:
-    #         utils.SaveReadWindowPosition(self._presenters[code][0].View)
-    #         self._model.SaveHistory(code)
-
     def ShowBookmarkPopup(self, x, y):
         self._view.ShowBookmarkPopup(x,y)
         
@@ -346,7 +340,9 @@ class Presenter(object):
             volume, page, code = dlg.Result
             self.OpenBook(volume, page, code)
         dlg.Destroy()
-        
+
+    def SaveBookmark(self):        
+        self._bookmarkManager.Save()        
         
     def LoadBookmarks(self, menu):
 

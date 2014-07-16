@@ -552,6 +552,7 @@ class View(AuiBaseFrame):
     def OnMenuManageBookmarkSelected(self, event):
         dlg = BookmarkManagerDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.BookmarkItems)
         dlg.ShowModal()
+        self._delegate.SaveBookmark()
         dlg.Destroy()
         
     def SetSelection(self, content, start, end, code, index):
