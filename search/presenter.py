@@ -344,7 +344,9 @@ class Presenter(object):
             self.OpenBook(volume, page, code)
         dlg.Destroy()
         
-        
+    def SaveBookmark(self):
+        self._bookmarkManager.Save()
+
     def LoadBookmarks(self, menu):
 
         def OnBookmark(event):
