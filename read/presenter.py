@@ -337,7 +337,7 @@ class Presenter(object):
         self.SaveBookmark()
         utils.SaveReadWindowPosition(self._view)
         if hasattr(self._delegate, 'OnReadWindowClose'):
-            self._delegate.OnReadWindowClose(self._code)
+            self._delegate.OnReadWindowClose(self._code, self)
             
     def GetBookListItems(self):
         return self._model.GetBookListItems()

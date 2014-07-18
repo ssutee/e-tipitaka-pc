@@ -114,10 +114,12 @@ class Presenter(object):
         self._view.Raise()
         self._view.Iconize(False)        
             
-    def OnReadWindowClose(self, code):
+    def OnReadWindowClose(self, code, presenter):
         if code in self._presenters:
             self._model.SaveHistory(code)
-            del self._presenters[code]  
+            self._presenters[code].remove(presenter)
+            if len(self._presenters[code]) == 0:
+                del self._presenters[code]  
             
     def OnReadWindowOpenPage(self, volume, page, code):
         self._model.Skim(volume, page, code)
