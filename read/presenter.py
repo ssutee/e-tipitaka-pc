@@ -351,7 +351,6 @@ class Presenter(object):
 
     def Forward(self, code=None):        
         code, index = utils.SplitKey(self._lastFocus)
-        print code, index
         self._DoForward(code, index)
         
     def _DoBackward(self, code=None, index=1):
