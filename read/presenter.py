@@ -349,8 +349,9 @@ class Presenter(object):
             key = utils.MakeKey(code, index)
             self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] + 1)
 
-    def Forward(self, code=None):
-        code, index = utils.SplitKey(self._lastFocus) if code is not None else code,1
+    def Forward(self, code=None):        
+        code, index = utils.SplitKey(self._lastFocus)
+        print code, index
         self._DoForward(code, index)
         
     def _DoBackward(self, code=None, index=1):
@@ -361,7 +362,7 @@ class Presenter(object):
             self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] - 1)
                 
     def Backward(self, code=None):
-        code, index = utils.SplitKey(self._lastFocus) if code is not None else code,1
+        code, index = utils.SplitKey(self._lastFocus)
         self._DoBackward(code, index)
 
     def HandleBookSelection(self, event):
