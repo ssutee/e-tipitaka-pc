@@ -31,14 +31,23 @@ class DictWindow(wx.Frame):
         
         font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
         font.SetFaceName('TF Chiangsaen')
-
+        
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
         self.hboxToolbar = wx.BoxSizer(wx.HORIZONTAL)
 
         labelWord = wx.StaticText(self, -1, u'ค้นหา: ')
         self.input = wx.SearchCtrl(self, -1, pos=(0,0), size=(-1,-1), style=wx.TE_PROCESS_ENTER)
-        self.input.SetFont(font)
+        fontError = False
+
+        try:
+            self.input.SetFont(font)
+        except wx.PyAssertionError, e:
+            fontError = True
+            font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
+            self.input.SetFont(font)
+            self.input.SetValue(u'กรุณาติดตั้งฟอนต์ TF Chiangsaen เพื่อการแสดงผลที่ถูกต้อง')
+
         self.input.Bind(wx.EVT_TEXT_ENTER, self.OnTextEntered)
         self.input.Bind(wx.EVT_TEXT, self.OnTextEntered)
 
@@ -52,7 +61,13 @@ class DictWindow(wx.Frame):
         
         self.rightPanel = wx.Panel(self.sp,-1)
         self.text = wx.TextCtrl(self.rightPanel, -1, style=wx.TE_READONLY|wx.TE_RICH2|wx.TE_MULTILINE)
-        self.text.SetFont(font)
+
+        try:
+            self.text.SetFont(font)
+        except wx.PyAssertionError, e:        
+            fontError = True  
+            font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
+            self.text.SetFont(font)
 
         rightSizer = wx.StaticBoxSizer(wx.StaticBox(self.rightPanel, -1, u'คำแปล'), wx.VERTICAL)
         rightSizer.Add(self.text,1,wx.ALL | wx.EXPAND,0)
@@ -77,7 +92,8 @@ class DictWindow(wx.Frame):
 
         self.conn = self.ConnectDatabase()
 
-        self.input.SetValue('')
+        if not fontError:
+            self.input.SetValue(u'')
                 
     @abc.abstractmethod
     def LookupDictSQLite(self, word1, word2=None, prefix=False):
