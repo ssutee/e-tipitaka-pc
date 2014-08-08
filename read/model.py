@@ -282,6 +282,11 @@ class ThaiMahaMakutEngine(Engine):
             return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        args = ('%02d'%(volume), '%04d'%(page))
+        return select, args
+
     def ProcessResult(self, result):
         r = {}
         if result is not None:
