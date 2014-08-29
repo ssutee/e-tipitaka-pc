@@ -1112,6 +1112,10 @@ class SearchToolPanel(wx.Panel):
     @property
     def ThaiDictButton(self):
         return self._thaiDictButton
+
+    @property
+    def BuddhawajOnly(self):
+        return self._buddhawajOnly
         
     def _DoLayout(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -1121,6 +1125,7 @@ class SearchToolPanel(wx.Panel):
         topSizer.Add(self._fontsButton, flag=wx.ALIGN_CENTER)
         topSizer.Add((5,5))
         topSizer.Add(self._text, 1, wx.ALIGN_CENTER|wx.RIGHT, 3)
+        topSizer.Add(self._buddhawajOnly, 0, wx.ALIGN_CENTER|wx.RIGHT, 5)        
         topSizer.Add(self._findButton, flag=wx.ALIGN_CENTER)
         topSizer.Add(self._volumesRadio, 0 ,wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, 5)        
         topSizer.Add(self._aboutButton, 0, flag=wx.ALIGN_CENTER)
@@ -1160,7 +1165,10 @@ class SearchToolPanel(wx.Panel):
         else:   
             self._text.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, u''))
 
-        langs = [_('Thai Royal'), _('Pali Siam'), _('Thai Mahamakut'), _('Thai Mahachula'), _('Thai Five Books'), _('Roman Script')] 
+        self._buddhawajOnly = wx.CheckBox(self, wx.ID_ANY, label=u'เฉพาะพุทธวจน')
+        self._buddhawajOnly.Disable()
+
+        langs = [_('Thai Royal'), _('Pali Siam'), _('Thai Mahamakut'), _('Thai Mahachula'), _('Thai Five Books'), _('Roman Script'), _('Buddhawajana Pitaka')]
         self._langPanel = wx.Panel(self, wx.ID_ANY)
         langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, u'เลือก'), orient=wx.HORIZONTAL)
         self._langComboBox = wx.ComboBox(self._langPanel, wx.ID_ANY, choices=langs, style=wx.CB_DROPDOWN|wx.CB_READONLY)

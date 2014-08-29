@@ -236,3 +236,5 @@ def ShortName(code):
         return u'roman'
     if code == constants.THAI_FIVE_BOOKS_CODE:
         return u'จากพระโอษฐ์'
+    if code == constants.THAI_WATNA_CODE:
+        return u'พุทธวจนปิฎก'

@@ -267,7 +267,7 @@ class Presenter(object):
 
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
 
-        self._HighlightKeywords(content, self._keywords)        
+        self._HighlightKeywords(content, self._keywords, volume, page)        
         self._LoadMarks(self._currentVolume, self._currentPage)
         
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
@@ -309,11 +309,12 @@ class Presenter(object):
 
         self._model.Code = currentCode                
 
-    def _HighlightKeywords(self, content, keywords):
+    def _HighlightKeywords(self, content, keywords, volume, page):
         if content == u'' or keywords is None: return
 
         font = self._view.Body.GetFont()
         font.SetWeight(wx.FONTWEIGHT_BOLD)
+        fontSize = font.GetPointSize()
         for term in keywords.replace('+',' ').replace('|',' ').split():
             n = -1
             while True:                    
@@ -321,7 +322,24 @@ class Presenter(object):
                 if n == -1: break                
                 offset = self._model.HighlightOffset                
                 self._view.Body.Freeze()
-                self._view.Body.SetStyle(n-offset, n+len(term)-offset, wx.TextAttr('purple', wx.NullColour, font))
+                
+                checkBuddhawaj = False
+                for format in self._model.GetFormatter(volume, page).split():
+                    tag, s, e = format.split('|')
+                    s, e = int(s), int(e)
+                    if tag == 'eh1' and n-offset >= s and n+len(term)-offset <= e:
+                        font.SetPointSize(fontSize * 1.2)
+                        checkBuddhawaj = True
+                    elif tag == 'eh2' and n-offset >= s and n+len(term)-offset <= e:
+                        font.SetPointSize(fontSize * 0.85)
+                    elif tag == 'eh3' and n-offset >= s and n+len(term)-offset <= e:
+                        font.SetPointSize(fontSize * 0.75)
+                    elif tag == 'fn' and n-offset >= s and n+len(term)-offset <= e:
+                        font.SetPointSize(fontSize * 0.8)
+
+                if (self._delegate.SearchingBuddhawaj() and checkBuddhawaj) or not self._delegate.SearchingBuddhawaj():
+                    self._view.Body.SetStyle(n-offset, n+len(term)-offset, wx.TextAttr('purple', wx.NullColour, font))
+
                 self._view.Body.Thaw()
 
     def OnLinkToReference(self, code, volume, item):
@@ -424,7 +442,10 @@ class Presenter(object):
         item, sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
         volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
 
-        self._DoCompare(constants.CODES[index], volume, sub, item)
+        if index <= 3:
+            self._DoCompare(constants.CODES[index], volume, sub, item)
+        elif index == 4:
+            self._DoCompare(constants.THAI_WATNA_CODE, volume, sub, item)
 
     def _DoCompare(self, code, volume, sub, item):        
         if item is None: return
@@ -539,6 +560,8 @@ class Presenter(object):
         utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)        
         self._view.SetFont(font, code, index)        
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        content = self._model.GetPage(self._currentVolume, self._currentPage)
+        self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)
         
     def DecreaseFontSize(self):
         code, index = utils.SplitKey(self._lastFocus)
@@ -547,6 +570,8 @@ class Presenter(object):
         utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)
         self._view.SetFont(font, code, index)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        content = self._model.GetPage(self._currentVolume, self._currentPage)
+        self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)
 
     def MarkText(self, code, index, mark=True):
         s,t = self._view.MarkText(code, index) if mark else self._view.UnmarkText(code, index)

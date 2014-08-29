@@ -28,12 +28,13 @@ class CheckNewUpdateThread(threading.Thread):
 
 class SearchThread(threading.Thread):
     
-    def __init__(self, keywords, volumes, delegate, queue=None):
+    def __init__(self, keywords, volumes, delegate, queue=None, buddhawaj=False):
         super(SearchThread, self).__init__()
         self._delegate = delegate
         self._keywords = keywords
         self._volumes = volumes    
         self._queue = queue
+        self._buddhawaj = buddhawaj
     
     @property
     def TableName(self):
@@ -79,15 +80,15 @@ class SearchThread(threading.Thread):
                 tmp = ''
                 for t in term.split('|'):
                     if len(t.strip()) > 0:
-                        tmp += 'content LIKE ? OR '
+                        tmp += '%s LIKE ? OR ' % ('content' if not self._buddhawaj else 'buddhawaj')
                         args += ('%'+t+'%',)
                 if len(tmp) > 0:
                     query += ' (%s) AND' % (tmp.rstrip(' OR '))
             elif term[0] == '~':
-                query += ' content NOT LIKE ? AND'
+                query += ' %s NOT LIKE ? AND' % ('content' if not self._buddhawaj else 'buddhawaj')
                 args += ('%'+term[1:]+'%',)
             else:
-                query += ' content LIKE ? AND'
+                query += ' %s LIKE ? AND' % ('content' if not self._buddhawaj else 'buddhawaj')
                 args += ('%'+term+'%',)
         
         if len(self._volumes) > 0:
@@ -274,6 +275,30 @@ class ThaiMahaMakutSearchThread(SearchThread):
         r['content'] = result[4]
         return r
 
+class ThaiWatnaSearchThread(SearchThread):
+
+    @property
+    def Code(self):
+        return constants.THAI_WATNA_CODE
+
+    @property
+    def Database(self):
+        return constants.THAI_WATNA_DB
+
+    @property
+    def VolumeColumn(self):
+        return 'volume'
+
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['content'] = result[4]
+        r['buddhawaj'] = result[5]
+        r['display'] = result[6]
+        return r
+
 class DisplayThread(threading.Thread):
     
     def __init__(self, results, keywords, delegate, mark, current):
@@ -340,10 +365,12 @@ class ThaiMahaMakutDisplayThread(DisplayThread):
 class ThaiMahaChulaDisplayThread(DisplayThread):
     pass
 
-    
+class ThaiWatnaDisplayThread(DisplayThread):
+
+    def ProcessResult(self, idx, result, excerpts):
+        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
+
 class ScriptDisplayThread(DisplayThread):
 
     def ProcessResult(self, idx, result, excerpts):
         return (self._mark[0]+idx+1, result['volume'], result['page'], result['items'], excerpts)
-
-

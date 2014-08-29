@@ -45,6 +45,10 @@ class View(AuiBaseFrame):
     @property
     def SearchCtrl(self):
         return self._topBar.SearchCtrl
+
+    @property
+    def BuddhawajOnly(self):
+        return self._topBar._buddhawajOnly
     
     @property
     def Delegate(self):
@@ -59,10 +63,6 @@ class View(AuiBaseFrame):
     @property
     def ResultsWindow(self):
         return self._resultsWindow
-        
-    # @property
-    # def StatusBar(self):
-    #     return self._statusBar
         
     @property
     def VolumesRadio(self):
@@ -132,7 +132,6 @@ class View(AuiBaseFrame):
             self._resultsWindow.SetStandardFonts(self._font.GetPointSize(), self._font.GetFaceName())
         
         self._topBar = widgets.SearchToolPanel(self, self._font)
-        # self._CreateStatusBar()
 
         self.SetCenterPane(self._resultsWindow)
         info = AuiPaneInfo().CloseButton(False).Resizable(False).CaptionVisible(False)
@@ -167,16 +166,6 @@ class View(AuiBaseFrame):
         
         panel.SetSizer(sizer)
         self.AddPane(panel, AuiPaneInfo().CloseButton(False).CaptionVisible(False).BestSize((200, -1)).Right())        
-
-    # def _CreateStatusBar(self):
-    #     self._statusBar = self.CreateStatusBar()
-    #     self._statusBar.SetFieldsCount(4)
-    #     self._statusBar.SetStatusWidths([-1,170,170,100])
-    #     self._progressBar = wx.Gauge(self._statusBar, -1, 100, size=(100,-1))
-    #     self._progressBar.SetBezelFace(3)
-    #     self._progressBar.SetShadowWidth(3)
-    #     self._progressBar.SetRect(self._statusBar.GetFieldRect(3))
-    #     self._statusBar.Bind(wx.EVT_SIZE, lambda event: self._progressBar.SetRect(self._statusBar.GetFieldRect(3)))
 
     def DisableSearchControls(self):
         for control in ['SearchButton', 'ForwardButton', 'BackwardButton']:
@@ -237,9 +226,6 @@ class View(AuiBaseFrame):
         ret = dialog.ShowModal()
         OnDismiss(ret, dialog.GetCheckedVolumes())
         dialog.Destroy()
-        
-    def SetTitle(self, title):
-        self.SetTitle(title)
         
     def SetHistoryListItems(self, items):
         self._historyList.SetItems(items)    

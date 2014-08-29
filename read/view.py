@@ -276,12 +276,6 @@ class View(AuiBaseFrame):
 
     def _SetupStatusBar(self):
         pass
-        # self._statusBar = self.CreateStatusBar()
-        # self._statusBar.SetFieldsCount(2)
-        # self._statusBar.SetStatusWidths([-1,-1])
-        # font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-        # font.SetFaceName('TF Chiangsaen')
-        # self._statusBar.SetFont(font)                
 
     def _PostInit(self):            
         self._readPanel = ReadPanelCreator.Create(self, self._code, 1, self._font, self._delegate, mainWindow=True)
@@ -436,24 +430,37 @@ class View(AuiBaseFrame):
         font = readPanel.Body.GetFont()
         fontSize = font.GetPointSize()
         readPanel.Body.Freeze()
+
+        offset = 0
         if 'wxMac' in wx.PlatformInfo:
             readPanel.SetContentFont(font)
+            offset = 1
         
         for token in formatter.split():
             tag,x,y = token.split('|')
             if tag == 's3' or tag == 'p3':
                 colorCode, diffSize = constants.FOOTER_STYLE
                 font.SetPointSize(fontSize-diffSize)
-                if 'wxMac' not in wx.PlatformInfo:
-                    readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr(colorCode, wx.NullColour, font))
-                else:
-                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr(colorCode, wx.NullColour, font))
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr(colorCode, wx.NullColour, font))                    
             elif tag == 'h1' or tag == 'h2' or tag == 'h3':
                 font.SetPointSize(fontSize)
-                if 'wxMac' not in wx.PlatformInfo:
-                    readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('blue', wx.NullColour, font))
-                else:
-                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))  
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr('blue', wx.NullColour, font))  
+            elif tag == 'eh1':
+                font.SetPointSize(fontSize*1.2)
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, 
+                    wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), wx.NullColour, font))  
+            elif tag == 'eh2':
+                font.SetPointSize(fontSize*0.85)                
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, 
+                    wx.TextAttr(wx.Colour(0x88,0x88,0x88,0xFF), wx.NullColour, font))  
+            elif tag == 'eh3':
+                font.SetPointSize(fontSize*0.75)
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, 
+                    wx.TextAttr(wx.Colour(0x88,0x88,0x88,0xFF), wx.NullColour, font))  
+            elif tag == 'fn':
+                font.SetPointSize(fontSize*0.8)
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr('#3CBF3F', wx.NullColour, font))  
+
         readPanel.Body.Thaw()     
         
     def ShowFindDialog(self, code, index, text, flags):

@@ -122,7 +122,7 @@ class Model(object):
     def SaveDisplayResult(self, items, key):
         self._data[key] = items
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         raise NotImplementedError('Subclass needs to implement this method!')
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):
@@ -161,7 +161,7 @@ class Model(object):
     def ReloadDisplay(self):
         self.Display(self._currentPagination)
 
-    def Search(self, keywords):
+    def Search(self, keywords, buddhawaj=False):
         self._keywords = keywords
         self._currentPagination = 0        
         self._clickedPages = []
@@ -171,7 +171,7 @@ class Model(object):
         self._data = {}
                 
         self.CreateSearchThread(keywords, self._volumes if self._mode == constants.MODE_ALL else self._selectedVolumes, 
-            self._delegate).start()
+            self._delegate, buddhawaj).start()
         
     def Display(self, current):
         if len(self._results) == 0:
@@ -372,6 +372,9 @@ class Model(object):
     def ConvertSpecialCharacters(self, text):
         return text
 
+    def HasBuddhawaj(self):
+        return False
+
 class SearchModelCreator(object):
     
     @staticmethod
@@ -389,6 +392,8 @@ class SearchModelCreator(object):
         if index == 5:
             return RomanScriptSearchModel(delegate)
         if index == 6:
+            return ThaiWatnaSearchModel(delegate)
+        if index == 7:
             return ThaiScriptSearchModel(delegate)
         return None
 
@@ -403,7 +408,7 @@ class ThaiRoyalSearchModel(Model):
         self._volumes = range(45)
         self._spellChecker = constants.THAI_SPELL_CHECKER
     
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiRoyalSearchThread(keywords, volumes, delegate)
         
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
@@ -427,7 +432,7 @@ class PaliSiamSearchModel(Model):
     def Keywords(self):
         return utils.ConvertToPaliSearch(self._keywords)
     
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         keywords = utils.ConvertToThaiSearch(keywords, True)
         return threads.PaliSiamSearchThread(keywords, volumes, delegate)
 
@@ -443,6 +448,29 @@ class PaliSiamSearchModel(Model):
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
         
+class ThaiWatnaSearchModel(Model):
+
+    @property
+    def Code(self):
+        return constants.THAI_WATNA_CODE
+
+    def __init__(self, delegate):
+        super(ThaiWatnaSearchModel, self).__init__(delegate)
+        self._volumes = range(33)
+        self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def HasBuddhawaj(self):
+        return True
+
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.ThaiWatnaSearchThread(keywords, volumes, delegate, buddhawaj=buddhawaj)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.ThaiWatnaDisplayThread(results, keywords, delegate, mark, current)
+        
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Buddhawajana Pitaka')) % (self._keywords) )        
+
 class ThaiMahaChulaSearchModel(Model):
 
     @property
@@ -454,7 +482,7 @@ class ThaiMahaChulaSearchModel(Model):
         self._volumes = range(45)
         self._spellChecker = constants.THAI_SPELL_CHECKER
     
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiMahaChulaSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
@@ -481,7 +509,7 @@ class ThaiMahaMakutSearchModel(Model):
             return 74
         return 91
         
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiMahaMakutSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
@@ -513,7 +541,7 @@ class RomanScriptSearchModel(ScriptSearchModel):
     def Code(self):
         return constants.ROMAN_SCRIPT_CODE
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.RomanScriptSearchThread(keywords, volumes, delegate)
 
     def NotFoundMessage(self):
@@ -530,7 +558,7 @@ class ThaiScriptSearchModel(ScriptSearchModel):
         return constants.THAI_SCRIPT_CODE
 
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiScriptSearchThread(keywords, volumes, delegate)
 
     def NotFoundMessage(self):
@@ -573,7 +601,7 @@ class ThaiFiveBooksSearchModel(Model):
     def GetBookName(self, volume):
         return constants.FIVE_BOOKS_NAMES[int(volume)-1]
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiFiveBooksSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        

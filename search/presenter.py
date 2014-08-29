@@ -28,6 +28,7 @@ class Presenter(object):
         self._scrollPosition = 0
         self._shouldOpenNewWindow = False
         self._refreshHistoryList = True
+        self._searchingBuddhawaj = False
         self._paliDictWindow = None
         self._thaiDictWindow = None
         self._delegate = None
@@ -98,7 +99,8 @@ class Presenter(object):
             self.SelectLanguage(constants.CODES.index(code))
         
         self._view.SearchCtrl.SetValue(keywords)
-        self._model.Search(keywords)
+        self._searchingBuddhawaj = self._view.BuddhawajOnly.IsChecked()
+        self._model.Search(keywords, buddhawaj=self._searchingBuddhawaj)
         
         return True
                 
@@ -157,6 +159,8 @@ class Presenter(object):
     def SelectLanguage(self, index):
         self._model = search.model.SearchModelCreator.Create(self, index)
         self._view.VolumesRadio.Disable() if index == 4 or index == 5 or index == 6 else self._view.VolumesRadio.Enable()
+
+        self._view.BuddhawajOnly.Enable() if self._model.HasBuddhawaj() else self._view.BuddhawajOnly.Disable()
         self.RefreshHistoryList(index, self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
         self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
 
@@ -383,3 +387,6 @@ class Presenter(object):
 
         self._thaiDictWindow.Show()        
         self._thaiDictWindow.Raise()
+
+    def SearchingBuddhawaj(self):
+        return self._searchingBuddhawaj

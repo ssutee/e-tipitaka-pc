@@ -51,7 +51,7 @@ class Engine(object):
         return volume
     
     def GetTotalPages(self, volume):
-        return int(constants.BOOK_PAGES['%s_%d' % (self._code, volume)])
+        return int(constants.BOOK_PAGES.get('%s_%d' % (self._code, volume), 0))
         
     def GetFirstPageNumber(self, volume):
         return 0
@@ -64,6 +64,10 @@ class Engine(object):
         
     def GetFirstPage(self, volume):
         pages = map(lambda x:u'%s'%(x), range(0, self.GetTotalPages(volume)))
+        
+        if len(pages) == 0:
+            return u''
+
         text1 = u'\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0])+1, int(pages[-1]))
         text2 = u''
 
@@ -133,7 +137,7 @@ class Engine(object):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
+        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'พุทธวจนปิฎก']
         
     def GetSubItem(self, volume, page, item): 
         for sub in constants.BOOK_ITEMS[self._code][volume]:
@@ -220,6 +224,56 @@ class PaliSiamEngine(Engine):
         
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
+
+class ThaiWatnaEngine(Engine):
+
+    def __init__(self):
+        super(ThaiWatnaEngine, self).__init__()
+        self._code = constants.THAI_WATNA_CODE
+        self._conn = sqlite3.connect(constants.THAI_WATNA_DB)
+        self._searcher = self._conn.cursor()
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return result.get('content')
+
+    def GetTitle(self, volume=None):
+        return u'พุทธวจนปิฎก เล่มที่ %s'%(utils.ArabicToThai(unicode(volume))) if volume else u'พุทธวจนปิฎก ๓๓ เล่ม'
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+            r['buddhawaj'] = result[5]
+            r['display'] = result[6]
+        return r
+
+    def GetSectionName(self, volume):
+        if volume <= 25:
+            return constants.SECTION_THAI_NAMES[0]
+        return constants.SECTION_THAI_NAMES[1]
+            
+    def GetSectionBoundary(self, position):
+        if position == 0:
+            return 25
+        return 33
+
+    def GetComparingVolume(self, volume, page):
+        if volume <= 25:
+            return volume + 8
+        return volume - 25
+
+    def ConvertVolume(self, volume, item, sub):
+        if volume <= 8:
+            return volume + 25
+        return volume - 8
 
 class ThaiMahaChulaEngine(Engine):
 
@@ -507,7 +561,9 @@ class Model(object):
             self._engine[code] = RomanScriptEngine()
         elif constants.THAI_SCRIPT_CODE == code:
             self._engine[code] = ThaiScriptEngine()
-            
+        elif constants.THAI_WATNA_CODE == code:
+            self._engine[code] = ThaiWatnaEngine()
+
     def GetTitle(self, volume=None):
         return self._engine[self._code].GetTitle(volume)
 
