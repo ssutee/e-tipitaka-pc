@@ -320,25 +320,25 @@ class Presenter(object):
             while True:                    
                 n = content.find(self._model.ConvertSpecialCharacters(term), n+1)
                 if n == -1: break                
-                offset = self._model.HighlightOffset                
+
                 self._view.Body.Freeze()
                 
                 checkBuddhawaj = False
                 for format in self._model.GetFormatter(volume, page).split():
                     tag, s, e = format.split('|')
                     s, e = int(s), int(e)
-                    if tag == 'eh1' and n-offset >= s and n+len(term)-offset <= e:
+                    if tag == 'eh1' and n >= s and n+len(term) <= e:
                         font.SetPointSize(fontSize * 1.2)
                         checkBuddhawaj = True
-                    elif tag == 'eh2' and n-offset >= s and n+len(term)-offset <= e:
+                    elif tag == 'eh2' and n >= s and n+len(term) <= e:
                         font.SetPointSize(fontSize * 0.85)
-                    elif tag == 'eh3' and n-offset >= s and n+len(term)-offset <= e:
+                    elif tag == 'eh3' and n >= s and n+len(term) <= e:
                         font.SetPointSize(fontSize * 0.75)
-                    elif tag == 'fn' and n-offset >= s and n+len(term)-offset <= e:
+                    elif tag == 'fn' and n >= s and n+len(term) <= e:
                         font.SetPointSize(fontSize * 0.8)
 
                 if (self._delegate.SearchingBuddhawaj() and checkBuddhawaj) or not self._delegate.SearchingBuddhawaj():
-                    self._view.Body.SetStyle(n-offset, n+len(term)-offset, wx.TextAttr('purple', wx.NullColour, font))
+                    self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
 
                 self._view.Body.Thaw()
 

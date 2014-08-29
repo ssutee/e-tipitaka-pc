@@ -447,19 +447,19 @@ class View(AuiBaseFrame):
                 readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr('blue', wx.NullColour, font))  
             elif tag == 'eh1':
                 font.SetPointSize(fontSize*1.2)
-                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, 
+                readPanel.Body.SetStyle(int(x), int(y), 
                     wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), wx.NullColour, font))  
             elif tag == 'eh2':
                 font.SetPointSize(fontSize*0.85)                
-                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, 
+                readPanel.Body.SetStyle(int(x), int(y), 
                     wx.TextAttr(wx.Colour(0x88,0x88,0x88,0xFF), wx.NullColour, font))  
             elif tag == 'eh3':
                 font.SetPointSize(fontSize*0.75)
-                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, 
+                readPanel.Body.SetStyle(int(x), int(y), 
                     wx.TextAttr(wx.Colour(0x88,0x88,0x88,0xFF), wx.NullColour, font))  
             elif tag == 'fn':
                 font.SetPointSize(fontSize*0.8)
-                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr('#3CBF3F', wx.NullColour, font))  
+                readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#3CBF3F', wx.NullColour, font))  
 
         readPanel.Body.Thaw()     
         
