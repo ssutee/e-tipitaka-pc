@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import threads, utils, constants
-import wx, os.path, sys
+import wx, os.path, sys, math
 
 
 import i18n
@@ -340,8 +340,7 @@ class Model(object):
         return (start, len(self._results) if len(self._results) < end else end)
         
     def GetPages(self):
-        pages = len(self._results)/constants.ITEMS_PER_PAGE
-        return pages if len(self._results) == 0 else pages + 1
+        return int(math.ceil(1.0*len(self._results)/constants.ITEMS_PER_PAGE))
                 
     def _MakeHtmlExcerpts(self, excerpts):
         return u'<font size="4">%s</font><br>'%(excerpts) 
