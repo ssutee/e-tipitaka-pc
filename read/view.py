@@ -369,11 +369,7 @@ class View(AuiBaseFrame):
         
     def ToggleNotePanel(self, code, index):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
-        if readPanel.NotePanel.IsShown():
-            readPanel.NotePanel.Hide()
-        else:
-            readPanel.NotePanel.Show()
-        readPanel.Layout()
+        readPanel.ToggleNotePanel()
 
     def SetPageNumber(self, number, code=None, index=1):        
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]

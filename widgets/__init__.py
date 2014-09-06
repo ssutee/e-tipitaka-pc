@@ -631,7 +631,7 @@ class ReadPanel(wx.Panel):
 
         self._slider = None
         if not self._delegate.IsSmallScreen():
-            self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS|wx.SL_LABELS)        
+            self._slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.SL_HORIZONTAL|wx.SL_AUTOTICKS)        
             self._slider.Bind(wx.EVT_SLIDER, self.OnSliderValueChange)
         
         self._paintPanel = wx.Panel(self, wx.ID_ANY)                
@@ -662,6 +662,11 @@ class ReadPanel(wx.Panel):
             wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))        
         self._toggleNoteButton.SetToolTip(wx.ToolTip(u'เปิด/ปิด บันทึกข้อความเพิ่มเติม'))
         self._toggleNoteButton.Bind(wx.EVT_BUTTON, self.OnToggleNoteButtonClick)
+
+        self._toggleHeaderButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.HEADER_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._toggleHeaderButton.SetToolTip(wx.ToolTip(u'เปิด/ปิด ส่วนแสดงด้านบน'))
+        self._toggleHeaderButton.Bind(wx.EVT_BUTTON, self.OnToggleHeaderClick)
         
         paintSizer = wx.BoxSizer(wx.HORIZONTAL)
         paintSizer.Add(self._markButton)
@@ -670,7 +675,8 @@ class ReadPanel(wx.Panel):
         paintSizer.Add(self._saveButton)
         paintSizer.Add(self._clearButton)
         paintSizer.Add((10,-1))
-        paintSizer.Add(self._toggleNoteButton)                
+        paintSizer.Add(self._toggleNoteButton)  
+        paintSizer.Add(self._toggleHeaderButton)              
         self._paintPanel.SetSizer(paintSizer)     
         
         self._notePanel = NotePanel(self, self._code, self._index)
@@ -698,7 +704,7 @@ class ReadPanel(wx.Panel):
         if self._slider is not None:
             self._mainSizer.Add(self._slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
         
-        self._mainSizer.Add(self._paintPanel, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
+        self._mainSizer.Add(self._paintPanel, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP|wx.BOTTOM, 5)
         
         self._mainSizer.Add(self._body, 1, wx.EXPAND|wx.LEFT, 15)
         self.ExtraLayout()
@@ -739,6 +745,10 @@ class ReadPanel(wx.Panel):
     def OnSaveButtonClick(self, event):
         self.Delegate.SaveMarkedText(self._code, self._index)
         
+    def OnToggleHeaderClick(self, event):
+        self.ToggleTitles()
+        self.ToggleSlider()
+
     def OnFind(self, event):
         event.GetDialog().Destroy()       
         self._body.SetFocus()
@@ -791,6 +801,34 @@ class ReadPanel(wx.Panel):
             if len(numbers) > 1:
                 text += ' - ' + utils.ArabicToThai(unicode(numbers[-1]))
             self._item.SetPage(u'<div align="right"><font color="#378000" size="4">%s</font></div>' % (text))
+
+    def ToggleTitles(self):
+        if self._title.IsShown():
+            self._title.Hide()
+            self._page.Hide()
+            self._item.Hide()
+        else:
+            self._title.Show()
+            self._page.Show()
+            self._item.Show()
+        self.Layout()
+
+    def ToggleSlider(self):
+        if self._slider is None:
+            return
+            
+        if self._slider.IsShown():
+            self._slider.Hide()
+        else:
+            self._slider.Show()
+        self.Layout()
+
+    def ToggleNotePanel(self):
+        if self.NotePanel.IsShown():
+            self.NotePanel.Hide()
+        else:
+            self.NotePanel.Show()
+        self.Layout()
 
 class ReadWithReferencesPanel(ReadPanel):
     
