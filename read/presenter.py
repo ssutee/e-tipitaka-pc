@@ -428,6 +428,10 @@ class Presenter(object):
         self.JumpToPage(page, code, index)
 
     def CompareTo(self, index):
+        if self._paliDictWindow is not None:
+            self._paliDictWindow.Close()
+            self._paliDictWindow = None
+        
         item = None    
         items = self._model.GetItems(self._currentVolume, self._currentPage)
         if len(items) > 1:
