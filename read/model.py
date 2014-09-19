@@ -137,7 +137,7 @@ class Engine(object):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'พุทธวจนปิฎก']
+        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
         
     def GetSubItem(self, volume, page, item): 
         for sub in constants.BOOK_ITEMS[self._code][volume]:

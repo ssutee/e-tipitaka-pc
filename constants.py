@@ -12,7 +12,7 @@ APP_NAME = 'E-Tipitaka'
 
 HOME = expanduser("~")
 
-CODES = ['thai', 'pali', 'thaimm', 'thaimc', 'thaibt', 'romanct', 'thaiwn', 'thaict']
+CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaibt', 'romanct']
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'

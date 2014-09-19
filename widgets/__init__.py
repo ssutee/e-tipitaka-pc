@@ -1206,7 +1206,7 @@ class SearchToolPanel(wx.Panel):
         self._buddhawajOnly = wx.CheckBox(self, wx.ID_ANY, label=u'เฉพาะพุทธวจน')
         self._buddhawajOnly.Disable()
 
-        langs = [_('Thai Royal'), _('Pali Siam'), _('Thai Mahamakut'), _('Thai Mahachula'), _('Thai Five Books'), _('Roman Script'), _('Buddhawajana Pitaka')]
+        langs = [_('Thai Royal'), _('Pali Siam'), _('Buddhawajana Pitaka'), _('Thai Mahamakut'), _('Thai Mahachula'), _('Thai Five Books'), _('Roman Script')]
         self._langPanel = wx.Panel(self, wx.ID_ANY)
         langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, u'เลือก'), orient=wx.HORIZONTAL)
         self._langComboBox = wx.ComboBox(self._langPanel, wx.ID_ANY, choices=langs, style=wx.CB_DROPDOWN|wx.CB_READONLY)

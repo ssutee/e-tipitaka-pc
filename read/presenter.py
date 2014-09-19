@@ -431,6 +431,10 @@ class Presenter(object):
         if self._paliDictWindow is not None:
             self._paliDictWindow.Close()
             self._paliDictWindow = None
+
+        if self._thaiDictWindow is not None:
+            self._thaiDictWindow.Close()
+            self._thaiDictWindow = None
         
         item = None    
         items = self._model.GetItems(self._currentVolume, self._currentPage)
@@ -446,10 +450,9 @@ class Presenter(object):
         item, sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
         volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
 
-        if index <= 3:
-            self._DoCompare(constants.CODES[index], volume, sub, item)
-        elif index == 4:
-            self._DoCompare(constants.THAI_WATNA_CODE, volume, sub, item)
+        print constants.CODES[index]
+        
+        self._DoCompare(constants.CODES[index], volume, sub, item)
 
     def _DoCompare(self, code, volume, sub, item):        
         if item is None: return

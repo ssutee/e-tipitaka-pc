@@ -374,26 +374,29 @@ class Model(object):
     def HasBuddhawaj(self):
         return False
 
+    def HasVolumeSelection(self):
+        return True
+
 class SearchModelCreator(object):
     
     @staticmethod
     def Create(delegate, index):
-        if index == 0:
+        code = constants.CODES[index]
+        print code
+        if code == constants.THAI_ROYAL_CODE:
             return ThaiRoyalSearchModel(delegate)
-        if index == 1:
+        if code == constants.PALI_SIAM_CODE:
             return PaliSiamSearchModel(delegate)
-        if index == 2:
-            return ThaiMahaMakutSearchModel(delegate)
-        if index == 3:
-            return ThaiMahaChulaSearchModel(delegate)
-        if index == 4:
-            return ThaiFiveBooksSearchModel(delegate)
-        if index == 5:
-            return RomanScriptSearchModel(delegate)
-        if index == 6:
+        if code == constants.THAI_WATNA_CODE:
             return ThaiWatnaSearchModel(delegate)
-        if index == 7:
-            return ThaiScriptSearchModel(delegate)
+        if code == constants.THAI_MAHAMAKUT_CODE:
+            return ThaiMahaMakutSearchModel(delegate)
+        if code == constants.THAI_MAHACHULA_CODE:
+            return ThaiMahaChulaSearchModel(delegate)
+        if code == constants.THAI_FIVE_BOOKS_CODE:
+            return ThaiFiveBooksSearchModel(delegate)
+        if code == constants.ROMAN_SCRIPT_CODE:
+            return RomanScriptSearchModel(delegate)
         return None
 
 class ThaiRoyalSearchModel(Model):
@@ -461,6 +464,9 @@ class ThaiWatnaSearchModel(Model):
     def HasBuddhawaj(self):
         return True
 
+    def HasVolumeSelection(self):
+        return False        
+
     def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiWatnaSearchThread(keywords, volumes, delegate, buddhawaj=buddhawaj)
 
@@ -469,6 +475,10 @@ class ThaiWatnaSearchModel(Model):
         
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Buddhawajana Pitaka')) % (self._keywords) )        
+
+    def _GetEntry(self, idx, volume, page):
+        return u'%s. %s %s %s %s' % (utils.ArabicToThai(unicode(idx)), u'พุทธวจนปิฎก เล่มที่',
+            utils.ArabicToThai(volume), _('Page'), utils.ArabicToThai(page))
 
 class ThaiMahaChulaSearchModel(Model):
 
@@ -549,6 +559,9 @@ class RomanScriptSearchModel(ScriptSearchModel):
     def GetBookName(self, volume):
         return constants.ROMAN_SCRIPT_TITLES[volume][1]
 
+    def HasVolumeSelection(self):
+        return False                
+
 
 class ThaiScriptSearchModel(ScriptSearchModel):
 
@@ -566,6 +579,9 @@ class ThaiScriptSearchModel(ScriptSearchModel):
     def GetBookName(self, volume):
         return constants.THAI_SCRIPT_TITLES[volume][1]
 
+    def HasVolumeSelection(self):
+        return False                
+
 
 class ThaiFiveBooksSearchModel(Model):
 
@@ -577,6 +593,9 @@ class ThaiFiveBooksSearchModel(Model):
         super(ThaiFiveBooksSearchModel, self).__init__(delegate)
         self._volumes = range(5)
         self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def HasVolumeSelection(self):
+        return False                
 
     def GetSectionBoundary(self, position):
         return 0
