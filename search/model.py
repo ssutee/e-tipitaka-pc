@@ -366,7 +366,7 @@ class Model(object):
         return constants.BOOK_NAMES['%s_%s' % (self.Code, str(volume))].decode('utf8','ignore')
         
     def GetBookNames(self):
-        return [self.GetBookName(volume+1) for volume in range(self.GetSectionBoundary(2))]
+        return [self.GetBookName(volume+1) for volume in range(len(self.volumes))]
 
     def ConvertSpecialCharacters(self, text):
         return text
@@ -397,6 +397,8 @@ class SearchModelCreator(object):
             return ThaiFiveBooksSearchModel(delegate)
         if code == constants.ROMAN_SCRIPT_CODE:
             return RomanScriptSearchModel(delegate)
+        if code == constants.THAI_POCKET_BOOK_CODE:
+            return ThaiPocketBookModel(delegate)
         return None
 
 class ThaiRoyalSearchModel(Model):
@@ -581,6 +583,51 @@ class ThaiScriptSearchModel(ScriptSearchModel):
 
     def HasVolumeSelection(self):
         return False                
+
+class ThaiPocketBookModel(Model):
+
+    @property
+    def Code(self):
+        return constants.THAI_POCKET_BOOK_CODE
+
+    def __init__(self, delegate):
+        super(ThaiPocketBookModel, self).__init__(delegate)
+        self._volumes = range(13)
+        self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def HasVolumeSelection(self):
+        return False
+
+    def GetSectionBoundary(self, position):
+        return 0
+
+    def _GetColorCode(self, volume):
+        return None
+
+    def _GetResultSectionCounts(self):
+        return []
+
+    def _MakeHtmlItemInfo(self, volume, items):
+        return ''
+        
+    def _MakeHtmlSummary(self):
+        return ''        
+
+    def HasBuddhawaj(self):
+        return True
+
+    def _GetEntry(self, idx, volume, page):
+        return u'%s. %s %s %s' % (utils.ArabicToThai(unicode(idx)), 
+            self.GetBookName(volume), _('Page'), utils.ArabicToThai(page))
+
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.ThaiPocketBookSearchThread(keywords, volumes, delegate, buddhawaj=buddhawaj)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.ThaiPocketBookDisplayThread(results, keywords, delegate, mark, current)
+
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai Pocket Book')) % (self._keywords) )
 
 
 class ThaiFiveBooksSearchModel(Model):

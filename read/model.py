@@ -4,6 +4,9 @@ import wx
 import sqlite3, cPickle
 import constants, utils
 
+import i18n
+_ = i18n.language.ugettext
+
 from pony.orm import Database, Required, Optional, db_session, select, desc
 
 db = Database('sqlite', constants.NOTE_DB, create_db=True)
@@ -225,6 +228,54 @@ class PaliSiamEngine(Engine):
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
 
+class ThaiPocketBookEngine(Engine):
+
+    def __init__(self):
+        super(ThaiPocketBookEngine, self).__init__()
+        self._code = constants.THAI_POCKET_BOOK_CODE
+        self._conn = sqlite3.connect(constants.THAI_POCKET_BOOK_DB)
+        self._searcher = self._conn.cursor()
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return result.get('content')
+
+    def GetTitle(self, volume=None):
+        return u'%s เล่มที่ %s' % (_('Thai Pocket Book'), utils.ArabicToThai(unicode(volume)))
+
+    def GetSubtitle(self, volume, section=None):
+        return constants.BOOK_NAMES['%s_%s' % ('thaipb', str(volume))].decode('utf8','ignore') if volume else _('Thai Pocket Book')
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['content'] = result[3]
+            r['buddhawaj'] = result[4]
+            r['display'] = result[5]
+        return r
+
+    def GetCompareChoices(self):
+        return []
+
+    def GetItems(self, volume, page):
+        return []
+        
+    def GetSubItem(self, volume, page, item):
+        return item, 1
+
+    def GetSectionBoundary(self, position):
+        return 13
+
+    def GetFirstPageNumber(self, volume):
+        return 1
+
+
 class ThaiWatnaEngine(Engine):
 
     def __init__(self):
@@ -242,7 +293,7 @@ class ThaiWatnaEngine(Engine):
         return result.get('content')
 
     def GetTitle(self, volume=None):
-        return u'พุทธวจนปิฎก เล่มที่ %s'%(utils.ArabicToThai(unicode(volume))) if volume else u'พุทธวจนปิฎก ๓๓ เล่ม'
+        return u'พุทธวจนปิฎก เล่มที่ %s'%(utils.ArabicToThai(unicode(volume))) if volume else _('Buddhawajana Pitaka')
 
     def ProcessResult(self, result):
         r = {}
@@ -563,6 +614,10 @@ class Model(object):
             self._engine[code] = ThaiScriptEngine()
         elif constants.THAI_WATNA_CODE == code:
             self._engine[code] = ThaiWatnaEngine()
+        elif constants.THAI_POCKET_BOOK_CODE == code:
+            self._engine[code] = ThaiPocketBookEngine()
+        else:
+            raise ValueError(code)
 
     def GetTitle(self, volume=None):
         return self._engine[self._code].GetTitle(volume)

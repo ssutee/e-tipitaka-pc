@@ -238,3 +238,6 @@ def ShortName(code):
         return u'จากพระโอษฐ์'
     if code == constants.THAI_WATNA_CODE:
         return u'พุทธวจนปิฎก'
+    if code == constants.THAI_POCKET_BOOK_CODE:
+        return u'หมวดธรรม'
+    raise ValueError(code)

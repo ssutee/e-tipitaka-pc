@@ -13,7 +13,7 @@ _ = i18n.language.ugettext
 class ReadPanelCreator(object):
     @staticmethod
     def Create(parent, code, index, font, delegate, mainWindow=False):
-        if code == constants.THAI_FIVE_BOOKS_CODE:
+        if code == constants.THAI_FIVE_BOOKS_CODE or code == constants.THAI_POCKET_BOOK_CODE:
             return widgets.ReadWithReferencesPanel(parent, code if not mainWindow else None, index, font, delegate)
         font = utils.LoadFont(constants.READ_FONT, code)
         return widgets.ReadPanel(parent, code if not mainWindow else None, index, font, delegate)

@@ -12,7 +12,7 @@ APP_NAME = 'E-Tipitaka'
 
 HOME = expanduser("~")
 
-CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaibt', 'romanct']
+CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct']
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -127,6 +127,7 @@ THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.db')
 THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.db')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
 THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.db')
+THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.db')
 
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
 PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
@@ -141,6 +142,7 @@ PALI_SIAM_CODE = 'pali'
 THAI_SCRIPT_CODE = 'thaict'
 ROMAN_SCRIPT_CODE = 'romanct'
 THAI_WATNA_CODE = 'thaiwn'
+THAI_POCKET_BOOK_CODE = 'thaipb'
 
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-26 17:08+0700\n"
+"POT-Creation-Date: 2014-10-02 23:13+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: dialogs/__init__.py:559 widgets/__init__.py:1219
+#: dialogs/__init__.py:559 widgets/__init__.py:1265
 msgid "About E-Tipitaka"
 msgstr ""
 
@@ -90,12 +90,12 @@ msgstr ""
 msgid "AppName"
 msgstr ""
 
-#: read/presenter.py:578 search/model.py:315 search/model.py:593
-#: widgets/__init__.py:783
+#: read/presenter.py:610 search/model.py:315 search/model.py:483
+#: search/model.py:618 search/model.py:661 widgets/__init__.py:793
 msgid "Page"
 msgstr ""
 
-#: read/presenter.py:581 search/model.py:229 widgets/__init__.py:790
+#: read/presenter.py:613 search/model.py:229 widgets/__init__.py:800
 msgid "Item"
 msgstr ""
 
@@ -128,100 +128,105 @@ msgstr ""
 msgid "Tipitaka volume"
 msgstr ""
 
-#: search/model.py:415
+#: search/model.py:422
 #, python-format
 msgid "Not found %s in Thai Royal"
 msgstr ""
 
-#: search/model.py:440
+#: search/model.py:447
 #, python-format
 msgid "Not found %s in Pali Siam"
 msgstr ""
 
-#: search/model.py:466
+#: search/model.py:479
 #, python-format
 msgid "Not found %s in Buddhawajana Pitaka"
 msgstr ""
 
-#: search/model.py:486
+#: search/model.py:503
 #, python-format
 msgid "Not found %s in Thai MahaChula"
 msgstr ""
 
-#: search/model.py:513
+#: search/model.py:530
 #, python-format
 msgid "Not found %s in Thai MahaMakut"
 msgstr ""
 
-#: search/model.py:542
+#: search/model.py:559
 #, python-format
 msgid "Not found %s in Tipitaka Roman Script"
 msgstr ""
 
-#: search/model.py:559
+#: search/model.py:579
 #, python-format
 msgid "Not found %s in Tipitaka Thai Script"
 msgstr ""
 
-#: search/model.py:605
+#: search/model.py:627
+#, python-format
+msgid "Not found %s in Thai Pocket Book"
+msgstr ""
+
+#: search/model.py:673
 #, python-format
 msgid "Not found %s in Thai Five Books"
 msgstr ""
 
-#: search/presenter.py:128
+#: search/presenter.py:130
 msgid "Searching data, please wait..."
 msgstr ""
 
-#: search/presenter.py:129
+#: search/presenter.py:131
 msgid "Searching data"
 msgstr ""
 
-#: search/presenter.py:148
+#: search/presenter.py:150
 #, python-format
 msgid "Found %d pages"
 msgstr ""
 
-#: search/presenter.py:199
+#: search/presenter.py:203
 msgid "Displaying results"
 msgstr ""
 
-#: search/presenter.py:207
+#: search/presenter.py:211
 msgid "Search results"
 msgstr ""
 
-#: search/presenter.py:243
+#: search/presenter.py:247
 msgid "Save data"
 msgstr ""
 
-#: search/presenter.py:252
+#: search/presenter.py:256
 msgid "Export data complete"
 msgstr ""
 
-#: search/presenter.py:257
+#: search/presenter.py:261
 msgid "Choose import data"
 msgstr ""
 
-#: search/presenter.py:271
+#: search/presenter.py:275
 msgid "Import data complete"
 msgstr ""
 
-#: search/view.py:116 widgets/__init__.py:1175
+#: search/view.py:120 widgets/__init__.py:1221
 msgid "Search"
 msgstr ""
 
-#: search/view.py:142
+#: search/view.py:146
 msgid "History"
 msgstr ""
 
-#: search/view.py:148
+#: search/view.py:152
 msgid "Sorting"
 msgstr ""
 
-#: search/view.py:148
+#: search/view.py:152
 msgid "Alphabet"
 msgstr ""
 
-#: search/view.py:148
+#: search/view.py:152
 msgid "Creation"
 msgstr ""
 
@@ -229,110 +234,114 @@ msgstr ""
 msgid "Latest search"
 msgstr ""
 
-#: widgets/__init__.py:911
+#: widgets/__init__.py:949
 msgid "Notes"
 msgstr ""
 
-#: widgets/__init__.py:924
+#: widgets/__init__.py:962
 msgid "Save"
 msgstr ""
 
-#: widgets/__init__.py:926
+#: widgets/__init__.py:964
 msgid "Bold"
 msgstr ""
 
-#: widgets/__init__.py:927
+#: widgets/__init__.py:965
 msgid "Italic"
 msgstr ""
 
-#: widgets/__init__.py:928
+#: widgets/__init__.py:966
 msgid "Underline"
 msgstr ""
 
-#: widgets/__init__.py:930
+#: widgets/__init__.py:968
 msgid "Align Left"
 msgstr ""
 
-#: widgets/__init__.py:931
+#: widgets/__init__.py:969
 msgid "Center"
 msgstr ""
 
-#: widgets/__init__.py:932
+#: widgets/__init__.py:970
 msgid "Align Right"
 msgstr ""
 
-#: widgets/__init__.py:934
+#: widgets/__init__.py:972
 msgid "Indent Less"
 msgstr ""
 
-#: widgets/__init__.py:935
+#: widgets/__init__.py:973
 msgid "Indent More"
 msgstr ""
 
-#: widgets/__init__.py:937
+#: widgets/__init__.py:975
 msgid "Font"
 msgstr ""
 
-#: widgets/__init__.py:938
+#: widgets/__init__.py:976
 msgid "Font Color"
 msgstr ""
 
-#: widgets/__init__.py:940
+#: widgets/__init__.py:978
 msgid "Newline"
 msgstr ""
 
-#: widgets/__init__.py:1163
+#: widgets/__init__.py:1209
 msgid "Thai Royal"
 msgstr ""
 
-#: widgets/__init__.py:1163
+#: widgets/__init__.py:1209
 msgid "Pali Siam"
 msgstr ""
 
-#: widgets/__init__.py:1163
-msgid "Thai Mahamakut"
-msgstr ""
-
-#: widgets/__init__.py:1163
-msgid "Thai Mahachula"
-msgstr ""
-
-#: widgets/__init__.py:1163
-msgid "Thai Five Books"
-msgstr ""
-
-#: widgets/__init__.py:1163
-msgid "Roman Script"
-msgstr ""
-
-#: widgets/__init__.py:1163
+#: widgets/__init__.py:1209
 msgid "Buddhawajana Pitaka"
 msgstr ""
 
-#: widgets/__init__.py:1172
+#: widgets/__init__.py:1209
+msgid "Thai Mahamakut"
+msgstr ""
+
+#: widgets/__init__.py:1209
+msgid "Thai Mahachula"
+msgstr ""
+
+#: widgets/__init__.py:1209
+msgid "Thai Pocket Book"
+msgstr ""
+
+#: widgets/__init__.py:1209
+msgid "Thai Five Books"
+msgstr ""
+
+#: widgets/__init__.py:1209
+msgid "Roman Script"
+msgstr ""
+
+#: widgets/__init__.py:1218
 msgid "Choose volumes"
 msgstr ""
 
-#: widgets/__init__.py:1172
+#: widgets/__init__.py:1218
 msgid "All"
 msgstr ""
 
-#: widgets/__init__.py:1172
+#: widgets/__init__.py:1218
 msgid "Custom"
 msgstr ""
 
-#: widgets/__init__.py:1178
+#: widgets/__init__.py:1224
 msgid "Special characters"
 msgstr ""
 
-#: widgets/__init__.py:1197
+#: widgets/__init__.py:1243
 msgid "Change font"
 msgstr ""
 
-#: widgets/__init__.py:1210
+#: widgets/__init__.py:1256
 msgid "Import data"
 msgstr ""
 
-#: widgets/__init__.py:1214
+#: widgets/__init__.py:1260
 msgid "Export data"
 msgstr ""
