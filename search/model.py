@@ -382,7 +382,6 @@ class SearchModelCreator(object):
     @staticmethod
     def Create(delegate, index):
         code = constants.CODES[index]
-        print code
         if code == constants.THAI_ROYAL_CODE:
             return ThaiRoyalSearchModel(delegate)
         if code == constants.PALI_SIAM_CODE:

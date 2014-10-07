@@ -456,7 +456,7 @@ class View(AuiBaseFrame):
             elif tag == 'fn':
                 font.SetPointSize(fontSize*0.8)
                 readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#3CBF3F', wx.NullColour, font))  
-
+                
         readPanel.Body.Thaw()     
         
     def ShowFindDialog(self, code, index, text, flags):
