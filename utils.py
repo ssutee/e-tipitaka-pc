@@ -129,8 +129,9 @@ def LoadTheme(prefix):
     tokens = list(os.path.split(constants.THEME_CFG))
     path = os.path.join(* tokens[:-1] + [prefix + '_' + tokens[-1]])    
     if os.path.exists(path):
-        with codecs.open(path, 'r', 'utf8') as f:
-            theme = int(f.read().strip())
+        f = codecs.open(path, 'r', 'utf8')
+        theme = int(f.read().strip())
+        f.close()
         return theme    
     return 0
 

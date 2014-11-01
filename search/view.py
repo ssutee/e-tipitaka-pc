@@ -231,4 +231,7 @@ class View(AuiBaseFrame):
         self._historyList.SetItems(items)    
 
     def Start(self):
-        self.Show()        
+        if wx.__version__[:3]<='2.8':
+            self.Show()
+        else:
+            self.Activate()        

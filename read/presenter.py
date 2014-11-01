@@ -321,7 +321,8 @@ class Presenter(object):
                 n = content.find(self._model.ConvertSpecialCharacters(term), n+1)
                 if n == -1: break                
 
-                self._view.Body.Freeze()
+                if wx.__version__[:3]<='2.8':
+                    self._view.Body.Freeze()
                 
                 checkBuddhawaj = False
                 for format in self._model.GetFormatter(volume, page).split():
@@ -340,7 +341,8 @@ class Presenter(object):
                 if (self._delegate.SearchingBuddhawaj() and checkBuddhawaj) or not self._delegate.SearchingBuddhawaj():
                     self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
 
-                self._view.Body.Thaw()
+                if wx.__version__[:3]<='2.8':
+                    self._view.Body.Thaw()
 
     def OnLinkToReference(self, code, volume, item):
         self._DoCompare(code, volume, 1, item)
@@ -470,7 +472,7 @@ class Presenter(object):
         if flag and code is not None:            
             self._focusList.append(utils.MakeKey(code, index))
             self._lastFocus = utils.MakeKey(code, index)
-        elif not flag and code is not None:
+        elif not flag and code is not None and utils.MakeKey(code, index) in self._focusList:
             self._focusList.remove(utils.MakeKey(code, index))
         elif flag and code is None:
             self._focusList = []

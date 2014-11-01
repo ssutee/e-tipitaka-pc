@@ -624,7 +624,7 @@ class ReadPanel(wx.Panel):
         self._body.SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
-        self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
+        self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress, self._body)
         self._body.Bind(wx.EVT_MOTION if 'wxMac' in wx.PlatformInfo else wx.EVT_LEFT_UP, self.OnTextBodySelect)
         self._body.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
         self._body.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)
@@ -762,7 +762,7 @@ class ReadPanel(wx.Panel):
         try:
             self.Delegate.ProcessKeyCommand(event, event.GetKeyCode(), self._code, self._index)
         except ValueError, e:
-            pass
+            print e
         event.Skip()
             
     def OnUpdateClearButton(self, event):
@@ -774,8 +774,9 @@ class ReadPanel(wx.Panel):
     def SetBody(self, text):
         self._body.SetValue(text)
         font = self._body.GetFont()
-        self._body.SetStyle(0, len(text)+1, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
-            utils.LoadThemeBackgroundHex(constants.READ), font))    
+        offset = 1 if wx.__version__[:3]<='2.8' and 'wxMac' in wx.PlatformInfo else 0
+        self._body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
+            utils.LoadThemeBackgroundHex(constants.READ), font))
         
     def SetTitles(self, title1, title2):
         if 'wxMSW' in wx.PlatformInfo:

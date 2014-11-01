@@ -418,19 +418,23 @@ class View(AuiBaseFrame):
         font = readPanel.Body.GetFont()
         text = readPanel.Body.GetValue()
         readPanel.Body.SetFont(font)   
-        readPanel.Body.SetStyle(0, len(text)+1, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
+        offset = 1 if wx.__version__[:3]<='2.8' and 'wxMac' in wx.PlatformInfo else 0
+        readPanel.Body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
             utils.LoadThemeBackgroundHex(constants.READ), font))    
                 
     def FormatText(self, formatter, code=None, index=1):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         font = readPanel.Body.GetFont()
         fontSize = font.GetPointSize()
-        readPanel.Body.Freeze()
+        
 
-        offset = 0
+        offset = 1 if wx.__version__[:3]<='2.8' and 'wxMac' in wx.PlatformInfo else 0
+
+        if wx.__version__[:3]<='2.8':
+            readPanel.Body.Freeze()
+
         if 'wxMac' in wx.PlatformInfo:
-            readPanel.SetContentFont(font)
-            offset = 1
+            readPanel.SetContentFont(font)            
         
         for token in formatter.split():
             tag,x,y = token.split('|')
@@ -456,8 +460,9 @@ class View(AuiBaseFrame):
             elif tag == 'fn':
                 font.SetPointSize(fontSize*0.8)
                 readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#3CBF3F', wx.NullColour, font))  
-                
-        readPanel.Body.Thaw()     
+
+        if wx.__version__[:3]<='2.8':                
+            readPanel.Body.Thaw()     
         
     def ShowFindDialog(self, code, index, text, flags):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
@@ -573,4 +578,9 @@ class View(AuiBaseFrame):
     def Start(self):
         self._PostInit()
         self._components.Filter(self)
-        self.Show()        
+        
+        if wx.__version__[:3]<='2.8':
+            self.Show()
+        else:
+            self.Activate()        
+
