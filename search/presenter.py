@@ -237,8 +237,8 @@ class Presenter(object):
     
     @db_session                
     def ReloadHistory(self, position):
-        h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
-            self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue()))[position]
+        h = search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+            self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())[position]
         self.Search(h.keywords, refreshHistoryList=False)
     
     def ExportData(self):
@@ -295,8 +295,8 @@ class Presenter(object):
         if self._view.HistoryList.GetSelection() == -1: return
         
         with db_session:
-            h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
-                self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue()))[self._view.HistoryList.GetSelection()]
+            h = search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+                self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())[self._view.HistoryList.GetSelection()]
             h.delete()
 
         with db_session:

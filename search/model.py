@@ -29,11 +29,16 @@ class Model(object):
 
     @staticmethod
     def GetHistories(index, alphabetSort=True, text=''):
-        if alphabetSort:
-            return select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(lambda h: h.keywords)
-        else:
-            return select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(lambda h: desc(h.id))
-
+        sortDesc = (lambda h: h.keywords) if alphabetSort else (lambda h: desc(h.id))
+        results, start, page = [], 0, 500
+        while True:
+            query = select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(sortDesc)[start:start+page]
+            if len(query) == 0: 
+                break
+            results += list(query)
+            start += page
+        return results
+        
     def __init__(self, delegate):
         self._delegate = delegate
         self._volumes = []
