@@ -681,7 +681,7 @@ class ReadPanel(wx.Panel):
         
         self._notePanel = NotePanel(self, self._code, self._index)
         
-        if self.Delegate.IsSmallScreen():
+        if self.Delegate.IsSmallScreen() or not utils.LoadNoteStatus():
             self._notePanel.Hide()
               
     def ExtraLayout(self):
@@ -826,10 +826,23 @@ class ReadPanel(wx.Panel):
 
     def ToggleNotePanel(self):
         if self.NotePanel.IsShown():
+            utils.SaveNoteStatus(False)
             self.NotePanel.Hide()
         else:
+            utils.SaveNoteStatus(True)
             self.NotePanel.Show()
         self.Layout()
+
+    def HideNotePanel(self):
+        if self.NotePanel.IsShown():
+            self.NotePanel.Hide()
+            self.Layout()
+
+    def ShowNotePanel(self):
+        if not self.NotePanel.IsShown():
+            self.NotePanel.Show()
+            self.Layout()
+
 
 class ReadWithReferencesPanel(ReadPanel):
     

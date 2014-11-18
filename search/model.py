@@ -371,7 +371,7 @@ class Model(object):
         return constants.BOOK_NAMES['%s_%s' % (self.Code, str(volume))].decode('utf8','ignore')
         
     def GetBookNames(self):
-        return [self.GetBookName(volume+1) for volume in range(len(self.volumes))]
+        return [self.GetBookName(volume+1) for volume in range(len(self._volumes))]
 
     def ConvertSpecialCharacters(self, text):
         return text

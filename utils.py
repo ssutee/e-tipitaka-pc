@@ -215,6 +215,16 @@ def LoadReadWindowPosition():
 def LoadSearchWindowPosition():
     return LoadWindowPosition(constants.SEARCH_RECT)
 
+def LoadNoteStatus():
+    if not os.path.exists(constants.NOTE_STATUS_CFG):
+        return True
+    return True if open(constants.NOTE_STATUS_CFG).read().strip() == '1' else False
+
+def SaveNoteStatus(status):
+    f = open(constants.NOTE_STATUS_CFG, 'w')
+    f.write('1' if status else '0')
+    f.close()
+
 def MakeKey(code, index):
     return '%s:%d'%(code, index)
     

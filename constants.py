@@ -84,6 +84,7 @@ SEARCH_RECT = os.path.join(CONFIG_PATH, 'rect_search.cfg')
 READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 
 THEME_CFG = os.path.join(CONFIG_PATH, 'theme.cfg')
+NOTE_STATUS_CFG = os.path.join(CONFIG_PATH, 'comment.cfg')
 
 SEARCH_IMAGE = os.path.join(RESOURCES_DIR, 'search.png')
 NIKHAHIT_IMAGE = os.path.join(RESOURCES_DIR, 'nikhahit.gif')
