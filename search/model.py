@@ -15,9 +15,9 @@ class History(db.Entity):
     keywords = Required(unicode)
     total = Required(int)
     code = Required(unicode)
-    read = Optional(unicode)
-    skimmed = Optional(unicode)
-    pages = Optional(unicode)
+    read = Optional(unicode, 5000)
+    skimmed = Optional(unicode, 5000)
+    pages = Optional(unicode, 5000)
 
 db.generate_mapping(create_tables=True)
 
