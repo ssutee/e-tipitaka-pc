@@ -82,7 +82,27 @@ def UpdateDatabases():
                 cursor.execute('ALTER TABLE History ADD COLUMN pages TEXT')
             except sqlite3.OperationalError,e:
                 pass
-            conn.commit()
+            conn.commit()        
+        if cursor.execute('PRAGMA user_version').fetchone()[0] == 2:
+            cursor.execute('CREATE TABLE IF NOT EXISTS temp_table (id INTEGER PRIMARY KEY AUTOINCREMENT, keywords text NOT NULL, total INTEGER NOT NULL, code VARCHAR(200) NOT NULL, read TEXT NOT NULL, skimmed TEXT NOT NULL, pages TEXT)')
+            cursor.execute('INSERT INTO temp_table SELECT * FROM History')
+            cursor.execute('DROP TABLE History')
+            cursor.execute('ALTER TABLE temp_table RENAME TO History')
+            cursor.execute('PRAGMA user_version=3')
+            conn.commit()            
+        conn.close()        
+        
+    if os.path.exists(constants.NOTE_DB):
+        conn = sqlite3.connect(constants.NOTE_DB)
+        cursor = conn.cursor()
+        if cursor.execute('PRAGMA user_version').fetchone()[0] < 2:
+            print 'update database'
+            cursor.execute('CREATE TABLE IF NOT EXISTS temp_table (id INTEGER PRIMARY KEY AUTOINCREMENT, volume INTEGER NOT NULL, page INTEGER NOT NULL, code VARCHAR(200) NOT NULL, filename VARCHAR(255) NOT NULL, text TEXT NOT NULL)')
+            cursor.execute('INSERT INTO temp_table SELECT * FROM Note')
+            cursor.execute('DROP TABLE Note')
+            cursor.execute('ALTER TABLE temp_table RENAME TO Note')
+            cursor.execute('PRAGMA user_version=2')
+            conn.commit()                
         conn.close()
 
 def ConvertToPaliSearch(search, force=False):
