@@ -1215,7 +1215,9 @@ class SearchToolPanel(wx.Panel):
             self._font.SetPointSize(16)
             self._text.SetFont(self._font)
         else:   
-            self._text.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, u''))
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font.SetFaceName('Tahoma')            
+            self._text.SetFont(font)
 
         self._buddhawajOnly = wx.CheckBox(self, wx.ID_ANY, label=u'เฉพาะพุทธวจน')
         self._buddhawajOnly.Disable()

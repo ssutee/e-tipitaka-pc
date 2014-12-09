@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import search.model
-from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog
+from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog
 import wx, zipfile, os, json
 import wx.richtext as rt
 from utils import BookmarkManager
@@ -27,6 +27,7 @@ class Presenter(object):
         self._presenters = {}
         self._scrollPosition = 0
         self._shouldOpenNewWindow = False
+        self._canBeClosed = False
         self._refreshHistoryList = True
         self._searchingBuddhawaj = False
         self._paliDictWindow = None
@@ -57,7 +58,11 @@ class Presenter(object):
     @property
     def Model(self):
         return self._model
-
+        
+    @property
+    def CanBeClosed(self):
+        return self._canBeClosed
+    
     def ShowAboutDialog(self):
         dialog = AboutDialog(self._view)
         dialog.Center()
@@ -70,10 +75,11 @@ class Presenter(object):
         fontData.EnableEffects(False)
         if curFont != None:
             fontData.SetInitialFont(curFont)
-        dialog = wx.FontDialog(self._view, fontData)
+        dialog = SimpleFontDialog(self._view, fontData) if 'wxMac' in wx.PlatformInfo else wx.FontDialog(self._view, fontData)
         if dialog.ShowModal() == wx.ID_OK:
             data = dialog.GetFontData()
             font = data.GetChosenFont()
+            print font.GetFaceName(), font.GetPointSize()
             if font.IsOk():
                 utils.SaveFont(font, constants.SEARCH_FONT)
                 self._view.Font = font

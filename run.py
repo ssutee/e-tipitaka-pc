@@ -67,10 +67,10 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         view = search.view.View(self)
         interactor = search.interactor.Interactor()
         model = search.model.ThaiRoyalSearchModel(None)  
-
+        
         self._presenter = search.presenter.Presenter(model, view, interactor)
         self._presenter.Delegate = self
-
+        
         self._presenters = {}
 
         if rect is None:
@@ -93,10 +93,17 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         self._statusBar.Bind(wx.EVT_SIZE, lambda event: wx.CallAfter(self.PositionProgressBar))
 
     def OnFrameClose(self, event):     
+        self._presenter._canBeClosed = True
         utils.SaveSearchWindowPosition(self)
         if self._presenter: self._presenter.SaveSearches()
         for code in self._presenters:
             self._presenter.SaveHistory(code)
+        for child in self.GetClientWindow().GetChildren():
+            if isinstance(child, wx.aui.AuiMDIChildFrame):
+                try:
+                    child.Close()
+                except wx.PyAssertionError,e:
+                    pass
         event.Skip()
 
     def Read(self, code, volume, page, idx, section, shouldHighlight, showBookList, shouldOpenNewWindow):        

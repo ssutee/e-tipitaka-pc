@@ -3,7 +3,7 @@
 import wx
 from wx.lib.combotreebox import ComboTreeBox
 import wx.richtext as rt
-import sys, os
+import sys, os, re
 import i18n
 _ = i18n.language.ugettext
 
@@ -33,6 +33,45 @@ class DataXferCheckboxValidator(wx.PyValidator):
 
     def Validate(self, win):
         return True
+
+class DataXferFontValidator(wx.PyValidator):
+    def __init__(self, data, key):
+        wx.PyValidator.__init__(self)
+        self._data = data
+        self._key = key
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+    
+    def Clone(self):
+        return DataXferFontValidator(self._data, self._key)
+        
+    def Validate(self, win):
+        return True
+        
+    def TransferToWindow(self):
+        return True
+
+    def TransferFromWindow(self):
+        return True
+        
+    def OnChar(self, event):
+        code = event.GetKeyCode()
+        window = self.GetWindow()
+        if not isinstance(window, wx.TextCtrl):
+            event.Skip()
+            return
+            
+        text = window.GetValue()
+        if (code < 48 or code > 57) and code != 8:
+            return
+            
+        if (code >= 48 and code <= 57) and int(text + chr(code)) > 200:
+            return            
+            
+        if text == '' and code == 48:
+            return
+            
+        event.Skip()        
+        
 
 class DataXferPagesValidator(wx.PyValidator):
     def __init__(self, data, key):
@@ -96,6 +135,12 @@ class NoteManagerDialog(wx.Dialog):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         leftSizer = wx.BoxSizer(wx.VERTICAL)
         self._searchCtrl = wx.SearchCtrl(self, wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
+        
+        if 'wxMac' in wx.PlatformInfo:
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font.SetFaceName('Tahoma')
+            self._searchCtrl.SetFont(font)
+
         self._searchCtrl.SetFocus()
         self._searchCtrl.Bind(wx.EVT_TEXT, self.OnSearchCtrlTextEnter)
         self._readButton = wx.Button(self, wx.ID_ANY, u'อ่าน')
@@ -152,9 +197,103 @@ class NoteManagerDialog(wx.Dialog):
     def Result(self):
         return self._result
 
+class FontData(object):
+    
+    def __init__(self, font):
+        self._font = font
+    
+    def GetChosenFont(self):
+        return self._font
+
+class SimpleFontDialog(wx.Dialog):
+    def __init__(self, parent, fontData):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, u'เลือกฟอนต์')
+        data = {}
+        mainSizer = wx.GridBagSizer()
+        e = wx.FontEnumerator()
+        e.EnumerateFacenames()
+        facenames = filter(lambda face: 'Bold' not in face and 'Italic' not in face, e.GetFacenames()) 
+        facenames.sort()
+
+        mainSizer.Add(wx.StaticBox(self, wx.ID_ANY, u'Face names:', size=(400, -1)), (0,0), flag=wx.EXPAND)
+        self._listBox = wx.ListBox(self, wx.ID_ANY, wx.DefaultPosition, (400, 150), facenames, wx.LB_SINGLE, validator=DataXferFontValidator(data, 'facename'))
+        self._listBox.Bind(wx.EVT_LISTBOX, self.OnSelect)
+        self._listBox.SetSelection(0)
+
+        for i, facename in enumerate(facenames):
+            if fontData.GetInitialFont().GetFaceName() == facename:
+                self._listBox.SetSelection(i)
+                break
+    
+        mainSizer.Add(self._listBox, (1,0), flag=wx.EXPAND)        
+        
+        mainSizer.Add(wx.StaticBox(self, wx.ID_ANY, u'Size:', size=(100, -1)), (0,1), flag=wx.EXPAND)
+        
+        spinPanel = wx.Panel(self, wx.ID_ANY)
+        spinSizer = wx.BoxSizer(wx.HORIZONTAL)
+        spinPanel.SetSizer(spinSizer)
+        
+        self._spin = wx.SpinButton(spinPanel, wx.ID_ANY)        
+        self._spin.SetValue(fontData.GetInitialFont().GetPointSize())
+        self._spin.SetRange(1, 200)
+        self.Bind(wx.EVT_SPIN, self.OnSpin, self._spin)
+        spinSizer.Add(self._spin)
+
+        self._fontSize = wx.TextCtrl(spinPanel, wx.ID_ANY, str(self._spin.GetValue()), size=(50, -1), validator=DataXferFontValidator(data, 'size'))
+        self.Bind(wx.EVT_TEXT, self.OnText, self._fontSize)
+        spinSizer.Add(self._fontSize)
+        
+        mainSizer.Add(spinPanel, (1,1), flag=wx.ALIGN_CENTER_HORIZONTAL)
+        
+        self._text = wx.StaticText(self, wx.ID_ANY, u'ตถาคเต เอกนฺตคโต อภิปฺปสนฺโน', size=(500, 100), style=wx.ALIGN_CENTRE)
+        mainSizer.Add(self._text, (2,0), (1,2), flag=wx.ALIGN_CENTER|wx.EXPAND|wx.TOP, border=10)
+
+        buttonPanel = wx.Panel(self, wx.ID_ANY)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(buttonPanel, wx.ID_OK, 'OK'))
+        buttonSizer.Add(wx.Button(buttonPanel, wx.ID_CANCEL, 'Cancel'))
+        buttonPanel.SetSizer(buttonSizer)
+        
+        mainSizer.Add(buttonPanel, (3,0), (1,2), flag=wx.ALIGN_CENTER|wx.BOTTOM, border=10)
+
+        self.SetSizer(mainSizer)
+        self.Center()
+        self.Fit()
+        
+        self.UpdateText()
+        
+    def UpdateText(self):
+        facename = self._listBox.GetStringSelection()
+        font = wx.Font(int(self._fontSize.GetValue()), wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, facename)
+        font.SetPointSize(int(self._fontSize.GetValue()))
+        self._text.SetFont(font)
+
+        if wx.Platform == "__WXMAC__":
+            self.Refresh()
+        
+    def OnSelect(self, event):
+        self.UpdateText()
+        
+    def OnSpin(self, event):
+        self._fontSize.SetValue(str(event.GetPosition()))
+        self.UpdateText()
+        
+    def OnText(self, event):
+        try:
+            self._spin.SetValue(int(event.GetString()))
+            self.UpdateText()
+        except ValueError, e:
+            pass
+
+    def GetFontData(self):
+        facename = self._listBox.GetStringSelection()
+        font = wx.Font(int(self._fontSize.GetValue()), wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, facename)        
+        return FontData(font)
+
+
 class PageRangeDialog(wx.Dialog):
     def __init__(self, parent, title, msg1, msg2, num, data):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(350,200))
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(350,200))        
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         
         s1 = wx.BoxSizer(wx.HORIZONTAL)

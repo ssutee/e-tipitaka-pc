@@ -553,7 +553,7 @@ class Presenter(object):
         fontData.EnableEffects(False)
         if curFont != None:
             fontData.SetInitialFont(curFont)
-        dialog = wx.FontDialog(self._view, fontData)
+        dialog = dialogs.SimpleFontDialog(self._view, fontData) if 'wxMac' in wx.PlatformInfo else wx.FontDialog(self._view, fontData)
         if dialog.ShowModal() == wx.ID_OK:
             data = dialog.GetFontData()
             font = data.GetChosenFont()
@@ -657,7 +657,7 @@ class Presenter(object):
         if textCtrl.GetStyle(textCtrl.GetInsertionPoint(), attr):
             fontData.SetInitialFont(attr.GetFont())
 
-        dlg = wx.FontDialog(self._view, fontData)
+        dlg = dialogs.SimpleFontDialog(self._view, fontData) if 'wxMac' in wx.PlatformInfo else wx.FontDialog(self._view, fontData)
         if dlg.ShowModal() == wx.ID_OK:
             fontData = dlg.GetFontData()
             font = fontData.GetChosenFont()
