@@ -624,7 +624,7 @@ class ReadPanel(wx.Panel):
         self._body.SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
-        self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress, self._body)
+        self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
         self._body.Bind(wx.EVT_MOTION if 'wxMac' in wx.PlatformInfo else wx.EVT_LEFT_UP, self.OnTextBodySelect)
         self._body.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
         self._body.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)
