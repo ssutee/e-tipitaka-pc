@@ -566,7 +566,7 @@ class RomanScriptSearchModel(ScriptSearchModel):
         return constants.ROMAN_SCRIPT_TITLES[volume][1]
 
     def HasVolumeSelection(self):
-        return False                
+        return True                
 
 
 class ThaiScriptSearchModel(ScriptSearchModel):

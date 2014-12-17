@@ -25,10 +25,10 @@ class ViewComponentsCreator(object):
             return ThaiFiveBooksViewComponents(parent)
         if code == constants.THAI_MAHACHULA_CODE:
             return ThaiMahaChulaViewComponents(parent)
-        if code == constants.ROMAN_SCRIPT_CODE:
-            return RomanScriptViewComponents(parent)
         if code == constants.THAI_SCRIPT_CODE:
             return ThaiScriptViewComponents(parent)
+        if code == constants.ROMAN_SCRIPT_CODE:
+            return RomanScriptViewComponents(parent)
         return ViewComponents(parent)
 
 class ViewComponents(object):
@@ -121,11 +121,11 @@ class ThaiScriptViewComponents(ScriptViewComponents):
         super(ThaiScriptViewComponents, self).__init__(parent, dataSource)
         self._toc = constants.THAI_SCRIPT_TOC
         
-class RomanScriptViewComponents(ScriptViewComponents):
+class RomanScriptViewComponents(ViewComponents):
     def __init__(self, parent, dataSource=None):
         super(RomanScriptViewComponents, self).__init__(parent, dataSource)
-        self._toc = constants.ROMAN_SCRIPT_TOC
-        
+
+
 class View(AuiBaseFrame):    
     
     def __init__(self, parent, title, code):         
@@ -418,7 +418,7 @@ class View(AuiBaseFrame):
         font = readPanel.Body.GetFont()
         text = readPanel.Body.GetValue()
         readPanel.Body.SetFont(font)   
-        offset = 1 if wx.__version__[:3]<='2.8' and 'wxMac' in wx.PlatformInfo else 0
+        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
         readPanel.Body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
             utils.LoadThemeBackgroundHex(constants.READ), font))    
                 
@@ -428,7 +428,7 @@ class View(AuiBaseFrame):
         fontSize = font.GetPointSize()
         
 
-        offset = 1 if wx.__version__[:3]<='2.8' and 'wxMac' in wx.PlatformInfo else 0
+        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
 
         if wx.__version__[:3]<='2.8':
             readPanel.Body.Freeze()

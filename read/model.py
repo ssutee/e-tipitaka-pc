@@ -50,9 +50,6 @@ class Engine(object):
             r['content'] = result[3]
         return r
     
-    def GetComparingVolume(self, volume, page):
-        return volume
-    
     def GetTotalPages(self, volume):
         return int(constants.BOOK_PAGES.get('%s_%d' % (self._code, volume), 0))
         
@@ -140,7 +137,7 @@ class Engine(object):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
+        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
         
     def GetSubItem(self, volume, page, item): 
         for sub in constants.BOOK_ITEMS[self._code][volume]:
@@ -149,9 +146,6 @@ class Engine(object):
                 if page in pages:
                     return item, sub
         return item, 1
-        
-    def ConvertVolume(self, volume, item, sub):
-        return volume
         
     @property
     def HighlightOffset(self):
@@ -162,11 +156,26 @@ class Engine(object):
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
-            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
         except KeyError, e:
             return 0
         except TypeError, e:
             return 0
+
+    def ConvertVolume(self, volume, item, sub):
+        return volume
+        
+    def GetComparingVolume(self, volume, page):
+        return volume
+    
+    def ConvertToPivot(self, volume, page, item):
+        item, sub = self.GetSubItem(volume, page, item)        
+        return self.GetComparingVolume(volume, page), item, sub
+
+    def ConvertFromPivot(self, volume, item, sub):
+        volume = self.ConvertVolume(volume, item, sub)
+        page = self.ConvertItemToPage(volume, item, sub, True)
+        return volume, page
 
 class ThaiRoyalEngine(Engine):
     
@@ -373,6 +382,13 @@ class ThaiMahaChulaEngine(Engine):
             return constants.SECTION_THAI_NAMES[1]
         return constants.SECTION_THAI_NAMES[2]        
 
+    def ConvertItemToPage(self, volume, item, sub, checked=False):
+        try:
+            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+        except KeyError, e:
+            return 0
+        except TypeError, e:
+            return 0
 
 class ThaiMahaMakutEngine(Engine):
 
@@ -538,6 +554,28 @@ class RomanScriptEngine(ScriptEngine):
         self._conn = sqlite3.connect(constants.ROMAN_SCRIPT_DB)
         self._searcher = self._conn.cursor()    
 
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+        return r        
+
+    def GetCompareChoices(self):
+        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM romanct WHERE volume=? AND page=?'
+        args = (int(volume), int(page))
+        return select, args        
+
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM romanct WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0        
+
     def GetTitle(self, volume=None):
         if volume is None:
             return 'Tipitaka (Roman Script)'
@@ -545,6 +583,39 @@ class RomanScriptEngine(ScriptEngine):
 
     def GetSubtitle(self, volume, section=None):
         return constants.ROMAN_SCRIPT_TITLES[str(volume)][1]
+
+    def GetBookName(self, volume):
+        return constants.ROMAN_BOOK_NAMES[volume-1].decode('utf8','ignore')
+
+    def GetBookListItems(self):
+        return ['%2s. %s' % (volume+1, self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
+
+    def GetSectionBoundary(self, position):
+        if position == 0:
+            return 5
+        if position == 1:
+            return 48
+        return 61
+
+    def ConvertToPivot(self, volume, page, item):
+        table = constants.ROMAN_MAPPING_TABLE
+        
+        if str(volume) not in table or str(page) not in table[str(volume)]:
+            return volume, 1
+        
+        results = table[str(volume)][str(page)]
+
+        return results[0][0], results[0][1], results[0][2]
+        
+    def ConvertFromPivot(self, volume, item, sub):
+        table = constants.ROMAN_REVERSE_MAPPING_TABLE
+
+        if str(volume) not in table or str(item) not in table[str(volume)] or str(sub) not in table[str(volume)][str(item)]:
+            return volume, 1, 1
+
+        result = table[str(volume)][str(item)][str(sub)]
+
+        return result[0], result[1]
 
 class ThaiScriptEngine(ScriptEngine):
 
@@ -664,6 +735,12 @@ class Model(object):
         
     def ConvertSpecialCharacters(self, text):
         return self._engine[self._code].ConvertSpecialCharacters(text)
+
+    def ConvertToPivot(self, volume, page, item):
+        return self._engine[self._code].ConvertToPivot(volume, page, item)
+
+    def ConvertFromPivot(self, volume, item, sub):
+        return self._engine[self._code].ConvertFromPivot(volume, item, sub)
         
     @property
     def HighlightOffset(self):

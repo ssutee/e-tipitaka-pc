@@ -4,7 +4,7 @@ import wx
 import wx.richtext as rt
 from wx.html import HtmlEasyPrinting
 import constants, utils, dialogs, widgets
-import os, json, codecs
+import os, json, codecs, re
 
 from pony.orm import Database, Required, Optional, db_session, select, desc
 from read.model import Model
@@ -268,6 +268,7 @@ class Presenter(object):
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
 
         self._HighlightKeywords(content, self._keywords, volume, page)        
+        self._HighlightItems(content)
         self._LoadMarks(self._currentVolume, self._currentPage)
         
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
@@ -305,9 +306,28 @@ class Presenter(object):
         content = self._model.GetPage(volume, page)
         self._view.SetText(content, code=code, index=index)
         self._view.FormatText(self._model.GetFormatter(volume, page), code=code, index=index)        
-        self._LoadMarks(volume, page, code, index)        
+        self._HighlightItems(content, code, index)
+        self._LoadMarks(volume, page, code, index)
 
         self._model.Code = currentCode                
+
+    def _HighlightItems(self, content, code=None, index=1):
+        n = -1
+        for item in re.findall(ur'({[0-9\.:;]+})', content):
+            n = content.find(item, n+1)
+            
+            body = self._view.Body if code == None else self._view.FocusBody(code, index)
+
+            if wx.__version__[:3]<='2.8':
+                body.Freeze()
+
+            font = body.GetFont()
+            colorCode, diffSize = constants.FOOTER_STYLE
+            body.SetStyle(n, n+len(item), wx.TextAttr(colorCode, wx.NullColour, font))
+
+            if wx.__version__[:3]<='2.8':
+                body.Thaw()
+
 
     def _HighlightKeywords(self, content, keywords, volume, page):
         if content == u'' or keywords is None: return
@@ -448,24 +468,24 @@ class Presenter(object):
             dialog.Destroy()
         elif len(items) == 1:
             item = items[0]
-
-        item, sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
-        volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
-
-        print constants.CODES[index]
         
-        self._DoCompare(constants.CODES[index], volume, sub, item)
+        self._DoCompare(constants.COMPARE_CODES[index], item)
 
-    def _DoCompare(self, code, volume, sub, item):        
+    def _DoCompare(self, code, item):        
         if item is None: return
         
         self._view.HideBookList()
         index = self._view.AddReadPanel(code)
+        
+        volume, item, sub = self._model.ConvertToPivot(self._currentVolume, self._currentPage, item)
+
         currentCode = self._model.Code
         self._model.Code = code
-        volume = self._model.ConvertVolume(volume, item, sub)
-        page = self._model.ConvertItemToPage(volume, item, sub, code == constants.THAI_MAHACHULA_CODE)
-        self._model.Code = currentCode
+
+        volume, page = self._model.ConvertFromPivot(volume, item, sub)
+        
+        self._model.Code = currentCode 
+
         self.OpenAnotherBook(code, index, volume, page)
 
     def SetFocus(self, flag, code, index):
@@ -571,6 +591,7 @@ class Presenter(object):
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)
+        self._HighlightItems(content)
         
     def DecreaseFontSize(self):
         code, index = utils.SplitKey(self._lastFocus)
@@ -581,6 +602,7 @@ class Presenter(object):
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)
+        self._HighlightItems(content)
 
     def MarkText(self, code, index, mark=True):
         s,t = self._view.MarkText(code, index) if mark else self._view.UnmarkText(code, index)

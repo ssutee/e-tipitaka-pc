@@ -13,6 +13,7 @@ APP_NAME = 'E-Tipitaka'
 HOME = expanduser("~")
 
 CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct']
+COMPARE_CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'romanct']
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -163,6 +164,12 @@ THAI_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_th.json')).re
 
 ROMAN_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_rm.json')).read())
 THAI_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_th.json')).read())
+
+ROMAN_BOOK_NAMES = open(os.path.join(RESOURCES_DIR, 'roman_names.txt')).readlines()
+ROMAN_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst.json')).read())
+ROMAN_REVERSE_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst_r.json')).read())
+ROMAN_PAGE_INDEX = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_page_index.json')).read())
+ROMAN_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_items.json')).read())
 
 FIVE_BOOKS_NAMES = [
     u'ขุมทรัพย์จากพระโอษฐ์', 

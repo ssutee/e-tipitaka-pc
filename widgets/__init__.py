@@ -774,7 +774,7 @@ class ReadPanel(wx.Panel):
     def SetBody(self, text):
         self._body.SetValue(text)
         font = self._body.GetFont()
-        offset = 1 if wx.__version__[:3]<='2.8' and 'wxMac' in wx.PlatformInfo else 0
+        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
         self._body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
             utils.LoadThemeBackgroundHex(constants.READ), font))
         

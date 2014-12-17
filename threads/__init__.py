@@ -124,6 +124,10 @@ class ScriptSearchThread(SearchThread):
     
         
 class RomanScriptSearchThread(ScriptSearchThread):
+
+    @property
+    def TableName(self):
+        return 'romanct'
     
     @property
     def Code(self):
