@@ -811,15 +811,32 @@ class Presenter(object):
     
         self._model.Code = currentCode
 
-    def _ShowConfirmSaveDialog(self, code, volume, data, text):
+    def _ShowConfirmSaveDialog(self, code, volume, start, end, text):
         dlg = wx.FileDialog(self._view, u'โปรดเลือกไฟล์', self._saveDirectory, 
-            '%s_volumn-%02d_page-%04d-%04d' % (code, volume, data['from']+1, data['to']+1), 
+            '%s_volumn-%02d_page-%04d-%04d' % (code, volume, start+1, end+1), 
             u'Plain Text (*.txt)|*.txt', wx.SAVE|wx.OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             with codecs.open(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w', 'utf-8') as f:
                 f.write(text)
             self._saveDirectory = dlg.GetDirectory()                
         dlg.Destroy()
+        
+    def _SavePagesToText(self, title1, title2, volume, start, end, sep):
+        text = u'%s\n%s\n\n' % (title1, title2)
+        for p in range(start, end+1) if start <= end else range(start, end-1, -1):
+            content = self._model.GetPage(volume, p+1)
+            text += u' '*60 + u'หน้าที่ %s\n\n'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore'))) if sep else ''
+            text += u'%s\n\n\n' % (content)
+        self._ShowConfirmSaveDialog(self._model.Code, volume, start, end, text)
+
+    def _SavePagesToPDF(self, volume, start, end):
+        import urllib2, webbrowser
+        start, end = (end, start) if start > end else (start, end)
+        url = "http://pali.watnapp.com/?volume=%d&start=%d&end=%d"%(volume, start+1, end+1)
+        response = urllib2.urlopen(url).read()
+        obj = json.loads(response)
+        if obj.get('success', False):
+            webbrowser.open_new(obj.get('url'))
         
     def ShowSaveDialog(self):
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
@@ -832,14 +849,12 @@ class Presenter(object):
         total = self._model.GetTotalPages(volume)
 
         data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0}
-        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการบันทึก', title1, title2, total, data)        
+        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการบันทึก', title1, title2, total, data, self._model.HasPdf)        
         if dlg.ShowModal() == wx.ID_OK:
-            text = u'%s\n%s\n\n' % (title1, title2)
-            for p in range(data['from'], data['to']+1) if data['from'] <= data['to'] else range(data['from'], data['to']-1, -1):
-                content = self._model.GetPage(volume, p+1)
-                text += u' '*60 + u'หน้าที่ %s\n\n'%(utils.ArabicToThai(str(page+1).decode('utf8','ignore')))
-                text += u'%s\n\n\n' % (content)
-            self._ShowConfirmSaveDialog(self._model.Code, volume, data, text)
+            if data.get('pdf', False):
+                self._SavePagesToPDF(volume, data['from'], data['to'])
+            else:
+                self._SavePagesToText(title1, title2, volume, data['from'], data['to'], data['sep'])
         dlg.Destroy()
     
         self._model.Code = currentCode        

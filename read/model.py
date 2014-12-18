@@ -30,6 +30,10 @@ class Engine(object):
     def __del__(self):
         if self._conn is not None:
             self._conn.close()
+
+    @property
+    def HasPdf(self):
+        return False
         
     def Query(self, volume, page):
         results = self._cache.get('q:%d:%d'%(volume, page), self._searcher.execute(*self.PrepareStatement(volume, page)))
@@ -204,6 +208,10 @@ class PaliSiamEngine(Engine):
         self._code = constants.PALI_SIAM_CODE
         self._conn = sqlite3.connect(constants.PALI_SIAM_DB)
         self._searcher = self._conn.cursor()
+
+    @property
+    def HasPdf(self):
+        return True        
 
     def PrepareStatement(self, volume, page):
         select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
@@ -665,6 +673,10 @@ class Model(object):
     @property
     def Code(self):
         return self._code
+
+    @property
+    def HasPdf(self):
+        return self._engine[self._code].HasPdf
         
     @Code.setter
     def Code(self, code):

@@ -292,7 +292,7 @@ class SimpleFontDialog(wx.Dialog):
 
 
 class PageRangeDialog(wx.Dialog):
-    def __init__(self, parent, title, msg1, msg2, num, data):
+    def __init__(self, parent, title, msg1, msg2, num, data, pdf=False):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(350,200))        
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         
@@ -326,7 +326,15 @@ class PageRangeDialog(wx.Dialog):
         rangeSizer.Add(toChoice)
         rangeSizer.Add((20,-1), 1, flag=wx.EXPAND)
         
-        checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'แสดงเลขคั่นหน้า', validator=DataXferCheckboxValidator(data,'sep'))
+        self.checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'แสดงเลขคั่นหน้า', validator=DataXferCheckboxValidator(data,'sep'))
+        self.checkBoxPDF = wx.CheckBox(self, wx.ID_ANY, label=u'ไฟล์ต้นฉบับ (PDF)', validator=DataXferCheckboxValidator(data,'pdf'))
+
+        self.checkBoxPDF.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxPDF)
+
+        checkSizer = wx.BoxSizer(wx.HORIZONTAL)
+        checkSizer.Add(self.checkBox)
+        checkSizer.Add((10,-1))
+        checkSizer.Add(self.checkBoxPDF)
         
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
         btnOk = wx.Button(self, wx.ID_OK, u'ตกลง',size=(-1,-1))
@@ -347,13 +355,23 @@ class PageRangeDialog(wx.Dialog):
         mainSizer.Add((-1,5),flag=wx.EXPAND)
         mainSizer.Add(rangeSizer, flag=wx.EXPAND)
         mainSizer.Add((-1,5),flag=wx.EXPAND)
-        mainSizer.Add(checkBox,flag=wx.ALIGN_CENTER)
+        mainSizer.Add(checkSizer,flag=wx.ALIGN_CENTER)
         mainSizer.Add((-1,15),flag=wx.EXPAND)
         mainSizer.Add(btnSizer, flag=wx.EXPAND)
         mainSizer.Add((-1,10), 1, flag=wx.EXPAND)
+
+        if not pdf:
+            checkBoxPDF.Hide()
         
         self.Center()
         self.SetSizer(mainSizer)
+
+    def OnCheckBoxPDF(self, event):
+        if self.checkBoxPDF.IsChecked():
+            self.checkBox.SetValue(False)
+            self.checkBox.Disable()
+        else:
+            self.checkBox.Enable()
 
 class BookmarkManagerDialog(wx.Dialog):
     def __init__(self, parent, items):
