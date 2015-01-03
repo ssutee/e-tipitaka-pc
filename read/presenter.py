@@ -365,7 +365,21 @@ class Presenter(object):
                     self._view.Body.Thaw()
 
     def OnLinkToReference(self, code, volume, item):
-        self._DoCompare(code, volume, 1, item)
+        self._view.HideBookList()
+        index = self._view.AddReadPanel(code)
+        
+        currentCode = self._model.Code
+        
+        self._model.Code = code
+
+        volume, page = self._model.ConvertFromPivot(volume, item, 1)
+        
+        self._model.Code = currentCode 
+
+        if volume == 0:
+            return
+
+        self.OpenAnotherBook(code, index, volume, page)                
 
     def SaveBookmark(self):        
         self._bookmarkManager.Save()
@@ -478,6 +492,9 @@ class Presenter(object):
         index = self._view.AddReadPanel(code)
         
         volume, item, sub = self._model.ConvertToPivot(self._currentVolume, self._currentPage, item)
+        
+        if volume == 0:
+            return
 
         currentCode = self._model.Code
         self._model.Code = code
@@ -485,6 +502,9 @@ class Presenter(object):
         volume, page = self._model.ConvertFromPivot(volume, item, sub)
         
         self._model.Code = currentCode 
+
+        if volume == 0:
+            return
 
         self.OpenAnotherBook(code, index, volume, page)
 

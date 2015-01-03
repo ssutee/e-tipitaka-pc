@@ -141,7 +141,7 @@ class Engine(object):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
+        return constants.COMPARE_CHOICES
         
     def GetSubItem(self, volume, page, item): 
         for sub in constants.BOOK_ITEMS[self._code][volume]:
@@ -609,9 +609,12 @@ class RomanScriptEngine(ScriptEngine):
         table = constants.ROMAN_MAPPING_TABLE
         
         if str(volume) not in table or str(page) not in table[str(volume)]:
-            return volume, 1
+            return 0, 0, 0
         
         results = table[str(volume)][str(page)]
+
+        if len(results) == 0:
+            return 0, 0, 0
 
         return results[0][0], results[0][1], results[0][2]
         
@@ -619,7 +622,7 @@ class RomanScriptEngine(ScriptEngine):
         table = constants.ROMAN_REVERSE_MAPPING_TABLE
 
         if str(volume) not in table or str(item) not in table[str(volume)] or str(sub) not in table[str(volume)][str(item)]:
-            return volume, 1, 1
+            return 0, 0
 
         result = table[str(volume)][str(item)][str(sub)]
 

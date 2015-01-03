@@ -1352,15 +1352,13 @@ class ReferencesWindow(wx.html.HtmlWindow):
     def OnLinkClicked(self, link):
         href = link.GetHref()
         dlg = wx.SingleChoiceDialog(self.Parent, 
-            u'พระไตรปิฎก', u'เทียบเคียง', 
-            [u'ภาษาไทย ฉบับหลวง', u'ภาษาบาลี ฉบับสยามรัฐ'], wx.CHOICEDLG_STYLE)
+            u'พระไตรปิฎก', u'เทียบเคียง', constants.COMPARE_CHOICES, wx.CHOICEDLG_STYLE)
+        dlg.SetSize((250,280))
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
             tokens = map(unicode.strip,href.split('/'))
             volume = utils.ThaiToArabic(tokens[0])
             item = utils.ThaiToArabic(re.split(r'[–\-,\s]+', tokens[2])[0])
             if hasattr(self._delegate, 'OnLinkToReference'):
-                self._delegate.OnLinkToReference(
-                    constants.THAI_ROYAL_CODE if dlg.GetSelection() == 0 else constants.PALI_SIAM_CODE, 
-                    int(volume), int(item))
+                self._delegate.OnLinkToReference(constants.COMPARE_CODES[dlg.GetSelection()], int(volume), int(item))
         dlg.Destroy()

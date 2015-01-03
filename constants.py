@@ -14,6 +14,7 @@ HOME = expanduser("~")
 
 CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct']
 COMPARE_CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'romanct']
+COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
