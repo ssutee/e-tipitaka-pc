@@ -292,6 +292,10 @@ class ThaiPocketBookEngine(Engine):
     def GetFirstPageNumber(self, volume):
         return 1
 
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM thaipb WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0
 
 class ThaiWatnaEngine(Engine):
 
