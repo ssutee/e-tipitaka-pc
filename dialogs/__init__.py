@@ -361,7 +361,7 @@ class PageRangeDialog(wx.Dialog):
         mainSizer.Add((-1,10), 1, flag=wx.EXPAND)
 
         if not pdf:
-            checkBoxPDF.Hide()
+            self.checkBoxPDF.Hide()
         
         self.Center()
         self.SetSizer(mainSizer)
