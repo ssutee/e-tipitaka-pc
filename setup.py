@@ -6,6 +6,9 @@ Usage:
 """
 
 from setuptools import setup
+import sys
+
+sys.setrecursionlimit(10000)
 
 APP = ['run.py']
 DATA_FILES = ['resources']
