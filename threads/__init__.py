@@ -42,7 +42,7 @@ class SearchThread(threading.Thread):
         
     @property
     def VolumeColumn(self):
-        return 'volumn'
+        return 'volume'
     
     def run(self):
         conn = sqlite3.connect(self.Database)
@@ -124,10 +124,6 @@ class ScriptSearchThread(SearchThread):
     
         
 class RomanScriptSearchThread(ScriptSearchThread):
-
-    @property
-    def TableName(self):
-        return 'romanct'
     
     @property
     def Code(self):
@@ -209,6 +205,10 @@ class ThaiRoyalSearchThread(SearchThread):
     def Database(self):
         return constants.THAI_ROYAL_DB    
 
+    @property
+    def TableName(self):
+        return 'main'
+
 class PaliSiamSearchThread(SearchThread):
 
     def ProcessResult(self, result):
@@ -220,8 +220,8 @@ class PaliSiamSearchThread(SearchThread):
         return r    
 
     @property
-    def VolumeColumn(self):
-        return 'volume'
+    def TableName(self):
+        return 'main'
 
     @property
     def Code(self):
@@ -242,8 +242,8 @@ class ThaiMahaChulaSearchThread(SearchThread):
         return constants.THAI_MAHACHULA_DB    
         
     @property
-    def VolumeColumn(self):
-        return 'volume'        
+    def TableName(self):
+        return 'main'
         
     def ProcessResult(self, result):
         r = {}
@@ -267,8 +267,8 @@ class ThaiMahaMakutSearchThread(SearchThread):
         return constants.THAI_MAHAMAKUT_DB    
         
     @property
-    def VolumeColumn(self):
-        return 'volume'
+    def TableName(self):
+        return 'main'
 
     def ProcessResult(self, result):
         r = {}
@@ -290,8 +290,8 @@ class ThaiWatnaSearchThread(SearchThread):
         return constants.THAI_WATNA_DB
 
     @property
-    def VolumeColumn(self):
-        return 'volume'
+    def TableName(self):
+        return 'main'
 
     def ProcessResult(self, result):
         r = {}
@@ -314,8 +314,8 @@ class ThaiPocketBookSearchThread(SearchThread):
         return constants.THAI_POCKET_BOOK_DB
 
     @property
-    def VolumeColumn(self):
-        return 'volume'
+    def TableName(self):
+        return 'main'
 
     def ProcessResult(self, result):
         r = {}

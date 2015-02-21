@@ -189,6 +189,12 @@ class ThaiRoyalEngine(Engine):
         self._conn = sqlite3.connect(constants.THAI_ROYAL_DB)
         self._searcher = self._conn.cursor()
                 
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = ('%02d'%(volume), '%04d'%(page))
+        return select, args
+
+
     def GetTitle(self, volume=None):
         if not volume:
             return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
@@ -214,7 +220,7 @@ class PaliSiamEngine(Engine):
         return True        
 
     def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = ('%02d'%(volume), '%04d'%(page))
         return select, args
         
@@ -254,7 +260,7 @@ class ThaiPocketBookEngine(Engine):
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = (volume, page)
         return select, args
 
@@ -293,7 +299,7 @@ class ThaiPocketBookEngine(Engine):
         return 1
 
     def GetTotalPages(self, volume):
-        self._searcher.execute('SELECT COUNT(_id) FROM thaipb WHERE volume=?', (int(volume),))
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
         result = self._searcher.fetchone()
         return result[0] if result is not None else 0
 
@@ -306,7 +312,7 @@ class ThaiWatnaEngine(Engine):
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = (volume, page)
         return select, args
 
@@ -356,7 +362,7 @@ class ThaiMahaChulaEngine(Engine):
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = ('%02d'%(volume), '%04d'%(page))
         return select, args
 
@@ -416,7 +422,7 @@ class ThaiMahaMakutEngine(Engine):
         return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
     def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = ('%02d'%(volume), '%04d'%(page))
         return select, args
 
@@ -578,13 +584,8 @@ class RomanScriptEngine(ScriptEngine):
     def GetCompareChoices(self):
         return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
 
-    def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM romanct WHERE volume=? AND page=?'
-        args = (int(volume), int(page))
-        return select, args        
-
     def GetTotalPages(self, volume):
-        self._searcher.execute('SELECT COUNT(_id) FROM romanct WHERE volume=?', (int(volume),))
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
         result = self._searcher.fetchone()
         return result[0] if result is not None else 0        
 
