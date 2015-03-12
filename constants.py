@@ -108,6 +108,7 @@ NOTES_IMAGE = os.path.join(RESOURCES_DIR, 'edit-notes.png')
 DICT_IMAGE = os.path.join(RESOURCES_DIR, 'dict.png')
 THAI_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'thaidict.png')
 PALI_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'palidict.png')
+ENGLISH_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'palieng.png')
 DICT_ICON = os.path.join(RESOURCES_DIR, 'dict.ico')
 LAYOUT_IMAGE = os.path.join(RESOURCES_DIR, 'layout.gif')
 INC_IMAGE = os.path.join(RESOURCES_DIR, 'fontSizeUp.gif')
@@ -133,9 +134,10 @@ THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.db')
 THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.db')
 
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
-PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 
+PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 THAI_DICT_DB = os.path.join(RESOURCES_DIR, 'thaidict.db')
+ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english.db')
 
 THAI_FIVE_BOOKS_CODE = 'thaibt'
 THAI_ROYAL_CODE = 'thai'

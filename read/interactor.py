@@ -21,6 +21,7 @@ class Interactor(object):
         self.View.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)
         self.View.PaliDictButton.Bind(wx.EVT_BUTTON, self.OnPaliDictButtonClick)
         self.View.ThaiDictButton.Bind(wx.EVT_BUTTON, self.OnThaiDictButtonClick)
+        self.View.EnglishDictButton.Bind(wx.EVT_BUTTON, self.OnEnglishDictButtonClick)
         self.View.NotesButton.Bind(wx.EVT_BUTTON, self.OnNotesButtonClick)
     
         if isinstance(self.View.BookList, wx.ListBox):
@@ -80,6 +81,9 @@ class Interactor(object):
 
     def OnThaiDictButtonClick(self, event):
         self.Presenter.OpenThaiDict()
+
+    def OnEnglishDictButtonClick(self, event):
+        self.Presenter.OpenEnglishDict()
         
     def OnNotesButtonClick(self, event):
         self.Presenter.ShowNotesManager()

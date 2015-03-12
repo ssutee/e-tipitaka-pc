@@ -89,6 +89,10 @@ class View(AuiBaseFrame):
         return self._topBar.ThaiDictButton
                 
     @property
+    def EnglishDictButton(self):
+        return self._topBar.EnglishDictButton
+
+    @property
     def ThemeComboBox(self):
         return self._topBar.ThemeComboBox
                 

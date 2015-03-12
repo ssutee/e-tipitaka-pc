@@ -121,6 +121,7 @@ class Presenter(object):
         self._keywords = None
         self._paliDictWindow = None
         self._thaiDictWindow = None
+        self._englishDictWindow = None
         
         self._comparePage = {}
         self._compareVolume = {}
@@ -434,6 +435,8 @@ class Presenter(object):
             self._paliDictWindow.SetInput(text)
         if self._thaiDictWindow is not None:
             self._thaiDictWindow.SetInput(text)
+        if self._englishDictWindow is not None:
+            self._englishDictWindow.SetInput(text)
             
     def JumpToPage(self, page, code=None, index=1):
         if code is None:
@@ -463,7 +466,7 @@ class Presenter(object):
             
         self.JumpToPage(page, code, index)
 
-    def CompareTo(self, index):
+    def _CloseDictWindow(self):
         if self._paliDictWindow is not None:
             self._paliDictWindow.Close()
             self._paliDictWindow = None
@@ -471,16 +474,24 @@ class Presenter(object):
         if self._thaiDictWindow is not None:
             self._thaiDictWindow.Close()
             self._thaiDictWindow = None
+
+        if self._englishDictWindow is not None:
+            self._englishDictWindow.Close()
+            self._englishDictWindow = None
+
+
+    def CompareTo(self, index):
+        self._CloseDictWindow()
         
         item = None    
         items = self._model.GetItems(self._currentVolume, self._currentPage)
-        if len(items) > 1:
+        if len(items) > 1 and self._model.canSelectComparingItem():
             dialog = wx.SingleChoiceDialog(self._view, u'เลือกข้อที่ต้องการเทียบเคียง', 
                 self._model.GetTitle(self._currentVolume), map(lambda x: u'ข้อที่ ' + utils.ArabicToThai(x), items))
             if dialog.ShowModal() == wx.ID_OK:
                 item = items[dialog.GetSelection()]
             dialog.Destroy()
-        elif len(items) == 1:
+        elif len(items) > 0:
             item = items[0]
         
         self._DoCompare(constants.COMPARE_CODES[index], item)
@@ -934,18 +945,28 @@ class Presenter(object):
         self._thaiDictWindow.Raise()
         text = self._view.GetStringSelection(self._lastFocus)
         self._thaiDictWindow.SetInput(text.strip().split('\n')[0].strip())
+
+    def OpenEnglishDict(self):
+
+        def OnDictClose(event):
+            self._englishDictWindow = None
+            event.Skip()
+
+        if self._englishDictWindow is None:
+            self._englishDictWindow = widgets.EnglishDictWindow(self._view)
+            self._englishDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._englishDictWindow.SetTitle(u'Pali-English Dictionary')
+
+        self._englishDictWindow.Show()
+        self._englishDictWindow.Raise()
+        text = self._view.GetStringSelection(self._lastFocus)
+        self._englishDictWindow.SetInput(text.strip().split('\n')[0].strip())
         
     def ShowContextMenu(self, window, position, code, index):
         self._view.ShowContextMenu(window, position, code, index)
         
     def ShowNotesManager(self):
-        if self._paliDictWindow is not None:
-            self._paliDictWindow.Close()
-            self._paliDictWindow = None
-
-        if self._thaiDictWindow is not None:
-            self._thaiDictWindow.Close()
-            self._thaiDictWindow = None        
+        self._CloseDictWindow()
         
         code, index = utils.SplitKey(self._lastFocus)                
         dlg = dialogs.NoteManagerDialog(self._view.ReadPanel(code, index), code if code is not None else self._model.Code)

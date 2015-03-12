@@ -37,6 +37,7 @@ class Interactor(object):
         
         self.View.PaliDictButton.Bind(wx.EVT_BUTTON, self.OnPaliDictButtonClick)
         self.View.ThaiDictButton.Bind(wx.EVT_BUTTON, self.OnThaiDictButtonClick)
+        self.View.EnglishDictButton.Bind(wx.EVT_BUTTON, self.OnEnglishDictButtonClick)
         
         self.View.TopBar.CheckBox.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxChange)
         
@@ -119,3 +120,6 @@ class Interactor(object):
         
     def OnThaiDictButtonClick(self, event):
         self.Presenter.OpenThaiDict()
+
+    def OnEnglishDictButtonClick(self, event):
+        self.Presenter.OpenEnglishDict()

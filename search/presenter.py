@@ -32,6 +32,7 @@ class Presenter(object):
         self._searchingBuddhawaj = False
         self._paliDictWindow = None
         self._thaiDictWindow = None
+        self._englishDictWindow = None
         self._delegate = None
         self._model = model        
         self._model.Delegate = self
@@ -393,6 +394,20 @@ class Presenter(object):
 
         self._thaiDictWindow.Show()        
         self._thaiDictWindow.Raise()
+
+    def OpenEnglishDict(self):
+
+        def OnDictClose(event):
+            self._englishDictWindow = None
+            event.Skip()
+
+        if self._englishDictWindow is None:
+            self._englishDictWindow = widgets.EnglishDictWindow(self._view)
+            self._englishDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._englishDictWindow.SetTitle(u'Pali-English Dictionary')
+
+        self._englishDictWindow.Show()        
+        self._englishDictWindow.Raise()        
 
     def SearchingBuddhawaj(self):
         return self._searchingBuddhawaj

@@ -220,6 +220,10 @@ class View(AuiBaseFrame):
     @property
     def ThaiDictButton(self):
         return self._toolPanel.ThaiDictButton
+
+    @property
+    def EnglishDictButton(self):
+        return self._toolPanel.EnglishDictButton
         
     @property
     def NotesButton(self):

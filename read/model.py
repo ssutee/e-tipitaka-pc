@@ -181,6 +181,9 @@ class Engine(object):
         page = self.ConvertItemToPage(volume, item, sub, True)
         return volume, page
 
+    def canSelectComparingItem(self):
+        return True
+
 class ThaiRoyalEngine(Engine):
     
     def __init__(self):
@@ -303,6 +306,9 @@ class ThaiPocketBookEngine(Engine):
         result = self._searcher.fetchone()
         return result[0] if result is not None else 0
 
+    def canSelectComparingItem(self):
+        return False
+
 class ThaiWatnaEngine(Engine):
 
     def __init__(self):
@@ -407,6 +413,10 @@ class ThaiMahaChulaEngine(Engine):
             return 0
         except TypeError, e:
             return 0
+
+    def canSelectComparingItem(self):
+        return False
+
 
 class ThaiMahaMakutEngine(Engine):
 
@@ -515,7 +525,8 @@ class ThaiFiveBooksEngine(Engine):
         
     def GetSubItem(self, volume, page, item):
         return item, 1
-        
+
+
 class ScriptEngine(Engine):
             
     def PrepareStatement(self, volume, page):
@@ -564,6 +575,10 @@ class ScriptEngine(Engine):
             return 0
         except TypeError, e:
             return 0
+
+    def canSelectComparingItem(self):
+        return False
+
 
 class RomanScriptEngine(ScriptEngine):
     def __init__(self):
@@ -761,6 +776,9 @@ class Model(object):
 
     def ConvertFromPivot(self, volume, item, sub):
         return self._engine[self._code].ConvertFromPivot(volume, item, sub)
+
+    def canSelectComparingItem(self):
+        return self._engine[self._code].canSelectComparingItem()
         
     @property
     def HighlightOffset(self):
