@@ -160,6 +160,7 @@ class EnglishDictWindow(DictWindow):
 
     def LookupDictSQLite(self, word1, word2=None, prefix=False):
         cursor = self.conn.cursor()
+        word1 = self.ConvertToLowercase(word1)
         if prefix:
             cursor.execute("SELECT head,translation FROM english WHERE head LIKE ?", (word1+'%',))
             return cursor.fetchmany(size=50)
@@ -173,24 +174,23 @@ class EnglishDictWindow(DictWindow):
         self.text.SetFont(font)
         return font, True
 
+    def ConvertToLowercase(self, headword):
+        upperchars = u'ĀĪŪṄṂÑṬḌṆḶ'
+        lowerchars = u'āīūṅṃñṭḍṇḷ'
+        result = u''
+        for c in headword:
+            pos = upperchars.find(c)
+            result += lowerchars[pos] if pos > -1 else c.lower()
+        return result
+
     def SetupAdditionalToolbar(self, mainSizer):
-        upperSizer = wx.BoxSizer(wx.HORIZONTAL)
         lowerSizer = wx.BoxSizer(wx.HORIZONTAL)        
-        
-        upperChars = u'ĀĪŪṄṂÑṬḌṆḶ'
         lowerChars = u'āīūṅṃñṭḍṇḷ'
 
         def OnCharButton(event):
             button = event.GetEventObject()
             self.input.SetValue(self.input.GetValue() + button.title)
             self.input.SetInsertionPointEnd()
-
-        for button, c in ((wx.Button(self, wx.ID_ANY, c, size=(-1, -1)), c) for c in upperChars):
-            font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
-            button.title = c
-            button.SetFont(font)
-            button.Bind(wx.EVT_BUTTON, OnCharButton)
-            upperSizer.Add(button, 1)
 
         for button, c in ((wx.Button(self, wx.ID_ANY, c, size=(-1, -1)), c) for c in lowerChars):
             font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
@@ -199,7 +199,6 @@ class EnglishDictWindow(DictWindow):
             button.Bind(wx.EVT_BUTTON, OnCharButton)
             lowerSizer.Add(button, 1)
         
-        mainSizer.Add(upperSizer,0,wx.EXPAND | wx.ALL)
         mainSizer.Add(lowerSizer,0,wx.EXPAND | wx.ALL)
         mainSizer.Add((-1, 1), 0,wx.EXPAND | wx.ALL)
 
