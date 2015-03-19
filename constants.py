@@ -33,9 +33,11 @@ ETZ_TYPE = u'E-Tipitaka Backup File (*.etz)|*.etz'
 
 CHECK_VERSION_URL   = 'http://download.watnapahpong.org/data/etipitaka/version.txt'
 
-DOWNLOAD_MSW_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.exe'
-DOWNLOAD_OSX_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.dmg'
-DOWNLOAD_SRC_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.tar.gz'
+DOWNLOAD_MSW_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.exe'
+DOWNLOAD_OSX_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.dmg'
+DOWNLOAD_SRC_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.tar.gz'
+
+PALI_PDF_URL_PATTERN = "http://pali.watnapp.com/?volume=%d&start=%d&end=%d"
 
 CMD_IDLE            = 1000
 CMD_FORWARD         = 1001

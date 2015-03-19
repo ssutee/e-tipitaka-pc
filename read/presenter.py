@@ -314,7 +314,7 @@ class Presenter(object):
 
     def _HighlightItems(self, content, code=None, index=1):
         n = -1
-        for item in re.findall(ur'({[0-9\.:;]+})', content):
+        for item in re.findall(ur'({[๐๑๒๓๔๕๖๗๘๙0-9\.:;]+})', content):
             n = content.find(item, n+1)
             
             body = self._view.Body if code == None else self._view.FocusBody(code, index)
@@ -863,11 +863,17 @@ class Presenter(object):
     def _SavePagesToPDF(self, volume, start, end):
         import urllib2, webbrowser
         start, end = (end, start) if start > end else (start, end)
-        url = "http://pali.watnapp.com/?volume=%d&start=%d&end=%d"%(volume, start+1, end+1)
+        url = constants.PALI_PDF_URL_PATTERN % (volume, start+1, end+1)
         response = urllib2.urlopen(url).read()
         obj = json.loads(response)
         if obj.get('success', False):
             webbrowser.open_new(obj.get('url'))
+        else:
+            dlg = wx.MessageDialog(self._view, 
+                                   u'เนื่องจากข้อมูลยังไม่สมบูรณ์ กรุณาทดลองใหม่ภายหลัง', 
+                                   u'ไม่พบไฟล์ PDF ต้นฉบับ', style=wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
         
     def ShowSaveDialog(self):
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
