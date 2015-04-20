@@ -1057,7 +1057,7 @@ class NotePanel(wx.Panel):
      
         self._saveItem = self._toolBar.AddTool(-1, images._rt_save.GetBitmap(), shortHelpString=_("Save"))
         self._toolBar.AddSeparator()
-        self._boldItem = self._toolBar.AddTool(-1, images._rt_bold.GetBitmap(), isToggle=True, shortHelpString=_("Bold"))
+        self._boldItem = self._toolBar.AddTool(-1, images._rt_bold.GetBitmap(), isToggle=False, shortHelpString=_("Bold"))
         self._italicItem = self._toolBar.AddTool(-1, images._rt_italic.GetBitmap(), isToggle=True, shortHelpString=_("Italic"))
         self._underlineItem = self._toolBar.AddTool(-1, images._rt_underline.GetBitmap(), isToggle=True, shortHelpString=_("Underline"))   
         self._toolBar.AddSeparator()

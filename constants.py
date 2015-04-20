@@ -29,7 +29,9 @@ ITEMS_PER_PAGE = 20
 
 FOOTER_STYLE = '#3CBF3F', 4
 
-ETZ_TYPE = u'E-Tipitaka Backup File (*.etz)|*.etz'
+ETZ_TYPE = u'E-Tipitaka Backup File (*.etz;*.js)|*.etz;*.js'
+IOS_ETZ_TYPE = u'iOS Backup File (*.json.etz)|*.json.etz'
+ANDROID_ETZ_TYPE = u'Android Backup File (*.js)|*.js'
 
 CHECK_VERSION_URL   = 'http://download.watnapahpong.org/data/etipitaka/version.txt'
 
@@ -261,3 +263,32 @@ FIVE_BOOKS_SECTIONS = {
         u'ภาค ๕ การปรินิพพาน',
         u'ภาค ๖ เรื่องการบำเพ็ญบารมีในอดีตชาติ ซึ่งเต็มไปด้วยทิฏฐานุคติอันสาวกในภายหลังพึงดำเนินตาม',
     ]} 
+
+XML_NOTE_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
+<richtext version="1.0.0.0" xmlns="http://www.wxwidgets.org">
+  <paragraphlayout textcolor="#000000" fontpointsize="13" fontfamily="70" fontstyle="90" fontweight="90" fontunderlined="0" fontface="Lucida Grande" alignment="1" parspacingafter="10" parspacingbefore="0" linespacing="10" margin-left="5,4098" margin-right="5,4098" margin-top="5,4098" margin-bottom="5,4098">
+  </paragraphlayout>
+</richtext>    
+'''
+
+IOS_CODE_TABLE = {
+    1: 'thai',
+    2: 'pali',
+    3: 'thaimm',
+    4: 'thaimc',
+    5: 'thaibt',
+    6: 'thaiwn',
+    7: 'thaipb',
+    8: 'romanct',
+}
+
+ANDROID_CODE_TABLE = {
+    0: 'thai',
+    1: 'pali',
+    2: 'thaimm',
+    3: 'thaimc',
+    4: 'thaibt',
+    5: 'thaiwn',
+    6: 'thaipb',
+    7: 'romanct',    
+}

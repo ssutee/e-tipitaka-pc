@@ -672,8 +672,8 @@ class Presenter(object):
         return ref                        
     
     def IndentLessNoteText(self, textCtrl):
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
         ip = textCtrl.GetInsertionPoint()
         if textCtrl.GetStyle(ip, attr):
             r = rt.RichTextRange(ip, ip)
@@ -682,12 +682,12 @@ class Presenter(object):
 
         if attr.GetLeftIndent() >= 100:
             attr.SetLeftIndent(attr.GetLeftIndent() - 100)
-            attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+            attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
             textCtrl.SetStyle(r, attr)
     
     def IndentMoreNoteText(self, textCtrl):
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
         ip = textCtrl.GetInsertionPoint()
         if textCtrl.GetStyle(ip, attr):
             r = rt.RichTextRange(ip, ip)
@@ -695,7 +695,7 @@ class Presenter(object):
                 r = textCtrl.GetSelectionRange()
 
             attr.SetLeftIndent(attr.GetLeftIndent() + 100)
-            attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+            attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
             textCtrl.SetStyle(r, attr)
             
     def ApplyFontToNoteText(self, textCtrl):
@@ -705,8 +705,8 @@ class Presenter(object):
         r = textCtrl.GetSelectionRange()
         fontData = wx.FontData()
         fontData.EnableEffects(False)
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_FONT)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_FONT)
         if textCtrl.GetStyle(textCtrl.GetInsertionPoint(), attr):
             fontData.SetInitialFont(attr.GetFont())
 
@@ -715,15 +715,15 @@ class Presenter(object):
             fontData = dlg.GetFontData()
             font = fontData.GetChosenFont()
             if font:
-                attr.SetFlags(rt.TEXT_ATTR_FONT)
+                attr.SetFlags(wx.TEXT_ATTR_FONT)
                 attr.SetFont(font)
                 textCtrl.SetStyle(r, attr)
         dlg.Destroy()
 
     def ApplyFontColorToNoteText(self, textCtrl):
         colourData = wx.ColourData()
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         if textCtrl.GetStyle(textCtrl.GetInsertionPoint(), attr):
             colourData.SetColour(attr.GetTextColour())
 
@@ -736,7 +736,7 @@ class Presenter(object):
                     textCtrl.BeginTextColour(colour)
                 else:
                     r = textCtrl.GetSelectionRange()
-                    attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
+                    attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
                     attr.SetTextColour(colour)
                     textCtrl.SetStyle(r, attr)
         dlg.Destroy()

@@ -3,6 +3,7 @@
 import search.model
 from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog
 import wx, zipfile, os, json
+import xml.etree.ElementTree as ET
 import wx.richtext as rt
 from utils import BookmarkManager
 import i18n
@@ -262,23 +263,96 @@ class Presenter(object):
                             fz.write(fn, fn[rootlen:])                
             wx.MessageBox(_('Export data complete'), u'E-Tipitaka')
         dlg.Destroy()
+
+    def ImportPCData(self, path):
+        with zipfile.ZipFile(path, 'r') as fz:
+            fz.extractall(constants.DATA_PATH)            
+        # relocate old version data file
+        for filename in os.listdir(constants.DATA_PATH):
+            fullpath = os.path.join(constants.DATA_PATH, filename)
+            if os.path.isfile(fullpath) and filename.split('.')[-1] == 'fav':
+                os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, filename))
+            elif os.path.isfile(fullpath) and filename.split('.')[-1] == 'log':
+                os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, '.'.join(filename.split('.')[:-1])+'.cfg'))
+            elif os.path.isfile(fullpath) and not fullpath.endswith('.sqlite'):
+                os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))    
+
+    def WriteXmlNoteFile(self, volume, page, code, note):
+        if volume == 0 or page == 0 or len(note) == 0 or code == None:
+            return
+
+        xml_note_file = os.path.join(constants.NOTES_PATH, code, '%02d-%04d.xml' % (volume, page))
+
+        ET.register_namespace('', 'http://www.wxwidgets.org')
+        if os.path.exists(xml_note_file):
+            tree = ET.parse(xml_note_file)
+            root = tree.getroot()
+        else:
+            root = ET.fromstring(constants.XML_NOTE_TEMPLATE)
+            tree = ET.ElementTree(root)
+
+        para_layout = root.find('{http://www.wxwidgets.org}paragraphlayout')
+
+        original_text = u''
+        for para in para_layout:
+            for text in para:
+                original_text += text.text
+            original_text += u'\n'
+
+        if original_text.strip().endswith(note.strip()):
+            return
+
+        for line in note.split('\n'):
+            para_node = ET.SubElement(para_layout, '{http://www.wxwidgets.org}paragraph')
+            text_node = ET.SubElement(para_node, '{http://www.wxwidgets.org}text')
+            text_node.text = line if len(line) > 0 else ' '
+
+        tree.write(xml_note_file)
+
+
+    def ImportIOSData(self, path):
+        with zipfile.ZipFile(path, 'r') as fz:
+            for filename in fz.namelist():
+                jsonobj = json.loads(fz.read(filename))
+                if jsonobj.get('version', 1) < 2:
+                    continue
+                
+                for item in jsonobj.get('bookmarks', []):
+                    volume = item.get('volume', 0)
+                    page = item.get('page', 0)
+                    code = constants.IOS_CODE_TABLE.get(item.get('code', -1)) 
+                    note = item.get('note', '')
+
+                    self.WriteXmlNoteFile(volume, page, code, note)
+
+    def ImportAndroidData(self, path):
+        with open(path, 'r') as f:
+            jsonobj = json.load(f)
+            for item in jsonobj.get('favorite_table', []):
+                volume = item.get('volume_column', 0)
+                page = item.get('page_column', 0)
+                code = constants.ANDROID_CODE_TABLE.get(item.get('language_column', -1)) 
+                note = item.get('note_column', '')
+
+                self.WriteXmlNoteFile(volume, page, code, note)
         
     def ImportData(self):
         ret = 0
-        dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
+        dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', 
+                            constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:        
-            with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'r') as fz:
-                fz.extractall(constants.DATA_PATH)            
-            # relocate old version data file
-            for filename in os.listdir(constants.DATA_PATH):
-                fullpath = os.path.join(constants.DATA_PATH, filename)
-                if os.path.isfile(fullpath) and filename.split('.')[-1] == 'fav':
-                    os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, filename))
-                elif os.path.isfile(fullpath) and filename.split('.')[-1] == 'log':
-                    os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, '.'.join(filename.split('.')[:-1])+'.cfg'))
-                elif os.path.isfile(fullpath) and not fullpath.endswith('.sqlite'):
-                    os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))                                            
+            path = os.path.join(dlg.GetDirectory(), dlg.GetFilename())
+            
+            if path.split('.')[-1] == 'etz':                
+                with zipfile.ZipFile(path, 'r') as fz:
+                    if len(fz.namelist()) > 1:
+                        self.ImportPCData(path)
+                    else:
+                        self.ImportIOSData(path)
+            elif path.split('.')[-1] == 'js':
+                self.ImportAndroidData(path)
+
             wx.MessageBox(_('Import data complete'), u'E-Tipitaka')
             self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())                    
         dlg.Destroy()
