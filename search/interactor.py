@@ -12,7 +12,8 @@ class Interactor(object):
         self.View.TopBar.SearchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
         self.View.TopBar.FontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClick)
         self.View.TopBar.ReadButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
-        
+        self.View.TopBar.SearchCtrl.Bind(wx.EVT_TEXT, self.OnSearchCtrlTextChange)
+
         self.View.TopBar.LanguagesComboBox.Bind(wx.EVT_COMBOBOX, self.OnLanguagesComboBoxSelect)
         self.View.ThemeComboBox.Bind(wx.EVT_COMBOBOX, self.OnThemeComboBoxSelect)
         
@@ -106,6 +107,9 @@ class Interactor(object):
         
     def OnUpdateDeleteButton(self, event):
         event.Enable(self.View.HistoryList.GetSelection() > -1)
+        
+    def OnSearchCtrlTextChange(self, event):
+        self.Presenter.ShowInputText(self.View.TopBar.SearchCtrl.GetValue())
         
     def OnStarButtonClick(self, event):
         x,y = self.View.StarButton.GetPosition()

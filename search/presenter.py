@@ -413,6 +413,9 @@ class Presenter(object):
     def CheckNewUpdate(self):
         threads.CheckNewUpdateThread(self).start()
         
+    def ShowInputText(self, text):
+        self._view.SetPage('<div align="center"><h1>' + _('Search') + ': ' + text + '</h1></div>' if len(text) > 0 else '')
+
     def SaveSearches(self):
         self._view.SearchCtrl.SaveSearches()
 
