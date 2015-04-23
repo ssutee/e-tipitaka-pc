@@ -4,7 +4,7 @@ import wx
 import wx.richtext as rt
 from wx.html import HtmlEasyPrinting
 import constants, utils, dialogs, widgets
-import os, json, codecs, re
+import os, json, codecs, re, sqlite3
 
 from pony.orm import Database, Required, Optional, db_session, select, desc
 from read.model import Model
@@ -764,12 +764,30 @@ class Presenter(object):
         volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code,index)]
         page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code,index)]        
         
-        note = Model.Note(volume=volume, page=page, 
-            code=code if code is not None else self._model.Code, 
-            text=textCtrl.GetValue(), filename=textCtrl.GetFilename())
+        conn = sqlite3.connect(constants.NOTE_DB)
+        cursor = conn.cursor()
+
+        filename = textCtrl.GetFilename()
+        text = textCtrl.GetValue()
+
+        cursor.execute('SELECT * FROM Note WHERE filename=?', (filename,))
+        if cursor.fetchone() and text != u'':
+            cursor.execute('UPDATE Note SET text=? WHERE filename=?', (text, filename))
+        elif text != u'':
+            cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', 
+                           (volume, page, code if code is not None else self._model.Code, filename, text))
+        else:
+            cursor.execute('DELETE FROM Note WHERE filename=?', (filename,))
+
+        conn.commit()
+        conn.close()
+
+        # note = Model.Note(volume=volume, page=page, 
+        #     code=code if code is not None else self._model.Code, 
+        #     text=textCtrl.GetValue(), filename=textCtrl.GetFilename())
         
-        if textCtrl.GetValue() == u'':
-            note.delete()
+        # if textCtrl.GetValue() == u'':
+        #     note.delete()
                         
     def SaveMarkedText(self, code, index):
         key = self._CurrentMarkKey(code, index)                

@@ -1,13 +1,13 @@
 #-*- coding:utf-8 -*-
 
 import threads, utils, constants
-import wx, os.path, sys, math
+import wx, os.path, sys, math, sqlite3
 
 
 import i18n
 _ = i18n.language.ugettext
 
-from pony.orm import Database, Required, Optional, db_session, select, desc
+from pony.orm import Database, Required, Optional, db_session, select, desc, LongUnicode
 
 db = Database('sqlite', constants.DATA_DB, create_db=True)
 
@@ -206,9 +206,18 @@ class Model(object):
     def SaveHistory(self, code):
         history = History.get(keywords=self._keywords, code=code) if self._keywords is not None and len(self._keywords) > 0 else None
         if history and self.Code == code:
-            history.read = ','.join(map(str, self._readItems))
-            history.skimmed = ','.join(map(str, self._skimmedItems))
-            history.pages = ','.join(map(str, self._clickedPages))
+            conn = sqlite3.connect(constants.DATA_DB)
+            cursor = conn.cursor()
+            
+            readItems = ','.join(map(str, self._readItems))
+            skimmedItems = ','.join(map(str, self._skimmedItems))
+            clickedPages = ','.join(map(str, self._clickedPages))
+
+            cursor.execute('UPDATE History SET read=? WHERE keywords=? AND code=?', (readItems, self._keywords, code))
+            cursor.execute('UPDATE History SET skimmed=? WHERE keywords=? AND code=?', (skimmedItems, self._keywords, code))
+            cursor.execute('UPDATE History SET pages=? WHERE keywords=? AND code=?', (clickedPages, self._keywords, code))
+            conn.commit()
+            conn.close()
                     
     def DisplayNext(self):
         self.Display(self._currentPagination+1)

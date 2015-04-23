@@ -7,7 +7,7 @@ import constants, utils
 import i18n
 _ = i18n.language.ugettext
 
-from pony.orm import Database, Required, Optional, db_session, select, desc
+from pony.orm import Database, Required, Optional, db_session, select, desc, LongUnicode
 
 db = Database('sqlite', constants.NOTE_DB, create_db=True)
 

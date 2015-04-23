@@ -13,6 +13,7 @@ import constants, utils, threads
 
 import pony.orm
 from pony.orm import db_session
+import sqlite3
 
 from distutils.version import LooseVersion, StrictVersion
 import settings, widgets
@@ -43,6 +44,7 @@ class Presenter(object):
         interactor.Install(self, view)
         self.RefreshHistoryList(0)
         self.CheckNewUpdate()
+        utils.UpdateDatabases()
         self._view.Start()
          
     @property
@@ -277,11 +279,14 @@ class Presenter(object):
             elif os.path.isfile(fullpath) and not fullpath.endswith('.sqlite'):
                 os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))    
 
+    @db_session
     def WriteXmlNoteFile(self, volume, page, code, note):
         if volume == 0 or page == 0 or len(note) == 0 or code == None:
             return
 
         xml_note_file = os.path.join(constants.NOTES_PATH, code, '%02d-%04d.xml' % (volume, page))
+        if not os.path.exists(os.path.join(constants.NOTES_PATH, code)):
+            os.makedirs(os.path.join(constants.NOTES_PATH, code))
 
         ET.register_namespace('', 'http://www.wxwidgets.org')
         if os.path.exists(xml_note_file):
@@ -309,6 +314,18 @@ class Presenter(object):
 
         tree.write(xml_note_file)
 
+        conn = sqlite3.connect(constants.NOTE_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM Note WHERE filename=?', (xml_note_file,))
+        
+        text = original_text+ '\n' + note if original_text != '' else note
+        if cursor.fetchone():
+            cursor.execute('UPDATE Note SET text=? WHERE filename=?', (text, xml_note_file))
+        else:
+            cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', (volume,page,code,xml_note_file,text))
+
+        conn.commit()
+        conn.close()
 
     def ImportIOSData(self, path):
         with zipfile.ZipFile(path, 'r') as fz:
@@ -324,7 +341,7 @@ class Presenter(object):
                     note = item.get('note', '')
 
                     self.WriteXmlNoteFile(volume, page, code, note)
-
+    
     def ImportAndroidData(self, path):
         with open(path, 'r') as f:
             jsonobj = json.load(f)
