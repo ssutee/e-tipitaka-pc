@@ -304,15 +304,14 @@ class Presenter(object):
                 original_text += text.text
             original_text += u'\n'
 
-        if original_text.strip().endswith(note.strip()):
-            return
-
         for line in note.split('\n'):
             para_node = ET.SubElement(para_layout, '{http://www.wxwidgets.org}paragraph')
             text_node = ET.SubElement(para_node, '{http://www.wxwidgets.org}text')
             text_node.text = line if len(line) > 0 else ' '
 
-        tree.write(xml_note_file)
+
+        if not original_text.strip().endswith(note.strip()):
+            tree.write(xml_note_file)
 
         conn = sqlite3.connect(constants.NOTE_DB)
         cursor = conn.cursor()
