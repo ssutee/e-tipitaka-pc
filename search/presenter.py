@@ -309,8 +309,7 @@ class Presenter(object):
             text_node = ET.SubElement(para_node, '{http://www.wxwidgets.org}text')
             text_node.text = line if len(line) > 0 else ' '
 
-
-        if not original_text.strip().endswith(note.strip()):
+        if original_text.strip().find(note.strip()) == -1:
             tree.write(xml_note_file)
 
         conn = sqlite3.connect(constants.NOTE_DB)
@@ -318,9 +317,10 @@ class Presenter(object):
         cursor.execute('SELECT * FROM Note WHERE filename=?', (xml_note_file,))
         
         text = original_text+ '\n' + note if original_text != '' else note
-        if cursor.fetchone():
+        found = cursor.fetchone()
+        if found and original_text.strip().find(note.strip()) == -1:
             cursor.execute('UPDATE Note SET text=? WHERE filename=?', (text, xml_note_file))
-        else:
+        elif not found:
             cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', (volume,page,code,xml_note_file,text))
 
         conn.commit()
