@@ -6,6 +6,9 @@ import constants
 if not os.path.exists(constants.DATA_PATH):
     os.makedirs(constants.DATA_PATH)
 
+if not os.path.exists(constants.LOG_PATH):
+    os.makedirs(constants.LOG_PATH)
+
 import utils, settings
 
 import search.view

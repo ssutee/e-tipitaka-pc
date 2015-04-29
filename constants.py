@@ -7,11 +7,13 @@ from os.path import expanduser
 from whoosh.spelling import SpellChecker
 from whoosh.filedb.filestore import FileStorage
 from whoosh.index import open_dir
-from appdirs import user_data_dir
+from appdirs import user_data_dir, user_log_dir
 
 
 APP_NAME = 'E-Tipitaka'
 APP_AUTHOR = 'Sutee'
+
+VIRTURE_STORE = user_data_dir('VirtualStore', '')
 
 HOME = expanduser("~")
 
@@ -79,11 +81,13 @@ CONFIG_DIR = 'config'
 OLD_DATA_PATH = os.path.join(HOME, '.' + APP_NAME)
 
 DATA_PATH = user_data_dir(APP_NAME, APP_AUTHOR)
+LOG_PATH = user_log_dir(APP_NAME, APP_AUTHOR)
+
 NOTES_PATH = os.path.join(DATA_PATH, NOTES_DIR)
 MARKS_PATH = os.path.join(DATA_PATH, MARKS_DIR)
 BOOKMARKS_PATH = os.path.join(DATA_PATH, BOOKMARKS_DIR)
 
-ERROR_LOG_PATH = os.path.join('./', 'error.log')
+ERROR_LOG_PATH = os.path.join(LOG_PATH, 'error.log')
 
 CONFIG_PATH = os.path.join(DATA_PATH, CONFIG_DIR)
 LOG_FILE = os.path.join(CONFIG_PATH, 'history.log')

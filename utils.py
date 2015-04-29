@@ -273,13 +273,34 @@ def ShortName(code):
         return u'หมวดธรรม'
     raise ValueError(code)
 
+def GetFilePaths(directory):
+    """
+    This function will generate the file names in a directory 
+    tree by walking the tree either top-down or bottom-up. For each 
+    directory in the tree rooted at directory top (including top itself), 
+    it yields a 3-tuple (dirpath, dirnames, filenames).
+    """
+    file_paths = []  # List which will store all of the full filepaths.
+
+    # Walk the tree.
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            # Join the two strings in order to form the full filepath.
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)  # Add it to the list.
+
+    return file_paths  # Self-explanatory
+
 def MoveOldUserData():
+    for filename in GetFilePaths(constants.VIRTURE_STORE):
+        if os.path.split(filename)[-2].endswith(constants.APP_NAME):
+            shutil.rmtree(os.path.join(*os.path.split(filename)[:-1]))
+
     if os.path.exists(constants.IMPORTED_MARK_FILE):
         return
 
     for filename in os.listdir(constants.OLD_DATA_PATH):
         full_path = os.path.join(constants.OLD_DATA_PATH, filename)
-        print full_path
         if os.path.isfile(full_path):
             shutil.copy(full_path, constants.DATA_PATH)
         else:
