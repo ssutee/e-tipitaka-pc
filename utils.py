@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import wx
-import os, codecs, json
+import os, codecs, json, shutil
 import constants
 import sqlite3
 
@@ -272,3 +272,18 @@ def ShortName(code):
     if code == constants.THAI_POCKET_BOOK_CODE:
         return u'หมวดธรรม'
     raise ValueError(code)
+
+def MoveOldUserData():
+    if os.path.exists(constants.IMPORTED_MARK_FILE):
+        return
+
+    for filename in os.listdir(constants.OLD_DATA_PATH):
+        full_path = os.path.join(constants.OLD_DATA_PATH, filename)
+        print full_path
+        if os.path.isfile(full_path):
+            shutil.copy(full_path, constants.DATA_PATH)
+        else:
+            shutil.copytree(full_path, os.path.join(constants.DATA_PATH, filename))
+
+    fout = open(constants.IMPORTED_MARK_FILE, 'w')
+    fout.close()

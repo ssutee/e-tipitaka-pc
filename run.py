@@ -136,6 +136,8 @@ def excepthook(type, value, tb):
         log.write(message+'\n')
     print message
 
+utils.MoveOldUserData()
+
 sys.excepthook = excepthook
 
 wx.Log.SetLogLevel(0)

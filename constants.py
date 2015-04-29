@@ -7,8 +7,11 @@ from os.path import expanduser
 from whoosh.spelling import SpellChecker
 from whoosh.filedb.filestore import FileStorage
 from whoosh.index import open_dir
+from appdirs import user_data_dir
+
 
 APP_NAME = 'E-Tipitaka'
+APP_AUTHOR = 'Sutee'
 
 HOME = expanduser("~")
 
@@ -73,7 +76,9 @@ MARKS_DIR = 'marks'
 BOOKMARKS_DIR = 'favs'
 CONFIG_DIR = 'config'
 
-DATA_PATH = os.path.join(HOME, '.' + APP_NAME)
+OLD_DATA_PATH = os.path.join(HOME, '.' + APP_NAME)
+
+DATA_PATH = user_data_dir(APP_NAME, APP_AUTHOR)
 NOTES_PATH = os.path.join(DATA_PATH, NOTES_DIR)
 MARKS_PATH = os.path.join(DATA_PATH, MARKS_DIR)
 BOOKMARKS_PATH = os.path.join(DATA_PATH, BOOKMARKS_DIR)
@@ -83,6 +88,7 @@ ERROR_LOG_PATH = os.path.join('./', 'error.log')
 CONFIG_PATH = os.path.join(DATA_PATH, CONFIG_DIR)
 LOG_FILE = os.path.join(CONFIG_PATH, 'history.log')
 SKIP_VERSION_FILE = os.path.join(CONFIG_PATH, 'skip_version')
+IMPORTED_MARK_FILE = os.path.join(DATA_PATH, 'imported_old_user_data')
 
 SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')
 READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')
