@@ -296,7 +296,7 @@ def MoveOldUserData():
         if os.path.split(filename)[-2].endswith(constants.APP_NAME):
             shutil.rmtree(os.path.join(*os.path.split(filename)[:-1]))
 
-    if os.path.exists(constants.IMPORTED_MARK_FILE):
+    if os.path.exists(constants.IMPORTED_MARK_FILE) or not os.path.exists(constants.OLD_DATA_PATH):
         return
 
     for filename in os.listdir(constants.OLD_DATA_PATH):
