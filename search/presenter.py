@@ -2,7 +2,7 @@
 
 import search.model
 from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog
-import wx, zipfile, os, json
+import wx, zipfile, os, json, tempfile
 import xml.etree.ElementTree as ET
 import wx.richtext as rt
 from utils import BookmarkManager
@@ -266,9 +266,47 @@ class Presenter(object):
             wx.MessageBox(_('Export data complete'), u'E-Tipitaka')
         dlg.Destroy()
 
+    def ImportHistory(self, keywords, total, code, read, skimmed, pages):
+        conn = sqlite3.connect(constants.DATA_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM History WHERE keywords=? AND code=?', (keywords, code))
+        if not cursor.fetchone():
+            cursor.execute('INSERT INTO History (keywords, total, code, read, skimmed, pages) VALUES (?,?,?,?,?,?)',(keywords, total, code, read, skimmed, pages))
+        conn.commit()
+        conn.close()        
+
     def ImportPCData(self, path):
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'note.sqlite')):
+            os.remove(os.path.join(tempfile.gettempdir(), 'note.sqlite'))
+
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'data.sqlite')):
+            os.remove(os.path.join(tempfile.gettempdir(), 'data.sqlite'))
+ 
         with zipfile.ZipFile(path, 'r') as fz:
-            fz.extractall(constants.DATA_PATH)            
+            for filename in fz.namelist():
+                if filename.endswith('.sqlite'):
+                    fz.extract(filename, tempfile.gettempdir())
+                else:
+                    fz.extract(filename, constants.DATA_PATH)
+
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'note.sqlite')):
+            conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'note.sqlite'))
+            cursor = conn.cursor()
+            cursor.execute('SELECT volume,page,code,filename,text FROM Note')
+            for volume, page, code, xmlfile, text in cursor.fetchall():
+                self.WriteXmlNoteFile(volume, page, code, text)
+            conn.commit()
+            conn.close()
+        
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'data.sqlite')):
+            conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'data.sqlite'))
+            cursor = conn.cursor()
+            cursor.execute('SELECT keywords,total,code,read,skimmed,pages FROM History')
+            for keywords, total, code, read, skimmed, pages in cursor.fetchall():
+                self.ImportHistory(keywords, total, code, read, skimmed, pages)
+            conn.commit()
+            conn.close()
+
         # relocate old version data file
         for filename in os.listdir(constants.DATA_PATH):
             fullpath = os.path.join(constants.DATA_PATH, filename)
@@ -314,15 +352,13 @@ class Presenter(object):
 
         conn = sqlite3.connect(constants.NOTE_DB)
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM Note WHERE filename=?', (xml_note_file,))
-        
+        cursor.execute('SELECT * FROM Note WHERE volume=? AND page=? AND code=?', (volume, page, code))        
         text = original_text+ '\n' + note if original_text != '' else note
         found = cursor.fetchone()
         if found and original_text.strip().find(note.strip()) == -1:
-            cursor.execute('UPDATE Note SET text=? WHERE filename=?', (text, xml_note_file))
+            cursor.execute('UPDATE Note SET text=?,filename=? WHERE volume=? AND page=? AND code=?', (text, xml_note_file, volume, page, code))
         elif not found:
             cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', (volume,page,code,xml_note_file,text))
-
         conn.commit()
         conn.close()
 

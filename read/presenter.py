@@ -770,24 +770,19 @@ class Presenter(object):
         filename = textCtrl.GetFilename()
         text = textCtrl.GetValue()
 
-        cursor.execute('SELECT * FROM Note WHERE filename=?', (filename,))
+        real_code = code if code is not None else self._model.Code
+
+        cursor.execute('SELECT * FROM Note WHERE volume=? AND page=? AND code=?', (volume, page, real_code))
         if cursor.fetchone() and text != u'':
-            cursor.execute('UPDATE Note SET text=? WHERE filename=?', (text, filename))
+            cursor.execute('UPDATE Note SET text=? WHERE volume=? AND page=? AND code=?', (text, volume, page, real_code))
         elif text != u'':
             cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', 
-                           (volume, page, code if code is not None else self._model.Code, filename, text))
+                           (volume, page, real_code, filename, text))
         else:
-            cursor.execute('DELETE FROM Note WHERE filename=?', (filename,))
+            cursor.execute('DELETE FROM Note WHERE volume=? AND page=? AND code=?', (volume, page, real_code))
 
         conn.commit()
         conn.close()
-
-        # note = Model.Note(volume=volume, page=page, 
-        #     code=code if code is not None else self._model.Code, 
-        #     text=textCtrl.GetValue(), filename=textCtrl.GetFilename())
-        
-        # if textCtrl.GetValue() == u'':
-        #     note.delete()
                         
     def SaveMarkedText(self, code, index):
         key = self._CurrentMarkKey(code, index)                
