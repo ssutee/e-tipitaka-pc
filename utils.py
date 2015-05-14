@@ -294,8 +294,8 @@ def GetFilePaths(directory):
 def MoveOldUserData():
     for filename in GetFilePaths(constants.VIRTURE_STORE):
         curdir = os.path.dirname(os.path.realpath(__file__))
-        if os.path.split(filename)[-2].endswith(constants.APP_NAME) or os.path.split(filename)[-2].endswith(os.path.split(curdir)[-1]):
-            shutil.rmtree(os.path.join(*os.path.split(filename)[:-1]))
+        if os.path.join(constants.APP_NAME, '') in filename or os.path.join(os.path.split(curdir)[-1], '') in filename:
+            os.remove(filename)
 
     if os.path.exists(constants.IMPORTED_MARK_FILE) or not os.path.exists(constants.OLD_DATA_PATH):
         return
