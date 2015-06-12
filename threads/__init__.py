@@ -252,13 +252,13 @@ class ThaiMahaChulaSearchThread(SearchThread):
         
     def ProcessResult(self, result):
         r = {}
-        r['volume'] = result[0]
-        r['page'] = result[1]
-        r['items'] = result[2]
-        r['header'] = result[3]
-        r['footer'] = result[4]
-        r['display'] = result[5]
-        r['content'] = result[6]
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['header'] = result[4]
+        r['footer'] = result[5]
+        r['display'] = result[6]
+        r['content'] = result[7]
         return r
 
 class ThaiMahaMakutSearchThread(SearchThread):
