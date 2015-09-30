@@ -194,6 +194,11 @@ class Presenter(object):
 
     def _SetupPrinter(self):
         self._printer = Printer()
+
+        body = self._view.Body
+        font = body.GetFont()
+        self._printer.SetStandardFonts(14)
+
         data = self._printer.GetPageSetupData()
         data.SetDefaultMinMargins(False)
         data.SetMarginTopLeft((20,20))

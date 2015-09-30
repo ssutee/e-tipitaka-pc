@@ -11,6 +11,8 @@ if not os.path.exists(constants.LOG_PATH):
 
 import utils, settings
 
+utils.UpdateDatabases()
+
 import search.view
 import search.interactor
 import search.presenter
@@ -139,13 +141,26 @@ def excepthook(type, value, tb):
         log.write(message+'\n')
     print message
 
+class MyApp(wx.App):
+
+    def OnInit(self):
+        mfs = wx.MemoryFSHandler()
+        noteImage = wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
+        okImage = wx.BitmapFromImage(wx.Image(constants.OK_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
+        notOkImage = wx.BitmapFromImage(wx.Image(constants.NOT_OK_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
+        mfs.AddFile("edit-notes.png", noteImage, wx.BITMAP_TYPE_PNG)
+        mfs.AddFile("ok.png", okImage, wx.BITMAP_TYPE_PNG)
+        mfs.AddFile("not-ok.png", notOkImage, wx.BITMAP_TYPE_PNG)
+        wx.FileSystem_AddHandler(mfs)        
+        return True
+
 utils.MoveOldUserData()
 
 sys.excepthook = excepthook
 
 wx.Log.SetLogLevel(0)
 
-app = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)
+app = MyApp(redirect=False, clearSigInt=True, useBestVisual=True)
 
 parent = ParentFrame(None)
 parent.PostInit()

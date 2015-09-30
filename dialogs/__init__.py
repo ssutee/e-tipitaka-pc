@@ -711,10 +711,57 @@ class VolumesDialog(wx.Dialog):
         else:
             self.btnOk.Enable()
 
+class NoteDialog(wx.Dialog):
+    def __init__(self, parent, note, state, *args, **kwargs):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, u'จดบันทึก')
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        mainSizer.Add((-1,10), 1, flag=wx.EXPAND)
+        
+        self._noteTextCtrl = wx.TextCtrl(self, wx.ID_ANY, size=(200, 100), style=wx.TE_MULTILINE)
+        self._noteTextCtrl.SetValue(note)
+
+        if 'wxMac' in wx.PlatformInfo:
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font.SetFaceName('Tahoma')
+            self._noteTextCtrl.SetFont(font)
+
+        self._stateRadioBox = wx.RadioBox(self, wx.ID_ANY, u'', choices=[u'', u'✕', u'✔︎'], majorDimension=3)
+        self._stateRadioBox.SetSelection(state)
+
+        mainSizer.Add(self._stateRadioBox, 0, wx.EXPAND|wx.ALL, 10)
+
+        mainSizer.Add(self._noteTextCtrl, 0, wx.EXPAND|wx.ALL, 10)
+
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.CancelButton = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก')
+        self.SaveButton = wx.Button(self, -1, u'บันทึก')
+        self.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButton)
+        buttonSizer.Add((-1,-1), 1, wx.EXPAND)        
+        buttonSizer.Add(self.CancelButton, 0)
+        buttonSizer.Add(self.SaveButton, 0)
+        buttonSizer.Add((-1,-1), 1, wx.EXPAND)                
+
+        mainSizer.Add(buttonSizer, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+
+        self.SetSizer(mainSizer)
+        self.Fit()
+
+    def GetNote(self):
+        return self._noteTextCtrl.GetValue()
+
+    def GetState(self):
+        return self._stateRadioBox.GetSelection()
+
+    def OnSaveButton(self, event):
+        self.EndModal(wx.ID_OK)
+
+
 class AboutDialog(wx.Dialog):
     def __init__(self, parent, *args, **kwargs):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, _('About E-Tipitaka'))
         
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+
         label1 = wx.StaticText(self, wx.ID_ANY, 
             _('E-Tipitaka %s - developed by Sutee Sudprasert Copyright (C) 2010\n written by Python 2.7.5 and wxPython 2.8.12.1 (unicode)') % (settings.VERSION))
         label2 = wx.StaticText(self, wx.ID_ANY, 
@@ -722,8 +769,6 @@ class AboutDialog(wx.Dialog):
         label3 = wx.StaticText(self, wx.ID_ANY, 
             _('If you have any suggestion or comment, please send to <etipitaka@gmail.com>'))
 
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
         bottomSizer.Add(label3, flag=wx.ALIGN_CENTER_VERTICAL)
         bottomSizer.Add((20,20), 1, wx.EXPAND)

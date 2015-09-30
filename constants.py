@@ -135,6 +135,9 @@ CLEAR_IMAGE = os.path.join(RESOURCES_DIR, 'clear.png')
 ABOUT_IMAGE = os.path.join(RESOURCES_DIR, 'about.png')
 HEADER_IMAGE = os.path.join(RESOURCES_DIR, 'header.png')
 
+OK_IMAGE = os.path.join(RESOURCES_DIR, 'ok.png')
+NOT_OK_IMAGE = os.path.join(RESOURCES_DIR, 'not_ok.png')
+
 DATA_DB = os.path.join(DATA_PATH, 'data.sqlite')
 NOTE_DB = os.path.join(DATA_PATH, 'note.sqlite')
 

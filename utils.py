@@ -81,15 +81,25 @@ def UpdateDatabases():
             try:
                 cursor.execute('ALTER TABLE History ADD COLUMN pages TEXT')
             except sqlite3.OperationalError,e:
-                pass
-            conn.commit()        
+                pass            
+            conn.commit()                        
         if cursor.execute('PRAGMA user_version').fetchone()[0] == 2:
-            cursor.execute('CREATE TABLE IF NOT EXISTS temp_table (id INTEGER PRIMARY KEY AUTOINCREMENT, keywords text NOT NULL, total INTEGER NOT NULL, code VARCHAR(200) NOT NULL, read TEXT NOT NULL, skimmed TEXT NOT NULL, pages TEXT)')
-            cursor.execute('INSERT INTO temp_table SELECT * FROM History')
-            cursor.execute('DROP TABLE History')
-            cursor.execute('ALTER TABLE temp_table RENAME TO History')
             cursor.execute('PRAGMA user_version=3')
+            try:
+                cursor.execute('CREATE TABLE IF NOT EXISTS temp_table (id INTEGER PRIMARY KEY AUTOINCREMENT, keywords text NOT NULL, total INTEGER NOT NULL, code VARCHAR(200) NOT NULL, read TEXT NOT NULL, skimmed TEXT NOT NULL, pages TEXT, notes TEXT)')
+                cursor.execute('INSERT INTO temp_table SELECT * FROM History')
+                cursor.execute('DROP TABLE History')
+                cursor.execute('ALTER TABLE temp_table RENAME TO History')
+            except sqlite3.OperationalError,e:
+                pass                        
             conn.commit()            
+        if cursor.execute('PRAGMA user_version').fetchone()[0] == 3:
+            cursor.execute('PRAGMA user_version=4')            
+            try:
+                cursor.execute('ALTER TABLE History ADD COLUMN notes TEXT')
+            except sqlite3.OperationalError,e:
+                pass        
+            conn.commit()        
         conn.close()        
         
     if os.path.exists(constants.NOTE_DB):

@@ -18,6 +18,7 @@ class History(db.Entity):
     read = Optional(unicode)
     skimmed = Optional(unicode)
     pages = Optional(unicode)
+    notes = Optional(unicode)
 
 db.generate_mapping(create_tables=True)
 
@@ -163,6 +164,15 @@ class Model(object):
                     self._skimmedItems.append(idx+1)
                     self.ReloadDisplay()
 
+    def GetNote(self, idx):
+        return self._notes.get(idx, ('', 0))
+
+    def TakeNote(self, idx, note ,state, code):
+        if self.Code != code:
+            return
+        self._notes[idx] = (note, state)
+        self.ReloadDisplay()
+
     def ReloadDisplay(self):
         self.Display(self._currentPagination)
 
@@ -201,7 +211,12 @@ class Model(object):
         self._readItems = map(int, history.read.split(',')) if len(history.read) > 0 else []            
         self._skimmedItems = map(int, history.skimmed.split(',')) if len(history.skimmed) > 0 else []
         self._clickedPages = map(int, history.pages.split(',')) if history.pages is not None and len(history.pages) > 0 else []
-                        
+        self._notes = {}
+        if history.notes is not None and len(history.notes) > 0:
+            for token in history.notes.split('~'):
+                idx,note,state = token.split('|')
+                self._notes[int(idx)] = (note, int(state))
+
     @db_session
     def SaveHistory(self, code):
         history = History.get(keywords=self._keywords, code=code) if self._keywords is not None and len(self._keywords) > 0 else None
@@ -212,10 +227,18 @@ class Model(object):
             readItems = ','.join(map(str, self._readItems))
             skimmedItems = ','.join(map(str, self._skimmedItems))
             clickedPages = ','.join(map(str, self._clickedPages))
+            
+            notes = ''
+            tmp = []            
+            for idx in self._notes:
+                tmp.append('%d|%s|%d' % (idx, self._notes[idx][0], self._notes[idx][1]))
+            if len(tmp) > 0:
+                notes = '~'.join(tmp)
 
             cursor.execute('UPDATE History SET read=? WHERE keywords=? AND code=?', (readItems, self._keywords, code))
             cursor.execute('UPDATE History SET skimmed=? WHERE keywords=? AND code=?', (skimmedItems, self._keywords, code))
             cursor.execute('UPDATE History SET pages=? WHERE keywords=? AND code=?', (clickedPages, self._keywords, code))
+            cursor.execute('UPDATE History SET notes=? WHERE keywords=? AND code=?', (notes, self._keywords, code))
             conn.commit()
             conn.close()
                     
@@ -251,7 +274,7 @@ class Model(object):
 
         link = u'<font color="black"><b>%s</b></font>'        
         if idx == self._selectedItem:
-            link = u'<table bgcolor="#4688DF"><tr><td><font color="white"><b>%s</b></font></td></tr></table>'
+            link = u'<table><tr><td bgcolor="#4688DF"><font color="white"><b>%s</b></font></td></tr></table>'
             info = ''
         elif idx in self._readItems or idx in self._skimmedItems:
             link = u'<font color="grey" bgcolor="#00FF00">%s</font>'        
@@ -362,10 +385,24 @@ class Model(object):
     def MakeHtmlResults(self, current):
         mark = self.GetMark(current)        
         pages = self.GetPages()        
-        text = ''
+        text = ''        
         for idx, volume, page, items, excerpts in self.GetDisplayResult('%d:%d'%mark):
+            stateImage = ''
+            noteText = ''
+            if idx in self._notes:
+                state = self._notes[idx][1]
+                if state == 1:
+                    stateImage = '<img src="memory:not-ok.png">'
+                elif state == 2:
+                    stateImage = '<img src="memory:ok.png">'                
+
+                if len(self._notes[idx][0]) > 0:
+                    noteText = '(' + self._notes[idx][0] + ')'
+
+            note = '<a href="note:%d_%s_%s_%s"><img src="memory:edit-notes.png"></a> %s %s' % (idx, volume, page, self.Code, stateImage, noteText)
             text += u'<div>' + self._MakeHtmlEntry(idx, volume, page) + \
-                self._MakeHtmlExcerpts(excerpts) + self._MakeHtmlItemInfo(volume, items) + u'</div><br>'
+                self._MakeHtmlExcerpts(excerpts) + self._MakeHtmlItemInfo(volume, items) + \
+                u'</div> %s <br>' % (note)
                 
         return u'<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex(constants.SEARCH)) + self._MakeHtmlSummary() + self._MakeHtmlHeader(mark) + self.MakeHtmlSuggestion(found=True) \
             + text + '<br>' + self._MakeHtmlPagination(pages, current) + '</body></html>'

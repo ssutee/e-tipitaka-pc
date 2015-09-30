@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import search.model
-from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog
+from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog, NoteDialog
 import wx, zipfile, os, json, tempfile
 import xml.etree.ElementTree as ET
 import wx.richtext as rt
@@ -44,7 +44,6 @@ class Presenter(object):
         interactor.Install(self, view)
         self.RefreshHistoryList(0)
         self.CheckNewUpdate()
-        utils.UpdateDatabases()
         self._view.Start()
          
     @property
@@ -266,12 +265,12 @@ class Presenter(object):
             wx.MessageBox(_('Export data complete'), u'E-Tipitaka')
         dlg.Destroy()
 
-    def ImportHistory(self, keywords, total, code, read, skimmed, pages):
+    def ImportHistory(self, keywords, total, code, read, skimmed, pages, notes):
         conn = sqlite3.connect(constants.DATA_DB)
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM History WHERE keywords=? AND code=?', (keywords, code))
         if not cursor.fetchone():
-            cursor.execute('INSERT INTO History (keywords, total, code, read, skimmed, pages) VALUES (?,?,?,?,?,?)',(keywords, total, code, read, skimmed, pages))
+            cursor.execute('INSERT INTO History (keywords, total, code, read, skimmed, pages, notes) VALUES (?,?,?,?,?,?,?)',(keywords, total, code, read, skimmed, pages, notes))
         conn.commit()
         conn.close()        
 
@@ -292,6 +291,7 @@ class Presenter(object):
         if os.path.exists(os.path.join(tempfile.gettempdir(), 'note.sqlite')):
             conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'note.sqlite'))
             cursor = conn.cursor()
+            cursor.execute('PRAGMA user_version=2')
             cursor.execute('SELECT volume,page,code,filename,text FROM Note')
             for volume, page, code, xmlfile, text in cursor.fetchall():
                 self.WriteXmlNoteFile(volume, page, code, text)
@@ -301,9 +301,10 @@ class Presenter(object):
         if os.path.exists(os.path.join(tempfile.gettempdir(), 'data.sqlite')):
             conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'data.sqlite'))
             cursor = conn.cursor()
-            cursor.execute('SELECT keywords,total,code,read,skimmed,pages FROM History')
-            for keywords, total, code, read, skimmed, pages in cursor.fetchall():
-                self.ImportHistory(keywords, total, code, read, skimmed, pages)
+            cursor.execute('PRAGMA user_version=4')
+            cursor.execute('SELECT keywords,total,code,read,skimmed,pages,notes FROM History')
+            for keywords, total, code, read, skimmed, pages, notes in cursor.fetchall():
+                self.ImportHistory(keywords, total, code, read, skimmed, pages, notes)
             conn.commit()
             conn.close()
 
@@ -540,3 +541,11 @@ class Presenter(object):
 
     def SearchingBuddhawaj(self):
         return self._searchingBuddhawaj
+
+    def TakeNote(self, code, volume, page, idx):
+        note, state = self._model.GetNote(idx)
+        dialog = NoteDialog(self._view, note, state)
+        dialog.Center()
+        if dialog.ShowModal() == wx.ID_OK:
+            self._model.TakeNote(idx, dialog.GetNote(), dialog.GetState(), code)
+        dialog.Destroy()

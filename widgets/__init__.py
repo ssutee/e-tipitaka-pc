@@ -1426,6 +1426,12 @@ class ResultsWindow(wx.html.HtmlWindow):
             volume, page, code, now, per, total, idx = body.split(u'_')
             if hasattr(self._delegate, 'Read'):
                 self._delegate.Read(code, int(volume), int(page), int(idx))
+        elif cmd == 'note':
+            if hasattr(self._delegate, 'SaveScrollPosition'):
+                self._delegate.SaveScrollPosition(self.GetScrollPos(wx.VERTICAL))                        
+            idx, volume, page, code = body.split(u'_')
+            if hasattr(self._delegate, 'TakeNote'):
+                self._delegate.TakeNote(code, int(volume), int(page), int(idx))
                 
 class ReferencesWindow(wx.html.HtmlWindow):    
             
