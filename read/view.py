@@ -13,7 +13,7 @@ _ = i18n.language.ugettext
 class ReadPanelCreator(object):
     @staticmethod
     def Create(parent, code, index, font, delegate, mainWindow=False):
-        if code == constants.THAI_FIVE_BOOKS_CODE:
+        if code == constants.THAI_FIVE_BOOKS_CODE or code == constants.THAI_POCKET_BOOK_CODE:
             return widgets.ReadWithReferencesPanel(parent, code if not mainWindow else None, index, font, delegate)
         font = utils.LoadFont(constants.READ_FONT, code)
         return widgets.ReadPanel(parent, code if not mainWindow else None, index, font, delegate)
@@ -25,10 +25,10 @@ class ViewComponentsCreator(object):
             return ThaiFiveBooksViewComponents(parent)
         if code == constants.THAI_MAHACHULA_CODE:
             return ThaiMahaChulaViewComponents(parent)
-        if code == constants.ROMAN_SCRIPT_CODE:
-            return RomanScriptViewComponents(parent)
         if code == constants.THAI_SCRIPT_CODE:
             return ThaiScriptViewComponents(parent)
+        if code == constants.ROMAN_SCRIPT_CODE:
+            return RomanScriptViewComponents(parent)
         return ViewComponents(parent)
 
 class ViewComponents(object):
@@ -121,31 +121,19 @@ class ThaiScriptViewComponents(ScriptViewComponents):
         super(ThaiScriptViewComponents, self).__init__(parent, dataSource)
         self._toc = constants.THAI_SCRIPT_TOC
         
-class RomanScriptViewComponents(ScriptViewComponents):
+class RomanScriptViewComponents(ViewComponents):
     def __init__(self, parent, dataSource=None):
         super(RomanScriptViewComponents, self).__init__(parent, dataSource)
-        self._toc = constants.ROMAN_SCRIPT_TOC
-        
+
+
 class View(AuiBaseFrame):    
     
     def __init__(self, parent, title, code):         
-        rect = utils.LoadReadWindowPosition()
-        
-        pos = 0,0
-        if rect is not None:
-            pos = rect[0], rect[1]
-
-        size = min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])
-        if rect is not None:
-            size = rect[2], rect[3]
-                
-        super(View, self).__init__(parent, wx.ID_ANY, title=title, size=size, pos=pos)
-            
-        if rect is None:
-            self.CenterOnScreen()            
-            
+        super(View, self).__init__(parent, wx.ID_ANY, title=title, style=wx.CAPTION)
+                        
         self._dataSource = None
         self._delegate = None
+        self._parent = parent
         
         self._components = ViewComponentsCreator.Create(code, self)
         self._code = code                
@@ -155,7 +143,7 @@ class View(AuiBaseFrame):
         self._font = utils.LoadFont(constants.READ_FONT, code)
         
         self._bookmarkMenu = None
-        self._SetupStatusBar()
+        self.SetBackgroundColour(wx.Colour(0xED,0xED,0xED,0xFF))
         
     @property
     def Font(self):
@@ -232,6 +220,10 @@ class View(AuiBaseFrame):
     @property
     def ThaiDictButton(self):
         return self._toolPanel.ThaiDictButton
+
+    @property
+    def EnglishDictButton(self):
+        return self._toolPanel.EnglishDictButton
         
     @property
     def NotesButton(self):
@@ -273,10 +265,10 @@ class View(AuiBaseFrame):
     def Body(self):
         return self._readPanel.Body
         
-    @property
-    def StatusBar(self):
-        return self._statusBar
-        
+    def SetStatusText(self, text, field):
+        self._parent.StatusBar.SetStatusText(u'', 2)
+        self._parent.StatusBar.SetStatusText(text, field)
+
     def ReadPanel(self, code, index):
         return self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         
@@ -287,12 +279,7 @@ class View(AuiBaseFrame):
         return self.ReadPanel(code, index).Body
 
     def _SetupStatusBar(self):
-        self._statusBar = self.CreateStatusBar()
-        self._statusBar.SetFieldsCount(2)
-        self._statusBar.SetStatusWidths([-1,-1])
-        font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-        font.SetFaceName('TF Chiangsaen')
-        self._statusBar.SetFont(font)                
+        pass
 
     def _PostInit(self):            
         self._readPanel = ReadPanelCreator.Create(self, self._code, 1, self._font, self._delegate, mainWindow=True)
@@ -306,7 +293,7 @@ class View(AuiBaseFrame):
         self.SetCenterPane(self._readPanel, caption=True)
 
         info = AuiPaneInfo().CaptionVisible(False).Resizable(False)
-        info = info.FloatingSize((740, 65)).MinSize((740, 65)).Top().Layer(0)
+        info = info.FloatingSize((740, 75)).MinSize((740, 75)).Top().Layer(0)
         self.AddPane(self._toolPanel, info.Name('Tool'))
 
         info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
@@ -386,11 +373,7 @@ class View(AuiBaseFrame):
         
     def ToggleNotePanel(self, code, index):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
-        if readPanel.NotePanel.IsShown():
-            readPanel.NotePanel.Hide()
-        else:
-            readPanel.NotePanel.Show()
-        readPanel.Layout()
+        readPanel.ToggleNotePanel()
 
     def SetPageNumber(self, number, code=None, index=1):        
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
@@ -439,33 +422,54 @@ class View(AuiBaseFrame):
         font = readPanel.Body.GetFont()
         text = readPanel.Body.GetValue()
         readPanel.Body.SetFont(font)   
-        readPanel.Body.SetStyle(0, len(text)+1, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
+        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
+        readPanel.Body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
             utils.LoadThemeBackgroundHex(constants.READ), font))    
                 
     def FormatText(self, formatter, code=None, index=1):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         font = readPanel.Body.GetFont()
         fontSize = font.GetPointSize()
-        readPanel.Body.Freeze()
+        
+
+        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
+
+        if wx.__version__[:3]<='2.8':
+            readPanel.Body.Freeze()
+
         if 'wxMac' in wx.PlatformInfo:
-            readPanel.SetContentFont(font)
+            readPanel.SetContentFont(font)            
         
         for token in formatter.split():
             tag,x,y = token.split('|')
             if tag == 's3' or tag == 'p3':
                 colorCode, diffSize = constants.FOOTER_STYLE
                 font.SetPointSize(fontSize-diffSize)
-                if 'wxMac' not in wx.PlatformInfo:
-                    readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr(colorCode, wx.NullColour, font))
-                else:
-                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr(colorCode, wx.NullColour, font))
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr(colorCode, wx.NullColour, font))                    
             elif tag == 'h1' or tag == 'h2' or tag == 'h3':
                 font.SetPointSize(fontSize)
-                if 'wxMac' not in wx.PlatformInfo:
-                    readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('blue', wx.NullColour, font))
-                else:
-                    readPanel.Body.SetStyle(int(x)-1, int(y)-1, wx.TextAttr('blue', wx.NullColour, font))  
-        readPanel.Body.Thaw()     
+                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr('blue', wx.NullColour, font))  
+            elif tag == 'eh1':
+                font.SetPointSize(fontSize*1.2)
+                readPanel.Body.SetStyle(int(x), int(y), 
+                    wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), wx.NullColour, font))  
+            elif tag == 'eh2':
+                font.SetPointSize(fontSize*0.85)                
+                readPanel.Body.SetStyle(int(x), int(y), 
+                    wx.TextAttr(wx.Colour(0x88,0x88,0x88,0xFF), wx.NullColour, font))  
+            elif tag == 'eh3':
+                font.SetPointSize(fontSize*0.75)
+                readPanel.Body.SetStyle(int(x), int(y), 
+                    wx.TextAttr(wx.Colour(0x88,0x88,0x88,0xFF), wx.NullColour, font))  
+            elif tag == 'er':
+                font.SetPointSize(fontSize*0.70)
+                readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#D1D3D4', wx.NullColour, font))
+            elif tag == 'fn':
+                font.SetPointSize(fontSize*0.8)
+                readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#3CBF3F', wx.NullColour, font))  
+
+        if wx.__version__[:3]<='2.8':                
+            readPanel.Body.Thaw()     
         
     def ShowFindDialog(self, code, index, text, flags):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
@@ -563,6 +567,7 @@ class View(AuiBaseFrame):
     def OnMenuManageBookmarkSelected(self, event):
         dlg = BookmarkManagerDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.BookmarkItems)
         dlg.ShowModal()
+        self._delegate.SaveBookmark()
         dlg.Destroy()
         
     def SetSelection(self, content, start, end, code, index):
@@ -580,4 +585,9 @@ class View(AuiBaseFrame):
     def Start(self):
         self._PostInit()
         self._components.Filter(self)
-        self.Show()        
+        
+        if wx.__version__[:3]<='2.8':
+            self.Show()
+        else:
+            self.Activate()        
+

@@ -1,8 +1,9 @@
 #-*- coding:utf-8 -*-
 
 import search.model
-from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog
-import wx, zipfile, os, json
+from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog, NoteDialog
+import wx, zipfile, os, json, tempfile
+import xml.etree.ElementTree as ET
 import wx.richtext as rt
 from utils import BookmarkManager
 import i18n
@@ -12,6 +13,7 @@ import constants, utils, threads
 
 import pony.orm
 from pony.orm import db_session
+import sqlite3
 
 from distutils.version import LooseVersion, StrictVersion
 import settings, widgets
@@ -27,9 +29,13 @@ class Presenter(object):
         self._presenters = {}
         self._scrollPosition = 0
         self._shouldOpenNewWindow = False
+        self._canBeClosed = False
         self._refreshHistoryList = True
+        self._searchingBuddhawaj = False
         self._paliDictWindow = None
         self._thaiDictWindow = None
+        self._englishDictWindow = None
+        self._delegate = None
         self._model = model        
         self._model.Delegate = self
         self._view = view
@@ -41,9 +47,25 @@ class Presenter(object):
         self._view.Start()
          
     @property
+    def Delegate(self):
+        return self._delegate
+
+    @Delegate.setter
+    def Delegate(self, value):
+        self._delegate = value
+
+    @property
     def BookmarkItems(self):
         return self._bookmarkManager.Items
-                  
+                
+    @property
+    def Model(self):
+        return self._model
+        
+    @property
+    def CanBeClosed(self):
+        return self._canBeClosed
+    
     def ShowAboutDialog(self):
         dialog = AboutDialog(self._view)
         dialog.Center()
@@ -56,10 +78,11 @@ class Presenter(object):
         fontData.EnableEffects(False)
         if curFont != None:
             fontData.SetInitialFont(curFont)
-        dialog = wx.FontDialog(self._view, fontData)
+        dialog = SimpleFontDialog(self._view, fontData) if 'wxMac' in wx.PlatformInfo else wx.FontDialog(self._view, fontData)
         if dialog.ShowModal() == wx.ID_OK:
             data = dialog.GetFontData()
             font = data.GetChosenFont()
+            print font.GetFaceName(), font.GetPointSize()
             if font.IsOk():
                 utils.SaveFont(font, constants.SEARCH_FONT)
                 self._view.Font = font
@@ -85,40 +108,29 @@ class Presenter(object):
             self.SelectLanguage(constants.CODES.index(code))
         
         self._view.SearchCtrl.SetValue(keywords)
-        self._model.Search(keywords)
+        self._searchingBuddhawaj = self._view.BuddhawajOnly.IsChecked()
+        self._model.Search(keywords, buddhawaj=self._searchingBuddhawaj)
         
         return True
                 
-    def OpenBook(self, volume=1, page=0, code=None):
+    def OpenBook(self, volume=1, page=0, code=None):        
         self.Read(self._model.Code if code is None else code, volume, page, 0, section=1, shouldHighlight=False, showBookList=True)
 
-    def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):
+    def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):        
         self._model.Read(code, volume, page, idx)
-        presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
-        if not presenter or self._shouldOpenNewWindow:
-            model = read.model.Model(code)
-            view = read.view.View(self._view, self._model.Code, code)
-            interactor = read.interactor.Interactor()
-            presenter = read.presenter.Presenter(model, view, interactor, code)
-            presenter.Delegate = self
-            if code not in self._presenters:
-                self._presenters[code] = [presenter]
-            else:
-                self._presenters[code] += [presenter]
-        else:
-            presenter.BringToFront() 
-        presenter.Keywords = self._model.Keywords if shouldHighlight else None
-        presenter.OpenBook(volume, page, section, selectItem=True, showBookList=showBookList)
-        
+        self._delegate.Read(code, volume, page, idx, section, shouldHighlight, showBookList, self._shouldOpenNewWindow)        
+
     def BringToFront(self):
         self._view.Raise()
         self._view.Iconize(False)        
             
-    def OnReadWindowClose(self, code):
-        if code in self._presenters:
-            self._model.SaveHistory(code)
-            del self._presenters[code]  
-            
+    def SaveHistory(self, code):
+        self._model.SaveHistory(code)
+
+    def OnReadWindowClose(self, code, presenter):
+        self.SaveHistory(code)
+        self._delegate.OnReadWindowClose(code, presenter)
+
     def OnReadWindowOpenPage(self, volume, page, code):
         self._model.Skim(volume, page, code)
 
@@ -155,7 +167,9 @@ class Presenter(object):
         
     def SelectLanguage(self, index):
         self._model = search.model.SearchModelCreator.Create(self, index)
-        self._view.VolumesRadio.Disable() if index == 4 or index == 5 or index == 6 else self._view.VolumesRadio.Enable()
+        self._view.VolumesRadio.Enable() if self._model.HasVolumeSelection() else self._view.VolumesRadio.Disable()
+
+        self._view.BuddhawajOnly.Enable() if self._model.HasBuddhawaj() else self._view.BuddhawajOnly.Disable()
         self.RefreshHistoryList(index, self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
         self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
 
@@ -232,8 +246,8 @@ class Presenter(object):
     
     @db_session                
     def ReloadHistory(self, position):
-        h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
-            self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue()))[position]
+        h = search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+            self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())[position]
         self.Search(h.keywords, refreshHistoryList=False)
     
     def ExportData(self):
@@ -250,23 +264,148 @@ class Presenter(object):
                             fz.write(fn, fn[rootlen:])                
             wx.MessageBox(_('Export data complete'), u'E-Tipitaka')
         dlg.Destroy()
+
+    def ImportHistory(self, keywords, total, code, read, skimmed, pages, notes):
+        conn = sqlite3.connect(constants.DATA_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM History WHERE keywords=? AND code=?', (keywords, code))
+        if not cursor.fetchone():
+            cursor.execute('INSERT INTO History (keywords, total, code, read, skimmed, pages, notes) VALUES (?,?,?,?,?,?,?)',(keywords, total, code, read, skimmed, pages, notes))
+        conn.commit()
+        conn.close()        
+
+    def ImportPCData(self, path):
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'note.sqlite')):
+            os.remove(os.path.join(tempfile.gettempdir(), 'note.sqlite'))
+
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'data.sqlite')):
+            os.remove(os.path.join(tempfile.gettempdir(), 'data.sqlite'))
+ 
+        with zipfile.ZipFile(path, 'r') as fz:
+            for filename in fz.namelist():
+                if filename.endswith('.sqlite'):
+                    fz.extract(filename, tempfile.gettempdir())
+                else:
+                    fz.extract(filename, constants.DATA_PATH)
+
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'note.sqlite')):
+            conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'note.sqlite'))
+            cursor = conn.cursor()
+            cursor.execute('PRAGMA user_version=2')
+            cursor.execute('SELECT volume,page,code,filename,text FROM Note')
+            for volume, page, code, xmlfile, text in cursor.fetchall():
+                self.WriteXmlNoteFile(volume, page, code, text)
+            conn.commit()
+            conn.close()
+        
+        if os.path.exists(os.path.join(tempfile.gettempdir(), 'data.sqlite')):
+            conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'data.sqlite'))
+            cursor = conn.cursor()
+            cursor.execute('PRAGMA user_version=4')
+            cursor.execute('SELECT keywords,total,code,read,skimmed,pages,notes FROM History')
+            for keywords, total, code, read, skimmed, pages, notes in cursor.fetchall():
+                self.ImportHistory(keywords, total, code, read, skimmed, pages, notes)
+            conn.commit()
+            conn.close()
+
+        # relocate old version data file
+        for filename in os.listdir(constants.DATA_PATH):
+            fullpath = os.path.join(constants.DATA_PATH, filename)
+            if os.path.isfile(fullpath) and filename.split('.')[-1] == 'fav':
+                os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, filename))
+            elif os.path.isfile(fullpath) and filename.split('.')[-1] == 'log':
+                os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, '.'.join(filename.split('.')[:-1])+'.cfg'))
+            elif os.path.isfile(fullpath) and not fullpath.endswith('.sqlite'):
+                os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))    
+
+    @db_session
+    def WriteXmlNoteFile(self, volume, page, code, note):
+        if volume == 0 or page == 0 or len(note) == 0 or code == None:
+            return
+
+        xml_note_file = os.path.join(constants.NOTES_PATH, code, '%02d-%04d.xml' % (volume, page))
+        if not os.path.exists(os.path.join(constants.NOTES_PATH, code)):
+            os.makedirs(os.path.join(constants.NOTES_PATH, code))
+
+        ET.register_namespace('', 'http://www.wxwidgets.org')
+        if os.path.exists(xml_note_file):
+            tree = ET.parse(xml_note_file)
+            root = tree.getroot()
+        else:
+            root = ET.fromstring(constants.XML_NOTE_TEMPLATE)
+            tree = ET.ElementTree(root)
+
+        para_layout = root.find('{http://www.wxwidgets.org}paragraphlayout')
+
+        original_text = u''
+        for para in para_layout:
+            for text in para:
+                original_text += text.text
+            original_text += u'\n'
+
+        for line in note.split('\n'):
+            para_node = ET.SubElement(para_layout, '{http://www.wxwidgets.org}paragraph')
+            text_node = ET.SubElement(para_node, '{http://www.wxwidgets.org}text')
+            text_node.text = line if len(line) > 0 else ' '
+
+        if original_text.strip().find(note.strip()) == -1:
+            tree.write(xml_note_file)
+
+        conn = sqlite3.connect(constants.NOTE_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM Note WHERE volume=? AND page=? AND code=?', (volume, page, code))        
+        text = original_text+ '\n' + note if original_text != '' else note
+        found = cursor.fetchone()
+        if found and original_text.strip().find(note.strip()) == -1:
+            cursor.execute('UPDATE Note SET text=?,filename=? WHERE volume=? AND page=? AND code=?', (text, xml_note_file, volume, page, code))
+        elif not found:
+            cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', (volume,page,code,xml_note_file,text))
+        conn.commit()
+        conn.close()
+
+    def ImportIOSData(self, path):
+        with zipfile.ZipFile(path, 'r') as fz:
+            for filename in fz.namelist():
+                jsonobj = json.loads(fz.read(filename))
+                if jsonobj.get('version', 1) < 2:
+                    continue
+                
+                for item in jsonobj.get('bookmarks', []):
+                    volume = item.get('volume', 0)
+                    page = item.get('page', 0)
+                    code = constants.IOS_CODE_TABLE.get(item.get('code', -1)) 
+                    note = item.get('note', '')
+
+                    self.WriteXmlNoteFile(volume, page, code, note)
+    
+    def ImportAndroidData(self, path):
+        with open(path, 'r') as f:
+            jsonobj = json.load(f)
+            for item in jsonobj.get('favorite_table', []):
+                volume = item.get('volume_column', 0)
+                page = item.get('page_column', 0)
+                code = constants.ANDROID_CODE_TABLE.get(item.get('language_column', -1)) 
+                note = item.get('note_column', '')
+
+                self.WriteXmlNoteFile(volume, page, code, note)
         
     def ImportData(self):
         ret = 0
-        dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
+        dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', 
+                            constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:        
-            with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'r') as fz:
-                fz.extractall(constants.DATA_PATH)            
-            # relocate old version data file
-            for filename in os.listdir(constants.DATA_PATH):
-                fullpath = os.path.join(constants.DATA_PATH, filename)
-                if os.path.isfile(fullpath) and filename.split('.')[-1] == 'fav':
-                    os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, filename))
-                elif os.path.isfile(fullpath) and filename.split('.')[-1] == 'log':
-                    os.rename(fullpath, os.path.join(constants.BOOKMARKS_PATH, '.'.join(filename.split('.')[:-1])+'.cfg'))
-                elif os.path.isfile(fullpath) and not fullpath.endswith('.sqlite'):
-                    os.rename(fullpath, os.path.join(constants.CONFIG_PATH, os.path.basename(filename)))                                            
+            path = os.path.join(dlg.GetDirectory(), dlg.GetFilename())
+            
+            if path.split('.')[-1] == 'etz':                
+                with zipfile.ZipFile(path, 'r') as fz:
+                    if len(fz.namelist()) > 1:
+                        self.ImportPCData(path)
+                    else:
+                        self.ImportIOSData(path)
+            elif path.split('.')[-1] == 'js':
+                self.ImportAndroidData(path)
+
             wx.MessageBox(_('Import data complete'), u'E-Tipitaka')
             self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())                    
         dlg.Destroy()
@@ -290,8 +429,8 @@ class Presenter(object):
         if self._view.HistoryList.GetSelection() == -1: return
         
         with db_session:
-            h = list(search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
-                self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue()))[self._view.HistoryList.GetSelection()]
+            h = search.model.Model.GetHistories(self._view.TopBar.LanguagesComboBox.GetSelection(), 
+                self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())[self._view.HistoryList.GetSelection()]
             h.delete()
 
         with db_session:
@@ -327,11 +466,10 @@ class Presenter(object):
     def CheckNewUpdate(self):
         threads.CheckNewUpdateThread(self).start()
         
-    def Close(self):
-        utils.SaveSearchWindowPosition(self._view)
-        for code in self._presenters:
-            utils.SaveReadWindowPosition(self._presenters[code][0].View)
-            self._model.SaveHistory(code)
+    def ShowInputText(self, text):
+        self._view.SetPage('<div align="center"><h1>' + _('Search') + ': ' + text + '</h1></div>' if len(text) > 0 else '')
+
+    def SaveSearches(self):
         self._view.SearchCtrl.SaveSearches()
 
     def ShowBookmarkPopup(self, x, y):
@@ -343,7 +481,9 @@ class Presenter(object):
             volume, page, code = dlg.Result
             self.OpenBook(volume, page, code)
         dlg.Destroy()
-        
+
+    def SaveBookmark(self):        
+        self._bookmarkManager.Save()        
         
     def LoadBookmarks(self, menu):
 
@@ -384,3 +524,28 @@ class Presenter(object):
 
         self._thaiDictWindow.Show()        
         self._thaiDictWindow.Raise()
+
+    def OpenEnglishDict(self):
+
+        def OnDictClose(event):
+            self._englishDictWindow = None
+            event.Skip()
+
+        if self._englishDictWindow is None:
+            self._englishDictWindow = widgets.EnglishDictWindow(self._view)
+            self._englishDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._englishDictWindow.SetTitle(u'Pali-English Dictionary')
+
+        self._englishDictWindow.Show()        
+        self._englishDictWindow.Raise()        
+
+    def SearchingBuddhawaj(self):
+        return self._searchingBuddhawaj
+
+    def TakeNote(self, code, volume, page, idx):
+        note, state = self._model.GetNote(idx)
+        dialog = NoteDialog(self._view, note, state)
+        dialog.Center()
+        if dialog.ShowModal() == wx.ID_OK:
+            self._model.TakeNote(idx, dialog.GetNote(), dialog.GetState(), code)
+        dialog.Destroy()

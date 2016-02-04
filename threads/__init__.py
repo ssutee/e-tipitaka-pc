@@ -28,12 +28,13 @@ class CheckNewUpdateThread(threading.Thread):
 
 class SearchThread(threading.Thread):
     
-    def __init__(self, keywords, volumes, delegate, queue=None):
+    def __init__(self, keywords, volumes, delegate, queue=None, buddhawaj=False):
         super(SearchThread, self).__init__()
         self._delegate = delegate
         self._keywords = keywords
         self._volumes = volumes    
         self._queue = queue
+        self._buddhawaj = buddhawaj
     
     @property
     def TableName(self):
@@ -41,11 +42,16 @@ class SearchThread(threading.Thread):
         
     @property
     def VolumeColumn(self):
-        return 'volumn'
+        return 'volume'
     
     def run(self):
+        print os.path.abspath(self.Database)
         conn = sqlite3.connect(self.Database)
         searcher = conn.cursor()
+
+        searcher.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        print(searcher.fetchall())
+        
         terms = map(lambda term: term.replace('+',' '),self._keywords.split())
         
         query, args = self.PrepareStatement(terms)
@@ -79,15 +85,15 @@ class SearchThread(threading.Thread):
                 tmp = ''
                 for t in term.split('|'):
                     if len(t.strip()) > 0:
-                        tmp += 'content LIKE ? OR '
+                        tmp += '%s LIKE ? OR ' % ('content' if not self._buddhawaj else 'buddhawaj')
                         args += ('%'+t+'%',)
                 if len(tmp) > 0:
                     query += ' (%s) AND' % (tmp.rstrip(' OR '))
             elif term[0] == '~':
-                query += ' content NOT LIKE ? AND'
+                query += ' %s NOT LIKE ? AND' % ('content' if not self._buddhawaj else 'buddhawaj')
                 args += ('%'+term[1:]+'%',)
             else:
-                query += ' content LIKE ? AND'
+                query += ' %s LIKE ? AND' % ('content' if not self._buddhawaj else 'buddhawaj')
                 args += ('%'+term+'%',)
         
         if len(self._volumes) > 0:
@@ -204,6 +210,10 @@ class ThaiRoyalSearchThread(SearchThread):
     def Database(self):
         return constants.THAI_ROYAL_DB    
 
+    @property
+    def TableName(self):
+        return 'main'
+
 class PaliSiamSearchThread(SearchThread):
 
     def ProcessResult(self, result):
@@ -215,8 +225,8 @@ class PaliSiamSearchThread(SearchThread):
         return r    
 
     @property
-    def VolumeColumn(self):
-        return 'volume'
+    def TableName(self):
+        return 'main'
 
     @property
     def Code(self):
@@ -237,18 +247,18 @@ class ThaiMahaChulaSearchThread(SearchThread):
         return constants.THAI_MAHACHULA_DB    
         
     @property
-    def VolumeColumn(self):
-        return 'volume'        
+    def TableName(self):
+        return 'main'
         
     def ProcessResult(self, result):
         r = {}
-        r['volume'] = result[0]
-        r['page'] = result[1]
-        r['items'] = result[2]
-        r['header'] = result[3]
-        r['footer'] = result[4]
-        r['display'] = result[5]
-        r['content'] = result[6]
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['header'] = result[4]
+        r['footer'] = result[5]
+        r['display'] = result[6]
+        r['content'] = result[7]
         return r
 
 class ThaiMahaMakutSearchThread(SearchThread):
@@ -261,6 +271,10 @@ class ThaiMahaMakutSearchThread(SearchThread):
     def Database(self):
         return constants.THAI_MAHAMAKUT_DB    
         
+    @property
+    def TableName(self):
+        return 'main'
+
     def ProcessResult(self, result):
         r = {}
         r['volume'] = result[0]
@@ -268,6 +282,53 @@ class ThaiMahaMakutSearchThread(SearchThread):
         r['page'] = result[2]
         r['items'] = result[3]
         r['content'] = result[4]
+        return r
+
+class ThaiWatnaSearchThread(SearchThread):
+
+    @property
+    def Code(self):
+        return constants.THAI_WATNA_CODE
+
+    @property
+    def Database(self):
+        return constants.THAI_WATNA_DB
+
+    @property
+    def TableName(self):
+        return 'main'
+
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['content'] = result[4]
+        r['buddhawaj'] = result[5]
+        r['display'] = result[6]
+        return r
+
+class ThaiPocketBookSearchThread(SearchThread):
+
+    @property
+    def Code(self):
+        return constants.THAI_POCKET_BOOK_CODE
+
+    @property
+    def Database(self):
+        return constants.THAI_POCKET_BOOK_DB
+
+    @property
+    def TableName(self):
+        return 'main'
+
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['content'] = result[3]
+        r['buddhawaj'] = result[4]
+        r['display'] = result[5]
         return r
 
 class DisplayThread(threading.Thread):
@@ -322,6 +383,11 @@ class PaliSiamDisplayThread(DisplayThread):
     def ProcessExcerpts(self, excerpts):
         return utils.ConvertToThaiSearch(excerpts, True)
 
+class ThaiPocketBookDisplayThread(DisplayThread):
+    
+    def ProcessResult(self, idx, result, excerpts):
+        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), u'0', excerpts)
+
 class ThaiFiveBooksDisplayThread(DisplayThread):
     
     def ProcessResult(self, idx, result, excerpts):
@@ -336,10 +402,12 @@ class ThaiMahaMakutDisplayThread(DisplayThread):
 class ThaiMahaChulaDisplayThread(DisplayThread):
     pass
 
-    
+class ThaiWatnaDisplayThread(DisplayThread):
+
+    def ProcessResult(self, idx, result, excerpts):
+        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
+
 class ScriptDisplayThread(DisplayThread):
 
     def ProcessResult(self, idx, result, excerpts):
         return (self._mark[0]+idx+1, result['volume'], result['page'], result['items'], excerpts)
-
-

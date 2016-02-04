@@ -7,12 +7,19 @@ from os.path import expanduser
 from whoosh.spelling import SpellChecker
 from whoosh.filedb.filestore import FileStorage
 from whoosh.index import open_dir
+from appdirs import user_data_dir, user_log_dir
+
 
 APP_NAME = 'E-Tipitaka'
+APP_AUTHOR = 'Sutee'
+
+VIRTURE_STORE = user_data_dir('VirtualStore', '')
 
 HOME = expanduser("~")
 
-CODES = ['thai', 'pali', 'thaimm', 'thaimc', 'thaibt', 'romanct', 'thaict']
+CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct']
+COMPARE_CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'romanct']
+COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -27,13 +34,17 @@ ITEMS_PER_PAGE = 20
 
 FOOTER_STYLE = '#3CBF3F', 4
 
-ETZ_TYPE = u'E-Tipitaka Backup File (*.etz)|*.etz'
+ETZ_TYPE = u'E-Tipitaka Backup File (*.etz;*.js)|*.etz;*.js'
+IOS_ETZ_TYPE = u'iOS Backup File (*.json.etz)|*.json.etz'
+ANDROID_ETZ_TYPE = u'Android Backup File (*.js)|*.js'
 
 CHECK_VERSION_URL   = 'http://download.watnapahpong.org/data/etipitaka/version.txt'
 
-DOWNLOAD_MSW_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.exe'
-DOWNLOAD_OSX_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.dmg'
-DOWNLOAD_SRC_URL    = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.tar.gz'
+DOWNLOAD_MSW_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.exe'
+DOWNLOAD_OSX_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.dmg'
+DOWNLOAD_SRC_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.tar.gz'
+
+PALI_PDF_URL_PATTERN = "http://pali.watnapp.com/?volume=%d&start=%d&end=%d"
 
 CMD_IDLE            = 1000
 CMD_FORWARD         = 1001
@@ -67,14 +78,21 @@ MARKS_DIR = 'marks'
 BOOKMARKS_DIR = 'favs'
 CONFIG_DIR = 'config'
 
-DATA_PATH = os.path.join(HOME, '.' + APP_NAME)
+OLD_DATA_PATH = os.path.join(HOME, '.' + APP_NAME)
+
+DATA_PATH = user_data_dir(APP_NAME, APP_AUTHOR)
+LOG_PATH = user_log_dir(APP_NAME, APP_AUTHOR)
+
 NOTES_PATH = os.path.join(DATA_PATH, NOTES_DIR)
 MARKS_PATH = os.path.join(DATA_PATH, MARKS_DIR)
 BOOKMARKS_PATH = os.path.join(DATA_PATH, BOOKMARKS_DIR)
 
+ERROR_LOG_PATH = os.path.join(LOG_PATH, 'error.log')
+
 CONFIG_PATH = os.path.join(DATA_PATH, CONFIG_DIR)
 LOG_FILE = os.path.join(CONFIG_PATH, 'history.log')
 SKIP_VERSION_FILE = os.path.join(CONFIG_PATH, 'skip_version')
+IMPORTED_MARK_FILE = os.path.join(DATA_PATH, 'imported_old_user_data')
 
 SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')
 READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')
@@ -82,6 +100,7 @@ SEARCH_RECT = os.path.join(CONFIG_PATH, 'rect_search.cfg')
 READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 
 THEME_CFG = os.path.join(CONFIG_PATH, 'theme.cfg')
+NOTE_STATUS_CFG = os.path.join(CONFIG_PATH, 'comment.cfg')
 
 SEARCH_IMAGE = os.path.join(RESOURCES_DIR, 'search.png')
 NIKHAHIT_IMAGE = os.path.join(RESOURCES_DIR, 'nikhahit.gif')
@@ -103,6 +122,7 @@ NOTES_IMAGE = os.path.join(RESOURCES_DIR, 'edit-notes.png')
 DICT_IMAGE = os.path.join(RESOURCES_DIR, 'dict.png')
 THAI_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'thaidict.png')
 PALI_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'palidict.png')
+ENGLISH_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'palieng.png')
 DICT_ICON = os.path.join(RESOURCES_DIR, 'dict.ico')
 LAYOUT_IMAGE = os.path.join(RESOURCES_DIR, 'layout.gif')
 INC_IMAGE = os.path.join(RESOURCES_DIR, 'fontSizeUp.gif')
@@ -113,6 +133,10 @@ YELLOW_IMAGE = os.path.join(RESOURCES_DIR, 'yellow.png')
 WHITE_IMAGE = os.path.join(RESOURCES_DIR, 'white.png')
 CLEAR_IMAGE = os.path.join(RESOURCES_DIR, 'clear.png')
 ABOUT_IMAGE = os.path.join(RESOURCES_DIR, 'about.png')
+HEADER_IMAGE = os.path.join(RESOURCES_DIR, 'header.png')
+
+OK_IMAGE = os.path.join(RESOURCES_DIR, 'ok.png')
+NOT_OK_IMAGE = os.path.join(RESOURCES_DIR, 'not_ok.png')
 
 DATA_DB = os.path.join(DATA_PATH, 'data.sqlite')
 NOTE_DB = os.path.join(DATA_PATH, 'note.sqlite')
@@ -123,11 +147,14 @@ THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.db')
 THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.db')
 THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.db')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
+THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.db')
+THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.db')
 
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
-PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 
+PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 THAI_DICT_DB = os.path.join(RESOURCES_DIR, 'thaidict.db')
+ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english.db')
 
 THAI_FIVE_BOOKS_CODE = 'thaibt'
 THAI_ROYAL_CODE = 'thai'
@@ -136,6 +163,8 @@ THAI_MAHAMAKUT_CODE = 'thaimm'
 PALI_SIAM_CODE = 'pali'
 THAI_SCRIPT_CODE = 'thaict'
 ROMAN_SCRIPT_CODE = 'romanct'
+THAI_WATNA_CODE = 'thaiwn'
+THAI_POCKET_BOOK_CODE = 'thaipb'
 
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
@@ -155,6 +184,12 @@ THAI_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_th.json')).re
 
 ROMAN_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_rm.json')).read())
 THAI_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_th.json')).read())
+
+ROMAN_BOOK_NAMES = open(os.path.join(RESOURCES_DIR, 'roman_names.txt')).readlines()
+ROMAN_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst.json')).read())
+ROMAN_REVERSE_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst_r.json')).read())
+ROMAN_PAGE_INDEX = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_page_index.json')).read())
+ROMAN_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_items.json')).read())
 
 FIVE_BOOKS_NAMES = [
     u'ขุมทรัพย์จากพระโอษฐ์', 
@@ -241,3 +276,32 @@ FIVE_BOOKS_SECTIONS = {
         u'ภาค ๕ การปรินิพพาน',
         u'ภาค ๖ เรื่องการบำเพ็ญบารมีในอดีตชาติ ซึ่งเต็มไปด้วยทิฏฐานุคติอันสาวกในภายหลังพึงดำเนินตาม',
     ]} 
+
+XML_NOTE_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
+<richtext version="1.0.0.0" xmlns="http://www.wxwidgets.org">
+  <paragraphlayout textcolor="#000000" fontpointsize="13" fontfamily="70" fontstyle="90" fontweight="90" fontunderlined="0" fontface="Lucida Grande" alignment="1" parspacingafter="10" parspacingbefore="0" linespacing="10" margin-left="5,4098" margin-right="5,4098" margin-top="5,4098" margin-bottom="5,4098">
+  </paragraphlayout>
+</richtext>    
+'''
+
+IOS_CODE_TABLE = {
+    1: 'thai',
+    2: 'pali',
+    3: 'thaimm',
+    4: 'thaimc',
+    5: 'thaibt',
+    6: 'thaiwn',
+    7: 'thaipb',
+    8: 'romanct',
+}
+
+ANDROID_CODE_TABLE = {
+    0: 'thai',
+    1: 'pali',
+    2: 'thaimm',
+    3: 'thaimc',
+    4: 'thaibt',
+    5: 'thaiwn',
+    6: 'thaipb',
+    7: 'romanct',    
+}

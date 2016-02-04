@@ -4,7 +4,10 @@ import wx
 import sqlite3, cPickle
 import constants, utils
 
-from pony.orm import Database, Required, Optional, db_session, select, desc
+import i18n
+_ = i18n.language.ugettext
+
+from pony.orm import Database, Required, Optional, db_session, select, desc, LongUnicode
 
 db = Database('sqlite', constants.NOTE_DB, create_db=True)
 
@@ -27,6 +30,10 @@ class Engine(object):
     def __del__(self):
         if self._conn is not None:
             self._conn.close()
+
+    @property
+    def HasPdf(self):
+        return False
         
     def Query(self, volume, page):
         results = self._cache.get('q:%d:%d'%(volume, page), self._searcher.execute(*self.PrepareStatement(volume, page)))
@@ -47,11 +54,8 @@ class Engine(object):
             r['content'] = result[3]
         return r
     
-    def GetComparingVolume(self, volume, page):
-        return volume
-    
     def GetTotalPages(self, volume):
-        return int(constants.BOOK_PAGES['%s_%d' % (self._code, volume)])
+        return int(constants.BOOK_PAGES.get('%s_%d' % (self._code, volume), 0))
         
     def GetFirstPageNumber(self, volume):
         return 0
@@ -64,6 +68,10 @@ class Engine(object):
         
     def GetFirstPage(self, volume):
         pages = map(lambda x:u'%s'%(x), range(0, self.GetTotalPages(volume)))
+        
+        if len(pages) == 0:
+            return u''
+
         text1 = u'\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0])+1, int(pages[-1]))
         text2 = u''
 
@@ -133,7 +141,7 @@ class Engine(object):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)']
+        return constants.COMPARE_CHOICES
         
     def GetSubItem(self, volume, page, item): 
         for sub in constants.BOOK_ITEMS[self._code][volume]:
@@ -142,9 +150,6 @@ class Engine(object):
                 if page in pages:
                     return item, sub
         return item, 1
-        
-    def ConvertVolume(self, volume, item, sub):
-        return volume
         
     @property
     def HighlightOffset(self):
@@ -155,11 +160,29 @@ class Engine(object):
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
-            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
         except KeyError, e:
             return 0
         except TypeError, e:
             return 0
+
+    def ConvertVolume(self, volume, item, sub):
+        return volume
+        
+    def GetComparingVolume(self, volume, page):
+        return volume
+    
+    def ConvertToPivot(self, volume, page, item):
+        item, sub = self.GetSubItem(volume, page, item)        
+        return self.GetComparingVolume(volume, page), item, sub
+
+    def ConvertFromPivot(self, volume, item, sub):
+        volume = self.ConvertVolume(volume, item, sub)
+        page = self.ConvertItemToPage(volume, item, sub, True)
+        return volume, page
+
+    def canSelectComparingItem(self):
+        return True
 
 class ThaiRoyalEngine(Engine):
     
@@ -169,6 +192,12 @@ class ThaiRoyalEngine(Engine):
         self._conn = sqlite3.connect(constants.THAI_ROYAL_DB)
         self._searcher = self._conn.cursor()
                 
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = ('%02d'%(volume), '%04d'%(page))
+        return select, args
+
+
     def GetTitle(self, volume=None):
         if not volume:
             return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
@@ -189,8 +218,12 @@ class PaliSiamEngine(Engine):
         self._conn = sqlite3.connect(constants.PALI_SIAM_DB)
         self._searcher = self._conn.cursor()
 
+    @property
+    def HasPdf(self):
+        return True        
+
     def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = ('%02d'%(volume), '%04d'%(page))
         return select, args
         
@@ -221,6 +254,111 @@ class PaliSiamEngine(Engine):
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
 
+class ThaiPocketBookEngine(Engine):
+
+    def __init__(self):
+        super(ThaiPocketBookEngine, self).__init__()
+        self._code = constants.THAI_POCKET_BOOK_CODE
+        self._conn = sqlite3.connect(constants.THAI_POCKET_BOOK_DB)
+        self._searcher = self._conn.cursor()
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return result.get('content')
+
+    def GetTitle(self, volume=None):
+        return u'%s เล่มที่ %s' % (_('Thai Pocket Book'), utils.ArabicToThai(unicode(volume)))
+
+    def GetSubtitle(self, volume, section=None):
+        return constants.BOOK_NAMES['%s_%s' % ('thaipb', str(volume))].decode('utf8','ignore') if volume else _('Thai Pocket Book')
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['content'] = result[3]
+            r['buddhawaj'] = result[4]
+            r['display'] = result[5]
+        return r
+
+    def GetCompareChoices(self):
+        return []
+
+    def GetItems(self, volume, page):
+        return []
+        
+    def GetSubItem(self, volume, page, item):
+        return item, 1
+
+    def GetSectionBoundary(self, position):
+        return 13
+
+    def GetFirstPageNumber(self, volume):
+        return 1
+
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0
+
+    def canSelectComparingItem(self):
+        return False
+
+class ThaiWatnaEngine(Engine):
+
+    def __init__(self):
+        super(ThaiWatnaEngine, self).__init__()
+        self._code = constants.THAI_WATNA_CODE
+        self._conn = sqlite3.connect(constants.THAI_WATNA_DB)
+        self._searcher = self._conn.cursor()
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return result.get('content')
+
+    def GetTitle(self, volume=None):
+        return u'พุทธวจนปิฎก เล่มที่ %s'%(utils.ArabicToThai(unicode(volume))) if volume else _('Buddhawajana Pitaka')
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+            r['buddhawaj'] = result[5]
+            r['display'] = result[6]
+        return r
+
+    def GetSectionName(self, volume):
+        if volume <= 25:
+            return constants.SECTION_THAI_NAMES[0]
+        return constants.SECTION_THAI_NAMES[1]
+            
+    def GetSectionBoundary(self, position):
+        if position == 0:
+            return 25
+        return 33
+
+    def GetComparingVolume(self, volume, page):
+        if volume <= 25:
+            return volume + 8
+        return volume - 25
+
+    def ConvertVolume(self, volume, item, sub):
+        if volume <= 8:
+            return volume + 25
+        return volume - 8
+
 class ThaiMahaChulaEngine(Engine):
 
     def __init__(self):
@@ -230,7 +368,7 @@ class ThaiMahaChulaEngine(Engine):
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
-        select = 'SELECT * FROM %s WHERE volume = ? AND page = ?'%(self._code)
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = ('%02d'%(volume), '%04d'%(page))
         return select, args
 
@@ -245,13 +383,13 @@ class ThaiMahaChulaEngine(Engine):
     def ProcessResult(self, result):
         r = {}
         if result is not None:
-            r['volume'] = result[0]
-            r['page'] = result[1]
-            r['items'] = result[2]
-            r['header'] = result[3]
-            r['footer'] = result[4]
-            r['display'] = result[5]
-            r['content'] = result[6]
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['header'] = result[4]
+            r['footer'] = result[5]
+            r['display'] = result[6]
+            r['content'] = result[7]
         return r
         
     def GetSubItem(self, volume, page, item):
@@ -268,6 +406,17 @@ class ThaiMahaChulaEngine(Engine):
             return constants.SECTION_THAI_NAMES[1]
         return constants.SECTION_THAI_NAMES[2]        
 
+    def ConvertItemToPage(self, volume, item, sub, checked=False):
+        try:
+            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+        except KeyError, e:
+            return 0
+        except TypeError, e:
+            return 0
+
+    def canSelectComparingItem(self):
+        return False
+
 
 class ThaiMahaMakutEngine(Engine):
 
@@ -281,6 +430,11 @@ class ThaiMahaMakutEngine(Engine):
         if not volume:
             return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย)'
         return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = ('%02d'%(volume), '%04d'%(page))
+        return select, args
 
     def ProcessResult(self, result):
         r = {}
@@ -371,7 +525,8 @@ class ThaiFiveBooksEngine(Engine):
         
     def GetSubItem(self, volume, page, item):
         return item, 1
-        
+
+
 class ScriptEngine(Engine):
             
     def PrepareStatement(self, volume, page):
@@ -421,12 +576,33 @@ class ScriptEngine(Engine):
         except TypeError, e:
             return 0
 
+    def canSelectComparingItem(self):
+        return False
+
+
 class RomanScriptEngine(ScriptEngine):
     def __init__(self):
         super(RomanScriptEngine, self).__init__()
         self._code = constants.ROMAN_SCRIPT_CODE
         self._conn = sqlite3.connect(constants.ROMAN_SCRIPT_DB)
         self._searcher = self._conn.cursor()    
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+        return r        
+
+    def GetCompareChoices(self):
+        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
+
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0        
 
     def GetTitle(self, volume=None):
         if volume is None:
@@ -435,6 +611,42 @@ class RomanScriptEngine(ScriptEngine):
 
     def GetSubtitle(self, volume, section=None):
         return constants.ROMAN_SCRIPT_TITLES[str(volume)][1]
+
+    def GetBookName(self, volume):
+        return constants.ROMAN_BOOK_NAMES[volume-1].decode('utf8','ignore')
+
+    def GetBookListItems(self):
+        return ['%2s. %s' % (volume+1, self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
+
+    def GetSectionBoundary(self, position):
+        if position == 0:
+            return 5
+        if position == 1:
+            return 48
+        return 61
+
+    def ConvertToPivot(self, volume, page, item):
+        table = constants.ROMAN_MAPPING_TABLE
+        
+        if str(volume) not in table or str(page) not in table[str(volume)]:
+            return 0, 0, 0
+        
+        results = table[str(volume)][str(page)]
+
+        if len(results) == 0:
+            return 0, 0, 0
+
+        return results[0][0], results[0][1], results[0][2]
+        
+    def ConvertFromPivot(self, volume, item, sub):
+        table = constants.ROMAN_REVERSE_MAPPING_TABLE
+
+        if str(volume) not in table or str(item) not in table[str(volume)] or str(sub) not in table[str(volume)][str(item)]:
+            return 0, 0
+
+        result = table[str(volume)][str(item)][str(sub)]
+
+        return result[0], result[1]
 
 class ThaiScriptEngine(ScriptEngine):
 
@@ -484,10 +696,15 @@ class Model(object):
     @property
     def Code(self):
         return self._code
+
+    @property
+    def HasPdf(self):
+        return self._engine[self._code].HasPdf
         
     @Code.setter
     def Code(self, code):
-        self._code = code.split(":")[0]
+        code = code.split(":")[0]
+        self._code = code
         if constants.THAI_ROYAL_CODE == code:
             self._engine[code] = ThaiRoyalEngine()
         elif constants.PALI_SIAM_CODE == code:
@@ -502,7 +719,13 @@ class Model(object):
             self._engine[code] = RomanScriptEngine()
         elif constants.THAI_SCRIPT_CODE == code:
             self._engine[code] = ThaiScriptEngine()
-            
+        elif constants.THAI_WATNA_CODE == code:
+            self._engine[code] = ThaiWatnaEngine()
+        elif constants.THAI_POCKET_BOOK_CODE == code:
+            self._engine[code] = ThaiPocketBookEngine()
+        else:
+            raise ValueError(code)
+
     def GetTitle(self, volume=None):
         return self._engine[self._code].GetTitle(volume)
 
@@ -547,6 +770,15 @@ class Model(object):
         
     def ConvertSpecialCharacters(self, text):
         return self._engine[self._code].ConvertSpecialCharacters(text)
+
+    def ConvertToPivot(self, volume, page, item):
+        return self._engine[self._code].ConvertToPivot(volume, page, item)
+
+    def ConvertFromPivot(self, volume, item, sub):
+        return self._engine[self._code].ConvertFromPivot(volume, item, sub)
+
+    def canSelectComparingItem(self):
+        return self._engine[self._code].canSelectComparingItem()
         
     @property
     def HighlightOffset(self):

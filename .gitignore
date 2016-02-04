@@ -13,3 +13,4 @@ resources/spell_*
 fonts/
 build/
 dist/
+error.log

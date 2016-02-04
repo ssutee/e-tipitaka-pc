@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import wx
-import os, codecs, json
+import os, codecs, json, shutil
 import constants
 import sqlite3
 
@@ -81,8 +81,38 @@ def UpdateDatabases():
             try:
                 cursor.execute('ALTER TABLE History ADD COLUMN pages TEXT')
             except sqlite3.OperationalError,e:
-                pass
-            conn.commit()
+                pass            
+            conn.commit()                        
+        if cursor.execute('PRAGMA user_version').fetchone()[0] == 2:
+            cursor.execute('PRAGMA user_version=3')
+            try:
+                cursor.execute('CREATE TABLE IF NOT EXISTS temp_table (id INTEGER PRIMARY KEY AUTOINCREMENT, keywords text NOT NULL, total INTEGER NOT NULL, code VARCHAR(200) NOT NULL, read TEXT NOT NULL, skimmed TEXT NOT NULL, pages TEXT, notes TEXT)')
+                cursor.execute('INSERT INTO temp_table SELECT * FROM History')
+                cursor.execute('DROP TABLE History')
+                cursor.execute('ALTER TABLE temp_table RENAME TO History')
+            except sqlite3.OperationalError,e:
+                pass                        
+            conn.commit()            
+        if cursor.execute('PRAGMA user_version').fetchone()[0] == 3:
+            cursor.execute('PRAGMA user_version=4')            
+            try:
+                cursor.execute('ALTER TABLE History ADD COLUMN notes TEXT')
+            except sqlite3.OperationalError,e:
+                pass        
+            conn.commit()        
+        conn.close()        
+        
+    if os.path.exists(constants.NOTE_DB):
+        conn = sqlite3.connect(constants.NOTE_DB)
+        cursor = conn.cursor()
+        if cursor.execute('PRAGMA user_version').fetchone()[0] < 2:
+            print 'update database'
+            cursor.execute('CREATE TABLE IF NOT EXISTS temp_table (id INTEGER PRIMARY KEY AUTOINCREMENT, volume INTEGER NOT NULL, page INTEGER NOT NULL, code VARCHAR(200) NOT NULL, filename VARCHAR(255) NOT NULL, text TEXT NOT NULL)')
+            cursor.execute('INSERT INTO temp_table SELECT * FROM Note')
+            cursor.execute('DROP TABLE Note')
+            cursor.execute('ALTER TABLE temp_table RENAME TO Note')
+            cursor.execute('PRAGMA user_version=2')
+            conn.commit()                
         conn.close()
 
 def ConvertToPaliSearch(search, force=False):
@@ -129,8 +159,9 @@ def LoadTheme(prefix):
     tokens = list(os.path.split(constants.THEME_CFG))
     path = os.path.join(* tokens[:-1] + [prefix + '_' + tokens[-1]])    
     if os.path.exists(path):
-        with codecs.open(path, 'r', 'utf8') as f:
-            theme = int(f.read().strip())
+        f = codecs.open(path, 'r', 'utf8')
+        theme = int(f.read().strip())
+        f.close()
         return theme    
     return 0
 
@@ -214,6 +245,16 @@ def LoadReadWindowPosition():
 def LoadSearchWindowPosition():
     return LoadWindowPosition(constants.SEARCH_RECT)
 
+def LoadNoteStatus():
+    if not os.path.exists(constants.NOTE_STATUS_CFG):
+        return True
+    return True if open(constants.NOTE_STATUS_CFG).read().strip() == '1' else False
+
+def SaveNoteStatus(status):
+    f = open(constants.NOTE_STATUS_CFG, 'w')
+    f.write('1' if status else '0')
+    f.close()
+
 def MakeKey(code, index):
     return '%s:%d'%(code, index)
     
@@ -236,3 +277,45 @@ def ShortName(code):
         return u'roman'
     if code == constants.THAI_FIVE_BOOKS_CODE:
         return u'จากพระโอษฐ์'
+    if code == constants.THAI_WATNA_CODE:
+        return u'พุทธวจนปิฎก'
+    if code == constants.THAI_POCKET_BOOK_CODE:
+        return u'หมวดธรรม'
+    raise ValueError(code)
+
+def GetFilePaths(directory):
+    """
+    This function will generate the file names in a directory 
+    tree by walking the tree either top-down or bottom-up. For each 
+    directory in the tree rooted at directory top (including top itself), 
+    it yields a 3-tuple (dirpath, dirnames, filenames).
+    """
+    file_paths = []  # List which will store all of the full filepaths.
+
+    # Walk the tree.
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            # Join the two strings in order to form the full filepath.
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)  # Add it to the list.
+
+    return file_paths  # Self-explanatory
+
+def MoveOldUserData():
+    for filename in GetFilePaths(constants.VIRTURE_STORE):
+        curdir = os.path.dirname(os.path.realpath(__file__))
+        if os.path.join(constants.APP_NAME, '') in filename or os.path.join(os.path.split(curdir)[-1], '') in filename:
+            os.remove(filename)
+
+    if os.path.exists(constants.IMPORTED_MARK_FILE) or not os.path.exists(constants.OLD_DATA_PATH):
+        return
+
+    for filename in os.listdir(constants.OLD_DATA_PATH):
+        full_path = os.path.join(constants.OLD_DATA_PATH, filename)
+        if os.path.isfile(full_path):
+            shutil.copy(full_path, constants.DATA_PATH)
+        else:
+            shutil.copytree(full_path, os.path.join(constants.DATA_PATH, filename))
+
+    fout = open(constants.IMPORTED_MARK_FILE, 'w')
+    fout.close()
