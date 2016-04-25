@@ -45,7 +45,6 @@ class SearchThread(threading.Thread):
         return 'volume'
     
     def run(self):
-        print os.path.abspath(self.Database)
         conn = sqlite3.connect(self.Database)
         searcher = conn.cursor()
 

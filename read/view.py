@@ -441,7 +441,6 @@ class View(AuiBaseFrame):
             readPanel.SetContentFont(font)            
         
         for token in formatter.split():
-            print token
             tag,x,y = token.split('|')
             if tag == 's3' or tag == 'p3':
                 colorCode, diffSize = constants.FOOTER_STYLE

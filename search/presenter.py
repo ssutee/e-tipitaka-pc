@@ -82,7 +82,6 @@ class Presenter(object):
         if dialog.ShowModal() == wx.ID_OK:
             data = dialog.GetFontData()
             font = data.GetChosenFont()
-            print font.GetFaceName(), font.GetPointSize()
             if font.IsOk():
                 utils.SaveFont(font, constants.SEARCH_FONT)
                 self._view.Font = font

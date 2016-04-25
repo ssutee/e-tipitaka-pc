@@ -69,7 +69,6 @@ class Engine(object):
     def GetFirstPage(self, volume):
         pages = map(lambda x:u'%s'%(x), range(0, self.GetTotalPages(volume)))
         
-        print pages
 
         if len(pages) == 0:
             return u''
@@ -383,7 +382,6 @@ class PaliMahaChulaEngine(Engine):
     def PrepareStatement(self, volume, page):
         select = 'SELECT * FROM main WHERE volume = ? AND page = ?' 
         args = (volume, page)
-        print select, args
         return select, args
 
     def GetContent(self, result):
