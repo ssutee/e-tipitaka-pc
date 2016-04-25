@@ -236,6 +236,30 @@ class PaliSiamSearchThread(SearchThread):
     def Database(self):
         return constants.PALI_SIAM_DB    
 
+class PaliMahaChulaSearchThread(SearchThread):
+
+    @property
+    def Code(self):
+        return constants.PALI_MAHACHULA_CODE
+
+    @property
+    def Database(self):
+        return constants.PALI_MAHACHULA_DB    
+        
+    @property
+    def TableName(self):
+        return 'main'
+        
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['content'] = result[4]
+        r['footer'] = result[5]
+        r['display'] = result[6]
+        return r
+
 class ThaiMahaChulaSearchThread(SearchThread):
 
     @property
@@ -401,6 +425,14 @@ class ThaiMahaMakutDisplayThread(DisplayThread):
     
 class ThaiMahaChulaDisplayThread(DisplayThread):
     pass
+
+class PaliMahaChulaDisplayThread(DisplayThread):
+
+    def ProcessExcerpts(self, excerpts):
+        return utils.ConvertToThaiSearch(excerpts, True)
+
+    def ProcessResult(self, idx, result, excerpts):
+        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
 
 class ThaiWatnaDisplayThread(DisplayThread):
 

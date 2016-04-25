@@ -263,8 +263,10 @@ class Presenter(object):
         self._view.UpdateSlider(self._currentPage, self._model.GetFirstPageNumber(self._currentVolume), 
             self._model.GetTotalPages(self._currentVolume))
 
+        print self._currentVolume, self._currentPage
         content = self._model.GetPage(self._currentVolume, self._currentPage)
-
+        print content
+        
         # work around for fixing font size problem on win32
         self._view.SetText(content)        
         self._view.SetText(content)

@@ -448,7 +448,9 @@ class SearchModelCreator(object):
         if code == constants.ROMAN_SCRIPT_CODE:
             return RomanScriptSearchModel(delegate)
         if code == constants.THAI_POCKET_BOOK_CODE:
-            return ThaiPocketBookModel(delegate)
+            return ThaiPocketBookSearchModel(delegate)
+        if code == constants.PALI_MAHACHULA_CODE:
+            return PaliMahaChulaSearchModel(delegate)
         return None
 
 class ThaiRoyalSearchModel(Model):
@@ -552,6 +554,30 @@ class ThaiMahaChulaSearchModel(Model):
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai MahaChula')) % (self._keywords) )        
         
+class PaliMahaChulaSearchModel(Model):
+
+    @property
+    def Code(self):
+        return constants.PALI_MAHACHULA_CODE
+
+    def __init__(self, delegate):
+        super(PaliMahaChulaSearchModel, self).__init__(delegate)
+        self._volumes = range(45)
+        self._spellChecker = constants.PALI_SPELL_CHECKER
+    
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.PaliMahaChulaSearchThread(keywords, volumes, delegate)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.PaliMahaChulaDisplayThread(results, keywords, delegate, mark, current)
+        
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Pali MahaChula')) % (self._keywords) )        
+
+    def GetBookName(self, volume):
+        return constants.BOOK_NAMES['pali_%s' % (str(volume))].decode('utf8','ignore')
+
+
 class ThaiMahaMakutSearchModel(Model):
 
     @property
@@ -634,14 +660,14 @@ class ThaiScriptSearchModel(ScriptSearchModel):
     def HasVolumeSelection(self):
         return False                
 
-class ThaiPocketBookModel(Model):
+class ThaiPocketBookSearchModel(Model):
 
     @property
     def Code(self):
         return constants.THAI_POCKET_BOOK_CODE
 
     def __init__(self, delegate):
-        super(ThaiPocketBookModel, self).__init__(delegate)
+        super(ThaiPocketBookSearchModel, self).__init__(delegate)
         self._volumes = range(13)
         self._spellChecker = constants.THAI_SPELL_CHECKER
 
