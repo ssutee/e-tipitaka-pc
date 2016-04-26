@@ -197,12 +197,12 @@ class Presenter(object):
 
         body = self._view.Body
         font = body.GetFont()
-        self._printer.SetStandardFonts(14)
+        self._printer.SetStandardFonts(13)
 
         data = self._printer.GetPageSetupData()
         data.SetDefaultMinMargins(False)
-        data.SetMarginTopLeft((20,20))
-        data.SetMarginBottomRight((10,10))        
+        data.SetMarginTopLeft((10,20))
+        data.SetMarginBottomRight((5,10))        
 
     def BringToFront(self):
         self._view.Activate()
