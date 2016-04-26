@@ -324,3 +324,5 @@ def MoveOldUserData():
 
     fout = open(constants.IMPORTED_MARK_FILE, 'w')
     fout.close()
+
+    UpdateDatabases()
