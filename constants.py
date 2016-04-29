@@ -35,9 +35,7 @@ ITEMS_PER_PAGE = 20
 
 FOOTER_STYLE = '#3CBF3F', 4
 
-ETZ_TYPE = u'E-Tipitaka Backup File (*.etz;*.js)|*.etz;*.js'
-IOS_ETZ_TYPE = u'iOS Backup File (*.json.etz)|*.json.etz'
-ANDROID_ETZ_TYPE = u'Android Backup File (*.js)|*.js'
+ETZ_TYPE = u'E-Tipitaka Backup File (*.etz;*.js;*.json)|*.etz;*.js;*.json'
 
 CHECK_VERSION_URL   = 'http://download.watnapahpong.org/data/etipitaka/version.txt'
 

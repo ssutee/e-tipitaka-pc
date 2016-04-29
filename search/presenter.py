@@ -23,6 +23,8 @@ import read.interactor
 import read.view
 import read.presenter
 
+import codecs
+
 class Presenter(object):
     def __init__(self, model, view, interactor):
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
@@ -362,21 +364,30 @@ class Presenter(object):
         conn.commit()
         conn.close()
 
-    def ImportIOSData(self, path):
-        with zipfile.ZipFile(path, 'r') as fz:
-            for filename in fz.namelist():
-                jsonobj = json.loads(fz.read(filename))
-                if jsonobj.get('version', 1) < 2:
-                    continue
-                
-                for item in jsonobj.get('bookmarks', []):
-                    volume = item.get('volume', 0)
-                    page = item.get('page', 0)
-                    code = constants.IOS_CODE_TABLE.get(item.get('code', -1)) 
-                    note = item.get('note', '')
+    def ProcessIOSData(self, text):
+        jsonobj = json.loads(text)
+        if jsonobj.get('version', 1) < 2:
+            return False
+        
+        for item in jsonobj.get('bookmarks', []):
+            volume = item.get('volume', 0)
+            page = item.get('page', 0)
+            code = constants.IOS_CODE_TABLE.get(item.get('code', -1)) 
+            note = item.get('note', '')
 
-                    self.WriteXmlNoteFile(volume, page, code, note)
-    
+            self.WriteXmlNoteFile(volume, page, code, note)
+
+        return True
+
+    def ImportIOSData(self, path):
+        if path.split()[-1] == 'etz':
+            with zipfile.ZipFile(path, 'r') as fz:
+                for filename in fz.namelist():
+                    self.ProcessIOSData(fz.read(filename))
+        else:
+            with codecs.open(path, 'r', 'utf-8') as fin:
+                self.ProcessIOSData(fin.read())
+
     def ImportAndroidData(self, path):
         with open(path, 'r') as f:
             jsonobj = json.load(f)
@@ -402,6 +413,8 @@ class Presenter(object):
                         self.ImportPCData(path)
                     else:
                         self.ImportIOSData(path)
+            elif path.split('.')[-1] == 'json':
+                self.ImportIOSData(path)
             elif path.split('.')[-1] == 'js':
                 self.ImportAndroidData(path)
 
