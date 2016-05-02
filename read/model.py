@@ -429,6 +429,12 @@ class PaliMahaChulaEngine(Engine):
     def canSelectComparingItem(self):
         return False
 
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0        
+
+
 class ThaiMahaChulaEngine(Engine):
 
     def __init__(self):
