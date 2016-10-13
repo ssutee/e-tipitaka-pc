@@ -5,7 +5,9 @@ ARCHFLAGS="-arch i386 -arch x86_64" arch -i386 python setup.py py2app --arch i38
 
 # code signing
 
-codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_osx_carbonu-3.0.0.2.0.dylib
+#codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_osx_carbonu-3.0.0.2.0.dylib
+codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_macud-2.8.0.8.0.dylib
+codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_macud-2.8.0.dylib
 codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/Python.framework
 codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/MacOS/python
 codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app
