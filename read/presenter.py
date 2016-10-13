@@ -1,10 +1,10 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import wx
 import wx.richtext as rt
 from wx.html import HtmlEasyPrinting
 import constants, utils, dialogs, widgets
-import os, json, codecs
+import os, json, codecs, re, sqlite3
 
 from pony.orm import Database, Required, Optional, db_session, select, desc
 from read.model import Model
@@ -121,6 +121,7 @@ class Presenter(object):
         self._keywords = None
         self._paliDictWindow = None
         self._thaiDictWindow = None
+        self._englishDictWindow = None
         
         self._comparePage = {}
         self._compareVolume = {}
@@ -136,8 +137,7 @@ class Presenter(object):
         self._delegate = None
         self._view = view
         self._view.DataSource = self
-        self._view.Delegate = self
-        self._view.SetTitle(self._model.GetTitle())
+        self._view.Delegate = self        
         self._view.Start()
         interactor.Install(self, view)     
         
@@ -194,14 +194,18 @@ class Presenter(object):
 
     def _SetupPrinter(self):
         self._printer = Printer()
+
+        body = self._view.Body
+        font = body.GetFont()
+        self._printer.SetStandardFonts(13)
+
         data = self._printer.GetPageSetupData()
         data.SetDefaultMinMargins(False)
-        data.SetMarginTopLeft((20,20))
-        data.SetMarginBottomRight((10,10))        
+        data.SetMarginTopLeft((10,20))
+        data.SetMarginBottomRight((5,10))        
 
     def BringToFront(self):
-        self._view.Raise()
-        self._view.Iconize(False)
+        self._view.Activate()
 
     def _LoadNoteText(self, volume, page, code=None, index=1):
         textCtrl = self._view.NoteTextCtrl(code, index)
@@ -264,12 +268,13 @@ class Presenter(object):
         # work around for fixing font size problem on win32
         self._view.SetText(content)        
         self._view.SetText(content)
-        self._view.StatusBar.SetStatusText(u'', 0)
-        self._view.StatusBar.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
+        self.SetStatusText(u'', 0)        
+        self.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
 
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
 
-        self._HighlightKeywords(content, self._keywords)        
+        self._HighlightKeywords(content, self._keywords, volume, page)        
+        self._HighlightItems(content)
         self._LoadMarks(self._currentVolume, self._currentPage)
         
         if hasattr(self._delegate, 'OnReadWindowOpenPage'):
@@ -307,35 +312,87 @@ class Presenter(object):
         content = self._model.GetPage(volume, page)
         self._view.SetText(content, code=code, index=index)
         self._view.FormatText(self._model.GetFormatter(volume, page), code=code, index=index)        
-        self._LoadMarks(volume, page, code, index)        
+        self._HighlightItems(content, code, index)
+        self._LoadMarks(volume, page, code, index)
 
         self._model.Code = currentCode                
 
-    def _HighlightKeywords(self, content, keywords):
+    def _HighlightItems(self, content, code=None, index=1):
+        n = -1
+        for item in re.findall(ur'({[๐๑๒๓๔๕๖๗๘๙0-9\.:;]+})', content):
+            n = content.find(item, n+1)
+            
+            body = self._view.Body if code == None else self._view.FocusBody(code, index)
+
+            if wx.__version__[:3]<='2.8':
+                body.Freeze()
+
+            font = body.GetFont()
+            colorCode, diffSize = constants.FOOTER_STYLE
+            body.SetStyle(n, n+len(item), wx.TextAttr(colorCode, wx.NullColour, font))
+
+            if wx.__version__[:3]<='2.8':
+                body.Thaw()
+
+
+    def _HighlightKeywords(self, content, keywords, volume, page):
         if content == u'' or keywords is None: return
 
         font = self._view.Body.GetFont()
         font.SetWeight(wx.FONTWEIGHT_BOLD)
+        fontSize = font.GetPointSize()
         for term in keywords.replace('+',' ').replace('|',' ').split():
             n = -1
             while True:                    
                 n = content.find(self._model.ConvertSpecialCharacters(term), n+1)
                 if n == -1: break                
-                offset = self._model.HighlightOffset                
-                self._view.Body.Freeze()
-                self._view.Body.SetStyle(n-offset, n+len(term)-offset, wx.TextAttr('purple', wx.NullColour, font))
-                self._view.Body.Thaw()
+
+                if wx.__version__[:3]<='2.8':
+                    self._view.Body.Freeze()
+                
+                checkBuddhawaj = False
+                for format in self._model.GetFormatter(volume, page).split():
+                    tag, s, e = format.split('|')
+                    s, e = int(s), int(e)
+                    if tag == 'eh1' and n >= s and n+len(term) <= e:
+                        font.SetPointSize(fontSize * 1.2)
+                        checkBuddhawaj = True
+                    elif tag == 'eh2' and n >= s and n+len(term) <= e:
+                        font.SetPointSize(fontSize * 0.85)
+                    elif tag == 'eh3' and n >= s and n+len(term) <= e:
+                        font.SetPointSize(fontSize * 0.75)
+                    elif tag == 'fn' and n >= s and n+len(term) <= e:
+                        font.SetPointSize(fontSize * 0.8)
+
+                if (self._delegate.SearchingBuddhawaj() and checkBuddhawaj) or not self._delegate.SearchingBuddhawaj():
+                    self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
+
+                if wx.__version__[:3]<='2.8':
+                    self._view.Body.Thaw()
 
     def OnLinkToReference(self, code, volume, item):
-        self._DoCompare(code, volume, 1, item)
+        self._view.HideBookList()
+        index = self._view.AddReadPanel(code)
+        
+        currentCode = self._model.Code
+        
+        self._model.Code = code
+
+        volume, page = self._model.ConvertFromPivot(volume, item, 1)
+        
+        self._model.Code = currentCode 
+
+        if volume == 0:
+            return
+
+        self.OpenAnotherBook(code, index, volume, page)                
 
     def SaveBookmark(self):        
         self._bookmarkManager.Save()
 
     def Close(self):
         self._stopOpen = True
-        self.SaveBookmark()
-        utils.SaveReadWindowPosition(self._view)
+        self.SaveBookmark()        
         if hasattr(self._delegate, 'OnReadWindowClose'):
             self._delegate.OnReadWindowClose(self._code, self)
             
@@ -352,7 +409,7 @@ class Presenter(object):
             key = utils.MakeKey(code, index)
             self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] + 1)
 
-    def Forward(self, code=None):
+    def Forward(self, code=None):        
         code, index = utils.SplitKey(self._lastFocus)
         self._DoForward(code, index)
         
@@ -375,14 +432,16 @@ class Presenter(object):
             self.OpenBook(volume, page, section if section is not None else self._model.GetSection(volume, page))
         elif isinstance(event, wx.CommandEvent):
             self.OpenBook(event.GetSelection()+1, self._model.GetFirstPageNumber(event.GetSelection()+1))
-            
+
     def HandleTextSelection(self, text, code, index):
         text = text.strip().split('\n')[0]        
-        self._view.StatusBar.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
+        self.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
         if self._paliDictWindow is not None:            
             self._paliDictWindow.SetInput(text)
         if self._thaiDictWindow is not None:
             self._thaiDictWindow.SetInput(text)
+        if self._englishDictWindow is not None:
+            self._englishDictWindow.SetInput(text)
             
     def JumpToPage(self, page, code=None, index=1):
         if code is None:
@@ -412,40 +471,64 @@ class Presenter(object):
             
         self.JumpToPage(page, code, index)
 
+    def _CloseDictWindow(self):
+        if self._paliDictWindow is not None:
+            self._paliDictWindow.Close()
+            self._paliDictWindow = None
+
+        if self._thaiDictWindow is not None:
+            self._thaiDictWindow.Close()
+            self._thaiDictWindow = None
+
+        if self._englishDictWindow is not None:
+            self._englishDictWindow.Close()
+            self._englishDictWindow = None
+
+
     def CompareTo(self, index):
+        self._CloseDictWindow()
+        
         item = None    
         items = self._model.GetItems(self._currentVolume, self._currentPage)
-        if len(items) > 1:
+        if len(items) > 1 and self._model.canSelectComparingItem():
             dialog = wx.SingleChoiceDialog(self._view, u'เลือกข้อที่ต้องการเทียบเคียง', 
                 self._model.GetTitle(self._currentVolume), map(lambda x: u'ข้อที่ ' + utils.ArabicToThai(x), items))
             if dialog.ShowModal() == wx.ID_OK:
                 item = items[dialog.GetSelection()]
             dialog.Destroy()
-        elif len(items) == 1:
+        elif len(items) > 0:
             item = items[0]
+        
+        self._DoCompare(constants.COMPARE_CODES[index], item)
 
-        item, sub = self._model.GetSubItem(self._currentVolume, self._currentPage, item)
-        volume = self._model.GetComparingVolume(self._currentVolume, self._currentPage)
-
-        self._DoCompare(constants.CODES[index], volume, sub, item)
-
-    def _DoCompare(self, code, volume, sub, item):        
+    def _DoCompare(self, code, item):        
         if item is None: return
         
         self._view.HideBookList()
         index = self._view.AddReadPanel(code)
+        
+        volume, item, sub = self._model.ConvertToPivot(self._currentVolume, self._currentPage, item)
+        
+        if volume == 0:
+            return
+
         currentCode = self._model.Code
         self._model.Code = code
-        volume = self._model.ConvertVolume(volume, item, sub)
-        page = self._model.ConvertItemToPage(volume, item, sub, code == constants.THAI_MAHACHULA_CODE)
-        self._model.Code = currentCode
+
+        volume, page = self._model.ConvertFromPivot(volume, item, sub)
+        
+        self._model.Code = currentCode 
+
+        if volume == 0:
+            return
+
         self.OpenAnotherBook(code, index, volume, page)
 
     def SetFocus(self, flag, code, index):
         if flag and code is not None:            
             self._focusList.append(utils.MakeKey(code, index))
             self._lastFocus = utils.MakeKey(code, index)
-        elif not flag and code is not None:
+        elif not flag and code is not None and utils.MakeKey(code, index) in self._focusList:
             self._focusList.remove(utils.MakeKey(code, index))
         elif flag and code is None:
             self._focusList = []
@@ -526,7 +609,7 @@ class Presenter(object):
         fontData.EnableEffects(False)
         if curFont != None:
             fontData.SetInitialFont(curFont)
-        dialog = wx.FontDialog(self._view, fontData)
+        dialog = dialogs.SimpleFontDialog(self._view, fontData) if 'wxMac' in wx.PlatformInfo else wx.FontDialog(self._view, fontData)
         if dialog.ShowModal() == wx.ID_OK:
             data = dialog.GetFontData()
             font = data.GetChosenFont()
@@ -542,6 +625,9 @@ class Presenter(object):
         utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)        
         self._view.SetFont(font, code, index)        
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        content = self._model.GetPage(self._currentVolume, self._currentPage)
+        self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)
+        self._HighlightItems(content)
         
     def DecreaseFontSize(self):
         code, index = utils.SplitKey(self._lastFocus)
@@ -550,6 +636,9 @@ class Presenter(object):
         utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)
         self._view.SetFont(font, code, index)
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
+        content = self._model.GetPage(self._currentVolume, self._currentPage)
+        self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)
+        self._HighlightItems(content)
 
     def MarkText(self, code, index, mark=True):
         s,t = self._view.MarkText(code, index) if mark else self._view.UnmarkText(code, index)
@@ -588,8 +677,8 @@ class Presenter(object):
         return ref                        
     
     def IndentLessNoteText(self, textCtrl):
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
         ip = textCtrl.GetInsertionPoint()
         if textCtrl.GetStyle(ip, attr):
             r = rt.RichTextRange(ip, ip)
@@ -598,12 +687,12 @@ class Presenter(object):
 
         if attr.GetLeftIndent() >= 100:
             attr.SetLeftIndent(attr.GetLeftIndent() - 100)
-            attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+            attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
             textCtrl.SetStyle(r, attr)
     
     def IndentMoreNoteText(self, textCtrl):
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
         ip = textCtrl.GetInsertionPoint()
         if textCtrl.GetStyle(ip, attr):
             r = rt.RichTextRange(ip, ip)
@@ -611,7 +700,7 @@ class Presenter(object):
                 r = textCtrl.GetSelectionRange()
 
             attr.SetLeftIndent(attr.GetLeftIndent() + 100)
-            attr.SetFlags(rt.TEXT_ATTR_LEFT_INDENT)
+            attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
             textCtrl.SetStyle(r, attr)
             
     def ApplyFontToNoteText(self, textCtrl):
@@ -621,25 +710,25 @@ class Presenter(object):
         r = textCtrl.GetSelectionRange()
         fontData = wx.FontData()
         fontData.EnableEffects(False)
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_FONT)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_FONT)
         if textCtrl.GetStyle(textCtrl.GetInsertionPoint(), attr):
             fontData.SetInitialFont(attr.GetFont())
 
-        dlg = wx.FontDialog(self._view, fontData)
+        dlg = dialogs.SimpleFontDialog(self._view, fontData) if 'wxMac' in wx.PlatformInfo else wx.FontDialog(self._view, fontData)
         if dlg.ShowModal() == wx.ID_OK:
             fontData = dlg.GetFontData()
             font = fontData.GetChosenFont()
             if font:
-                attr.SetFlags(rt.TEXT_ATTR_FONT)
+                attr.SetFlags(wx.TEXT_ATTR_FONT)
                 attr.SetFont(font)
                 textCtrl.SetStyle(r, attr)
         dlg.Destroy()
 
     def ApplyFontColorToNoteText(self, textCtrl):
         colourData = wx.ColourData()
-        attr = rt.TextAttrEx()
-        attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
+        attr = rt.RichTextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         if textCtrl.GetStyle(textCtrl.GetInsertionPoint(), attr):
             colourData.SetColour(attr.GetTextColour())
 
@@ -652,7 +741,7 @@ class Presenter(object):
                     textCtrl.BeginTextColour(colour)
                 else:
                     r = textCtrl.GetSelectionRange()
-                    attr.SetFlags(rt.TEXT_ATTR_TEXT_COLOUR)
+                    attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
                     attr.SetTextColour(colour)
                     textCtrl.SetStyle(r, attr)
         dlg.Destroy()
@@ -680,12 +769,25 @@ class Presenter(object):
         volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code,index)]
         page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code,index)]        
         
-        note = Model.Note(volume=volume, page=page, 
-            code=code if code is not None else self._model.Code, 
-            text=textCtrl.GetValue(), filename=textCtrl.GetFilename())
-        
-        if textCtrl.GetValue() == u'':
-            note.delete()
+        conn = sqlite3.connect(constants.NOTE_DB)
+        cursor = conn.cursor()
+
+        filename = textCtrl.GetFilename()
+        text = textCtrl.GetValue()
+
+        real_code = code if code is not None else self._model.Code
+
+        cursor.execute('SELECT * FROM Note WHERE volume=? AND page=? AND code=?', (volume, page, real_code))
+        if cursor.fetchone() and text != u'':
+            cursor.execute('UPDATE Note SET text=? WHERE volume=? AND page=? AND code=?', (text, volume, page, real_code))
+        elif text != u'':
+            cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', 
+                           (volume, page, real_code, filename, text))
+        else:
+            cursor.execute('DELETE FROM Note WHERE volume=? AND page=? AND code=?', (volume, page, real_code))
+
+        conn.commit()
+        conn.close()
                         
     def SaveMarkedText(self, code, index):
         key = self._CurrentMarkKey(code, index)                
@@ -758,15 +860,38 @@ class Presenter(object):
     
         self._model.Code = currentCode
 
-    def _ShowConfirmSaveDialog(self, code, volume, data, text):
+    def _ShowConfirmSaveDialog(self, code, volume, start, end, text):
         dlg = wx.FileDialog(self._view, u'โปรดเลือกไฟล์', self._saveDirectory, 
-            '%s_volumn-%02d_page-%04d-%04d' % (code, volume, data['from']+1, data['to']+1), 
+            '%s_volumn-%02d_page-%04d-%04d' % (code, volume, start+1, end+1), 
             u'Plain Text (*.txt)|*.txt', wx.SAVE|wx.OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             with codecs.open(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w', 'utf-8') as f:
                 f.write(text)
             self._saveDirectory = dlg.GetDirectory()                
         dlg.Destroy()
+        
+    def _SavePagesToText(self, title1, title2, volume, start, end, sep):
+        text = u'%s\n%s\n\n' % (title1, title2)
+        for p in range(start, end+1) if start <= end else range(start, end-1, -1):
+            content = self._model.GetPage(volume, p+1)
+            text += u' '*60 + u'หน้าที่ %s\n\n'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore'))) if sep else ''
+            text += u'%s\n\n\n' % (content)
+        self._ShowConfirmSaveDialog(self._model.Code, volume, start, end, text)
+
+    def _SavePagesToPDF(self, volume, start, end):
+        import urllib2, webbrowser
+        start, end = (end, start) if start > end else (start, end)
+        url = constants.PALI_PDF_URL_PATTERN % (volume, start+1, end+1)
+        response = urllib2.urlopen(url).read()
+        obj = json.loads(response)
+        if obj.get('success', False):
+            webbrowser.open_new(obj.get('url'))
+        else:
+            dlg = wx.MessageDialog(self._view, 
+                                   u'เนื่องจากข้อมูลยังไม่สมบูรณ์ กรุณาทดลองใหม่ภายหลัง', 
+                                   u'ไม่พบไฟล์ PDF ต้นฉบับ', style=wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
         
     def ShowSaveDialog(self):
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
@@ -779,14 +904,12 @@ class Presenter(object):
         total = self._model.GetTotalPages(volume)
 
         data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0}
-        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการบันทึก', title1, title2, total, data)        
+        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการบันทึก', title1, title2, total, data, self._model.HasPdf)        
         if dlg.ShowModal() == wx.ID_OK:
-            text = u'%s\n%s\n\n' % (title1, title2)
-            for p in range(data['from'], data['to']+1) if data['from'] <= data['to'] else range(data['from'], data['to']-1, -1):
-                content = self._model.GetPage(volume, p+1)
-                text += u' '*60 + u'หน้าที่ %s\n\n'%(utils.ArabicToThai(str(page+1).decode('utf8','ignore')))
-                text += u'%s\n\n\n' % (content)
-            self._ShowConfirmSaveDialog(self._model.Code, volume, data, text)
+            if data.get('pdf', False):
+                self._SavePagesToPDF(volume, data['from'], data['to'])
+            else:
+                self._SavePagesToText(title1, title2, volume, data['from'], data['to'], data['sep'])
         dlg.Destroy()
     
         self._model.Code = currentCode        
@@ -846,18 +969,28 @@ class Presenter(object):
         self._thaiDictWindow.Raise()
         text = self._view.GetStringSelection(self._lastFocus)
         self._thaiDictWindow.SetInput(text.strip().split('\n')[0].strip())
+
+    def OpenEnglishDict(self):
+
+        def OnDictClose(event):
+            self._englishDictWindow = None
+            event.Skip()
+
+        if self._englishDictWindow is None:
+            self._englishDictWindow = widgets.EnglishDictWindow(self._view)
+            self._englishDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
+            self._englishDictWindow.SetTitle(u'Pali-English Dictionary')
+
+        self._englishDictWindow.Show()
+        self._englishDictWindow.Raise()
+        text = self._view.GetStringSelection(self._lastFocus)
+        self._englishDictWindow.SetInput(text.strip().split('\n')[0].strip())
         
     def ShowContextMenu(self, window, position, code, index):
         self._view.ShowContextMenu(window, position, code, index)
         
     def ShowNotesManager(self):
-        if self._paliDictWindow is not None:
-            self._paliDictWindow.Close()
-            self._paliDictWindow = None
-
-        if self._thaiDictWindow is not None:
-            self._thaiDictWindow.Close()
-            self._thaiDictWindow = None        
+        self._CloseDictWindow()
         
         code, index = utils.SplitKey(self._lastFocus)                
         dlg = dialogs.NoteManagerDialog(self._view.ReadPanel(code, index), code if code is not None else self._model.Code)
@@ -898,3 +1031,6 @@ class Presenter(object):
                 self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))        
             else:
                 self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key])            
+
+    def SetStatusText(self, text, field):
+        self._view.SetStatusText(text, field)

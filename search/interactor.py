@@ -12,7 +12,8 @@ class Interactor(object):
         self.View.TopBar.SearchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
         self.View.TopBar.FontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClick)
         self.View.TopBar.ReadButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
-        
+        self.View.TopBar.SearchCtrl.Bind(wx.EVT_TEXT, self.OnSearchCtrlTextChange)
+
         self.View.TopBar.LanguagesComboBox.Bind(wx.EVT_COMBOBOX, self.OnLanguagesComboBoxSelect)
         self.View.ThemeComboBox.Bind(wx.EVT_COMBOBOX, self.OnThemeComboBoxSelect)
         
@@ -37,6 +38,7 @@ class Interactor(object):
         
         self.View.PaliDictButton.Bind(wx.EVT_BUTTON, self.OnPaliDictButtonClick)
         self.View.ThaiDictButton.Bind(wx.EVT_BUTTON, self.OnThaiDictButtonClick)
+        self.View.EnglishDictButton.Bind(wx.EVT_BUTTON, self.OnEnglishDictButtonClick)
         
         self.View.TopBar.CheckBox.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxChange)
         
@@ -49,8 +51,8 @@ class Interactor(object):
         self.Presenter.Search()
 
     def OnFrameClose(self, event):
-        self.Presenter.Close()
-        event.Skip()
+        if self.Presenter.CanBeClosed:
+            event.Skip()
         
     def OnLanguagesComboBoxSelect(self, event):
         self.Presenter.SelectLanguage(event.GetSelection())
@@ -106,6 +108,9 @@ class Interactor(object):
     def OnUpdateDeleteButton(self, event):
         event.Enable(self.View.HistoryList.GetSelection() > -1)
         
+    def OnSearchCtrlTextChange(self, event):
+        self.Presenter.ShowInputText(self.View.TopBar.SearchCtrl.GetValue())
+        
     def OnStarButtonClick(self, event):
         x,y = self.View.StarButton.GetPosition()
         w,h = self.View.StarButton.GetSize()
@@ -119,3 +124,6 @@ class Interactor(object):
         
     def OnThaiDictButtonClick(self, event):
         self.Presenter.OpenThaiDict()
+
+    def OnEnglishDictButtonClick(self, event):
+        self.Presenter.OpenEnglishDict()

@@ -1,13 +1,13 @@
 #-*- coding:utf-8 -*-
 
 import threads, utils, constants
-import wx, os.path, sys
+import wx, os.path, sys, math, sqlite3
 
 
 import i18n
 _ = i18n.language.ugettext
 
-from pony.orm import Database, Required, Optional, db_session, select, desc
+from pony.orm import Database, Required, Optional, db_session, select, desc, LongUnicode
 
 db = Database('sqlite', constants.DATA_DB, create_db=True)
 
@@ -18,6 +18,7 @@ class History(db.Entity):
     read = Optional(unicode)
     skimmed = Optional(unicode)
     pages = Optional(unicode)
+    notes = Optional(unicode)
 
 db.generate_mapping(create_tables=True)
 
@@ -29,11 +30,16 @@ class Model(object):
 
     @staticmethod
     def GetHistories(index, alphabetSort=True, text=''):
-        if alphabetSort:
-            return select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(lambda h: h.keywords)
-        else:
-            return select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(lambda h: desc(h.id))
-
+        sortDesc = (lambda h: h.keywords) if alphabetSort else (lambda h: desc(h.id))
+        results, start, page = [], 0, 500
+        while True:
+            query = select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(sortDesc)[start:start+page]
+            if len(query) == 0: 
+                break
+            results += list(query)
+            start += page
+        return results
+        
     def __init__(self, delegate):
         self._delegate = delegate
         self._volumes = []
@@ -122,7 +128,7 @@ class Model(object):
     def SaveDisplayResult(self, items, key):
         self._data[key] = items
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         raise NotImplementedError('Subclass needs to implement this method!')
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):
@@ -158,10 +164,19 @@ class Model(object):
                     self._skimmedItems.append(idx+1)
                     self.ReloadDisplay()
 
+    def GetNote(self, idx):
+        return self._notes.get(idx, ('', 0))
+
+    def TakeNote(self, idx, note ,state, code):
+        if self.Code != code:
+            return
+        self._notes[idx] = (note, state)
+        self.ReloadDisplay()
+
     def ReloadDisplay(self):
         self.Display(self._currentPagination)
 
-    def Search(self, keywords):
+    def Search(self, keywords, buddhawaj=False):
         self._keywords = keywords
         self._currentPagination = 0        
         self._clickedPages = []
@@ -171,7 +186,7 @@ class Model(object):
         self._data = {}
                 
         self.CreateSearchThread(keywords, self._volumes if self._mode == constants.MODE_ALL else self._selectedVolumes, 
-            self._delegate).start()
+            self._delegate, buddhawaj).start()
         
     def Display(self, current):
         if len(self._results) == 0:
@@ -196,14 +211,36 @@ class Model(object):
         self._readItems = map(int, history.read.split(',')) if len(history.read) > 0 else []            
         self._skimmedItems = map(int, history.skimmed.split(',')) if len(history.skimmed) > 0 else []
         self._clickedPages = map(int, history.pages.split(',')) if history.pages is not None and len(history.pages) > 0 else []
-                        
+        self._notes = {}
+        if history.notes is not None and len(history.notes) > 0:
+            for token in history.notes.split('~'):
+                idx,note,state = token.split('|')
+                self._notes[int(idx)] = (note, int(state))
+
     @db_session
     def SaveHistory(self, code):
         history = History.get(keywords=self._keywords, code=code) if self._keywords is not None and len(self._keywords) > 0 else None
         if history and self.Code == code:
-            history.read = ','.join(map(str, self._readItems))
-            history.skimmed = ','.join(map(str, self._skimmedItems))
-            history.pages = ','.join(map(str, self._clickedPages))
+            conn = sqlite3.connect(constants.DATA_DB)
+            cursor = conn.cursor()
+            
+            readItems = ','.join(map(str, self._readItems))
+            skimmedItems = ','.join(map(str, self._skimmedItems))
+            clickedPages = ','.join(map(str, self._clickedPages))
+            
+            notes = ''
+            tmp = []            
+            for idx in self._notes:
+                tmp.append('%d|%s|%d' % (idx, self._notes[idx][0], self._notes[idx][1]))
+            if len(tmp) > 0:
+                notes = '~'.join(tmp)
+
+            cursor.execute('UPDATE History SET read=? WHERE keywords=? AND code=?', (readItems, self._keywords, code))
+            cursor.execute('UPDATE History SET skimmed=? WHERE keywords=? AND code=?', (skimmedItems, self._keywords, code))
+            cursor.execute('UPDATE History SET pages=? WHERE keywords=? AND code=?', (clickedPages, self._keywords, code))
+            cursor.execute('UPDATE History SET notes=? WHERE keywords=? AND code=?', (notes, self._keywords, code))
+            conn.commit()
+            conn.close()
                     
     def DisplayNext(self):
         self.Display(self._currentPagination+1)
@@ -237,7 +274,7 @@ class Model(object):
 
         link = u'<font color="black"><b>%s</b></font>'        
         if idx == self._selectedItem:
-            link = u'<table bgcolor="#4688DF"><tr><td><font color="white"><b>%s</b></font></td></tr></table>'
+            link = u'<table><tr><td bgcolor="#4688DF"><font color="white"><b>%s</b></font></td></tr></table>'
             info = ''
         elif idx in self._readItems or idx in self._skimmedItems:
             link = u'<font color="grey" bgcolor="#00FF00">%s</font>'        
@@ -340,8 +377,7 @@ class Model(object):
         return (start, len(self._results) if len(self._results) < end else end)
         
     def GetPages(self):
-        pages = len(self._results)/constants.ITEMS_PER_PAGE
-        return pages if len(self._results) == 0 else pages + 1
+        return int(math.ceil(1.0*len(self._results)/constants.ITEMS_PER_PAGE))
                 
     def _MakeHtmlExcerpts(self, excerpts):
         return u'<font size="4">%s</font><br>'%(excerpts) 
@@ -349,10 +385,24 @@ class Model(object):
     def MakeHtmlResults(self, current):
         mark = self.GetMark(current)        
         pages = self.GetPages()        
-        text = ''
+        text = ''        
         for idx, volume, page, items, excerpts in self.GetDisplayResult('%d:%d'%mark):
+            stateImage = ''
+            noteText = ''
+            if idx in self._notes:
+                state = self._notes[idx][1]
+                if state == 1:
+                    stateImage = '<img src="memory:not-ok.png">'
+                elif state == 2:
+                    stateImage = '<img src="memory:ok.png">'                
+
+                if len(self._notes[idx][0]) > 0:
+                    noteText = '(' + self._notes[idx][0] + ')'
+
+            note = '<a href="note:%d_%s_%s_%s"><img src="memory:edit-notes.png"></a> %s %s' % (idx, volume, page, self.Code, stateImage, noteText)
             text += u'<div>' + self._MakeHtmlEntry(idx, volume, page) + \
-                self._MakeHtmlExcerpts(excerpts) + self._MakeHtmlItemInfo(volume, items) + u'</div><br>'
+                self._MakeHtmlExcerpts(excerpts) + self._MakeHtmlItemInfo(volume, items) + \
+                u'</div> %s <br>' % (note)
                 
         return u'<html><body bgcolor="%s">'%(utils.LoadThemeBackgroundHex(constants.SEARCH)) + self._MakeHtmlSummary() + self._MakeHtmlHeader(mark) + self.MakeHtmlSuggestion(found=True) \
             + text + '<br>' + self._MakeHtmlPagination(pages, current) + '</body></html>'
@@ -367,29 +417,40 @@ class Model(object):
         return constants.BOOK_NAMES['%s_%s' % (self.Code, str(volume))].decode('utf8','ignore')
         
     def GetBookNames(self):
-        return [self.GetBookName(volume+1) for volume in range(self.GetSectionBoundary(2))]
+        return [self.GetBookName(volume+1) for volume in range(len(self._volumes))]
 
     def ConvertSpecialCharacters(self, text):
         return text
+
+    def HasBuddhawaj(self):
+        return False
+
+    def HasVolumeSelection(self):
+        return True
 
 class SearchModelCreator(object):
     
     @staticmethod
     def Create(delegate, index):
-        if index == 0:
+        code = constants.CODES[index]
+        if code == constants.THAI_ROYAL_CODE:
             return ThaiRoyalSearchModel(delegate)
-        if index == 1:
+        if code == constants.PALI_SIAM_CODE:
             return PaliSiamSearchModel(delegate)
-        if index == 2:
+        if code == constants.THAI_WATNA_CODE:
+            return ThaiWatnaSearchModel(delegate)
+        if code == constants.THAI_MAHAMAKUT_CODE:
             return ThaiMahaMakutSearchModel(delegate)
-        if index == 3:
+        if code == constants.THAI_MAHACHULA_CODE:
             return ThaiMahaChulaSearchModel(delegate)
-        if index == 4:
+        if code == constants.THAI_FIVE_BOOKS_CODE:
             return ThaiFiveBooksSearchModel(delegate)
-        if index == 5:
+        if code == constants.ROMAN_SCRIPT_CODE:
             return RomanScriptSearchModel(delegate)
-        if index == 6:
-            return ThaiScriptSearchModel(delegate)
+        if code == constants.THAI_POCKET_BOOK_CODE:
+            return ThaiPocketBookSearchModel(delegate)
+        if code == constants.PALI_MAHACHULA_CODE:
+            return PaliMahaChulaSearchModel(delegate)
         return None
 
 class ThaiRoyalSearchModel(Model):
@@ -403,7 +464,7 @@ class ThaiRoyalSearchModel(Model):
         self._volumes = range(45)
         self._spellChecker = constants.THAI_SPELL_CHECKER
     
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiRoyalSearchThread(keywords, volumes, delegate)
         
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
@@ -427,7 +488,7 @@ class PaliSiamSearchModel(Model):
     def Keywords(self):
         return utils.ConvertToPaliSearch(self._keywords)
     
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         keywords = utils.ConvertToThaiSearch(keywords, True)
         return threads.PaliSiamSearchThread(keywords, volumes, delegate)
 
@@ -443,6 +504,36 @@ class PaliSiamSearchModel(Model):
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
         
+class ThaiWatnaSearchModel(Model):
+
+    @property
+    def Code(self):
+        return constants.THAI_WATNA_CODE
+
+    def __init__(self, delegate):
+        super(ThaiWatnaSearchModel, self).__init__(delegate)
+        self._volumes = range(33)
+        self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def HasBuddhawaj(self):
+        return True
+
+    def HasVolumeSelection(self):
+        return False        
+
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.ThaiWatnaSearchThread(keywords, volumes, delegate, buddhawaj=buddhawaj)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.ThaiWatnaDisplayThread(results, keywords, delegate, mark, current)
+        
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Buddhawajana Pitaka')) % (self._keywords) )        
+
+    def _GetEntry(self, idx, volume, page):
+        return u'%s. %s %s %s %s' % (utils.ArabicToThai(unicode(idx)), u'พุทธวจนปิฎก เล่มที่',
+            utils.ArabicToThai(volume), _('Page'), utils.ArabicToThai(page))
+
 class ThaiMahaChulaSearchModel(Model):
 
     @property
@@ -454,7 +545,7 @@ class ThaiMahaChulaSearchModel(Model):
         self._volumes = range(45)
         self._spellChecker = constants.THAI_SPELL_CHECKER
     
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiMahaChulaSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
@@ -463,6 +554,30 @@ class ThaiMahaChulaSearchModel(Model):
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai MahaChula')) % (self._keywords) )        
         
+class PaliMahaChulaSearchModel(Model):
+
+    @property
+    def Code(self):
+        return constants.PALI_MAHACHULA_CODE
+
+    def __init__(self, delegate):
+        super(PaliMahaChulaSearchModel, self).__init__(delegate)
+        self._volumes = range(45)
+        self._spellChecker = constants.PALI_SPELL_CHECKER
+    
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.PaliMahaChulaSearchThread(keywords, volumes, delegate)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.PaliMahaChulaDisplayThread(results, keywords, delegate, mark, current)
+        
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Pali MahaChula')) % (self._keywords) )        
+
+    def GetBookName(self, volume):
+        return constants.BOOK_NAMES['pali_%s' % (str(volume))].decode('utf8','ignore')
+
+
 class ThaiMahaMakutSearchModel(Model):
 
     @property
@@ -481,7 +596,7 @@ class ThaiMahaMakutSearchModel(Model):
             return 74
         return 91
         
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiMahaMakutSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
@@ -513,7 +628,7 @@ class RomanScriptSearchModel(ScriptSearchModel):
     def Code(self):
         return constants.ROMAN_SCRIPT_CODE
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.RomanScriptSearchThread(keywords, volumes, delegate)
 
     def NotFoundMessage(self):
@@ -521,6 +636,9 @@ class RomanScriptSearchModel(ScriptSearchModel):
 
     def GetBookName(self, volume):
         return constants.ROMAN_SCRIPT_TITLES[volume][1]
+
+    def HasVolumeSelection(self):
+        return True                
 
 
 class ThaiScriptSearchModel(ScriptSearchModel):
@@ -530,7 +648,7 @@ class ThaiScriptSearchModel(ScriptSearchModel):
         return constants.THAI_SCRIPT_CODE
 
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiScriptSearchThread(keywords, volumes, delegate)
 
     def NotFoundMessage(self):
@@ -538,6 +656,54 @@ class ThaiScriptSearchModel(ScriptSearchModel):
 
     def GetBookName(self, volume):
         return constants.THAI_SCRIPT_TITLES[volume][1]
+
+    def HasVolumeSelection(self):
+        return False                
+
+class ThaiPocketBookSearchModel(Model):
+
+    @property
+    def Code(self):
+        return constants.THAI_POCKET_BOOK_CODE
+
+    def __init__(self, delegate):
+        super(ThaiPocketBookSearchModel, self).__init__(delegate)
+        self._volumes = range(13)
+        self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def HasVolumeSelection(self):
+        return False
+
+    def GetSectionBoundary(self, position):
+        return 0
+
+    def _GetColorCode(self, volume):
+        return None
+
+    def _GetResultSectionCounts(self):
+        return []
+
+    def _MakeHtmlItemInfo(self, volume, items):
+        return ''
+        
+    def _MakeHtmlSummary(self):
+        return ''        
+
+    def HasBuddhawaj(self):
+        return True
+
+    def _GetEntry(self, idx, volume, page):
+        return u'%s. %s %s %s' % (utils.ArabicToThai(unicode(idx)), 
+            self.GetBookName(volume), _('Page'), utils.ArabicToThai(page))
+
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.ThaiPocketBookSearchThread(keywords, volumes, delegate, buddhawaj=buddhawaj)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.ThaiPocketBookDisplayThread(results, keywords, delegate, mark, current)
+
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai Pocket Book')) % (self._keywords) )
 
 
 class ThaiFiveBooksSearchModel(Model):
@@ -550,6 +716,9 @@ class ThaiFiveBooksSearchModel(Model):
         super(ThaiFiveBooksSearchModel, self).__init__(delegate)
         self._volumes = range(5)
         self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def HasVolumeSelection(self):
+        return False                
 
     def GetSectionBoundary(self, position):
         return 0
@@ -573,7 +742,7 @@ class ThaiFiveBooksSearchModel(Model):
     def GetBookName(self, volume):
         return constants.FIVE_BOOKS_NAMES[int(volume)-1]
 
-    def CreateSearchThread(self, keywords, volumes, delegate):
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         return threads.ThaiFiveBooksSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        

@@ -3,7 +3,11 @@
 import wx
 import os, sys, os.path
 import widgets
-from wx.aui import AuiPaneInfo
+
+try:
+    import wx.aui as aui
+except ImportError,e:
+    import wx.lib.agw.aui as aui
 
 import i18n
 _ = i18n.language.ugettext
@@ -45,6 +49,10 @@ class View(AuiBaseFrame):
     @property
     def SearchCtrl(self):
         return self._topBar.SearchCtrl
+
+    @property
+    def BuddhawajOnly(self):
+        return self._topBar._buddhawajOnly
     
     @property
     def Delegate(self):
@@ -59,10 +67,6 @@ class View(AuiBaseFrame):
     @property
     def ResultsWindow(self):
         return self._resultsWindow
-        
-    @property
-    def StatusBar(self):
-        return self._statusBar
         
     @property
     def VolumesRadio(self):
@@ -88,6 +92,10 @@ class View(AuiBaseFrame):
     def ThaiDictButton(self):
         return self._topBar.ThaiDictButton
                 
+    @property
+    def EnglishDictButton(self):
+        return self._topBar.EnglishDictButton
+
     @property
     def ThemeComboBox(self):
         return self._topBar.ThemeComboBox
@@ -116,29 +124,14 @@ class View(AuiBaseFrame):
     def DeleteButton(self):
         return self._deleteButton
         
-    def __init__(self):
-        self.App = wx.App(redirect=False, clearSigInt=True, useBestVisual=True)        
-        rect = utils.LoadSearchWindowPosition()
+    def __init__(self, parent):        
+        super(View, self).__init__(parent, -1, title=_('Search'), style=wx.CAPTION|wx.NO_BORDER)
 
+        self._parent = parent
         self._bookmarkMenu = None
 
-        pos = 0,0
-        if rect is not None:
-            pos = rect[0], rect[1]
-
-        size = min(1024, wx.DisplaySize()[0]), min(748, wx.DisplaySize()[1])
-        if rect is not None:
-            size = rect[2], rect[3]
-            
-        super(View, self).__init__(None, id=wx.ID_ANY, title=self.AppName(), pos=pos, size=size)
-
-        if rect is None:
-            self.CenterOnScreen()
-
-        icon = wx.IconBundle()
-        icon.AddIconFromFile(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)
-        self.SetIcons(icon)
-
+        self.SetBackgroundColour(wx.Colour(0xED,0xED,0xED,0xFF))
+        
         self._resultsWindow = widgets.ResultsWindow(self)
         self._resultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         
@@ -147,10 +140,9 @@ class View(AuiBaseFrame):
             self._resultsWindow.SetStandardFonts(self._font.GetPointSize(), self._font.GetFaceName())
         
         self._topBar = widgets.SearchToolPanel(self, self._font)
-        self._CreateStatusBar()
 
         self.SetCenterPane(self._resultsWindow)
-        info = AuiPaneInfo().CloseButton(False).Resizable(False).CaptionVisible(False)
+        info = aui.AuiPaneInfo().CloseButton(False).Resizable(False).CaptionVisible(False)
         info = info.FloatingSize((720, 125)).MinSize((720, 125)).Top()
         self.AddPane(self._topBar, info)
         
@@ -167,6 +159,12 @@ class View(AuiBaseFrame):
             
         self._sortingRadioBox = wx.RadioBox(panel, wx.ID_ANY, _('Sorting'), choices=[_('Alphabet'), _('Creation')], majorDimension=2)
         self._filterCtrl = wx.SearchCtrl(panel, wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
+        
+        if 'wxMac' in wx.PlatformInfo:
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font.SetFaceName('Tahoma')
+            self._filterCtrl.SetFont(font)
+        
         self._deleteButton = wx.BitmapButton(panel, wx.ID_ANY,
             wx.BitmapFromImage(wx.Image(constants.FILE_DELETE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(18,18)))
 
@@ -181,17 +179,7 @@ class View(AuiBaseFrame):
         sizer.Add(bottomSizer, 0, wx.EXPAND)
         
         panel.SetSizer(sizer)
-        self.AddPane(panel, AuiPaneInfo().CloseButton(False).CaptionVisible(False).BestSize((200, -1)).Right())        
-
-    def _CreateStatusBar(self):
-        self._statusBar = self.CreateStatusBar()
-        self._statusBar.SetFieldsCount(4)
-        self._statusBar.SetStatusWidths([-1,170,170,100])
-        self._progressBar = wx.Gauge(self._statusBar, -1, 100, size=(100,-1))
-        self._progressBar.SetBezelFace(3)
-        self._progressBar.SetShadowWidth(3)
-        self._progressBar.SetRect(self._statusBar.GetFieldRect(3))
-        self._statusBar.Bind(wx.EVT_SIZE, lambda event: self._progressBar.SetRect(self._statusBar.GetFieldRect(3)))
+        self.AddPane(panel, aui.AuiPaneInfo().CloseButton(False).CaptionVisible(False).BestSize((200, -1)).Right())        
 
     def DisableSearchControls(self):
         for control in ['SearchButton', 'ForwardButton', 'BackwardButton']:
@@ -217,10 +205,10 @@ class View(AuiBaseFrame):
         self._resultsWindow.SetPage(html)
         
     def SetProgress(self, progress):
-        self._progressBar.SetValue(progress)
+        self._parent.ProgressBar.SetValue(progress)
         
-    def SetStatusText(self, text, position):
-        self._statusBar.SetStatusText(text, position)
+    def SetStatusText(self, text, field):
+        self._parent.StatusBar.SetStatusText(text, field)
         
     def ScrollTo(self, position):
         if 'wxMSW' in wx.PlatformInfo:
@@ -244,7 +232,7 @@ class View(AuiBaseFrame):
         dlg = BookmarkManagerDialog(self, self._delegate.BookmarkItems)
         dlg.ShowModal()
         self._delegate.SaveBookmark()
-        dlg.Destroy()
+        dlg.Destroy()        
         
     def ShowVolumesDialog(self, dataSource, volumes, OnDismiss):
         dialog = VolumesDialog(self, volumes, dataSource)
@@ -253,15 +241,11 @@ class View(AuiBaseFrame):
         OnDismiss(ret, dialog.GetCheckedVolumes())
         dialog.Destroy()
         
-    def SetTitle(self, title):
-        self.SetTitle(title)
-        
     def SetHistoryListItems(self, items):
-        self._historyList.SetItems(items)
-
-    def AppName(self):
-        return '%s (%s)' % (_('AppName'), 'E-Tipitaka' + ' v' + settings.VERSION)  
+        self._historyList.SetItems(items)    
 
     def Start(self):
-        self.Show()        
-        self.App.MainLoop()
+        if wx.__version__[:3]<='2.8':
+            self.Show()
+        else:
+            self.Activate()        

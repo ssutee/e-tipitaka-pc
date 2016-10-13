@@ -21,8 +21,10 @@ DEFAULT_LANGUAGES = os.environ.get('LANG', '').split(':')
 DEFAULT_LANGUAGES += ['th']
  
 lc, encoding = locale.getdefaultlocale()
+
+languages = []
 if lc:
-    languages = [lc]
+    languages += [lc]
  
 # Concat all languages (env + default locale),
 #  and here we have the languages and location of the translations
