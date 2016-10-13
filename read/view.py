@@ -5,7 +5,11 @@ import os, sys, os.path
 import widgets, constants, utils
 from widgets import AuiBaseFrame
 from dialogs import BookMarkDialog, BookmarkManagerDialog
-from wx.aui import AuiPaneInfo
+
+try:
+    import wx.aui as aui
+except ImportError,e:
+    import wx.lib.agw.aui as aui
 
 import i18n
 _ = i18n.language.ugettext
@@ -292,11 +296,11 @@ class View(AuiBaseFrame):
         
         self.SetCenterPane(self._readPanel, caption=True)
 
-        info = AuiPaneInfo().CaptionVisible(False).Resizable(False)
+        info = aui.AuiPaneInfo().CaptionVisible(False).Resizable(False)
         info = info.FloatingSize((740, 75)).MinSize((740, 75)).Top().Layer(0)
         self.AddPane(self._toolPanel, info.Name('Tool'))
 
-        info = AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
+        info = aui.AuiPaneInfo().CaptionVisible(False).TopDockable(False).BottomDockable(False)
         info = info.BestSize((250, 768)).FloatingSize((250, 768)).MinSize((0, 0)).Left().Layer(1)        
         self.AddPane(self._listPanel, info.Name('BookList'))        
         
@@ -338,7 +342,7 @@ class View(AuiBaseFrame):
         index = 1 if len(self._comparePanel.keys()) == 0 else sum(map(lambda k:int(k.startswith(code)), self._comparePanel.keys()))+1
         
         self._comparePanel[utils.MakeKey(code,index)] = ReadPanelCreator.Create(self, code, index, self._font, self._delegate)
-        info = AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
+        info = aui.AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
         self.AddPane(self._comparePanel[utils.MakeKey(code,index)], info.Name(utils.MakeKey(code,index)))
         
         return index

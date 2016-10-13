@@ -3,7 +3,11 @@
 import wx
 import os, sys, os.path
 import widgets
-from wx.aui import AuiPaneInfo
+
+try:
+    import wx.aui as aui
+except ImportError,e:
+    import wx.lib.agw.aui as aui
 
 import i18n
 _ = i18n.language.ugettext
@@ -138,7 +142,7 @@ class View(AuiBaseFrame):
         self._topBar = widgets.SearchToolPanel(self, self._font)
 
         self.SetCenterPane(self._resultsWindow)
-        info = AuiPaneInfo().CloseButton(False).Resizable(False).CaptionVisible(False)
+        info = aui.AuiPaneInfo().CloseButton(False).Resizable(False).CaptionVisible(False)
         info = info.FloatingSize((720, 125)).MinSize((720, 125)).Top()
         self.AddPane(self._topBar, info)
         
@@ -175,7 +179,7 @@ class View(AuiBaseFrame):
         sizer.Add(bottomSizer, 0, wx.EXPAND)
         
         panel.SetSizer(sizer)
-        self.AddPane(panel, AuiPaneInfo().CloseButton(False).CaptionVisible(False).BestSize((200, -1)).Right())        
+        self.AddPane(panel, aui.AuiPaneInfo().CloseButton(False).CaptionVisible(False).BestSize((200, -1)).Right())        
 
     def DisableSearchControls(self):
         for control in ['SearchButton', 'ForwardButton', 'BackwardButton']:

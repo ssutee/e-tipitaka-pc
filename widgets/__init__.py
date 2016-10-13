@@ -1,7 +1,12 @@
 #-*- coding:utf-8 -*-
 
 import wx
-import wx.aui as aui
+
+try:
+    import wx.aui as aui
+except ImportError,e:
+    import wx.lib.agw.aui as aui
+
 import wx.lib.buttons as buttons
 import wx.html
 import sys, os, os.path, sys, codecs, re, cPickle, sqlite3
@@ -14,8 +19,6 @@ import abc
 _ = i18n.language.ugettext
 
 class DictWindow(wx.Frame):
-    
-    __metaclass__ = abc.ABCMeta
     
     def __init__(self, *args, **kwargs):
         wx.Frame.__init__(self, *args, **kwargs)
@@ -80,15 +83,12 @@ class DictWindow(wx.Frame):
         if not fontError:
             self.input.SetValue(u'')
                 
-    @abc.abstractmethod
     def LookupDictSQLite(self, word1, word2=None, prefix=False):
         return
 
-    @abc.abstractmethod
     def ConnectDatabase(self):
         return
         
-    @abc.abstractmethod
     def OnTextEntered(self, event):        
         return
 
@@ -204,7 +204,7 @@ class EnglishDictWindow(DictWindow):
 
 
 class ThaiDictWindow(DictWindow):
-    
+
     def ConnectDatabase(self):
         return sqlite3.connect(constants.THAI_DICT_DB)
 
@@ -284,6 +284,7 @@ class AuiBaseFrame(aui.AuiMDIChildFrame):
             auiFlags -= aui.AUI_MGR_TRANSPARENT_HINT
             auiFlags |= aui.AUI_MGR_VENETIAN_BLINDS_HINT
         self._mgr = aui.AuiManager(self, flags=auiFlags)
+        self._mgr = aui.AuiManager(self)
         
         self.Bind(wx.EVT_CLOSE, self.OnAuiBaseClose)
         

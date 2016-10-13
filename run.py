@@ -23,12 +23,17 @@ import read.interactor
 import read.view
 import read.presenter
 
-import wx, wx.aui
+import wx
+
+try:
+    import wx.aui as aui
+except ImportError,e:
+    import wx.lib.agw.aui as aui
 
 import i18n
 _ = i18n.language.ugettext
 
-class ParentFrame(wx.aui.AuiMDIParentFrame):
+class ParentFrame(aui.AuiMDIParentFrame):
 
     @property
     def ProgressBar(self):
@@ -57,7 +62,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         if rect is not None:
             size = rect[2], rect[3]
 
-        wx.aui.AuiMDIParentFrame.__init__(self, parent, wx.ID_ANY, title=appname,
+        aui.AuiMDIParentFrame.__init__(self, parent, wx.ID_ANY, title=appname,
             pos=pos, size=size, style=wx.DEFAULT_FRAME_STYLE)
 
         icon = wx.IconBundle()
@@ -102,7 +107,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         for code in self._presenters:
             self._presenter.SaveHistory(code)
         for child in self.GetClientWindow().GetChildren():
-            if isinstance(child, wx.aui.AuiMDIChildFrame):
+            if isinstance(child, aui.AuiMDIChildFrame):
                 try:
                     child.Close()
                 except wx.PyAssertionError,e:
@@ -158,7 +163,7 @@ utils.MoveOldUserData()
 
 sys.excepthook = excepthook
 
-wx.Log.SetLogLevel(0)
+wx.Log.SetLogLevel(wx.LOG_FatalError)
 
 app = MyApp(redirect=False, clearSigInt=True, useBestVisual=True)
 
