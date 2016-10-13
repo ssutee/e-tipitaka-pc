@@ -6,9 +6,14 @@ Usage:
 """
 
 from setuptools import setup
+import distutils
 import sys
+import opcode
+import os
 
 sys.setrecursionlimit(10000)
+
+distutils_path = os.path.join(os.path.dirname(opcode.__file__), 'distutils')
 
 APP = ['run.py']
 DATA_FILES = ['resources']
