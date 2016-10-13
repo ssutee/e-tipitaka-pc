@@ -9,7 +9,6 @@ from whoosh.filedb.filestore import FileStorage
 from whoosh.index import open_dir
 from appdirs import user_data_dir, user_log_dir
 
-
 APP_NAME = 'E-Tipitaka'
 APP_AUTHOR = 'Sutee'
 
@@ -17,9 +16,11 @@ VIRTURE_STORE = user_data_dir('VirtualStore', '')
 
 HOME = expanduser("~")
 
-CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct']
-COMPARE_CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'romanct']
-COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
+CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc']
+COMPARE_CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'romanct', 'palimc']
+COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script', u'บาลี (มหาจุฬาฯ)']
+
+LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'Roman Script', u'บาลี (มหาจุฬาฯ)']
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -34,9 +35,7 @@ ITEMS_PER_PAGE = 20
 
 FOOTER_STYLE = '#3CBF3F', 4
 
-ETZ_TYPE = u'E-Tipitaka Backup File (*.etz;*.js)|*.etz;*.js'
-IOS_ETZ_TYPE = u'iOS Backup File (*.json.etz)|*.json.etz'
-ANDROID_ETZ_TYPE = u'Android Backup File (*.js)|*.js'
+ETZ_TYPE = u'E-Tipitaka Backup File (*.etz;*.js;*.json)|*.etz;*.js;*.json'
 
 CHECK_VERSION_URL   = 'http://download.watnapahpong.org/data/etipitaka/version.txt'
 
@@ -149,6 +148,7 @@ THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.db')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
 THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.db')
 THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.db')
+PALI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'palimc.db')
 
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
 
@@ -159,6 +159,7 @@ ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english.db')
 THAI_FIVE_BOOKS_CODE = 'thaibt'
 THAI_ROYAL_CODE = 'thai'
 THAI_MAHACHULA_CODE = 'thaimc'
+PALI_MAHACHULA_CODE = 'palimc'
 THAI_MAHAMAKUT_CODE = 'thaimm'
 PALI_SIAM_CODE = 'pali'
 THAI_SCRIPT_CODE = 'thaict'
@@ -293,6 +294,7 @@ IOS_CODE_TABLE = {
     6: 'thaiwn',
     7: 'thaipb',
     8: 'romanct',
+    9: 'palimc',
 }
 
 ANDROID_CODE_TABLE = {
@@ -304,4 +306,5 @@ ANDROID_CODE_TABLE = {
     5: 'thaiwn',
     6: 'thaipb',
     7: 'romanct',    
+    8: 'palimc',
 }

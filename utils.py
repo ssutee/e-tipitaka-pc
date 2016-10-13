@@ -32,7 +32,10 @@ class BookmarkManager(object):
                         roots.append(child)
                 else:
                     tokens = ArabicToThai(text.strip()).split()
-                    root.append((int(tokens[1]), int(tokens[3]), text.strip()))
+                    try:
+                        root.append((int(tokens[1]), int(tokens[3]), text.strip()))
+                    except UnicodeEncodeError, e:
+                        continue
         map(lambda x:x.sort(), roots)
         
     def Save(self):
@@ -281,6 +284,8 @@ def ShortName(code):
         return u'พุทธวจนปิฎก'
     if code == constants.THAI_POCKET_BOOK_CODE:
         return u'หมวดธรรม'
+    if code == constants.PALI_MAHACHULA_CODE:
+        return u'มหาจุฬา (บาลี)'
     raise ValueError(code)
 
 def GetFilePaths(directory):
@@ -319,3 +324,5 @@ def MoveOldUserData():
 
     fout = open(constants.IMPORTED_MARK_FILE, 'w')
     fout.close()
+
+    UpdateDatabases()

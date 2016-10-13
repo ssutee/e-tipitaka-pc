@@ -69,6 +69,7 @@ class Engine(object):
     def GetFirstPage(self, volume):
         pages = map(lambda x:u'%s'%(x), range(0, self.GetTotalPages(volume)))
         
+
         if len(pages) == 0:
             return u''
 
@@ -359,6 +360,81 @@ class ThaiWatnaEngine(Engine):
             return volume + 25
         return volume - 8
 
+class PaliMahaChulaEngine(Engine):
+
+    def __init__(self):
+        super(PaliMahaChulaEngine, self).__init__()
+        self._code = constants.PALI_MAHACHULA_CODE
+        self._conn = sqlite3.connect(constants.PALI_MAHACHULA_DB)
+        self._searcher = self._conn.cursor()
+
+    @property
+    def HighlightOffset(self):
+        return 1 if 'wxMac' in wx.PlatformInfo else 0
+
+    def GetBookName(self, volume):
+        return constants.BOOK_NAMES['%s_%s' % ('pali', str(volume))].decode('utf8','ignore')
+
+    def GetSubtitle(self, volume, section=None):
+        tokens = constants.BOOK_NAMES['%s_%s' % ('pali', str(volume))].decode('utf8','ignore').split()
+        return '%s %s'%(' '.join(tokens[:3]),' '.join(tokens[3:]))
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?' 
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return None if result.get('content') is None else result.get('content') + result.get('footer', u'')
+
+    def GetTitle(self, volume=None):
+        if not volume:
+            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาบาลี)'
+        return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+            r['footer'] = result[5]
+            r['display'] = result[6]
+        return r
+
+    def GetSubItem(self, volume, page, item): 
+        item, sub = super(PaliMahaChulaEngine, self).GetSubItem(volume, page, item)
+        page = constants.BOOK_ITEMS['thaimc'][volume][sub][item][0]
+        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
+
+    def GetSectionName(self, volume):
+        if volume <= 8:
+            return constants.SECTION_PALI_NAMES[0]
+        if volume <= 33:
+            return constants.SECTION_PALI_NAMES[1]
+        return constants.SECTION_PALI_NAMES[2]        
+        
+    def ConvertSpecialCharacters(self, text):
+        return utils.ConvertToPaliSearch(text, True)        
+
+    def ConvertItemToPage(self, volume, item, sub, checked=False):
+        try:
+            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+        except KeyError, e:
+            return 0
+        except TypeError, e:
+            return 0
+
+    def canSelectComparingItem(self):
+        return False
+
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0        
+
+
 class ThaiMahaChulaEngine(Engine):
 
     def __init__(self):
@@ -597,7 +673,7 @@ class RomanScriptEngine(ScriptEngine):
         return r        
 
     def GetCompareChoices(self):
-        return [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
+        return constants.COMPARE_CHOICES
 
     def GetTotalPages(self, volume):
         self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
@@ -723,6 +799,8 @@ class Model(object):
             self._engine[code] = ThaiWatnaEngine()
         elif constants.THAI_POCKET_BOOK_CODE == code:
             self._engine[code] = ThaiPocketBookEngine()
+        elif constants.PALI_MAHACHULA_CODE == code:
+            self._engine[code] = PaliMahaChulaEngine()            
         else:
             raise ValueError(code)
 
