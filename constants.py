@@ -152,7 +152,7 @@ THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.db')
 THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.db')
 PALI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'palimc.db')
 
-PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.db')
+PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.3.db')
 
 PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 THAI_DICT_DB = os.path.join(RESOURCES_DIR, 'thaidict.db')
