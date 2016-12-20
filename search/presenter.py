@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import search.model
-from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog, NoteDialog
+from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog, NoteDialog, MarkManagerDialog
 import wx, zipfile, os, json, tempfile
 import xml.etree.ElementTree as ET
 import wx.richtext as rt

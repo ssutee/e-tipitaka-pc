@@ -234,6 +234,10 @@ class View(AuiBaseFrame):
         return self._toolPanel.NotesButton
 
     @property
+    def MarkButton(self):
+        return self._toolPanel.MarkButton
+
+    @property
     def InputItem(self):
         return self._inputItem
         

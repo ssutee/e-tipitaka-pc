@@ -3,11 +3,11 @@
 import wx
 from wx.lib.combotreebox import ComboTreeBox
 import wx.richtext as rt
-import sys, os, re
+import sys, os, re, json
 import i18n
 _ = i18n.language.ugettext
 
-import settings
+import settings, constants, utils
 import read.model
 
 from pony.orm import db_session
@@ -122,6 +122,130 @@ class DataXferPagesValidator(wx.PyValidator):
             return
             
         event.Skip()
+
+class MarkManagerDialog(wx.Dialog):
+    def __init__(self, parent, code=None, delegate=None):
+        super(MarkManagerDialog, self).__init__(parent, wx.ID_ANY, u'รายการไฮไลท์', size=(600,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+        self._result = None
+        self._code = code
+        self._delegate = delegate
+        
+        self.Center()        
+        self.SetBackgroundColour('white')        
+
+        self._searchCtrl = wx.SearchCtrl(self, wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
+        
+        if 'wxMac' in wx.PlatformInfo:
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font.SetFaceName('Tahoma')
+            self._searchCtrl.SetFont(font)
+
+        self._searchCtrl.SetFocus()
+        self._searchCtrl.Bind(wx.EVT_TEXT, self.OnSearchCtrlTextEnter)
+
+
+        self._items = self._loadMarkItems(code)
+        self._markListBox = wx.ListBox(self, wx.ID_ANY, choices=self._items, style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
+        self._markListBox.Bind(wx.EVT_LISTBOX_DCLICK, self.OnMarkListBoxDoubleClick)
+
+
+        self._readButton = wx.Button(self, wx.ID_ANY, u'อ่าน')
+        self._readButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateReadButton)
+        self._readButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self._searchCtrl, 0, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(self._markListBox, 1, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(self._readButton, 0, wx.CENTER|wx.BOTTOM, 10)
+        self.SetSizer(sizer)
+
+    @property
+    def Delegate(self):
+        return self._delegate
+        
+    @Delegate.setter
+    def Delegate(self, delegate):
+        self._delegate = delegate       
+
+
+
+    def _loadMarkItems(self, code):
+
+        def deleteMarks(mark, data):
+            result = []
+            for item in data:
+                result += deleteMark(mark, item)
+            return result
+
+        def deleteMark(mark, item):
+            if item[0] and mark[1] <= item[1] and mark[2] >= item[2]:
+                return []
+            if item[0] and mark[1] <= item[1] and mark[2] < item[2] and mark[2] > item[1]:
+                return [[True, mark[2], item[2]]]
+            if item[0] and mark[1] > item[1] and mark[2] >= item[2] and mark[1] < item[2]:
+                return [[True, item[1], mark[1]]]
+            return [item]
+
+
+        path = os.path.join(constants.MARKS_PATH, self._model.Code if code is None else code)
+        if not os.path.exists(path):
+            os.makedirs(path)
+            return []
+
+        items = []
+        for filename in os.listdir(path):
+            mobj = re.match(r'^(\d\d)-(\d\d\d\d)\.json$', filename)
+            if mobj:
+                volume, page = int(mobj.groups()[0]), int(mobj.groups()[1])
+                content = self._delegate.GetPage(volume, page)
+                with open(os.path.join(path, filename)) as fin:
+                    data = json.load(fin)
+
+                    cleanData = []
+                    while len(data) > 0:
+                        item = data[-1]
+                        del data[-1]
+
+                        if not item[0]:
+                            data = deleteMarks(item, data)
+                        else:
+                            cleanData.append(item)
+
+                    for mark in cleanData:
+                        if mark[0]:
+                            items.append(u'เล่มที่ %d หน้าที่ %d : %s' % (volume, page, content[mark[1]:mark[2]]))
+
+        return map(utils.ArabicToThai,items)
+
+    def OnMarkListBoxDoubleClick(self, event):
+        self._OpenMark(event.GetSelection())
+
+    def _OpenMark(self, selection):
+        if selection == -1: return
+        
+        text = self._markListBox.GetString(selection)
+        tokens = text.split()
+        self._result = int(tokens[1]), int(tokens[3]), self._code
+
+        self.EndModal(wx.ID_OK)
+
+    def OnUpdateReadButton(self, event):
+        event.Enable(self._markListBox.GetSelection() > -1)       
+        
+    def OnReadButtonClick(self, event):
+        self._OpenMark(self._markListBox.GetSelection())
+
+    def OnSearchCtrlTextEnter(self, event):
+        items = []
+        query = self._searchCtrl.GetValue().strip()
+        for item in self._items:
+            if len(query) == 0 or query in item:
+                items.append(item)
+        self._markListBox.SetItems(items)        
+
+    @property
+    def Result(self):
+        return self._result
 
 class NoteManagerDialog(wx.Dialog):
     def __init__(self, parent, code=None):

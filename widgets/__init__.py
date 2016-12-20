@@ -491,6 +491,10 @@ class ReadToolPanel(wx.Panel):
     @property
     def NotesButton(self):
         return self._notesButton
+
+    @property
+    def MarkButton(self):
+        return self._markButton
         
     @property
     def ThemeComboBox(self):
@@ -540,6 +544,10 @@ class ReadToolPanel(wx.Panel):
         self._notesButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
+
+        self._markButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+        self._markButton.SetToolTip(wx.ToolTip(u'รายการไฮไลท์'))
                 
         self._bookListButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.LAYOUT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(32,32)))
@@ -573,6 +581,8 @@ class ReadToolPanel(wx.Panel):
         toolsSizer.Add((5,-1))        
         toolsSizer.Add(self._notesButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))        
+        toolsSizer.Add(self._markButton, flag=wx.ALIGN_CENTER)
+        toolsSizer.Add((5,-1))                
         toolsSizer.Add(self._fontsButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add(self._incFontButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add(self._decFontButton, flag=wx.ALIGN_CENTER)

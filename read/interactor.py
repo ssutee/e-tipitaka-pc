@@ -23,6 +23,7 @@ class Interactor(object):
         self.View.ThaiDictButton.Bind(wx.EVT_BUTTON, self.OnThaiDictButtonClick)
         self.View.EnglishDictButton.Bind(wx.EVT_BUTTON, self.OnEnglishDictButtonClick)
         self.View.NotesButton.Bind(wx.EVT_BUTTON, self.OnNotesButtonClick)
+        self.View.MarkButton.Bind(wx.EVT_BUTTON, self.OnMarkButtonClick)
     
         if isinstance(self.View.BookList, wx.ListBox):
             self.View.BookList.Bind(wx.EVT_LISTBOX, self.OnBookListSelect)
@@ -87,6 +88,9 @@ class Interactor(object):
         
     def OnNotesButtonClick(self, event):
         self.Presenter.ShowNotesManager()
+
+    def OnMarkButtonClick(self, event):
+        self.Presenter.ShowMarkManager()
 
     def OnInputPageEnter(self, event):
         try:

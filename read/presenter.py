@@ -989,6 +989,21 @@ class Presenter(object):
     def ShowContextMenu(self, window, position, code, index):
         self._view.ShowContextMenu(window, position, code, index)
         
+    def ShowMarkManager(self):
+        self._CloseDictWindow()
+
+        code, index = utils.SplitKey(self._lastFocus) 
+        dlg = dialogs.MarkManagerDialog(self._view.ReadPanel(code, index), 
+                                        code if code is not None else self._model.Code, self._model)
+        dlg.Delegate = self._model
+        if dlg.ShowModal() == wx.ID_OK:
+            volume, page, c = dlg.Result
+            if self._lastFocus is not None:
+                self.OpenAnotherBook(code, index, volume, page)  
+            else:
+                self.OpenBook(volume, page, selectItem=True)
+        dlg.Destroy()
+
     def ShowNotesManager(self):
         self._CloseDictWindow()
         
