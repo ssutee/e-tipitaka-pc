@@ -465,9 +465,16 @@ class PageRangeDialog(wx.Dialog):
         btnCancel = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก', size=(-1,-1))
         btnOk.SetDefault()
         btnSizer.Add((20,-1), 1, flag=wx.EXPAND)
-        btnSizer.Add(btnOk, flag=wx.EXPAND)
-        btnSizer.Add((10,-1))
-        btnSizer.Add(btnCancel, flag=wx.EXPAND)
+
+        if 'wxMac' in wx.PlatformInfo:
+            btnSizer.Add(btnCancel, flag=wx.EXPAND)
+            btnSizer.Add((10,-1))
+            btnSizer.Add(btnOk, flag=wx.EXPAND)
+        else:
+            btnSizer.Add(btnOk, flag=wx.EXPAND)
+            btnSizer.Add((10,-1))
+            btnSizer.Add(btnCancel, flag=wx.EXPAND)
+
         btnSizer.Add((20,-1), 1, flag=wx.EXPAND)
 
         mainSizer.Add((-1,10), 1, flag=wx.EXPAND)
@@ -708,8 +715,14 @@ class BookMarkDialog(wx.Dialog):
         self.SaveButton = wx.Button(self, -1, u'บันทึก')
         self.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButton)
         sizer3.Add((-1,-1), 1, wx.EXPAND)        
-        sizer3.Add(self.CancelButton, 0)
-        sizer3.Add(self.SaveButton, 0)
+        
+        if 'wxMac' in wx.PlatformInfo:
+            sizer3.Add(self.CancelButton, 0)
+            sizer3.Add(self.SaveButton, 0)
+        else:
+            sizer3.Add(self.SaveButton, 0)
+            sizer3.Add(self.CancelButton, 0)
+
         sizer3.Add((-1,-1), 1, wx.EXPAND)                
         mainSizer.Add(sizer1, 0, wx.EXPAND|wx.TOP, 10)
         mainSizer.Add((-1, 5), 0)
@@ -861,8 +874,14 @@ class NoteDialog(wx.Dialog):
         self.SaveButton = wx.Button(self, -1, u'บันทึก')
         self.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButton)
         buttonSizer.Add((-1,-1), 1, wx.EXPAND)        
-        buttonSizer.Add(self.CancelButton, 0)
-        buttonSizer.Add(self.SaveButton, 0)
+        
+        if 'wxMac' in wx.PlatformInfo:
+            buttonSizer.Add(self.SaveButton, 0)
+            buttonSizer.Add(self.CancelButton, 0)
+        else:
+            buttonSizer.Add(self.CancelButton, 0)
+            buttonSizer.Add(self.SaveButton, 0)
+
         buttonSizer.Add((-1,-1), 1, wx.EXPAND)                
 
         mainSizer.Add(buttonSizer, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
