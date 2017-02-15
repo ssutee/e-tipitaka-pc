@@ -9,6 +9,7 @@ _ = i18n.language.ugettext
 
 import settings, constants, utils
 import read.model
+import search.model
 
 from pony.orm import db_session
 
@@ -122,6 +123,7 @@ class DataXferPagesValidator(wx.PyValidator):
             return
             
         event.Skip()
+
 
 class MarkManagerDialog(wx.Dialog):
     def __init__(self, parent, code=None, delegate=None):
