@@ -37,6 +37,7 @@ class Presenter(object):
         self._paliDictWindow = None
         self._thaiDictWindow = None
         self._englishDictWindow = None
+        self._searchAndCompareWindow = None
         self._delegate = None
         self._model = model        
         self._model.Delegate = self
@@ -118,8 +119,10 @@ class Presenter(object):
         self.Read(self._model.Code if code is None else code, volume, page, 0, section=1, shouldHighlight=False, showBookList=True)
 
     def Read(self, code, volume, page, idx, section=None, shouldHighlight=True, showBookList=False):        
+        # update reading status
         self._model.Read(code, volume, page, idx)
-        self._delegate.Read(code, volume, page, idx, section, shouldHighlight, showBookList, self._shouldOpenNewWindow)        
+        # open new page
+        self._delegate.Read(code, volume, page, section, shouldHighlight, showBookList, self._shouldOpenNewWindow)        
 
     def BringToFront(self):
         self._view.Raise()
@@ -561,3 +564,21 @@ class Presenter(object):
         if dialog.ShowModal() == wx.ID_OK:
             self._model.TakeNote(idx, dialog.GetNote(), dialog.GetState(), code)
         dialog.Destroy()
+
+    def OpenSearchAndCompareDialog(self):
+
+        def OnClose(event):
+            self._searchAndCompareWindow = None
+            event.Skip()
+
+        if self._searchAndCompareWindow is None:
+            self._searchAndCompareWindow = widgets.SearchAndCompareWindow(self._view)
+            self._searchAndCompareWindow.Delegate = self
+            self._searchAndCompareWindow.Bind(wx.EVT_CLOSE, OnClose)
+            self._searchAndCompareWindow.SetTitle(u'ค้นหาพร้อมจับคู่เลขข้อ')
+
+        self._searchAndCompareWindow.Show()
+        self._searchAndCompareWindow.Raise()
+
+    def OnSearchAndCompareItemClick(self, code, volume, page, keywords):
+        self._delegate.Read(code, volume, page, None, True, False, False, keywords)

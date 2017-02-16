@@ -12,11 +12,252 @@ import wx.html
 import sys, os, os.path, sys, codecs, re, cPickle, sqlite3
 import wx.richtext as rt
 import wx.lib.buttons as buttons
+import wx.grid
+
 from wx.lib.splitter import MultiSplitterWindow
 import constants, utils
 import i18n, images
 import abc
+
+import search.model
+import read.model
+
+import random
+
 _ = i18n.language.ugettext
+
+
+class CustomTableGrid(wx.grid.Grid):
+    def __init__(self, parent, dataSource, delegate):
+        wx.grid.Grid.__init__(self, parent,wx.ID_ANY)
+
+        self._dataSource = None
+        self._delegate = delegate
+
+        table = CustomDataTable(dataSource)
+        self.SetTable(table, True)
+
+        self.SetRowLabelSize(0)
+        self.SetMargins(0,0)
+        self.AutoSizeColumns(False)
+
+        wx.grid.EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDClick)
+
+    def OnLeftDClick(self, evt):
+        self._delegate.OnLeftDClick(evt.Col, evt.Row)
+
+
+class CustomDataTable(wx.grid.PyGridTableBase):
+    def __init__(self, dataSource):
+        wx.grid.PyGridTableBase.__init__(self)
+        self.dataSource = dataSource
+
+    def GetNumberRows(self):
+        return self.dataSource.GetNumberRows()
+
+    def GetNumberCols(self):
+        return self.dataSource.GetNumberCols()
+
+    def IsEmptyCell(self, row, col):
+        try:
+            return not self.dataSource.GetData(row, col)
+        except IndexError:
+            return True
+
+    def GetValue(self, row, col):
+        try:
+            return self.dataSource.GetData(row, col)
+        except IndexError:
+            return ''
+
+    def GetColLabelValue(self, col):
+        return self.dataSource.GetColLabelValue(col)
+
+    def GetTypeName(self, row, col):
+        return self.dataSource.GetTypeName(row, col)
+
+
+class SearchAndCompareWindow(wx.Frame):
+    # CustomDataTable data source
+    def GetNumberRows(self):
+        return len(self.matchItems)
+
+    def GetNumberCols(self):
+        return 2
+
+    def GetData(self, row, col):
+        volume1, page1, item1, volume2, page2, item2 = self.matchItems[row]
+        if col == 0:
+            return utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d ข้อที่ %d' % (volume1, page1, item1))
+        if col == 1:
+            return utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d ข้อที่ %d' % (volume2, page2, item2))
+        return ''
+
+    def GetTypeName(self, row, col) :
+        return wx.grid.GRID_VALUE_STRING
+
+    def GetColLabelValue(self, col):
+        if col == 0:
+            return self.combo1.GetStringSelection()
+        if col == 1:
+            return self.combo2.GetStringSelection()
+        return u''
+
+    @property
+    def Delegate(self):
+        return self._delegate
+
+    @Delegate.setter
+    def Delegate(self, value):
+        self._delegate = value
+
+    def __init__(self, *args, **kwargs):
+        wx.Frame.__init__(self, *args, **kwargs)
+
+        self._delegate = None
+
+        self.matchItems = []
+
+        mainPanel = wx.Panel(self,-1,style=wx.TAB_TRAVERSAL,size=(800,600))
+
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.SetBackgroundColour('#EEEEEE')
+
+        icon = wx.IconBundle()
+        icon.AddIconFromFile(constants.SEARCH_AND_COMPARE_ICON, wx.BITMAP_TYPE_ANY)
+        self.SetIcons(icon)
+
+        self.SetWindowStyle( self.GetWindowStyle() | wx.STAY_ON_TOP) 
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        sizer1 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer2 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.combo1 = wx.ComboBox(mainPanel, wx.ID_ANY, choices=constants.LANGS, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+        self.combo2 = wx.ComboBox(mainPanel, wx.ID_ANY, choices=constants.LANGS, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+
+        self.ctrl1 = wx.TextCtrl(mainPanel, wx.ID_ANY)
+        self.ctrl2 = wx.TextCtrl(mainPanel, wx.ID_ANY)
+
+        self.searchButton = wx.Button(mainPanel, wx.ID_ANY, _('Search'), size=(80,-1))
+        self.searchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
+
+        sizer1.Add(self.combo1, 0)
+        sizer1.Add(self.ctrl1, 1, wx.LEFT|wx.RIGHT, 5)
+        sizer1.Add((80, 0), 0)
+
+        sizer2.Add(self.combo2,0)
+        sizer2.Add(self.ctrl2, 1, wx.LEFT|wx.RIGHT, 5)
+        sizer2.Add(self.searchButton, 0)
+
+        mainSizer.Add(sizer1, 0, wx.EXPAND|wx.ALL, 5)
+        mainSizer.Add(sizer2, 0, wx.EXPAND|wx.ALL, 5)
+
+        self.grid = CustomTableGrid(mainPanel, self, self)
+        self.grid.EnableEditing(False)
+        self.grid.SetDefaultColSize(395)
+
+        mainSizer.Add(self.grid, 1, wx.EXPAND|wx.ALL, 5)
+
+        mainPanel.SetSizer(mainSizer)
+
+        sizer.Add(mainPanel, 1, wx.EXPAND)
+
+        self.SetSizer(sizer)
+
+        self.SetSize((800,600))
+        self.Center()        
+
+        self.model1 = None
+        self.model2 = None
+
+        self.readModel1 = None
+        self.readModel2 = None
+
+        self.results1 = None
+        self.results2 = None
+
+
+    def ReloadTable(self):
+        table = CustomDataTable(self)
+        self.grid.SetTable(table, True)
+        self.grid.ForceRefresh()
+        self.grid.Update()
+
+    def OnSearchButtonClick(self, event):
+        self.results1 = None
+        self.results2 = None
+
+        index1 = self.combo1.GetSelection()
+        index2 = self.combo2.GetSelection()
+        self.text1 = self.ctrl1.GetValue().strip()
+        self.text2 = self.ctrl2.GetValue().strip()
+
+        if index1 != -1 and index2 != -1 and len(self.text1) > 0 and len(self.text2) > 0:
+            self.model1 = search.model.SearchModelCreator.Create(self, index1)
+            self.model2 = search.model.SearchModelCreator.Create(self, index2)
+            self.model1.Search(self.text1)
+
+    def OnLeftDClick(self, col, row):
+        volume1, page1, item1, volume2, page2, item2 = self.matchItems[row]
+        if col == 0:
+            self._delegate.OnSearchAndCompareItemClick(self.model1.Code, volume1, page1, self.text1)
+        if col == 1:
+            self._delegate.OnSearchAndCompareItemClick(self.model2.Code, volume2, page2, self.text2)
+
+    def SearchWillStart(self, keywords):
+        self.searchButton.Enable(False)
+
+    def SearchDidFinish(self, results, keywords):
+        self.searchButton.Enable(True)
+        if self.results1 is None:
+            self.results1 = results
+            self.MatchItems()
+
+    def MatchItems(self):
+        self.matchItems = []
+
+        if len(self.results1) == 0:
+            return
+
+        self.readModel1 = read.model.Model(self.model1.Code)
+        self.readModel2 = read.model.Model(self.model2.Code)
+
+        for r1 in self.results1:
+            volume = int(r1['volume'])
+            page = int(r1['page'])
+            items1 = self.readModel1.GetItems(volume, page)
+            for item1 in items1:
+                result = self._DoCompare(volume, page, item1)
+            
+                if result is None:
+                    continue
+                
+                volume2, page2, item2 = result
+                content = self.readModel2.GetPage(volume2, page2)
+                
+                matchKey = (volume, page, item1, volume2, page2, item2)
+                if content.find(self.text2) > -1 and matchKey not in self.matchItems:
+                    self.matchItems.append(matchKey)
+        
+        self.ReloadTable()  
+
+    def _DoCompare(self, volume, page, item):        
+        if item is None: return
+        
+        volume, item, sub = self.readModel1.ConvertToPivot(volume, page, item)
+        
+        if volume == 0:
+            return
+
+        volume, page = self.readModel2.ConvertFromPivot(volume, item, sub)
+
+        if volume == 0:
+            return
+
+        return volume, page, item        
 
 class DictWindow(wx.Frame):
     
@@ -1263,6 +1504,10 @@ class SearchToolPanel(wx.Panel):
         return self._englishDictButton
 
     @property
+    def SearchAndCompareButton(self):
+        return self._searchAndCompareButton
+
+    @property
     def BuddhawajOnly(self):
         return self._buddhawajOnly
         
@@ -1298,6 +1543,8 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add(self._paliDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._thaiDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._englishDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
+        bottomSizer.Add((10,-1), 0)
+        bottomSizer.Add(self._searchAndCompareButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._themePanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
         
@@ -1398,6 +1645,9 @@ class SearchToolPanel(wx.Panel):
             wx.BitmapFromImage(wx.Image(constants.ENGLISH_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._englishDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-อังกฤษ'))                        
 
+        self._searchAndCompareButton = wx.BitmapButton(self, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.SEARCH_AND_COMPARE_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._searchAndCompareButton.SetToolTip(wx.ToolTip(u'ค้นหาพร้อมจับคู่เลขข้อ'))                        
 
         themes = [u'ขาว', u'น้ำตาลอ่อน'] 
         self._themePanel = wx.Panel(self, wx.ID_ANY)

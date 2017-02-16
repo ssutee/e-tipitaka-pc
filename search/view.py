@@ -97,6 +97,10 @@ class View(AuiBaseFrame):
         return self._topBar.EnglishDictButton
 
     @property
+    def SearchAndCompareButton(self):
+        return self._topBar.SearchAndCompareButton
+
+    @property
     def ThemeComboBox(self):
         return self._topBar.ThemeComboBox
                 

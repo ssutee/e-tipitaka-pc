@@ -22,6 +22,7 @@ class Interactor(object):
         self.View.PaliDictButton.Bind(wx.EVT_BUTTON, self.OnPaliDictButtonClick)
         self.View.ThaiDictButton.Bind(wx.EVT_BUTTON, self.OnThaiDictButtonClick)
         self.View.EnglishDictButton.Bind(wx.EVT_BUTTON, self.OnEnglishDictButtonClick)
+
         self.View.NotesButton.Bind(wx.EVT_BUTTON, self.OnNotesButtonClick)
         self.View.MarkButton.Bind(wx.EVT_BUTTON, self.OnMarkButtonClick)
     

@@ -114,7 +114,7 @@ class ParentFrame(aui.AuiMDIParentFrame):
                     pass
         event.Skip()
 
-    def Read(self, code, volume, page, idx, section, shouldHighlight, showBookList, shouldOpenNewWindow):
+    def Read(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords=None):
         presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
 
         if not presenter or shouldOpenNewWindow:
@@ -130,7 +130,12 @@ class ParentFrame(aui.AuiMDIParentFrame):
         else:
             presenter.BringToFront()
 
-        presenter.Keywords = self._presenter.Model.Keywords if shouldHighlight else None
+        presenter.Keywords = None
+        if keywords is None and shouldHighlight:
+            presenter.Keywords = self._presenter.Model.Keywords
+        elif keywords is not None and shouldHighlight:
+            presenter.Keywords = keywords
+
         presenter.OpenBook(volume, page, section, selectItem=True, showBookList=showBookList)
 
     def OnReadWindowClose(self, code, presenter):
