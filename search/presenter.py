@@ -572,7 +572,7 @@ class Presenter(object):
             event.Skip()
 
         if self._searchAndCompareWindow is None:
-            self._searchAndCompareWindow = widgets.SearchAndCompareWindow(self._view)
+            self._searchAndCompareWindow = widgets.SearchAndCompareWindow(self._view.GetMDIParentFrame())
             self._searchAndCompareWindow.Delegate = self
             self._searchAndCompareWindow.Bind(wx.EVT_CLOSE, OnClose)
             self._searchAndCompareWindow.SetTitle(u'ค้นหาพร้อมจับคู่เลขข้อ')
