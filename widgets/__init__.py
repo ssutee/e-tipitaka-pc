@@ -311,9 +311,9 @@ class SearchAndCompareWindow(wx.Frame):
         self._MarkAsRead(col, row)
         volume1, page1, item1, volume2, page2, item2 = self.matchItems[row]
         if col == 0:
-            self._delegate.OnSearchAndCompareItemClick(self.model1.Code, volume1, page1, self.text1, self.model2.Code, volume2, page2)
+            self._delegate.OnSearchAndCompareItemClick(self.model1.Code, volume1, page1, self.text1, self.model2.Code, volume2, page2, self.text2)
         if col == 1:
-            self._delegate.OnSearchAndCompareItemClick(self.model2.Code, volume2, page2, self.text2, self.model1.Code, volume1, page1)        
+            self._delegate.OnSearchAndCompareItemClick(self.model2.Code, volume2, page2, self.text2, self.model1.Code, volume1, page1, self.text1)        
 
     @db_session            
     def _ChangeReadCellBackgroundColor(self):
@@ -378,11 +378,17 @@ class SearchAndCompareWindow(wx.Frame):
                     continue
                 
                 volume2, page2, item2 = result
-                content = self.readModel2.GetPage(volume2, page2)
                 
-                matchKey = (volume, page, item1, volume2, page2, item2)
-                if content.find(self.text2) > -1 and matchKey not in self.matchItems:
-                    self.matchItems.append(matchKey)
+                while True:
+                    if item2 not in self.readModel2.GetItems(volume2, page2):
+                        break
+                    
+                    content = self.readModel2.GetPage(volume2, page2)
+                
+                    matchKey = (volume, page, item1, volume2, page2, item2)
+                    if content.find(self.text2) > -1 and matchKey not in self.matchItems:
+                        self.matchItems.append(matchKey)
+                    page2 += 1                    
         
         self._ReloadTable()  
         self._SaveHistory(self.text1, self.model1.Code, self.text2, self.model2.Code)
