@@ -114,10 +114,10 @@ class ParentFrame(aui.AuiMDIParentFrame):
                     pass
         event.Skip()
 
-    def ReadAndCompare(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords, code2, volume2, page2):
+    def ReadAndCompare(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords, code2, volume2, page2, keywords2):
         presenter = self.Read(code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords)
         index = presenter.View.AddReadPanel(code2)
-        presenter.OpenAnotherBook(code2, index, volume2, page2)
+        presenter.OpenAnotherBook(code2, index, volume2, page2, keywords2)
 
 
     def Read(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords=None):

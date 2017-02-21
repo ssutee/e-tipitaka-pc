@@ -289,7 +289,7 @@ class Presenter(object):
         elif showBookList != None and showBookList == False:
             self._view.HideBookList()
 
-    def OpenAnotherBook(self, code, index, volume, page):
+    def OpenAnotherBook(self, code, index, volume, page, keywords=None):
         self._findTextHandler.Reset()        
         currentCode = self._model.Code
         self._model.Code = code
@@ -312,6 +312,8 @@ class Presenter(object):
         content = self._model.GetPage(volume, page)
         self._view.SetText(content, code=code, index=index)
         self._view.FormatText(self._model.GetFormatter(volume, page), code=code, index=index)        
+        if keywords is not None:
+            self._HighlightKeywords(content, keywords, volume, page, code, index)
         self._HighlightItems(content, code, index)
         self._LoadMarks(volume, page, code, index)
 
@@ -335,10 +337,12 @@ class Presenter(object):
                 body.Thaw()
 
 
-    def _HighlightKeywords(self, content, keywords, volume, page):
+    def _HighlightKeywords(self, content, keywords, volume, page, code=None, index=1):
         if content == u'' or keywords is None: return
 
-        font = self._view.Body.GetFont()
+        body = self._view.Body if code == None else self._view.FocusBody(code, index)
+
+        font = body.GetFont()
         font.SetWeight(wx.FONTWEIGHT_BOLD)
         fontSize = font.GetPointSize()
         for term in keywords.replace('+',' ').replace('|',' ').split():
@@ -348,7 +352,7 @@ class Presenter(object):
                 if n == -1: break                
 
                 if wx.__version__[:3]<='2.8':
-                    self._view.Body.Freeze()
+                    body.Freeze()
                 
                 checkBuddhawaj = False
                 for format in self._model.GetFormatter(volume, page).split():
@@ -365,10 +369,10 @@ class Presenter(object):
                         font.SetPointSize(fontSize * 0.8)
 
                 if (self._delegate.SearchingBuddhawaj() and checkBuddhawaj) or not self._delegate.SearchingBuddhawaj():
-                    self._view.Body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
+                    body.SetStyle(n, n+len(term), wx.TextAttr('purple', wx.NullColour, font))
 
                 if wx.__version__[:3]<='2.8':
-                    self._view.Body.Thaw()
+                    body.Thaw()
 
     def OnLinkToReference(self, code, volume, item):
         self._view.HideBookList()
