@@ -580,5 +580,5 @@ class Presenter(object):
         self._searchAndCompareWindow.Show()
         self._searchAndCompareWindow.Raise()
 
-    def OnSearchAndCompareItemClick(self, code, volume, page, keywords):
-        self._delegate.Read(code, volume, page, None, True, False, False, keywords)
+    def OnSearchAndCompareItemClick(self, code1, volume1, page1, keywords, code2, volume2, page2):
+        self._delegate.ReadAndCompare(code1, volume1, page1, None, True, False, True, keywords, code2, volume2, page2)

@@ -7,7 +7,7 @@ import wx, os.path, sys, math, sqlite3
 import i18n
 _ = i18n.language.ugettext
 
-from pony.orm import Database, Required, Optional, db_session, select, desc, LongUnicode
+from pony.orm import Database, Required, Optional, db_session, select, desc, LongUnicode, Set
 
 db = Database('sqlite', constants.DATA_DB, create_db=True)
 
@@ -19,6 +19,19 @@ class History(db.Entity):
     skimmed = Optional(unicode)
     pages = Optional(unicode)
     notes = Optional(unicode)
+
+class SearchAndCompareHistory(db.Entity):
+    keywords1 = Required(unicode)
+    keywords2 = Required(unicode)
+    code1 = Required(unicode)
+    code2 = Required(unicode)
+    total = Required(int)
+    readItems = Set('SearchAndCompareHistoryReadItem')
+
+class SearchAndCompareHistoryReadItem(db.Entity):
+    history = Optional(SearchAndCompareHistory)
+    row = Required(int)
+    col = Required(int)
 
 db.generate_mapping(create_tables=True)
 

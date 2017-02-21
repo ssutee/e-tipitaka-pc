@@ -24,6 +24,9 @@ import read.model
 
 import random
 
+from pony.orm import db_session, commit
+from search.model import SearchAndCompareHistory, SearchAndCompareHistoryReadItem
+
 _ = i18n.language.ugettext
 
 
@@ -118,9 +121,9 @@ class SearchAndCompareWindow(wx.Frame):
 
         self.matchItems = []
 
-        mainPanel = wx.Panel(self,-1,style=wx.TAB_TRAVERSAL,size=(800,600))
+        mainPanel = wx.Panel(self,-1,style=wx.TAB_TRAVERSAL,size=(1024,768))
 
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        leftSizer = wx.BoxSizer(wx.VERTICAL)
 
         self.SetBackgroundColour('#EEEEEE')
 
@@ -144,22 +147,41 @@ class SearchAndCompareWindow(wx.Frame):
         self.searchButton = wx.Button(mainPanel, wx.ID_ANY, _('Search'), size=(80,-1))
         self.searchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
 
+        self.openAllButton = wx.Button(mainPanel, wx.ID_ANY, u'เปิดอ่าน', size=(80,-1))
+        self.openAllButton.Bind(wx.EVT_BUTTON, self.OnOpenAllButtonClick)
+
         sizer1.Add(self.combo1, 0)
         sizer1.Add(self.ctrl1, 1, wx.LEFT|wx.RIGHT, 5)
-        sizer1.Add((80, 0), 0)
+        sizer1.Add(self.searchButton, 0)
 
         sizer2.Add(self.combo2,0)
         sizer2.Add(self.ctrl2, 1, wx.LEFT|wx.RIGHT, 5)
-        sizer2.Add(self.searchButton, 0)
+        sizer2.Add(self.openAllButton, 0)
 
-        mainSizer.Add(sizer1, 0, wx.EXPAND|wx.ALL, 5)
-        mainSizer.Add(sizer2, 0, wx.EXPAND|wx.ALL, 5)
+        leftSizer.Add(sizer1, 0, wx.EXPAND|wx.ALL, 5)
+        leftSizer.Add(sizer2, 0, wx.EXPAND|wx.ALL, 5)
 
         self.grid = CustomTableGrid(mainPanel, self, self)
         self.grid.EnableEditing(False)
-        self.grid.SetDefaultColSize(395)
+        self.grid.SetDefaultColSize(350)
 
-        mainSizer.Add(self.grid, 1, wx.EXPAND|wx.ALL, 5)
+        leftSizer.Add(self.grid, 1, wx.EXPAND|wx.ALL, 5)
+
+        mainSizer = wx.BoxSizer(wx.HORIZONTAL)        
+
+ 
+        rightPanel = wx.Panel(mainPanel, wx.ID_ANY)
+        rightPanel.SetBackgroundColour('white')
+
+        rightSizer = wx.StaticBoxSizer(wx.StaticBox(rightPanel, wx.ID_ANY, _('History')), orient=wx.VERTICAL)        
+        self.historyList = wx.ListBox(rightPanel, wx.ID_ANY, choices=[], style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
+        self.historyList.Bind(wx.EVT_LISTBOX, self.OnHistoryListSelect)
+
+        rightSizer.Add(self.historyList, 1, wx.EXPAND)
+        rightPanel.SetSizer(rightSizer)
+
+        mainSizer.Add(leftSizer, 2, wx.EXPAND)
+        mainSizer.Add(rightPanel, 1, wx.EXPAND)
 
         mainPanel.SetSizer(mainSizer)
 
@@ -179,14 +201,41 @@ class SearchAndCompareWindow(wx.Frame):
         self.results1 = None
         self.results2 = None
 
+        self.history = None
 
-    def ReloadTable(self):
+        self._LoadHistoryList()
+
+    @db_session
+    def _LoadHistoryList(self):
+        items = []        
+        for history in SearchAndCompareHistory.select():
+            items.append(u'%s:%s | %s:%s (%d)' % 
+                         (history.keywords1, history.keywords2, 
+                          utils.ShortName(history.code1), utils.ShortName(history.code2), history.total))
+        self.historyList.SetItems(items)
+
+    @db_session
+    def _LoadHistoryItem(self, selection):
+        history = list(SearchAndCompareHistory.select())[selection]
+        self.ctrl1.SetValue(history.keywords1)
+        self.ctrl2.SetValue(history.keywords2)
+        self.combo1.SetSelection(constants.CODES.index(history.code1))
+        self.combo2.SetSelection(constants.CODES.index(history.code2))
+        self._Search()
+
+    def _ClearBackgroundColor(self, grid):
+        for row in xrange(grid.GetNumberRows()):
+            grid.SetCellBackgroundColour(row, 0, grid.GetDefaultCellBackgroundColour())
+            grid.SetCellBackgroundColour(row, 1, grid.GetDefaultCellBackgroundColour())
+
+    def _ReloadTable(self):
         table = CustomDataTable(self)
         self.grid.SetTable(table, True)
-        self.grid.ForceRefresh()
+        self._ClearBackgroundColor(self.grid)
         self.grid.Update()
+        self.grid.ForceRefresh()        
 
-    def OnSearchButtonClick(self, event):
+    def _Search(self):
         self.results1 = None
         self.results2 = None
 
@@ -200,23 +249,116 @@ class SearchAndCompareWindow(wx.Frame):
             self.model2 = search.model.SearchModelCreator.Create(self, index2)
             self.model1.Search(self.text1)
 
-    def OnLeftDClick(self, col, row):
+    def OnSearchButtonClick(self, event):
+        self._Search()
+
+    def OnHistoryListSelect(self, event):
+        self._LoadHistoryItem(event.GetSelection())
+
+    def corners_to_cells(self, top_lefts, bottom_rights):
+        """
+        Take lists of top left and bottom right corners, and
+        return a list of all the cells in that range
+        """
+        cells = []
+        for top_left, bottom_right in zip(top_lefts, bottom_rights):
+
+            rows_start = top_left[0]
+            rows_end = bottom_right[0]
+
+            cols_start = top_left[1]
+            cols_end = bottom_right[1]
+
+            rows = range(rows_start, rows_end+1)
+            cols = range(cols_start, cols_end+1)
+
+            cells.extend([(row, col)
+                for row in rows
+                for col in cols])
+
+        return cells
+
+    def get_selected_cells(self, grid):
+        """
+        Return the selected cells in the grid as a list of
+        (row, col) pairs.
+        We need to take care of three possibilities:
+        1. Multiple cells were click-selected (GetSelectedCells)
+        2. Multiple cells were drag selected (GetSelectionBlock…)
+        3. A single cell only is selected (CursorRow/Col)
+        """
+
+        top_left = grid.GetSelectionBlockTopLeft()
+
+        if top_left:
+            bottom_right = grid.GetSelectionBlockBottomRight()
+            return self.corners_to_cells(top_left, bottom_right)
+
+        selection = grid.GetSelectedCells()
+
+        if not selection:
+            row = grid.GetGridCursorRow()
+            col = grid.GetGridCursorCol()
+            return [(row, col)]
+
+        return selection
+
+    def OnOpenAllButtonClick(self, event):
+        for row, col in self.get_selected_cells(self.grid):
+            self._ProcessClick(col, row)
+
+    def _ProcessClick(self, col, row):
+        self._MarkAsRead(col, row)
         volume1, page1, item1, volume2, page2, item2 = self.matchItems[row]
         if col == 0:
-            self._delegate.OnSearchAndCompareItemClick(self.model1.Code, volume1, page1, self.text1)
+            self._delegate.OnSearchAndCompareItemClick(self.model1.Code, volume1, page1, self.text1, self.model2.Code, volume2, page2)
         if col == 1:
-            self._delegate.OnSearchAndCompareItemClick(self.model2.Code, volume2, page2, self.text2)
+            self._delegate.OnSearchAndCompareItemClick(self.model2.Code, volume2, page2, self.text2, self.model1.Code, volume1, page1)        
+
+    @db_session            
+    def _ChangeReadCellBackgroundColor(self):
+        history = SearchAndCompareHistory.get(keywords1=self.text1, keywords2=self.text2, 
+                                              code1=self.model1.Code, code2=self.model2.Code)
+        for item in history.readItems:
+            self._MarkAsRead(item.col, item.row, True)
+
+    @db_session
+    def _MarkAsRead(self, col, row, saved=False):
+        self.grid.SetCellBackgroundColour(row, col, wx.LIGHT_GREY)
+        
+        if saved: return
+
+        history = SearchAndCompareHistory.get(keywords1=self.text1, keywords2=self.text2, 
+                                              code1=self.model1.Code, code2=self.model2.Code)
+
+        if SearchAndCompareHistoryReadItem.get(history=history, row=row, col=col) is None:
+            h = SearchAndCompareHistoryReadItem(history=history, row=row, col=col)
+            commit()
+
+    def OnLeftDClick(self, col, row):
+        self._ProcessClick(col, row)
 
     def SearchWillStart(self, keywords):
         self.searchButton.Enable(False)
+        self.openAllButton.Enable(False)
 
     def SearchDidFinish(self, results, keywords):
         self.searchButton.Enable(True)
+        self.openAllButton.Enable(True)
+
         if self.results1 is None:
             self.results1 = results
-            self.MatchItems()
+            self._MatchItems()
+    
+    @db_session
+    def _SaveHistory(self, text1, code1,  text2, code2):
+        self.history = SearchAndCompareHistory.get(keywords1=text1, keywords2=text2, code1=code1, code2=code2)
+        if self.history is None:
+            self.history = SearchAndCompareHistory(keywords1=text1, keywords2=text2, 
+                                                   code1=code1, code2=code2, total=len(self.matchItems))
+            self._LoadHistoryList()
 
-    def MatchItems(self):
+    def _MatchItems(self):
         self.matchItems = []
 
         if len(self.results1) == 0:
@@ -242,7 +384,9 @@ class SearchAndCompareWindow(wx.Frame):
                 if content.find(self.text2) > -1 and matchKey not in self.matchItems:
                     self.matchItems.append(matchKey)
         
-        self.ReloadTable()  
+        self._ReloadTable()  
+        self._SaveHistory(self.text1, self.model1.Code, self.text2, self.model2.Code)
+        self._ChangeReadCellBackgroundColor()        
 
     def _DoCompare(self, volume, page, item):        
         if item is None: return

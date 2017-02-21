@@ -114,6 +114,12 @@ class ParentFrame(aui.AuiMDIParentFrame):
                     pass
         event.Skip()
 
+    def ReadAndCompare(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords, code2, volume2, page2):
+        presenter = self.Read(code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords)
+        index = presenter.View.AddReadPanel(code2)
+        presenter.OpenAnotherBook(code2, index, volume2, page2)
+
+
     def Read(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords=None):
         presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
 
@@ -137,6 +143,7 @@ class ParentFrame(aui.AuiMDIParentFrame):
             presenter.Keywords = keywords
 
         presenter.OpenBook(volume, page, section, selectItem=True, showBookList=showBookList)
+        return presenter
 
     def OnReadWindowClose(self, code, presenter):
         if code in self._presenters:
