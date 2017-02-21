@@ -357,6 +357,9 @@ class SearchAndCompareWindow(wx.Frame):
             self.history = SearchAndCompareHistory(keywords1=text1, keywords2=text2, 
                                                    code1=code1, code2=code2, total=len(self.matchItems))
             self._LoadHistoryList()
+        elif self.history.total != len(self.matchItems):
+            self.history.total = len(self.matchItems)
+            self._LoadHistoryList()
 
     def _MatchItems(self):
         self.matchItems = []
