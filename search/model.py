@@ -26,6 +26,8 @@ class SearchAndCompareHistory(db.Entity):
     code1 = Required(unicode)
     code2 = Required(unicode)
     total = Required(int)
+    count1 = Optional(int)
+    count2 = Optional(int)
     readItems = Set('SearchAndCompareHistoryReadItem')
 
 class SearchAndCompareHistoryReadItem(db.Entity):

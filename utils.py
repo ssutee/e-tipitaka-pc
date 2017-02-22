@@ -102,7 +102,15 @@ def UpdateDatabases():
                 cursor.execute('ALTER TABLE History ADD COLUMN notes TEXT')
             except sqlite3.OperationalError,e:
                 pass        
-            conn.commit()        
+            conn.commit()    
+        if cursor.execute('PRAGMA user_version').fetchone()[0] == 4:
+            cursor.execute('PRAGMA user_version=5')
+            try:
+                cursor.execute('ALTER TABLE SearchAndCompareHistory ADD COLUMN count1 INTEGER')
+                cursor.execute('ALTER TABLE SearchAndCompareHistory ADD COLUMN count2 INTEGER')
+            except sqlite3.OperationalError,e:
+                pass
+
         conn.close()        
         
     if os.path.exists(constants.NOTE_DB):

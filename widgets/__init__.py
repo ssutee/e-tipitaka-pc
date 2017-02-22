@@ -209,8 +209,9 @@ class SearchAndCompareWindow(wx.Frame):
     def _LoadHistoryList(self):
         items = []        
         for history in SearchAndCompareHistory.select():
-            items.append(u'%s:%s | %s:%s (%d)' % 
-                         (history.keywords1, history.keywords2, 
+            items.append(u'%s(%d):%s(%d) | %s:%s (%d)' % 
+                         (history.keywords1, history.count1 if history.count1 is not None else 0, 
+                          history.keywords2, history.count2 if history.count2 is not None else 0, 
                           utils.ShortName(history.code1), utils.ShortName(history.code2), history.total))
         self.historyList.SetItems(items)
 
@@ -348,6 +349,9 @@ class SearchAndCompareWindow(wx.Frame):
 
         if self.results1 is None:
             self.results1 = results
+            self.model2.Search(self.text2)
+        elif self.results1 is not None:
+            self.results2 = results
             self._MatchItems()
     
     @db_session
@@ -360,11 +364,16 @@ class SearchAndCompareWindow(wx.Frame):
         elif self.history.total != len(self.matchItems):
             self.history.total = len(self.matchItems)
             self._LoadHistoryList()
+        elif self.history.count1 is None or self.history.count2 is None:
+            self.history.count1 = len(self.results1)
+            self.history.count2 = len(self.results2)
+            self._LoadHistoryList()
 
     def _MatchItems(self):
         self.matchItems = []
 
-        if len(self.results1) == 0:
+        if len(self.results1) == 0 or len(self.results2) == 0:
+            self._SaveHistory(self.text1, self.model1.Code, self.text2, self.model2.Code)
             return
 
         self.readModel1 = read.model.Model(self.model1.Code)
