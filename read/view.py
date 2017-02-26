@@ -53,7 +53,7 @@ class ViewComponents(object):
     def GetBookList(self, parent=None):
         bookList = wx.ListBox(parent if parent else self._parent, wx.ID_ANY, 
             choices=self._dataSource.GetBookListItems(), style=wx.LB_SINGLE|wx.NO_BORDER)
-        font = utils.LoadFont(constants.READ_FONT, self._code)
+        font = utils.LoadFont(constants.BOOK_FONT, self._code)
         bookList.SetFont(font)
         bookList.SetSelection(0)
         return bookList
@@ -164,7 +164,6 @@ class View(AuiBaseFrame):
             
     def SetFont(self, font, code, index):
         self._readPanel.SetContentFont(font) if code is None else self._comparePanel[utils.MakeKey(code, index)].SetContentFont(font)
-        self._bookList.SetFont(font)
 
     @property
     def DataSource(self):
@@ -270,6 +269,10 @@ class View(AuiBaseFrame):
     @property
     def InputItem(self):
         return self._inputItem
+
+    @property
+    def BookFontsButton(self):
+        return self._bookFontsButton
         
     @property
     def CheckBox(self):
@@ -322,6 +325,8 @@ class View(AuiBaseFrame):
         naviPanel = wx.Panel(panel, wx.ID_ANY)
         naviSizer = wx.StaticBoxSizer(wx.StaticBox(naviPanel, wx.ID_ANY, u'เลือกอ่านที่'), orient=wx.HORIZONTAL)
 
+        self._bookFontsButton = wx.BitmapButton(naviPanel, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(30,30))
         labelPage = wx.StaticText(naviPanel, wx.ID_ANY, u'หน้า: ')
         labelItem = wx.StaticText(naviPanel, wx.ID_ANY, u'ข้อ: ')
         
@@ -331,6 +336,7 @@ class View(AuiBaseFrame):
         
         self._checkBox = wx.CheckBox(naviPanel, wx.ID_ANY, label=u'=สยามรัฐฯ')
 		
+        naviSizer.Add(self._bookFontsButton, 0, wx.RIGHT, 5)
         naviSizer.Add(labelPage, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(self._inputPage, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(wx.StaticText(panel, wx.ID_ANY, u'  หรือ  '), flag=wx.ALIGN_CENTER_VERTICAL)

@@ -97,6 +97,7 @@ IMPORTED_MARK_FILE = os.path.join(DATA_PATH, 'imported_old_user_data')
 
 SEARCH_FONT = os.path.join(CONFIG_PATH, 'font_search.cfg')
 READ_FONT = os.path.join(CONFIG_PATH, 'font_read.cfg')
+BOOK_FONT = os.path.join(CONFIG_PATH, 'font_book.cfg')
 SEARCH_RECT = os.path.join(CONFIG_PATH, 'rect_search.cfg')
 READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 

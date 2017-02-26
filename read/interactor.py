@@ -1,5 +1,6 @@
 import wx
 import wx.richtext as rt
+import constants
 
 class Interactor(object):
 
@@ -13,6 +14,7 @@ class Interactor(object):
         self.View.BackwardButton.Bind(wx.EVT_BUTTON, self.OnBackwordButtonClick)
         self.View.BookListButton.Bind(wx.EVT_BUTTON, self.OnBookListButtonClick)
         self.View.FontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClick)
+        self.View.BookFontsButton.Bind(wx.EVT_BUTTON, self.OnBookFontsButtonClick)
         self.View.IncreaseFontButton.Bind(wx.EVT_BUTTON, self.OnIncreaseFontButtonClick)
         self.View.DecreaseFontButton.Bind(wx.EVT_BUTTON, self.OnDecreaseFontButtonClick)
         self.View.StarButton.Bind(wx.EVT_BUTTON, self.OnStarButtonClick)
@@ -51,6 +53,9 @@ class Interactor(object):
         
     def OnFontsButtonClick(self, event):
         self.Presenter.ShowFontDialog()
+
+    def OnBookFontsButtonClick(self, event):
+        self.Presenter.ShowFontDialog(constants.BOOK_FONT)
         
     def OnIncreaseFontButtonClick(self, event):
         self.Presenter.IncreaseFontSize()

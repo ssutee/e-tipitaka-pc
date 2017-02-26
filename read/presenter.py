@@ -607,9 +607,12 @@ class Presenter(object):
     def ToggleNotePanel(self, code, index):
         self._view.ToggleNotePanel(code, index)
         
-    def ShowFontDialog(self):
-        code, index = utils.SplitKey(self._lastFocus)
-        curFont = utils.LoadFont(constants.READ_FONT, code if code else self._model.Code)
+    def ShowFontDialog(self, target=constants.READ_FONT):
+        code = None
+        if target == constants.READ_FONT:
+            code, index = utils.SplitKey(self._lastFocus)
+
+        curFont = utils.LoadFont(target, code if code else self._model.Code)
         fontData = wx.FontData()
         fontData.EnableEffects(False)
         if curFont != None:
@@ -619,8 +622,12 @@ class Presenter(object):
             data = dialog.GetFontData()
             font = data.GetChosenFont()
             if font.IsOk():
-                utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)                
-                self._view.SetFont(font, code, index)        
+                utils.SaveFont(font, target, code if code else self._model.Code) 
+                if target == constants.READ_FONT:               
+                    self._view.SetFont(font, code, index)
+                elif target == constants.BOOK_FONT:
+                    self._view.BookList.SetFont(font)
+                    
         dialog.Destroy()
 
     def IncreaseFontSize(self):
