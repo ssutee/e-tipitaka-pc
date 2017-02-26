@@ -628,7 +628,7 @@ class Presenter(object):
         font = utils.LoadFont(constants.READ_FONT, code if code else self._model.Code)
         font.SetPointSize(font.GetPointSize()+1)
         utils.SaveFont(font, constants.READ_FONT, code if code else self._model.Code)        
-        self._view.SetFont(font, code, index)        
+        self._view.SetFont(font, code, index)    
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)

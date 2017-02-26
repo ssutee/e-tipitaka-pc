@@ -176,8 +176,11 @@ class SearchAndCompareWindow(wx.Frame):
         rightSizer = wx.StaticBoxSizer(wx.StaticBox(rightPanel, wx.ID_ANY, _('History')), orient=wx.VERTICAL)        
         self.historyList = wx.ListBox(rightPanel, wx.ID_ANY, choices=[], style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
         self.historyList.Bind(wx.EVT_LISTBOX, self.OnHistoryListSelect)
+        self.deleteButton = wx.Button(rightPanel, wx.ID_ANY, u'ลบ', size=(80,-1))
+        self.deleteButton.Bind(wx.EVT_BUTTON, self.OnDeleteButtonClick)
 
         rightSizer.Add(self.historyList, 1, wx.EXPAND)
+        rightSizer.Add(self.deleteButton, 0, wx.EXPAND)
         rightPanel.SetSizer(rightSizer)
 
         mainSizer.Add(leftSizer, 2, wx.EXPAND)
@@ -245,13 +248,35 @@ class SearchAndCompareWindow(wx.Frame):
         self.text1 = self.ctrl1.GetValue().strip()
         self.text2 = self.ctrl2.GetValue().strip()
 
-        if index1 != -1 and index2 != -1 and len(self.text1) > 0 and len(self.text2) > 0:
+        if index1 != -1 and index2 != -1 and len(self.text1) > 0 and len(self.text2.strip('~')) > 0:
             self.model1 = search.model.SearchModelCreator.Create(self, index1)
             self.model2 = search.model.SearchModelCreator.Create(self, index2)
             self.model1.Search(self.text1)
 
     def OnSearchButtonClick(self, event):
         self._Search()
+
+    @db_session
+    def OnDeleteButtonClick(self, event):
+        if self.historyList.GetSelection() == -1:
+            return
+
+        dialog = wx.MessageDialog(self, u'คุณต้องการลบการประวัตินี้หรือไม่?', u'ยืนยันการลบ', 
+                wx.YES_NO | wx.ICON_INFORMATION)
+        dialog.Center()
+
+        if dialog.ShowModal() == wx.ID_YES:    
+            history = list(SearchAndCompareHistory.select())[self.historyList.GetSelection()]
+            history.delete()
+
+            self.historyList.SetSelection(-1)
+            self._LoadHistoryList()
+
+            self.ctrl1.SetValue('')
+            self.ctrl2.SetValue('')
+
+            self.matchItems = []
+            self._ReloadTable()
 
     def OnHistoryListSelect(self, event):
         self._LoadHistoryItem(event.GetSelection())
@@ -359,7 +384,9 @@ class SearchAndCompareWindow(wx.Frame):
         self.history = SearchAndCompareHistory.get(keywords1=text1, keywords2=text2, code1=code1, code2=code2)
         if self.history is None:
             self.history = SearchAndCompareHistory(keywords1=text1, keywords2=text2, 
-                                                   code1=code1, code2=code2, total=len(self.matchItems))
+                                                   code1=code1, code2=code2, 
+                                                   count1=len(self.results1), count2=len(self.results2), 
+                                                   total=len(self.matchItems))
             self._LoadHistoryList()
         elif self.history.total != len(self.matchItems):
             self.history.total = len(self.matchItems)
@@ -373,6 +400,7 @@ class SearchAndCompareWindow(wx.Frame):
         self.matchItems = []
 
         if len(self.results1) == 0 or len(self.results2) == 0:
+            self._ReloadTable()  
             self._SaveHistory(self.text1, self.model1.Code, self.text2, self.model2.Code)
             return
 
@@ -391,6 +419,8 @@ class SearchAndCompareWindow(wx.Frame):
                 
                 volume2, page2, item2 = result
                 
+                exclude = self.text2.find('~') == 0
+
                 while True:
                     if item2 not in self.readModel2.GetItems(volume2, page2):
                         break
@@ -398,7 +428,9 @@ class SearchAndCompareWindow(wx.Frame):
                     content = self.readModel2.GetPage(volume2, page2)
                 
                     matchKey = (volume, page, item1, volume2, page2, item2)
-                    if content.find(self.text2) > -1 and matchKey not in self.matchItems:
+                    if not exclude and content.find(self.text2) > -1 and matchKey not in self.matchItems:
+                        self.matchItems.append(matchKey)
+                    elif exclude and content.find(self.text2.strip('~')) == -1 and matchKey not in self.matchItems:
                         self.matchItems.append(matchKey)
                     page2 += 1                    
         

@@ -26,20 +26,21 @@ class ViewComponentsCreator(object):
     @staticmethod
     def Create(code, parent):
         if code == constants.THAI_FIVE_BOOKS_CODE:
-            return ThaiFiveBooksViewComponents(parent)
+            return ThaiFiveBooksViewComponents(parent, code)
         if code == constants.THAI_MAHACHULA_CODE:
-            return ThaiMahaChulaViewComponents(parent)
+            return ThaiMahaChulaViewComponents(parent, code)
         if code == constants.THAI_SCRIPT_CODE:
-            return ThaiScriptViewComponents(parent)
+            return ThaiScriptViewComponents(parent, code)
         if code == constants.ROMAN_SCRIPT_CODE:
-            return RomanScriptViewComponents(parent)
-        return ViewComponents(parent)
+            return RomanScriptViewComponents(parent, code)
+        return ViewComponents(parent, code)
 
 class ViewComponents(object):
     
-    def __init__(self, parent, dataSource=None):
+    def __init__(self, parent, code, dataSource=None):
         self._parent = parent
-        self._dataSource = dataSource
+        self._dataSource = dataSource 
+        self._code = code
     
     @property
     def DataSource(self):
@@ -52,6 +53,8 @@ class ViewComponents(object):
     def GetBookList(self, parent=None):
         bookList = wx.ListBox(parent if parent else self._parent, wx.ID_ANY, 
             choices=self._dataSource.GetBookListItems(), style=wx.LB_SINGLE|wx.NO_BORDER)
+        font = utils.LoadFont(constants.READ_FONT, self._code)
+        bookList.SetFont(font)
         bookList.SetSelection(0)
         return bookList
         
@@ -68,6 +71,8 @@ class ThaiFiveBooksViewComponents(ViewComponents):
     def GetBookList(self, parent=None):
         tree = wx.TreeCtrl(parent if parent else self._parent, wx.ID_ANY, 
             wx.DefaultPosition, wx.DefaultSize, style=wx.TR_HIDE_ROOT|wx.TR_HAS_BUTTONS)
+        font = utils.LoadFont(constants.READ_FONT, self._code)
+        tree.SetFont(font)
         self._InitTree(None, tree)
         return tree
         
@@ -121,13 +126,13 @@ class ScriptViewComponents(ViewComponents):
         
 class ThaiScriptViewComponents(ScriptViewComponents):
     
-    def __init__(self, parent, dataSource=None):
-        super(ThaiScriptViewComponents, self).__init__(parent, dataSource)
+    def __init__(self, parent, code, dataSource=None):
+        super(ThaiScriptViewComponents, self).__init__(parent, code, dataSource)
         self._toc = constants.THAI_SCRIPT_TOC
         
 class RomanScriptViewComponents(ViewComponents):
-    def __init__(self, parent, dataSource=None):
-        super(RomanScriptViewComponents, self).__init__(parent, dataSource)
+    def __init__(self, parent, code, dataSource=None):
+        super(RomanScriptViewComponents, self).__init__(parent, code, dataSource)
 
 
 class View(AuiBaseFrame):    
@@ -159,6 +164,7 @@ class View(AuiBaseFrame):
             
     def SetFont(self, font, code, index):
         self._readPanel.SetContentFont(font) if code is None else self._comparePanel[utils.MakeKey(code, index)].SetContentFont(font)
+        self._bookList.SetFont(font)
 
     @property
     def DataSource(self):
