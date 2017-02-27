@@ -51,8 +51,18 @@ class ViewComponents(object):
         self._dataSource = dataSource
     
     def GetBookList(self, parent=None):
+        choices = []
+        for item in self._dataSource.GetBookListItems():
+            
+            if self._code in [constants.THAI_POCKET_BOOK_CODE, constants.ROMAN_SCRIPT_CODE]:
+                choices.append(item)
+            else:
+                tokens = item.split()
+                choice = tokens[0] + ' ' + ' '.join(tokens[2:]) + ' ' + tokens[1]
+                choices.append(choice)
+
         bookList = wx.ListBox(parent if parent else self._parent, wx.ID_ANY, 
-            choices=self._dataSource.GetBookListItems(), style=wx.LB_SINGLE|wx.NO_BORDER)
+            choices=choices, style=wx.LB_SINGLE|wx.NO_BORDER)
         font = utils.LoadFont(constants.BOOK_FONT, self._code)
         bookList.SetFont(font)
         bookList.SetSelection(0)
