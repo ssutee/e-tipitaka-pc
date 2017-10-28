@@ -15,10 +15,10 @@ class History(db.Entity):
     keywords = Required(unicode)
     total = Required(int)
     code = Required(unicode)
-    read = Optional(unicode)
-    skimmed = Optional(unicode)
-    pages = Optional(unicode)
-    notes = Optional(unicode)
+    read = Optional(LongUnicode)
+    skimmed = Optional(LongUnicode)
+    pages = Optional(LongUnicode)
+    notes = Optional(LongUnicode)
 
 class SearchAndCompareHistory(db.Entity):
     keywords1 = Required(unicode)

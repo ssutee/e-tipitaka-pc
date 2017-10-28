@@ -147,7 +147,7 @@ NOTE_DB = os.path.join(DATA_PATH, 'note.sqlite')
 
 THAI_FIVE_BOOKS_DB = os.path.join(RESOURCES_DIR, 'thaibt.db')
 THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.db')
-THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.db')
+THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.6.db')
 THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.db')
 THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.db')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
@@ -155,7 +155,7 @@ THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.db')
 THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.db')
 PALI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'palimc.db')
 
-PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.3.db')
+PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.4.db')
 
 PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.db')
 THAI_DICT_DB = os.path.join(RESOURCES_DIR, 'thaidict.db')
@@ -198,10 +198,10 @@ ROMAN_PAGE_INDEX = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_page_index
 ROMAN_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_items.json')).read())
 
 FIVE_BOOKS_NAMES = [
-    u'ขุมทรัพย์จากพระโอษฐ์', 
-    u'อริยสัจจากพระโอษฐ์ ๑', 
-    u'อริยสัจจากพระโอษฐ์ ๒', 
-    u'ปฏิจจสมุปบาทจากพระโอษฐ์', 
+    u'ขุมทรัพย์จากพระโอษฐ์',
+    u'อริยสัจจากพระโอษฐ์ ๑',
+    u'อริยสัจจากพระโอษฐ์ ๒',
+    u'ปฏิจจสมุปบาทจากพระโอษฐ์',
     u'พุทธประวัติจากพระโอษฐ์']
 
 FIVE_BOOKS_PAGES = {
@@ -241,14 +241,14 @@ FIVE_BOOKS_SECTIONS = {
         u'หมวดที่ ๑๖ ว่าด้วย การไม่ลืมคำปฏิญาณ',
         u'หมวดที่ ๑๗ ว่าด้วย การหมดพิษสงทางใจ',
         u'หมวดที่ ๑๘ ว่าด้วย การไม่เสียความเป็นผู้หลักผู้ใหญ่',
-        u'หมวดที่ ๑๙ ว่าด้วย เนื้อนาบุญของโลก',                                                            
-    ], 
+        u'หมวดที่ ๑๙ ว่าด้วย เนื้อนาบุญของโลก',
+    ],
     2:[
         u'ภาคนำ ว่าด้วย ข้อความที่ควรทราบก่อนเกี่ยวกับจตุราริยสัจ',
         u'ภาค ๑ ว่าด้วย ทุกขอริยสัจ ความจริงอันประเสริฐคือทุกข์',
         u'ภาค ๒ ว่าด้วย สมุทยอริยสัจ ความจริงอันประเสริฐคือเหตุให้เกิดทุกข์',
         u'ภาค ๓ ว่าด้วย นิโรธอริยสัจ ความจริงอันประเสริฐคือความดับไม่เหลือของทุกข์',
-    ], 
+    ],
     3:[
         u'',
         u'',
@@ -256,7 +256,7 @@ FIVE_BOOKS_SECTIONS = {
         u'',
         u'ภาค ๔ ว่าด้วย มัคคอริยสัจ ความจริงอันประเสริฐคือมรรค',
         u'ภาคผนวก ว่าด้วย เรื่องนำมาผนวก เพื่อความสะดวกแก่การอ้างอิงสำหรับเรื่องที่ตรัสซ้ำ ๆ บ่อย ๆ',
-    ], 
+    ],
     4:[
         u'บทนำ ว่าด้วย เรื่องที่ควรทราบก่อนเกี่ยวกับปฏิจจสมุปบาท',
         u'หมวด ๑ ว่าด้วย ลักษณะ – ความสำคัญ – วัตถุประสงค์ของเรื่องปฏิจจสมุปบาท',
@@ -272,7 +272,7 @@ FIVE_BOOKS_SECTIONS = {
         u'หมวด ๑๑ ว่าด้วย ลัทธิหรือทิฏฐิที่ขัดกับปฏิจจสมุปบาท',
         u'หมวด ๑๒ ว่าด้วย ปฏิจจสมุปบาทที่ส่อไปในทางภาษาคน - เพื่อศีลธรรม',
         u'บทสรุป ว่าด้วย คุณค่าพิเศษของปฏิจจสมุปบาท',
-    ], 
+    ],
     5:[
         u'ภาคนำ ข้อความให้เกิดความสนใจในพุทธประวัติ',
         u'ภาค ๑ เริ่มแต่การเกิดแห่งวงศ์สากยะ, เรื่องก่อนประสูติ, จนถึงออกผนวช',
@@ -281,13 +281,13 @@ FIVE_BOOKS_SECTIONS = {
         u'ภาค ๔ เรื่องเบ็ดเตล็ดใหญ่น้อยต่าง ๆ ตั้งแต่โปรดปัญจวัคคีย์แล้ว  ไปจนถึงจวนจะปรินิพพาน',
         u'ภาค ๕ การปรินิพพาน',
         u'ภาค ๖ เรื่องการบำเพ็ญบารมีในอดีตชาติ ซึ่งเต็มไปด้วยทิฏฐานุคติอันสาวกในภายหลังพึงดำเนินตาม',
-    ]} 
+    ]}
 
 XML_NOTE_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
 <richtext version="1.0.0.0" xmlns="http://www.wxwidgets.org">
   <paragraphlayout textcolor="#000000" fontpointsize="13" fontfamily="70" fontstyle="90" fontweight="90" fontunderlined="0" fontface="Lucida Grande" alignment="1" parspacingafter="10" parspacingbefore="0" linespacing="10" margin-left="5,4098" margin-right="5,4098" margin-top="5,4098" margin-bottom="5,4098">
   </paragraphlayout>
-</richtext>    
+</richtext>
 '''
 
 IOS_CODE_TABLE = {
@@ -310,6 +310,6 @@ ANDROID_CODE_TABLE = {
     4: 'thaibt',
     5: 'thaiwn',
     6: 'thaipb',
-    7: 'romanct',    
+    7: 'romanct',
     8: 'palimc',
 }

@@ -46,8 +46,9 @@ class Presenter(object):
         self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
         interactor.Install(self, view)
         self.RefreshHistoryList(0)
-        self.CheckNewUpdate()
+        self.CheckNewUpdate()        
         self._view.Start()
+        utils.UpdateDatabases()
          
     @property
     def Delegate(self):
@@ -306,8 +307,13 @@ class Presenter(object):
             conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'data.sqlite'))
             cursor = conn.cursor()
             cursor.execute('PRAGMA user_version=4')
-            cursor.execute('SELECT keywords,total,code,read,skimmed,pages,notes FROM History')
-            for keywords, total, code, read, skimmed, pages, notes in cursor.fetchall():
+            cursor.execute('SELECT * FROM History')
+            for col in cursor.fetchall():
+                if len(col) == 7:
+                    pk, keywords, total, code, read, skimmed, pages = col
+                    notes = u''
+                elif len(col) == 8:
+                    pk, keywords, total, code, read, skimmed, pages, notes = col
                 self.ImportHistory(keywords, total, code, read, skimmed, pages, notes)
             conn.commit()
             conn.close()

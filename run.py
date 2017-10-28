@@ -168,7 +168,7 @@ class MyApp(wx.App):
         mfs.AddFile("edit-notes.png", noteImage, wx.BITMAP_TYPE_PNG)
         mfs.AddFile("ok.png", okImage, wx.BITMAP_TYPE_PNG)
         mfs.AddFile("not-ok.png", notOkImage, wx.BITMAP_TYPE_PNG)
-        wx.FileSystem_AddHandler(mfs)        
+        wx.FileSystem_AddHandler(mfs)
         return True
 
 utils.MoveOldUserData()
