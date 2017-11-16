@@ -4,7 +4,7 @@ import wx
 import wx.richtext as rt
 from wx.html import HtmlEasyPrinting
 import constants, utils, dialogs, widgets
-import os, json, codecs, re, sqlite3
+import os, json, codecs, re, sqlite3, sys
 
 from pony.orm import Database, Required, Optional, db_session, select, desc
 from read.model import Model
@@ -832,6 +832,9 @@ class Presenter(object):
         self._view.ShowBookmarkPopup(x, y, code, index)
         
     def ShowPrintDialog(self):
+        import cStringIO
+        import xhtml2pdf.pisa as pisa
+        
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
         page = self._currentPage if self._lastFocus is None else self._comparePage[self._lastFocus]
         
@@ -846,7 +849,16 @@ class Presenter(object):
         
         if dlg.ShowModal() == wx.ID_OK:
             font = utils.LoadFont(constants.READ_FONT, self._model.Code)
-            text = u'<font face="%s" size=+2>' % ('TF Chiangsaen' if font is None else font.GetFaceName())
+
+            app_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+            font_path = os.path.join(app_path, 'fonts','TF Chiangsaen.ttf')
+            
+            style = '<style>\n'
+            style += '@font-face { font-family: "TF Chiangsaen"; src: url(\'%s\') } \n' % font_path
+            style += 'body { font-family: "TF Chiangsaen"; font-size: 26px; line-height: 1; } \n'
+            style += '</style>'
+
+            text = u'<body>'
             
             ptext = u'หน้าที่ %s ถึง %s' % (utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')), 
                 utils.ArabicToThai(str(data['to']+1).decode('utf8','ignore')))
@@ -865,8 +877,17 @@ class Presenter(object):
                 else:
                     text += u'%s<br>'%(content)
                     
-            text += u'</font>'
-            self._printer.Print(text, "")
+            text += u'</body>'
+
+            dest = 'printing.pdf'
+            
+            html = '<html>' + style + text + '</html>'
+
+            pdf = pisa.CreatePDF(cStringIO.StringIO(html.encode('utf-8')), file(dest, "wb"), encoding='utf-8')
+            if pdf.err:
+                print pdf.err
+            else:
+                pisa.startViewer(dest)
 
         dlg.Destroy()
     
