@@ -877,7 +877,7 @@ class Presenter(object):
                 else:
                     text += u'%s<br>'%(content)
                     
-            text += u'</body>'
+            text = text.rstrip('<br>') + u'</body>'
 
             dest = 'printing.pdf'
             
