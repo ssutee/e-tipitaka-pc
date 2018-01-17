@@ -14,3 +14,4 @@ fonts/
 build/
 dist/
 error.log
+data_path.cfg

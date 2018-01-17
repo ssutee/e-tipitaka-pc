@@ -21,6 +21,7 @@ class Interactor(object):
         self.View.BackwardButton.Bind(wx.EVT_BUTTON, self.OnBackwardButtonClick)
         self.View.ExportButton.Bind(wx.EVT_BUTTON, self.OnExportButtonClick)
         self.View.ImportButton.Bind(wx.EVT_BUTTON, self.OnImportButtonClick)
+        self.View.SettingButton.Bind(wx.EVT_BUTTON, self.OnSettingButtonClick)
         
         self.View.VolumesRadio.Bind(wx.EVT_RADIOBOX, self.OnVolumesRadioSelect)
         self.View.SortingRadioBox.Bind(wx.EVT_RADIOBOX, self.OnSortingRadioBoxSelect)
@@ -87,6 +88,9 @@ class Interactor(object):
         
     def OnImportButtonClick(self, event):
         self.Presenter.ImportData()
+
+    def OnSettingButtonClick(self, event):
+        self.Presenter.SetUserDataDir()
 
     def OnNikhahitButtonClick(self, event):
         self.Presenter.InputSpecialCharacter(constants.NIKHAHIT_CHAR)

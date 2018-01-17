@@ -4,6 +4,7 @@ import wx
 import os, codecs, json, shutil
 import constants
 import sqlite3
+from appdirs import user_data_dir
 
 class BookmarkManager(object):
     def __init__(self, view, code):
@@ -334,3 +335,21 @@ def MoveOldUserData():
     fout.close()
 
     UpdateDatabases()
+
+def GetUserDataDir():    
+    from constants import APP_NAME, APP_AUTHOR
+
+    app_dir = os.path.dirname(os.path.realpath(__file__))
+    user_data_cfg_path = os.path.join(app_dir, 'data_path.cfg')
+    if os.path.exists(user_data_cfg_path):
+        with open(user_data_cfg_path, 'r') as f:
+            path = f.readline().rstrip()
+            if os.path.exists(path):
+                return path
+    return user_data_dir(APP_NAME, APP_AUTHOR)
+
+def SaveUserDataDir(path):
+    app_dir = os.path.dirname(os.path.realpath(__file__))
+    user_data_cfg_path = os.path.join(app_dir, 'data_path.cfg')
+    with open(user_data_cfg_path, 'w') as f:
+        f.write(path)

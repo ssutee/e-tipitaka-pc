@@ -72,7 +72,39 @@ class DataXferFontValidator(wx.PyValidator):
             return
             
         event.Skip()        
+
+class DataXferPathValidator(wx.PyValidator):
+    def __init__(self, data, key):
+        wx.PyValidator.__init__(self)
+        self.data = data
+        self.key = key
+
+    def Clone(self):
+        return DataXferPathValidator(self.data, self.key)
+
+    def Validate(self, win):
+        textctrl = self.GetWindow()
+        text = textctrl.GetValue()
+        if len(text.strip()) == 0:
+            wx.MessageBox(u'ช่องนี้ไม่สามารถเว้นว่างได้',u'พบข้อผิดพลาด')
+            textctrl.SetBackgroundColour('pink')
+            textctrl.Refresh()
+            return False
+        else:
+            textctrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textctrl.Refresh()
+            return True    
+
+    def TransferToWindow(self):
+        textctrl = self.GetWindow()
+        textctrl.SetValue(self.data.get(self.key, ''))
+        return True
         
+    def TransferFromWindow(self):
+        textctrl = self.GetWindow()
+        self.data[self.key] = textctrl.GetValue()
+        return True
+
 
 class DataXferPagesValidator(wx.PyValidator):
     def __init__(self, data, key):
@@ -416,6 +448,56 @@ class SimpleFontDialog(wx.Dialog):
         font = wx.Font(int(self._fontSize.GetValue()), wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, facename)        
         return FontData(font)
 
+class SettingUserDataDirDialog(wx.Dialog):
+    def __init__(self, parent, data):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, u'โปรดเลือกตำแหน่งเก็บข้อมูลใหม่', size=(600,150))
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        # DataXferPathValidator
+        self.path = wx.TextCtrl(self, wx.ID_ANY, size=(500, -1), validator=DataXferPathValidator(data, 'path'))
+        self.browseButton = wx.Button(self, wx.ID_ANY, u'เลือก')
+        self.browseButton.Bind(wx.EVT_BUTTON, self.OnBrowseButtonClick)
+
+        pathSizer = wx.BoxSizer(wx.HORIZONTAL)
+        pathSizer.Add(self.path, 1, flag=wx.EXPAND)
+        pathSizer.Add((5,-1))
+        pathSizer.Add(self.browseButton)
+
+        self.checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'สำเนาข้อมูลเดิมไปยังตำแหน่งใหม่', validator=DataXferCheckboxValidator(data,'copy'))
+        
+        btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+        btnOk = wx.Button(self, wx.ID_OK, u'ตกลง',size=(-1,-1))
+        btnCancel = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก', size=(-1,-1))
+        btnOk.SetDefault()
+        btnSizer.Add((20,-1), 1, flag=wx.EXPAND)
+
+        if 'wxMac' in wx.PlatformInfo:
+            btnSizer.Add(btnCancel, flag=wx.EXPAND)
+            btnSizer.Add((10,-1))
+            btnSizer.Add(btnOk, flag=wx.EXPAND)
+        else:
+            btnSizer.Add(btnOk, flag=wx.EXPAND)
+            btnSizer.Add((10,-1))
+            btnSizer.Add(btnCancel, flag=wx.EXPAND)
+
+        btnSizer.Add((20,-1), 1, flag=wx.EXPAND)        
+
+        mainSizer.Add((-1,15),flag=wx.EXPAND)
+        mainSizer.Add(pathSizer, flag=wx.ALIGN_CENTER)
+        mainSizer.Add((-1,15),flag=wx.EXPAND)
+        mainSizer.Add(self.checkBox, flag=wx.ALIGN_CENTER)
+        mainSizer.Add((-1,15),flag=wx.EXPAND)
+        mainSizer.Add(btnSizer, flag=wx.EXPAND)
+        
+        self.Center()
+        self.SetSizer(mainSizer)
+
+    def OnBrowseButtonClick(self, event):
+        dlg = wx.DirDialog(self, "Choose a directory:",
+                       style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.path.SetValue(dlg.GetPath())
+        dlg.Destroy()
 
 class PageRangeDialog(wx.Dialog):
     def __init__(self, parent, title, msg1, msg2, num, data, pdf=False):

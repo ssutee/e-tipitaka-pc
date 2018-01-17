@@ -1664,6 +1664,10 @@ class SearchToolPanel(wx.Panel):
     @property
     def ImportButton(self):
         return self._importButton
+
+    @property
+    def SettingButton(self):
+        return self._settingButton
         
     @property
     def NikhahitButton(self):
@@ -1733,6 +1737,7 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._exportButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
+        bottomSizer.Add(self._settingButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
         bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._paliDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._thaiDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
@@ -1813,6 +1818,10 @@ class SearchToolPanel(wx.Panel):
         self._exportButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.BitmapFromImage(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))         
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
+
+        self._settingButton = wx.BitmapButton(self, wx.ID_ANY, 
+            wx.BitmapFromImage(wx.Image(constants.SETTING_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._settingButton.SetToolTip(wx.ToolTip(u'ตั้งค่าตำแหน่งเก็บข้อมูล'))
         
         self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.READ_IMAGE, wx.BITMAP_TYPE_PNG)))
             

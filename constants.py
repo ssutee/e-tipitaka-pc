@@ -8,6 +8,7 @@ from whoosh.spelling import SpellChecker
 from whoosh.filedb.filestore import FileStorage
 from whoosh.index import open_dir
 from appdirs import user_data_dir, user_log_dir
+from utils import GetUserDataDir
 
 APP_NAME = 'E-Tipitaka'
 APP_AUTHOR = 'Sutee'
@@ -81,7 +82,7 @@ CONFIG_DIR = 'config'
 
 OLD_DATA_PATH = os.path.join(HOME, '.' + APP_NAME)
 
-DATA_PATH = user_data_dir(APP_NAME, APP_AUTHOR)
+DATA_PATH = GetUserDataDir()
 LOG_PATH = user_log_dir(APP_NAME, APP_AUTHOR)
 
 NOTES_PATH = os.path.join(DATA_PATH, NOTES_DIR)
@@ -114,6 +115,7 @@ RIGHT_IMAGE = os.path.join(RESOURCES_DIR, 'right.png')
 READ_IMAGE = os.path.join(RESOURCES_DIR, 'read.png')
 IMPORT_IMAGE = os.path.join(RESOURCES_DIR, 'import.png')
 EXPORT_IMAGE = os.path.join(RESOURCES_DIR, 'export.png')
+SETTING_IMAGE = os.path.join(RESOURCES_DIR, 'setting.png')
 BOOKS_IMAGE = os.path.join(RESOURCES_DIR, 'books.png')
 ICON_IMAGE = os.path.join(RESOURCES_DIR, 'e-tri_64_icon.ico')
 KEY_ENTER_IMAGE = os.path.join(RESOURCES_DIR, 'key_enter.png')

@@ -2,14 +2,14 @@
 
 import search.model
 from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog, NoteDialog, MarkManagerDialog
-import wx, zipfile, os, json, tempfile
+import wx, zipfile, os, json, tempfile, sys
 import xml.etree.ElementTree as ET
 import wx.richtext as rt
 from utils import BookmarkManager
 import i18n
 _ = i18n.language.ugettext
 
-import constants, utils, threads 
+import constants, utils, threads, dialogs
 
 import pony.orm
 from pony.orm import db_session
@@ -430,6 +430,33 @@ class Presenter(object):
             wx.MessageBox(_('Import data complete'), u'E-Tipitaka')
             self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())                    
         dlg.Destroy()
+
+    def SetUserDataDir(self):
+        data = { 'copy': False , 'path': constants.DATA_PATH }
+        dlg = dialogs.SettingUserDataDirDialog(self._view, data)
+        
+        if dlg.ShowModal() == wx.ID_OK:
+            print data
+            if data.get('path') != None and constants.DATA_PATH != data.get('path'):
+                self.ChangeUserDataDir(constants.DATA_PATH, data.get('path'), data.get('copy', False))
+        dlg.Destroy()
+
+    def ChangeUserDataDir(self, oldpath, newpath, copy):
+        import shutil
+        
+        def copy_and_overwrite(from_path, to_path):
+            if os.path.exists(to_path):
+                shutil.rmtree(to_path)
+            shutil.copytree(from_path, to_path)
+        
+        if copy:
+            copy_and_overwrite(oldpath, newpath)
+        
+        utils.SaveUserDataDir(newpath)
+        
+        wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
+        sys.exit(0)
+
         
     def InputSpecialCharacter(self, charCode):
         text = self._view.SearchCtrl.GetValue()
