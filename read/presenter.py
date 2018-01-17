@@ -10,6 +10,9 @@ from pony.orm import Database, Required, Optional, db_session, select, desc
 from read.model import Model
 from utils import BookmarkManager
 
+import cStringIO
+import xhtml2pdf.pisa as pisa
+
 import i18n
 _ = i18n.language.ugettext
 
@@ -831,10 +834,7 @@ class Presenter(object):
         code, index = utils.SplitKey(self._lastFocus)
         self._view.ShowBookmarkPopup(x, y, code, index)
         
-    def ShowPrintDialog(self):
-        import cStringIO
-        import xhtml2pdf.pisa as pisa
-        
+    def ShowPrintDialog(self):       
         volume = self._currentVolume if self._lastFocus is None else self._compareVolume[self._lastFocus]
         page = self._currentPage if self._lastFocus is None else self._comparePage[self._lastFocus]
         
@@ -879,7 +879,7 @@ class Presenter(object):
                     
             text = text.rstrip('<br>') + u'</body>'
 
-            dest = 'printing.pdf'
+            dest = os.path.join(constants.DATA_PATH, 'printing.pdf')
             
             html = '<html>' + style + text + '</html>'
 
