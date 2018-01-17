@@ -436,7 +436,6 @@ class Presenter(object):
         dlg = dialogs.SettingUserDataDirDialog(self._view, data)
         
         if dlg.ShowModal() == wx.ID_OK:
-            print data
             if data.get('path') != None and constants.DATA_PATH != data.get('path'):
                 self.ChangeUserDataDir(constants.DATA_PATH, data.get('path'), data.get('copy', False))
         dlg.Destroy()
@@ -450,13 +449,16 @@ class Presenter(object):
             shutil.copytree(from_path, to_path)
         
         if copy:
-            copy_and_overwrite(oldpath, newpath)
-        
-        utils.SaveUserDataDir(newpath)
-        
-        wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
-        sys.exit(0)
-
+            try:
+                copy_and_overwrite(oldpath, newpath)
+                utils.SaveUserDataDir(newpath)
+                wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
+                sys.exit(0)        
+            except WindowsError, e:
+                wx.MessageBox(u'ไม่สามารถเขียนทับที่ตำแหน่งใหม่ เนื่องจากมีโปรแกรมอื่นใช้อยู่', u'การตั้งค่าใหม่ไม่สำเร็จ', wx.OK | wx.ICON_ERROR)
+        else:
+            wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
+            sys.exit(0)
         
     def InputSpecialCharacter(self, charCode):
         text = self._view.SearchCtrl.GetValue()
