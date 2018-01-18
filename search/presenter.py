@@ -443,22 +443,29 @@ class Presenter(object):
     def ChangeUserDataDir(self, oldpath, newpath, copy):
         import shutil
         
-        def copy_and_overwrite(from_path, to_path):
-            if os.path.exists(to_path):
-                shutil.rmtree(to_path)
-            shutil.copytree(from_path, to_path)
-        
+        def recursive_overwrite(src, dest, ignore=None):
+            if os.path.isdir(src):
+                if not os.path.isdir(dest):
+                    os.makedirs(dest)
+                files = os.listdir(src)
+                if ignore is not None:
+                    ignored = ignore(src, files)
+                else:
+                    ignored = set()
+                for f in files:
+                    if f not in ignored:
+                        recursive_overwrite(os.path.join(src, f), 
+                                            os.path.join(dest, f), 
+                                            ignore)
+            else:
+                shutil.copyfile(src, dest)
+
         if copy:
-            try:
-                copy_and_overwrite(oldpath, newpath)
-                utils.SaveUserDataDir(newpath)
-                wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
-                sys.exit(0)        
-            except WindowsError, e:
-                wx.MessageBox(u'ไม่สามารถเขียนทับที่ตำแหน่งใหม่ เนื่องจากมีโปรแกรมอื่นใช้อยู่', u'การตั้งค่าใหม่ไม่สำเร็จ', wx.OK | wx.ICON_ERROR)
-        else:
-            wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
-            sys.exit(0)
+            recursive_overwrite(oldpath, newpath)
+
+        utils.SaveUserDataDir(newpath)
+        wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
+        sys.exit(0)
         
     def InputSpecialCharacter(self, charCode):
         text = self._view.SearchCtrl.GetValue()
