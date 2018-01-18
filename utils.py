@@ -339,8 +339,9 @@ def MoveOldUserData():
 def GetUserDataDir():    
     from constants import APP_NAME, APP_AUTHOR
 
-    app_dir = os.path.dirname(os.path.realpath(__file__))
-    user_data_cfg_path = os.path.join(app_dir, 'data_path.cfg')
+    data_dir = user_data_dir(APP_NAME, APP_AUTHOR)
+    user_data_cfg_path = os.path.join(data_dir, 'data_path.cfg')
+
     if os.path.exists(user_data_cfg_path):
         with open(user_data_cfg_path, 'r') as f:
             path = f.readline().rstrip()
@@ -349,7 +350,9 @@ def GetUserDataDir():
     return user_data_dir(APP_NAME, APP_AUTHOR)
 
 def SaveUserDataDir(path):
-    app_dir = os.path.dirname(os.path.realpath(__file__))
-    user_data_cfg_path = os.path.join(app_dir, 'data_path.cfg')
+    from constants import APP_NAME, APP_AUTHOR
+
+    data_dir = user_data_dir(APP_NAME, APP_AUTHOR)
+    user_data_cfg_path = os.path.join(data_dir, 'data_path.cfg')
     with open(user_data_cfg_path, 'w') as f:
         f.write(path)
