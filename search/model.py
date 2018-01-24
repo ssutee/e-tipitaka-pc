@@ -302,17 +302,17 @@ class Model(object):
                 link % (self._GetEntry(idx, volume ,page)), info)
     
     def _MakeHtmlPagination(self, pages, current):
-        text = u'<tr>'
+        text = u'<p>'
         for idx in range(1, pages+1):            
             if idx == current:
-                text += u'<td bgcolor="#4688DF"><b><font color="white">%s</font></b></td> '%(utils.ArabicToThai(unicode(idx)))
+                text += u'<span><b><font color="blue">%s</font></b></span> '%(utils.ArabicToThai(unicode(idx)))
             else:
                 p = u'<a href="n:%d_%d_%d"><font color="%s">%s</font></a>' % \
                     (idx, constants.ITEMS_PER_PAGE, len(self._results), 
                     "black" if idx not in self._clickedPages else "#BFBFBF", utils.ArabicToThai(unicode(idx)))
-                text += u'<td>' + p + u'</td>'                
-        text += '</tr>'
-        return '<div align="center">'+_('All results') + '<table cellspacing="1" cellpadding="2"><tr>' + text + '</tr></table></div>'
+                text += u'<span>' + p + u'</span> '                
+        text += '</p>'
+        return '<div align="center">'+_('All results') + text + '</div>'
                 
     def _MakeHtmlSummary(self):
         counts = self._GetResultSectionCounts()
