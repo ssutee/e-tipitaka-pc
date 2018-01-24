@@ -41,7 +41,7 @@ class KeyCommandHandler(object):
         if ((event.CmdDown() or event.ControlDown()) and code == 102) or code == 6:
             self._command = ''
             return constants.CMD_FIND
-        elif (event.CmdDown() or event.ControlDown()) and event.ShiftDown() and code == 99:
+        elif (event.CmdDown() or event.ControlDown()) and event.AltDown() and code == 141:
             return constants.CMD_COPY_REFERENCE
         elif code == wx.WXK_LEFT:
             self._command = ''

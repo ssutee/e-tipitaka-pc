@@ -548,7 +548,7 @@ class View(AuiBaseFrame):
             self._delegate.SearchSelection(text)
 
         cmd = u'⌘' if 'wxMac' in wx.PlatformInfo else u'Ctrl+'
-        aux = u'⇧' if 'wxMac' in wx.PlatformInfo else u'Shift+'
+        aux = u'⌥' if 'wxMac' in wx.PlatformInfo else u'Alt+'
         menu = wx.Menu()
         search = menu.Append(constants.ID_SEARCH, u'ค้นหา')
         menu.AppendSeparator()
