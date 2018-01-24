@@ -38,10 +38,11 @@ class KeyCommandHandler(object):
         
     def Handle(self, event, code):
         code = self._filter.get(code, code) 
+
         if ((event.CmdDown() or event.ControlDown()) and code == 102) or code == 6:
             self._command = ''
             return constants.CMD_FIND
-        elif (event.CmdDown() or event.ControlDown()) and event.AltDown() and code == 141:
+        elif (event.CmdDown() or event.ControlDown()) and (event.AltDown() or event.ShiftDown()) and (code == 141 or code == 3):
             return constants.CMD_COPY_REFERENCE
         elif code == wx.WXK_LEFT:
             self._command = ''
