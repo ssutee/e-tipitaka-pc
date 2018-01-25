@@ -34,15 +34,30 @@ class Printer(HtmlEasyPrinting):
 class KeyCommandHandler(object):
     def __init__(self):
         self._command = ''
-        self._filter = {3653:49, 47:50, 45:51, 3616:52, 3606:53, 3640:54, 3638:55, 3588:56, 3605:57, 3592:48, 3651:46}
+        self._filter = {3592: ord('.'), 3651: ord('0'), 3653: ord('1'), 47: ord('2'), 
+                        95: ord('3'), 3616: ord('4'), 3606: ord('5'), 3640: ord('6'), 
+                        3638: ord('7'), 3588: ord('8'), 3605: ord('9')}
         
     def Handle(self, event, code):
         code = self._filter.get(code, code) 
 
-        if ((event.CmdDown() or event.ControlDown()) and code == 102) or code == 6:
+        if (event.CmdDown() or event.ControlDown()) and code == ord('p'):
+            self._command = ''
+            return constants.CMD_PRINT
+        elif (event.CmdDown() or event.ControlDown()) and code == ord('s'):
+            self._command = ''
+            return constants.CMD_SAVE
+        elif code == ord('+') or code == ord('='):
+            self._command = ''
+            return constants.CMD_ZOOM_IN
+        elif code == ord('-'):
+            self._command = ''
+            return constants.CMD_ZOOM_OUT
+        elif ((event.CmdDown() or event.ControlDown()) and code == ord('f')) or code == 6:
             self._command = ''
             return constants.CMD_FIND
         elif (event.CmdDown() or event.ControlDown()) and (event.AltDown() or event.ShiftDown()) and (code == 141 or code == 3):
+            self._command = ''
             return constants.CMD_COPY_REFERENCE
         elif code == wx.WXK_LEFT:
             self._command = ''
@@ -50,25 +65,19 @@ class KeyCommandHandler(object):
         elif code == wx.WXK_RIGHT:
             self._command = ''
             return constants.CMD_FORWARD
-        elif (code >= 48 and code <= 57) or code == 46:
+        elif (code >= ord('0') and code <= ord('9')) or code == ord('.'):
             self._command += chr(code)
             return constants.CMD_IDLE
-        elif code == 105 or code == 112 or code == 118 or code == 3618 or code == 3619 or code == 3629:
+        elif code == ord('i') or code == ord('p') or code == ord('v') or code == 3618 or code == 3619 or code == 3629:
             self._result = self._command
             self._command = ''                
-            if code == 3619 or code == 105:
+            if code == 3619 or code == ord('i'):
                 return constants.CMD_JUMP_TO_ITEM
-            elif code == 3618 or code == 112:
+            elif code == 3618 or code == ord('p'):
                 return constants.CMD_JUMP_TO_PAGE
-            elif code == 3629 or code == 118:
+            elif code == 3629 or code == ord('v'):
                 return constants.CMD_JUMP_TO_VOLUME
             return constants.CMD_IDLE            
-        elif code == 43:
-            self._command = ''
-            return constants.CMD_ZOOM_IN
-        elif code == 45:
-            self._command = ''
-            return constants.CMD_ZOOM_OUT
 
         self._command = ''                
         return constants.CMD_IDLE
@@ -571,6 +580,10 @@ class Presenter(object):
             self.DecreaseFontSize()
         elif ret == constants.CMD_COPY_REFERENCE:
             self.CopyReference()
+        elif ret == constants.CMD_SAVE:
+            self.ShowSaveDialog()
+        elif ret == constants.CMD_PRINT:
+            self.ShowPrintDialog()
             
     def CopyReference(self, window=None, code=None):
         clipdata = wx.TextDataObject()        

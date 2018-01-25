@@ -58,6 +58,8 @@ CMD_ZOOM_IN         = 1006
 CMD_ZOOM_OUT        = 1007
 CMD_FIND            = 1008
 CMD_COPY_REFERENCE  = 1009
+CMD_PRINT           = 1010
+CMD_SAVE            = 1011
 
 ID_COPY           = 2000
 ID_SELECT_ALL     = 2001

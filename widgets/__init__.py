@@ -1305,6 +1305,7 @@ class ReadPanel(wx.Panel):
         offset = 1 if 'wxMac' in wx.PlatformInfo else 0
         self._body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
             utils.LoadThemeBackgroundHex(constants.READ), font))
+        self._body.SetFocus()
         
     def SetTitles(self, title1, title2):
         if 'wxMSW' in wx.PlatformInfo:
