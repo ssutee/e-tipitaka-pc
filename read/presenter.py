@@ -41,10 +41,10 @@ class KeyCommandHandler(object):
     def Handle(self, event, code):
         code = self._filter.get(code, code) 
 
-        if (event.CmdDown() or event.ControlDown()) and code == ord('p'):
+        if (event.CmdDown() or event.ControlDown()) and (code == ord('p') or code == 16):
             self._command = ''
             return constants.CMD_PRINT
-        elif (event.CmdDown() or event.ControlDown()) and code == ord('s'):
+        elif (event.CmdDown() or event.ControlDown()) and (code == ord('s') or code == 19):
             self._command = ''
             return constants.CMD_SAVE
         elif code == ord('+') or code == ord('='):
