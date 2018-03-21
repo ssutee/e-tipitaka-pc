@@ -151,7 +151,7 @@ NOTE_DB = os.path.join(DATA_PATH, 'note.sqlite')
 
 THAI_FIVE_BOOKS_DB = os.path.join(RESOURCES_DIR, 'thaibt.db')
 THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.db')
-THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.6.db')
+THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.7.db')
 THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.db')
 THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.db')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
