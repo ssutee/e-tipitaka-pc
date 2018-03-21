@@ -19,7 +19,7 @@ APP = ['run.py']
 DATA_FILES = ['resources']
 OPTIONS = {'argv_emulation': True,
  'iconfile': '/Users/sutee/Works/E-Tipitaka.icns',
- 'packages': ['whoosh', 'pony']}
+ 'packages': ['whoosh', 'pony', 'xhtml2pdf', 'reportlab']}
 
 setup(
     name="E-Tipitaka",
