@@ -417,9 +417,9 @@ class View(AuiBaseFrame):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         readPanel.SetTitles(title1, title2)
         
-    def SetText(self, text, code=None, index=1):
+    def SetText(self, text, code=None, index=1, focus=True):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
-        readPanel.SetBody(text)
+        readPanel.SetBody(text, focus)
         
     def GetStringSelection(self, code=None, index=1):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]

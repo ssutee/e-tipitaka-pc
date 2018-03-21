@@ -255,7 +255,7 @@ class Presenter(object):
         for marked, s, t in self._marks[key]:
             self._view.MarkText(code, index, (s,t)) if marked else self._view.UnmarkText(code, index, (s,t))
 
-    def OpenBook(self, volume, page, section=None, selectItem=False, showBookList=None):
+    def OpenBook(self, volume, page, section=None, selectItem=False, showBookList=None, focus=True):
         self._findTextHandler.Reset()
 
         page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
@@ -279,8 +279,8 @@ class Presenter(object):
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         
         # work around for fixing font size problem on win32
-        self._view.SetText(content)        
-        self._view.SetText(content)
+        self._view.SetText(content, focus=focus)        
+        self._view.SetText(content, focus=focus)
         self.SetStatusText(u'', 0)        
         self.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
 
@@ -302,7 +302,7 @@ class Presenter(object):
         elif showBookList != None and showBookList == False:
             self._view.HideBookList()
 
-    def OpenAnotherBook(self, code, index, volume, page, keywords=None):
+    def OpenAnotherBook(self, code, index, volume, page, keywords=None, focus=True):
         self._findTextHandler.Reset()        
         currentCode = self._model.Code
         self._model.Code = code
@@ -323,7 +323,7 @@ class Presenter(object):
         self._view.UpdateSlider(page, self._model.GetFirstPageNumber(volume), self._model.GetTotalPages(volume), code, index)
         
         content = self._model.GetPage(volume, page)
-        self._view.SetText(content, code=code, index=index)
+        self._view.SetText(content, code=code, index=index, focus=focus)
         self._view.FormatText(self._model.GetFormatter(volume, page), code=code, index=index)        
         if keywords is not None:
             self._HighlightKeywords(content, keywords, volume, page, code, index)
@@ -463,9 +463,9 @@ class Presenter(object):
     def JumpToPage(self, page, code=None, index=1):
         if code is None:
             page = page if page > 0 and page <= self._model.GetTotalPages(self._currentVolume) else self._model.GetFirstPageNumber(self._currentVolume)
-            self.OpenBook(self._currentVolume, page, self._model.GetSection(self._currentVolume, page))
+            self.OpenBook(self._currentVolume, page, self._model.GetSection(self._currentVolume, page), focus=False)
         else:            
-            self.OpenAnotherBook(code, index, self._compareVolume[utils.MakeKey(code, index)], page)
+            self.OpenAnotherBook(code, index, self._compareVolume[utils.MakeKey(code, index)], page, focus=False)
         
     def JumpToItem(self, item, code=None, index=1):
         page, sub = 0, 0

@@ -3,6 +3,8 @@
 *.swp
 *~
 .DS_Store
+.eggs/
+run.sh
 resources/*.db
 resources/*.pkl
 resources/*.ico
