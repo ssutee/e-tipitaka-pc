@@ -1397,8 +1397,8 @@ class ReadWithReferencesPanel(ReadPanel):
     def ExtraLayout(self):
         self._mainSizer.Add(self._refs, 0, wx.EXPAND|wx.ALL, 5)
                 
-    def SetBody(self, text):
-        super(ReadWithReferencesPanel, self).SetBody(text)
+    def SetBody(self, text, focus=True):
+        super(ReadWithReferencesPanel, self).SetBody(text, focus=focus)
         refs = re.findall(ur'[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+', text, re.U)
         if len(refs) > 0:
             html = u'อ้างอิง:  '
@@ -1409,7 +1409,7 @@ class ReadWithReferencesPanel(ReadPanel):
             self._refs.SetPage(html)
         else:
             self._refs.Hide()
-            self._refs.SetPage(u'')    
+            self._refs.SetPage(u'')
         self.Layout()
 
 class NotePanel(wx.Panel):
