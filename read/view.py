@@ -33,6 +33,8 @@ class ViewComponentsCreator(object):
             return ThaiScriptViewComponents(parent, code)
         if code == constants.ROMAN_SCRIPT_CODE:
             return RomanScriptViewComponents(parent, code)
+        if code == constants.THAI_SUPREME_CODE:
+            return ThaiSupremeViewComponents(parent, code)
         return ViewComponents(parent, code)
 
 class ViewComponents(object):
@@ -73,6 +75,11 @@ class ViewComponents(object):
         
 class ThaiMahaChulaViewComponents(ViewComponents):
     
+    def Filter(self, view):
+        view.CheckBox.Show()
+
+class ThaiSupremeViewComponents(ViewComponents):
+
     def Filter(self, view):
         view.CheckBox.Show()
         
@@ -469,7 +476,7 @@ class View(AuiBaseFrame):
 
         if 'wxMac' in wx.PlatformInfo:
             readPanel.SetContentFont(font)            
-        
+
         for token in formatter.split():
             tag,x,y = token.split('|')
             if tag == 's3' or tag == 'p3':

@@ -1925,5 +1925,5 @@ class ReferencesWindow(wx.html.HtmlWindow):
             volume = utils.ThaiToArabic(tokens[0])
             item = utils.ThaiToArabic(re.split(r'[–\-,\s]+', tokens[2])[0])
             if hasattr(self._delegate, 'OnLinkToReference'):
-                self._delegate.OnLinkToReference(constants.COMPARE_CODES[dlg.GetSelection()], int(volume), int(item))
+                self._delegate.OnLinkToReference(constants.CODES[constants.COMPARE_ORDER[dlg.GetSelection()]], int(volume), int(item))
         dlg.Destroy()

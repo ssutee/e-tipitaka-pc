@@ -99,13 +99,13 @@ class Engine(object):
         formatter = result.get('display', '')
                     
         header = result.get('header')
-        if header is not None:
+        if header is not None and len(header) > 0:
             formatter += u' h1|0|%d'%(len(header))
             
         footer = result.get('footer')
-        if footer is not None:
-            formatter += u' s3|%d|%d'%(len(content)-len(footer), len(content))
-        
+        if footer is not None and len(footer) > 0:
+            formatter += u' s3|%d|%d'%(len(content)-len(footer), len(content)+1)
+
         return formatter
         
     def GetItems(self, volume, page):
@@ -433,6 +433,55 @@ class PaliMahaChulaEngine(Engine):
         self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
         result = self._searcher.fetchone()
         return result[0] if result is not None else 0        
+
+class ThaiSupremeEngine(Engine):
+    def __init__(self):
+        super(ThaiSupremeEngine, self).__init__()
+        self._code = constants.THAI_SUPREME_CODE
+        self._conn = sqlite3.connect(constants.THAI_SUPREME_DB)
+        self._searcher = self._conn.cursor()
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return None if result.get('content') is None else result.get('content') + '\n' + result.get('footer', u'')
+
+    def GetTitle(self, volume=None):
+        if not volume:
+            return u'พระไตรปิฎก ฉบับมหาเถรฯ (ภาษาไทย)'
+        return u'พระไตรปิฎก ฉบับมหาเถรฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+    
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+            r['display'] = result[5]            
+            r['footer'] = result[7]
+        return r
+
+    def GetSubItem(self, volume, page, item):
+        return map(int, constants.MAP_MS_TO_SIAM['v%d-p%d'%(volume, page)])
+
+    def ConvertItemToPage(self, volume, item, sub, checked=False):
+        try:
+            return int(constants.MAP_MS_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+        except KeyError, e:
+            return 0
+        except TypeError, e:
+            return 0
+
+    def CanSelectComparingItem(self):
+        return False
+
+    @property
+    def HighlightOffset(self):
+        return 1 if 'wxMac' in wx.PlatformInfo else 0
 
 
 class ThaiMahaChulaEngine(Engine):
@@ -800,7 +849,9 @@ class Model(object):
         elif constants.THAI_POCKET_BOOK_CODE == code:
             self._engine[code] = ThaiPocketBookEngine()
         elif constants.PALI_MAHACHULA_CODE == code:
-            self._engine[code] = PaliMahaChulaEngine()            
+            self._engine[code] = PaliMahaChulaEngine()    
+        elif constants.THAI_SUPREME_CODE == code:
+            self._engine[code] = ThaiSupremeEngine()        
         else:
             raise ValueError(code)
 

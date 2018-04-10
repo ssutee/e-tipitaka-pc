@@ -516,7 +516,7 @@ class Presenter(object):
         elif len(items) > 0:
             item = items[0]
         
-        self._DoCompare(constants.COMPARE_CODES[index], item)
+        self._DoCompare(constants.CODES[constants.COMPARE_ORDER[index]], item)
 
     def _DoCompare(self, code, item):        
         if item is None: return

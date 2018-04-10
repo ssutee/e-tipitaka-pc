@@ -48,7 +48,7 @@ class Model(object):
         sortDesc = (lambda h: h.keywords) if alphabetSort else (lambda h: desc(h.id))
         results, start, page = [], 0, 500
         while True:
-            query = select(h for h in History if h.code == constants.CODES[index] and text in h.keywords).order_by(sortDesc)[start:start+page]
+            query = select(h for h in History if h.code == constants.CODES[constants.LANGS_ORDER[index]] and text in h.keywords).order_by(sortDesc)[start:start+page]
             if len(query) == 0: 
                 break
             results += list(query)
@@ -447,7 +447,8 @@ class SearchModelCreator(object):
     
     @staticmethod
     def Create(delegate, index):
-        code = constants.CODES[index]
+        code = constants.CODES[constants.LANGS_ORDER[index]]
+
         if code == constants.THAI_ROYAL_CODE:
             return ThaiRoyalSearchModel(delegate)
         if code == constants.PALI_SIAM_CODE:
@@ -458,6 +459,8 @@ class SearchModelCreator(object):
             return ThaiMahaMakutSearchModel(delegate)
         if code == constants.THAI_MAHACHULA_CODE:
             return ThaiMahaChulaSearchModel(delegate)
+        if code == constants.THAI_SUPREME_CODE:
+            return ThaiSupremeSearchModel(delegate)
         if code == constants.THAI_FIVE_BOOKS_CODE:
             return ThaiFiveBooksSearchModel(delegate)
         if code == constants.ROMAN_SCRIPT_CODE:
@@ -569,6 +572,27 @@ class ThaiMahaChulaSearchModel(Model):
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai MahaChula')) % (self._keywords) )        
         
+class ThaiSupremeSearchModel(Model):
+    @property
+    def Code(self):
+        return constants.THAI_SUPREME_CODE
+
+    def __init__(self, delegate):
+        super(ThaiSupremeSearchModel, self).__init__(delegate)
+        self._volumes = range(45)
+        self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.ThaiSupremeSearchThread(keywords, volumes, delegate)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.ThaiSupremeDisplayThread(results, keywords, delegate, mark, current)
+
+
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((u'ไม่พบ %s ในพระไตรปิฎก (ภาษาไทย ฉบับมหาเถรฯ)') % (self._keywords))
+
+
 class PaliMahaChulaSearchModel(Model):
 
     @property

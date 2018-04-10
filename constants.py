@@ -17,13 +17,16 @@ VIRTURE_STORE = user_data_dir('VirtualStore', '')
 
 HOME = expanduser("~")
 
-CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc']
-COMPARE_CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'romanct', 'palimc']
+#          0        1        2        3         4         5         6          7         8          9
+CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc', 'thaims']
+
 # COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script', u'บาลี (มหาจุฬาฯ)']
-COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'Roman Script']
+COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'ไทย (มหาเถรฯ)', u'Roman Script']
+COMPARE_ORDER = [0,1,2,3,4,9,7]
 
 # LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'Roman Script', u'บาลี (มหาจุฬาฯ)']
-LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'Roman Script']
+LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'ไทย (มหาเถรฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'Roman Script']
+LANGS_ORDER = [0,1,2,3,4,9,5,6,7]
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -158,6 +161,7 @@ ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.db')
 THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.db')
 THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.db')
 PALI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'palimc.db')
+THAI_SUPREME_DB = os.path.join(RESOURCES_DIR, 'thaims.db')
 
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.4.db')
 
@@ -175,6 +179,7 @@ THAI_SCRIPT_CODE = 'thaict'
 ROMAN_SCRIPT_CODE = 'romanct'
 THAI_WATNA_CODE = 'thaiwn'
 THAI_POCKET_BOOK_CODE = 'thaipb'
+THAI_SUPREME_CODE = 'thaims'
 
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
@@ -186,6 +191,7 @@ VOLUME_TABLE = cPickle.load(open(os.path.join(RESOURCES_DIR, 'maps.pkl'),  'rb')
 SCRIPT_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'ct_items.json')).read())
 
 MAP_MC_TO_SIAM = cPickle.load(open(os.path.join(RESOURCES_DIR, 'mc_map.pkl'), 'rb'))
+MAP_MS_TO_SIAM = cPickle.load(open(os.path.join(RESOURCES_DIR, 'ms_map.pkl'), 'rb'))
 
 FIVE_BOOKS_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'bt_toc.json')).read())
 

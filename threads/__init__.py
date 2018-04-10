@@ -284,6 +284,30 @@ class ThaiMahaChulaSearchThread(SearchThread):
         r['content'] = result[7]
         return r
 
+class ThaiSupremeSearchThread(SearchThread):
+
+    @property
+    def Code(self):
+        return constants.THAI_SUPREME_CODE
+
+    @property
+    def Database(self):
+        return constants.THAI_SUPREME_DB    
+        
+    @property
+    def TableName(self):
+        return 'main'
+        
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['content'] = result[4]
+        r['display'] = result[5]            
+        r['footer'] = result[7]
+        return r
+
 class ThaiMahaMakutSearchThread(SearchThread):
 
     @property
@@ -424,6 +448,11 @@ class ThaiMahaMakutDisplayThread(DisplayThread):
     
 class ThaiMahaChulaDisplayThread(DisplayThread):
     pass
+
+class ThaiSupremeDisplayThread(DisplayThread):
+
+    def ProcessResult(self, idx, result, excerpts):
+        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
 
 class PaliMahaChulaDisplayThread(DisplayThread):
 
