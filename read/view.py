@@ -500,7 +500,7 @@ class View(AuiBaseFrame):
                     wx.TextAttr(wx.Colour(0x88,0x88,0x88,0xFF), wx.NullColour, font))  
             elif tag == 'er':
                 font.SetPointSize(fontSize*0.70)
-                readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#D1D3D4', wx.NullColour, font))
+                readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#919394', wx.NullColour, font))
             elif tag == 'fn':
                 font.SetPointSize(fontSize*0.8)
                 readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#3CBF3F', wx.NullColour, font))  
