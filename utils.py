@@ -338,6 +338,12 @@ def MoveOldUserData():
 
     UpdateDatabases()
 
+def RemoveOldDatabases():
+    import glob
+
+    for dbfile in glob.glob(os.path.join(constants.RESOURCES_DIR, '*.db')):
+        os.remove(dbfile)
+
 def GetUserDataDir():    
     from constants import APP_NAME, APP_AUTHOR
 

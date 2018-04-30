@@ -6,6 +6,7 @@
 .eggs/
 run.sh
 resources/*.db
+resources/*.sqlite
 resources/*.pkl
 resources/*.ico
 resources/*.png

@@ -172,6 +172,7 @@ class MyApp(wx.App):
         return True
 
 utils.MoveOldUserData()
+utils.RemoveOldDatabases()
 
 sys.excepthook = excepthook
 
