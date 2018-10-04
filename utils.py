@@ -341,8 +341,14 @@ def MoveOldUserData():
 def RemoveOldDatabases():
     import glob
 
+    if not getattr(__builtins__, "WindowsError", None):
+        class WindowsError(OSError): pass
+
     for dbfile in glob.glob(os.path.join(constants.RESOURCES_DIR, '*.db')):
-        os.remove(dbfile)
+        try:
+            os.remove(dbfile)
+        except WindowsError, e:
+            pass
 
 def GetUserDataDir():    
     from constants import APP_NAME, APP_AUTHOR
