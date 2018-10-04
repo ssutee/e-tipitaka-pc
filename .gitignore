@@ -5,7 +5,6 @@
 .DS_Store
 .eggs/
 run.sh
-fonts/
 build/
 dist/
 error.log
