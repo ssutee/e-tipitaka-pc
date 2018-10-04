@@ -469,6 +469,8 @@ class SearchModelCreator(object):
             return ThaiPocketBookSearchModel(delegate)
         if code == constants.PALI_MAHACHULA_CODE:
             return PaliMahaChulaSearchModel(delegate)
+        if code == constants.THAI_VINAYA_CODE:
+            return ThaiVinayaSearchModel(delegate)
         return None
 
 class ThaiRoyalSearchModel(Model):
@@ -698,6 +700,51 @@ class ThaiScriptSearchModel(ScriptSearchModel):
 
     def HasVolumeSelection(self):
         return False                
+
+class ThaiVinayaSearchModel(Model):
+
+    @property
+    def Code(self):
+        return constants.THAI_VINAYA_CODE
+
+    def __init__(self, delegate):
+        super(ThaiVinayaSearchModel, self).__init__(delegate)
+        self._volumes = range(11)
+        self._spellChecker = constants.THAI_SPELL_CHECKER
+
+    def HasVolumeSelection(self):
+        return False
+
+    def GetSectionBoundary(self, position):
+        return 0
+
+    def _GetColorCode(self, volume):
+        return None
+
+    def _GetResultSectionCounts(self):
+        return []
+
+    def _MakeHtmlItemInfo(self, volume, items):
+        return ''
+        
+    def _MakeHtmlSummary(self):
+        return ''        
+
+    def HasBuddhawaj(self):
+        return True
+
+    def _GetEntry(self, idx, volume, page):
+        return u'%s. %s %s %s' % (utils.ArabicToThai(unicode(idx)), 
+            self.GetBookName(volume), _('Page'), utils.ArabicToThai(page))
+
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.ThaiVinayaSearchThread(keywords, volumes, delegate, buddhawaj=buddhawaj)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.ThaiVinayaDisplayThread(results, keywords, delegate, mark, current)
+
+    def NotFoundMessage(self):
+        return u'<div align="center"><h2>%s</h2></div>' % ((u'ไม่พบ %s ในหนังสืออริยวินัย') % (self._keywords) )
 
 class ThaiPocketBookSearchModel(Model):
 

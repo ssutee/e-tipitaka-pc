@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import wx
-import sqlite3, cPickle
+import sqlite3, cPickle, re
 import constants, utils
 
 import i18n
@@ -254,6 +254,72 @@ class PaliSiamEngine(Engine):
         
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
+
+class ThaiVinayaEngine(Engine):
+
+    def __init__(self):
+        super(ThaiVinayaEngine, self).__init__()
+        self._code = constants.THAI_VINAYA_CODE
+        self._conn = sqlite3.connect(constants.THAI_VINAYA_DB)
+        self._searcher = self._conn.cursor()
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return result.get('content')
+
+    def GetTitle(self, volume=None):
+        return u'อริยวินัย'
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['content'] = result[3]
+            r['buddhawaj'] = result[4]
+            r['display'] = result[5]
+        return r
+
+    def GetCompareChoices(self):
+        return constants.COMPARE_CHOICES
+
+    def ConvertVolume(self, volume, item, sub):
+        return volume
+
+    def GetComparingVolume(self, volume, page):
+        return 9 if volume == 1 else volume+1
+
+    def GetItems(self, volume, page):
+        self._searcher.execute('SELECT content FROM main WHERE volume=? AND page=?', (int(volume), int(page)))
+        result = self._searcher.fetchone()
+        return [] if volume > 9 else map(int, map(utils.ThaiToArabic, re.findall(ur'\[([๐-๙]+)\]', result[0])))
+
+    def GetSubtitle(self, volume, section=None):
+        tokens = constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore').split()
+        return '%s'%(' '.join(tokens[1:]))
+
+        
+    def GetSubItem(self, volume, page, item):
+        return item, 1
+
+    def GetSectionBoundary(self, position):
+        return 11
+
+    def GetFirstPageNumber(self, volume):
+        return 1
+
+    def GetTotalPages(self, volume):
+        self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0
+
+    def CanSelectComparingItem(self):
+        return True
+
 
 class ThaiPocketBookEngine(Engine):
 
@@ -852,6 +918,8 @@ class Model(object):
             self._engine[code] = PaliMahaChulaEngine()    
         elif constants.THAI_SUPREME_CODE == code:
             self._engine[code] = ThaiSupremeEngine()        
+        elif constants.THAI_VINAYA_CODE == code:
+            self._engine[code] = ThaiVinayaEngine()
         else:
             raise ValueError(code)
 
