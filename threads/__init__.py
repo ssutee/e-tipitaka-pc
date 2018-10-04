@@ -378,6 +378,30 @@ class ThaiPocketBookSearchThread(SearchThread):
         r['display'] = result[5]
         return r
 
+class ThaiVinayaSearchThread(SearchThread):
+
+    @property
+    def Code(self):
+        return constants.THAI_VINAYA_CODE
+
+    @property
+    def Database(self):
+        return constants.THAI_VINAYA_DB
+
+    @property
+    def TableName(self):
+        return 'main'
+
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['content'] = result[3]
+        r['buddhawaj'] = result[4]
+        r['display'] = result[5]
+        return r
+
+
 class DisplayThread(threading.Thread):
     
     def __init__(self, results, keywords, delegate, mark, current):
@@ -434,6 +458,11 @@ class ThaiPocketBookDisplayThread(DisplayThread):
     
     def ProcessResult(self, idx, result, excerpts):
         return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), u'0', excerpts)
+
+class ThaiVinayaDisplayThread(DisplayThread):
+    
+    def ProcessResult(self, idx, result, excerpts):
+        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), u'0', excerpts)        
 
 class ThaiFiveBooksDisplayThread(DisplayThread):
     

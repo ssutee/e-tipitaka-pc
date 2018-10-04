@@ -17,14 +17,27 @@ VIRTURE_STORE = user_data_dir('VirtualStore', '')
 
 HOME = expanduser("~")
 
-#          0        1        2        3         4         5         6          7         8          9
-CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc', 'thaims']
+THAI_FIVE_BOOKS_CODE = 'thaibt'
+THAI_ROYAL_CODE = 'thai'
+THAI_MAHACHULA_CODE = 'thaimc'
+PALI_MAHACHULA_CODE = 'palimc'
+THAI_MAHAMAKUT_CODE = 'thaimm'
+PALI_SIAM_CODE = 'pali'
+THAI_SCRIPT_CODE = 'thaict'
+ROMAN_SCRIPT_CODE = 'romanct'
+THAI_WATNA_CODE = 'thaiwn'
+THAI_POCKET_BOOK_CODE = 'thaipb'
+THAI_SUPREME_CODE = 'thaims'
+THAI_VINAYA_CODE = 'thaivn'
+
+#          0        1        2        3         4         5         6          7         8          9          10
+CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc', 'thaims', 'thaivn']
 
 COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'ไทย (มหาเถรฯ)', u'บาลี (มหาจุฬาฯ)', u'Roman Script']
 COMPARE_ORDER = [0,1,2,3,4,9,8,7]
 
-LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'ไทย (มหาเถรฯ)', u'บาลี (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'Roman Script']
-LANGS_ORDER = [0,1,2,3,4,9,8,5,6,7]
+LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'ไทย (มหาเถรฯ)', u'บาลี (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'อริยวินัย', u'Roman Script']
+LANGS_ORDER = [0,1,2,3,4,9,8,5,6,10,7]
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -160,24 +173,13 @@ THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn.sqlite')
 THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb.sqlite')
 PALI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'palimc.sqlite')
 THAI_SUPREME_DB = os.path.join(RESOURCES_DIR, 'thaims.sqlite')
+THAI_VINAYA_DB = os.path.join(RESOURCES_DIR, 'thaivn.sqlite')
 
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.sqlite')
 
 PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict.sqlite')
 THAI_DICT_DB = os.path.join(RESOURCES_DIR, 'thaidict.sqlite')
 ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english.sqlite')
-
-THAI_FIVE_BOOKS_CODE = 'thaibt'
-THAI_ROYAL_CODE = 'thai'
-THAI_MAHACHULA_CODE = 'thaimc'
-PALI_MAHACHULA_CODE = 'palimc'
-THAI_MAHAMAKUT_CODE = 'thaimm'
-PALI_SIAM_CODE = 'pali'
-THAI_SCRIPT_CODE = 'thaict'
-ROMAN_SCRIPT_CODE = 'romanct'
-THAI_WATNA_CODE = 'thaiwn'
-THAI_POCKET_BOOK_CODE = 'thaipb'
-THAI_SUPREME_CODE = 'thaims'
 
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
@@ -308,6 +310,7 @@ IOS_CODE_TABLE = {
     7: 'thaipb',
     8: 'romanct',
     9: 'palimc',
+    10: 'thaivn'
 }
 
 ANDROID_CODE_TABLE = {
@@ -320,4 +323,5 @@ ANDROID_CODE_TABLE = {
     6: 'thaipb',
     7: 'romanct',
     8: 'palimc',
+    9: 'thaivn'
 }

@@ -297,6 +297,8 @@ def ShortName(code):
         return u'มหาจุฬา (บาลี)'
     if code == constants.THAI_SUPREME_CODE:
         return u'มหาเถระ'
+    if code == constants.THAI_VINAYA_CODE:
+        return u'อริยวินัย'
     raise ValueError(code)
 
 def GetFilePaths(directory):
