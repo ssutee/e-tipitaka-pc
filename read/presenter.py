@@ -260,10 +260,15 @@ class Presenter(object):
 
         page = self._model.GetFirstPageNumber(volume) if page < self._model.GetFirstPageNumber(volume) else page
 
-        if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
-
         self._currentVolume = volume
         self._currentPage = page
+
+        if self._model.GetTotalPages(volume) == 0: 
+            self._view.SetText(u'ฐานข้อมูลยังจัดทำไม่เสร็จ', focus=focus)
+            self._view.SetText(u'ฐานข้อมูลยังจัดทำไม่เสร็จ', focus=focus)
+            return
+
+        if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
 
         self._LoadNoteText(self._currentVolume, self._currentPage)
 
