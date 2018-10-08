@@ -291,7 +291,7 @@ class ThaiVinayaEngine(Engine):
         return volume
 
     def GetComparingVolume(self, volume, page):
-        return 9 if volume == 1 else volume+1
+        return 9 if volume == 1 else volume-1
 
     def GetItems(self, volume, page):
         self._searcher.execute('SELECT content FROM main WHERE volume=? AND page=?', (int(volume), int(page)))
