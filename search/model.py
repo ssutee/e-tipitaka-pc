@@ -754,7 +754,7 @@ class ThaiPocketBookSearchModel(Model):
 
     def __init__(self, delegate):
         super(ThaiPocketBookSearchModel, self).__init__(delegate)
-        self._volumes = range(13)
+        self._volumes = range(18)
         self._spellChecker = constants.THAI_SPELL_CHECKER
 
     def HasVolumeSelection(self):

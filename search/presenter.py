@@ -29,6 +29,7 @@ class Presenter(object):
     def __init__(self, model, view, interactor):
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
         self._presenters = {}
+        self._models = { 0:model }
         self._scrollPosition = 0
         self._shouldOpenNewWindow = False
         self._canBeClosed = False
@@ -99,16 +100,16 @@ class Presenter(object):
         
     def Search(self, keywords=None, code=None, refreshHistoryList=True):
         self._refreshHistoryList = refreshHistoryList
-        
         if not keywords:
             keywords = self._view.SearchCtrl.GetValue()
 
         if len(keywords.strip()) == 0 or len(keywords.replace('+',' ').strip()) == 0:
             return True
         
-        if code is not None and constants.CODES.index(code) != self._view.TopBar.LanguagesComboBox.GetSelection():
-            self._view.TopBar.LanguagesComboBox.SetSelection(constants.CODES.index(code))
-            self.SelectLanguage(constants.CODES.index(code))
+        position = constants.LANGS_ORDER.index(constants.CODES.index(code)) if code is not None else 0
+        if code is not None and position != self._view.TopBar.LanguagesComboBox.GetSelection():
+            self._view.TopBar.LanguagesComboBox.SetSelection(position)
+            self.SelectLanguage(position)
         
         self._view.SearchCtrl.SetValue(keywords)
         self._searchingBuddhawaj = self._view.BuddhawajOnly.IsChecked()
@@ -171,12 +172,22 @@ class Presenter(object):
         self._model.Display(current)
         
     def SelectLanguage(self, index):
-        self._model = search.model.SearchModelCreator.Create(self, index)
+        if index not in self._models:        
+            self._models[index] = search.model.SearchModelCreator.Create(self, index)
+        
+        self._model = self._models[index]
+
         self._view.VolumesRadio.Enable() if self._model.HasVolumeSelection() else self._view.VolumesRadio.Disable()
 
         self._view.BuddhawajOnly.Enable() if self._model.HasBuddhawaj() else self._view.BuddhawajOnly.Disable()
         self.RefreshHistoryList(index, self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
         self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
+
+        self._view.SearchCtrl.SetValue(self._model.Keywords)
+        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
+        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
+
+        self._model.ReloadDisplay()
 
     def SelectTheme(self, index):
         utils.SaveTheme(index, constants.SEARCH)

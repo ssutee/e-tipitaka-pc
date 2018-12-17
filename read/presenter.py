@@ -528,7 +528,6 @@ class Presenter(object):
         
         self._view.HideBookList()
         index = self._view.AddReadPanel(code)
-        print index
         
         volume, item, sub = self._model.ConvertToPivot(self._currentVolume, self._currentPage, item)
         
