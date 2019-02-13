@@ -235,6 +235,31 @@ class PaliSiamSearchThread(SearchThread):
     def Database(self):
         return constants.PALI_SIAM_DB    
 
+class PaliSiamNewSearchThread(SearchThread):
+    
+    def ProcessResult(self, result):
+        r = {}
+        r['volume'] = result[1]
+        r['page'] = result[2]
+        r['items'] = result[3]
+        r['content'] = result[4]
+        r['display'] = result[5]            
+        r['footer'] = result[7]
+        return r    
+
+    @property
+    def TableName(self):
+        return 'main'
+
+    @property
+    def Code(self):
+        return constants.PALI_SIAM_NEW_CODE
+
+    @property
+    def Database(self):
+        return constants.PALI_SIAM_NEW_DB    
+
+
 class PaliMahaChulaSearchThread(SearchThread):
 
     @property
@@ -447,7 +472,7 @@ class DisplayThread(threading.Thread):
         return excerpts
         
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, result['volume'].lstrip(u'0'), result['page'].lstrip(u'0'), result['items'], excerpts)
+        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
         
 class PaliSiamDisplayThread(DisplayThread):
     

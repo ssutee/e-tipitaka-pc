@@ -45,6 +45,10 @@ class Engine(object):
         args = ('%02d'%(volume), '%04d'%(page))
         return select, args
     
+    @property
+    def BookCode(self):
+        return self._code
+
     def ProcessResult(self, result):
         r = {}
         if result is not None:
@@ -55,16 +59,16 @@ class Engine(object):
         return r
     
     def GetTotalPages(self, volume):
-        return int(constants.BOOK_PAGES.get('%s_%d' % (self._code, volume), 0))
+        return int(constants.BOOK_PAGES.get('%s_%d' % (self.BookCode, volume), 0))
         
     def GetFirstPageNumber(self, volume):
         return 0
         
     def GetSubItemsInVolume(self, volume):
-        return constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume].keys()
+        return constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume].keys()
         
     def GetItemsInVolume(self, volume, sub):
-        return constants.BOOK_ITEMS[self._code.encode('utf8','ignore')][volume][sub].keys()
+        return constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume][sub].keys()
         
     def GetFirstPage(self, volume):
         pages = map(lambda x:u'%s'%(x), range(0, self.GetTotalPages(volume)))
@@ -125,7 +129,7 @@ class Engine(object):
         raise NotImplementedError('Subclass needs to implement this method!')
 
     def GetSubtitle(self, volume, section=None):
-        tokens = constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore').split()
+        tokens = constants.BOOK_NAMES['%s_%s' % (self.BookCode, str(volume))].decode('utf8','ignore').split()
         return '%s %s'%(' '.join(tokens[:3]),' '.join(tokens[3:]))
 
     def GetSectionBoundary(self, position):
@@ -136,7 +140,7 @@ class Engine(object):
         return 45
 
     def GetBookName(self, volume):
-        return constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore')
+        return constants.BOOK_NAMES['%s_%s' % (self.BookCode, str(volume))].decode('utf8','ignore')
 
     def GetBookListItems(self):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
@@ -145,9 +149,9 @@ class Engine(object):
         return constants.COMPARE_CHOICES
         
     def GetSubItem(self, volume, page, item): 
-        for sub in constants.BOOK_ITEMS[self._code][volume]:
-            if item in constants.BOOK_ITEMS[self._code][volume][sub]:
-                pages = constants.BOOK_ITEMS[self._code][volume][sub][item]
+        for sub in constants.BOOK_ITEMS[self.BookCode][volume]:
+            if item in constants.BOOK_ITEMS[self.BookCode][volume][sub]:
+                pages = constants.BOOK_ITEMS[self.BookCode][volume][sub][item]
                 if page in pages:
                     return item, sub
         return item, 1
@@ -161,7 +165,7 @@ class Engine(object):
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
-            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+            return constants.BOOK_ITEMS[self.BookCode][volume][sub][item][0]
         except KeyError, e:
             return 0
         except TypeError, e:
@@ -239,8 +243,8 @@ class PaliSiamEngine(Engine):
         
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับสยามรัฐ (ภาษาบาลี)'
-        return u'พระไตรปิฎก ฉบับสยามรัฐ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๕๓๘ (ภาษาบาลี)'
+        return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๕๓๘ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
         
     def GetPage(self, volume, page):
         return super(PaliSiamEngine, self).GetPage(volume, page).replace(u'ฐ',u'\uf700').replace(u'ญ',u'\uf70f').replace(u'\u0e4d',u'\uf711')
@@ -254,6 +258,39 @@ class PaliSiamEngine(Engine):
         
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
+
+
+class PaliSiamNewEngine(PaliSiamEngine):
+
+    def __init__(self):
+        super(PaliSiamNewEngine, self).__init__()
+        self._code = constants.PALI_SIAM_NEW_CODE
+        self._conn = sqlite3.connect(constants.PALI_SIAM_NEW_DB)
+        self._searcher = self._conn.cursor()
+
+    @property
+    def BookCode(self):
+        return constants.PALI_SIAM_CODE
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+            r['display'] = result[5]            
+            r['footer'] = result[7]
+        return r
+
+    def GetTitle(self, volume=None):
+        if not volume:
+            return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๔๗๐ (ภาษาบาลี )'
+        return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๔๗๐ (ภาษาบาลี ) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+
+    def GetContent(self, result):
+        return None if result.get('content') is None else result.get('content') + '\n' + result.get('footer', u'')
+
 
 class ThaiVinayaEngine(Engine):
 
@@ -920,6 +957,8 @@ class Model(object):
             self._engine[code] = ThaiSupremeEngine()        
         elif constants.THAI_VINAYA_CODE == code:
             self._engine[code] = ThaiVinayaEngine()
+        elif constants.PALI_SIAM_NEW_CODE == code:
+            self._engine[code] = PaliSiamNewEngine()
         else:
             raise ValueError(code)
 

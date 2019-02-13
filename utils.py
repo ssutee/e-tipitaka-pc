@@ -280,7 +280,7 @@ def ShortName(code):
     if code == constants.THAI_ROYAL_CODE:
         return u'ฉบับหลวง'
     if code == constants.PALI_SIAM_CODE:
-        return u'สยามรัฐ'
+        return u'สยามรัฐ ๒๕๓๘'
     if code == constants.THAI_MAHAMAKUT_CODE:
         return u'มหามกุฏ'
     if code == constants.THAI_MAHACHULA_CODE:
@@ -299,6 +299,8 @@ def ShortName(code):
         return u'มหาเถระ'
     if code == constants.THAI_VINAYA_CODE:
         return u'อริยวินัย'
+    if code == constants.PALI_SIAM_NEW_CODE:
+        return u'สยามรัฐ ๒๔๗๐'
     raise ValueError(code)
 
 def GetFilePaths(directory):

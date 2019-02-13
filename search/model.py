@@ -471,6 +471,8 @@ class SearchModelCreator(object):
             return PaliMahaChulaSearchModel(delegate)
         if code == constants.THAI_VINAYA_CODE:
             return ThaiVinayaSearchModel(delegate)
+        if code == constants.PALI_SIAM_NEW_CODE:
+            return PaliSiamNewSearchModel(delegate)
         return None
 
 class ThaiRoyalSearchModel(Model):
@@ -503,18 +505,18 @@ class PaliSiamSearchModel(Model):
         super(PaliSiamSearchModel, self).__init__(delegate)
         self._volumes = range(45)
         self._spellChecker = constants.PALI_SPELL_CHECKER
-        
+
     @property
     def Keywords(self):
         return utils.ConvertToPaliSearch(self._keywords)
-    
+
     def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
         keywords = utils.ConvertToThaiSearch(keywords, True)
         return threads.PaliSiamSearchThread(keywords, volumes, delegate)
 
     def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
         return threads.PaliSiamDisplayThread(results, keywords, delegate, mark, current)
-        
+
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Pali Siam')) % (self._keywords))
         
@@ -524,6 +526,24 @@ class PaliSiamSearchModel(Model):
     def ConvertSpecialCharacters(self, text):
         return utils.ConvertToPaliSearch(text, True)        
         
+class PaliSiamNewSearchModel(PaliSiamSearchModel):
+    
+    @property
+    def Code(self):
+        return constants.PALI_SIAM_NEW_CODE
+
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        keywords = utils.ConvertToThaiSearch(keywords, True)
+        return threads.PaliSiamNewSearchThread(keywords, volumes, delegate)
+
+    def CreateDisplayThread(self, results, keywords, delegate, mark, current):        
+        return threads.PaliSiamDisplayThread(results, keywords, delegate, mark, current)
+
+
+    def GetBookName(self, volume):
+        return constants.BOOK_NAMES['pali_%s' % (str(volume))].decode('utf8','ignore')
+
+
 class ThaiWatnaSearchModel(Model):
 
     @property
