@@ -7,17 +7,8 @@ ditto --rsrc --arc i386 dist/E-Tipitaka.app dist/E-Tipitaka-32bit.app
 rm -rf dist/E-Tipitaka.app
 mv dist/E-Tipitaka-32bit.app dist/E-Tipitaka.app
 
-#export CODESIGN_ALLOCATE="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate"
-
 # code signing
-#codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_osx_carbonu-3.0.0.2.0.dylib
-#codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_macud-2.8.0.dylib
-#codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libcrypto.1.0.0.dylib
-#codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libssl.1.0.0.dylib
-#codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libsqlite3.0.dylib
-
 codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_macud-2.8.0.8.0.dylib
-codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libjpeg.8.dylib
 codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/Python.framework
 codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/MacOS/python
 codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app

@@ -429,7 +429,7 @@ class Model(object):
         return self._spellChecker.suggest(keywords, number=5) if self._spellChecker else []
         
     def GetBookName(self, volume):
-        return constants.BOOK_NAMES['%s_%s' % (self.Code, str(volume))].decode('utf8','ignore')
+        return constants.BOOK_NAMES['%s_%s' % (self.Code, str(volume).lstrip('0'))].decode('utf8','ignore')
         
     def GetBookNames(self):
         return [self.GetBookName(volume+1) for volume in range(len(self._volumes))]
@@ -541,7 +541,7 @@ class PaliSiamNewSearchModel(PaliSiamSearchModel):
 
 
     def GetBookName(self, volume):
-        return constants.BOOK_NAMES['pali_%s' % (str(volume))].decode('utf8','ignore')
+        return constants.BOOK_NAMES['pali_%s' % (str(volume).lstrip('0'))].decode('utf8','ignore')
 
 
 class ThaiWatnaSearchModel(Model):
@@ -636,7 +636,7 @@ class PaliMahaChulaSearchModel(Model):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Pali MahaChula')) % (self._keywords) )        
 
     def GetBookName(self, volume):
-        return constants.BOOK_NAMES['pali_%s' % (str(volume))].decode('utf8','ignore')
+        return constants.BOOK_NAMES['pali_%s' % (str(volume).lstrip('0'))].decode('utf8','ignore')
 
 
 class ThaiMahaMakutSearchModel(Model):
