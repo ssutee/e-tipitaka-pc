@@ -289,7 +289,7 @@ class PaliSiamNewEngine(PaliSiamEngine):
         return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๔๗๐ (ภาษาบาลี ) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('content') + '\n' + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
 
 
 class ThaiVinayaEngine(Engine):
@@ -488,7 +488,7 @@ class PaliMahaChulaEngine(Engine):
         return select, args
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('content') + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
 
     def GetTitle(self, volume=None):
         if not volume:
@@ -550,7 +550,7 @@ class ThaiSupremeEngine(Engine):
         return select, args
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('content') + '\n' + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
 
     def GetTitle(self, volume=None):
         if not volume:
@@ -601,12 +601,12 @@ class ThaiMahaChulaEngine(Engine):
         return select, args
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('header', u'') + result.get('content') + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('header', u'') + result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย)'
-        return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๑)'
+        return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๑) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
 
     def ProcessResult(self, result):
         r = {}
@@ -644,6 +644,44 @@ class ThaiMahaChulaEngine(Engine):
 
     def CanSelectComparingItem(self):
         return False
+
+
+class ThaiMahaChula2Engine(ThaiMahaChulaEngine):
+
+    def __init__(self):
+        super(ThaiMahaChula2Engine, self).__init__()
+        self._code = constants.THAI_MAHACHULA2_CODE
+        self._conn = sqlite3.connect(constants.THAI_MAHACHULA2_DB)
+        self._searcher = self._conn.cursor()
+
+    @property
+    def BookCode(self):
+        return constants.THAI_MAHACHULA_CODE
+
+    def PrepareStatement(self, volume, page):
+        select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
+        args = (volume, page)
+        return select, args
+
+    def GetContent(self, result):
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
+
+
+    def GetTitle(self, volume=None):
+        if not volume:
+            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๒)'
+        return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๒) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+
+    def ProcessResult(self, result):
+        r = {}
+        if result is not None:
+            r['volume'] = result[1]
+            r['page'] = result[2]
+            r['items'] = result[3]
+            r['content'] = result[4]
+            r['display'] = result[5]            
+            r['footer'] = result[7]
+        return r
 
 
 class ThaiMahaMakutEngine(Engine):
@@ -939,6 +977,8 @@ class Model(object):
             self._engine[code] = PaliSiamEngine()
         elif constants.THAI_MAHACHULA_CODE == code:
             self._engine[code] = ThaiMahaChulaEngine()
+        elif constants.THAI_MAHACHULA2_CODE == code:
+            self._engine[code] = ThaiMahaChula2Engine()            
         elif constants.THAI_MAHAMAKUT_CODE == code:
             self._engine[code] = ThaiMahaMakutEngine()
         elif constants.THAI_FIVE_BOOKS_CODE == code:

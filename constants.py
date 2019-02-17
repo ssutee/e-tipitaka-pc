@@ -20,6 +20,7 @@ HOME = expanduser("~")
 THAI_FIVE_BOOKS_CODE = 'thaibt'
 THAI_ROYAL_CODE = 'thai'
 THAI_MAHACHULA_CODE = 'thaimc'
+THAI_MAHACHULA2_CODE = 'thaimc2'
 PALI_MAHACHULA_CODE = 'palimc'
 THAI_MAHAMAKUT_CODE = 'thaimm'
 PALI_SIAM_CODE = 'pali'
@@ -31,15 +32,15 @@ THAI_POCKET_BOOK_CODE = 'thaipb'
 THAI_SUPREME_CODE = 'thaims'
 THAI_VINAYA_CODE = 'thaivn'
 
-#          0        1        2        3         4         5         6          7         8          9          10       11
-CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc', 'thaims', 'thaivn', 'palinew']
+#          0        1        2        3         4         5         6          7         8          9          10       11         12
+CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc', 'thaims', 'thaivn', 'palinew', 'thaimc2']
 
 COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ พ.ศ.๒๕๓๘)', u'บาลี (สยามรัฐ พ.ศ.๒๔๗๐)', 
-                   u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'ไทย (มหาเถรฯ)', u'บาลี (มหาจุฬาฯ)', u'Roman Script']
-COMPARE_ORDER = [0,1,11,2,3,4,9,8,7]
+                   u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ ๑)', u'ไทย (มหาจุฬาฯ ๒)', u'ไทย (มหาเถรฯ)', u'บาลี (มหาจุฬาฯ)', u'Roman Script']
+COMPARE_ORDER = [0,1,11,2,3,4,12,9,8,7]
 
-LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ พ.ศ.๒๕๓๘)', u'บาลี (สยามรัฐ พ.ศ.๒๔๗๐)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ)', u'ไทย (มหาเถรฯ)', u'บาลี (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'อริยวินัย', u'Roman Script']
-LANGS_ORDER = [0,1,11,2,3,4,9,8,5,6,10,7]
+LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ พ.ศ.๒๕๓๘)', u'บาลี (สยามรัฐ พ.ศ.๒๔๗๐)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ ๑)', u'ไทย (มหาจุฬาฯ ๒)', u'ไทย (มหาเถรฯ)', u'บาลี (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'อริยวินัย', u'Roman Script']
+LANGS_ORDER = [0,1,11,2,3,4,12,9,8,5,6,10,7]
 
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
@@ -168,6 +169,7 @@ NOTE_DB = os.path.join(DATA_PATH, 'note.sqlite')
 THAI_FIVE_BOOKS_DB = os.path.join(RESOURCES_DIR, 'thaibt.sqlite')
 THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.sqlite')
 THAI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'thaimc.sqlite')
+THAI_MAHACHULA2_DB = os.path.join(RESOURCES_DIR, 'thaimc2.sqlite')
 THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.sqlite')
 THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.sqlite')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.sqlite')
@@ -313,7 +315,9 @@ IOS_CODE_TABLE = {
     7: 'thaipb',
     8: 'romanct',
     9: 'palimc',
-    10: 'thaivn'
+    10: 'thaims',
+    11: 'thaivn',
+    12: 'thaimc2'
 }
 
 ANDROID_CODE_TABLE = {

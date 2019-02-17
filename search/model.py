@@ -459,6 +459,8 @@ class SearchModelCreator(object):
             return ThaiMahaMakutSearchModel(delegate)
         if code == constants.THAI_MAHACHULA_CODE:
             return ThaiMahaChulaSearchModel(delegate)
+        if code == constants.THAI_MAHACHULA2_CODE:
+            return ThaiMahaChula2SearchModel(delegate)            
         if code == constants.THAI_SUPREME_CODE:
             return ThaiSupremeSearchModel(delegate)
         if code == constants.THAI_FIVE_BOOKS_CODE:
@@ -593,7 +595,21 @@ class ThaiMahaChulaSearchModel(Model):
         
     def NotFoundMessage(self):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Thai MahaChula')) % (self._keywords) )        
-        
+
+
+class ThaiMahaChula2SearchModel(ThaiMahaChulaSearchModel):
+    
+    @property
+    def Code(self):
+        return constants.THAI_MAHACHULA2_CODE
+    
+    def CreateSearchThread(self, keywords, volumes, delegate, buddhawaj=False):
+        return threads.ThaiMahaChula2SearchThread(keywords, volumes, delegate)        
+
+    def GetBookName(self, volume):
+        return constants.BOOK_NAMES['thaimc_%s' % (str(volume).lstrip('0'))].decode('utf8','ignore')
+
+
 class ThaiSupremeSearchModel(Model):
     @property
     def Code(self):

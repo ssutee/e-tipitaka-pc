@@ -284,7 +284,9 @@ def ShortName(code):
     if code == constants.THAI_MAHAMAKUT_CODE:
         return u'มหามกุฏ'
     if code == constants.THAI_MAHACHULA_CODE:
-        return u'มหาจุฬา'
+        return u'มหาจุฬา (ไทย ๑)'
+    if code == constants.THAI_MAHACHULA2_CODE:
+        return u'มหาจุฬา (ไทย ๒)'        
     if code == constants.ROMAN_SCRIPT_CODE:
         return u'roman'
     if code == constants.THAI_FIVE_BOOKS_CODE:
