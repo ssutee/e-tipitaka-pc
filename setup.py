@@ -19,7 +19,10 @@ APP = ['run.py']
 DATA_FILES = ['resources']
 OPTIONS = {'argv_emulation': True,
  'iconfile': '/Users/sutee/Works/E-Tipitaka.icns',
- 'packages': ['whoosh', 'pony', 'xhtml2pdf', 'reportlab']}
+ 'packages': ['whoosh', 'pony', 'xhtml2pdf', 'reportlab'],
+ 'plist': {'CFBundleIdentifier': 'com.watnapp.etipitaka',
+           'CFBundleGetInfoString': 'E-Tipitaka.app built using py2app'}
+}
 
 setup(
     name="E-Tipitaka",
