@@ -8,12 +8,12 @@ rm -rf dist/E-Tipitaka.app
 mv dist/E-Tipitaka-32bit.app dist/E-Tipitaka.app
 
 # code signing
-codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_macud-2.8.0.8.0.dylib
-codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/Python.framework
-codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/MacOS/python
-codesign -s "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_macud-2.8.0.8.0.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/Python.framework
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/MacOS/python
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app
 
 # verify code signing
 codesign -vvv -d dist/E-Tipitaka.app
 
-
+productbuild --component dist/E-Tipitaka.app /Applications --sign "Developer ID Installer: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.pkg
