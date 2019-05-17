@@ -49,7 +49,6 @@ class SearchThread(threading.Thread):
         searcher = conn.cursor()
 
         searcher.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        print(searcher.fetchall())
         
         terms = map(lambda term: term.replace('+',' '),self._keywords.split())
         
