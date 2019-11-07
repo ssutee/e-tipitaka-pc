@@ -810,10 +810,12 @@ class MySearchCtrl(wx.SearchCtrl):
         return menu
         
     def LoadSearches(self):
+        import string
         if os.path.exists(self._logFile):            
             try:
                 for text in codecs.open(self._logFile,'r','utf-8').readlines():
-                    if text.strip() == '': continue 
+                    if text.strip() == '' or text.strip() not in string.printable: continue 
+
                     self._searches.append(text.strip())
                     if len(self._searches) > self.MAX_SEARCH_HISTORY:
                         del self._searches[0]
