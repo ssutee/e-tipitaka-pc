@@ -98,6 +98,9 @@ class Presenter(object):
                 self._view.ResultsWindow.SetStandardFonts(font.GetPointSize(),font.GetFaceName())
         dialog.Destroy()
         
+    def SetFocus(self):
+        self._view.SearchCtrl.SetFocus()
+
     def Search(self, keywords=None, code=None, refreshHistoryList=True):
         self._refreshHistoryList = refreshHistoryList
         if not keywords:
@@ -269,7 +272,7 @@ class Presenter(object):
     def ExportData(self):
         from datetime import datetime        
         zipFile = 'backup-%s.etz' % (datetime.now().strftime('%Y-%m-%d'))
-        dlg = wx.FileDialog(self._view, _('Save data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.SAVE|wx.OVERWRITE_PROMPT)        
+        dlg = wx.FileDialog(self._view, _('Save data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)        
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
             with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w') as fz:                
@@ -422,7 +425,7 @@ class Presenter(object):
     def ImportData(self):
         ret = 0
         dlg = wx.FileDialog(self._view, _('Choose import data'), constants.HOME, '', 
-                            constants.ETZ_TYPE, wx.OPEN|wx.CHANGE_DIR)
+                            constants.ETZ_TYPE, wx.FD_OPEN|wx.FD_CHANGE_DIR)
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:        
             path = os.path.join(dlg.GetDirectory(), dlg.GetFilename())

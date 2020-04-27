@@ -16,10 +16,10 @@ sys.setrecursionlimit(10000)
 distutils_path = os.path.join(os.path.dirname(opcode.__file__), 'distutils')
 
 APP = ['run.py']
-DATA_FILES = ['resources']
-OPTIONS = {'argv_emulation': True,
+DATA_FILES = ['resources', 'fonts']
+OPTIONS = {'argv_emulation': False,
  'iconfile': '/Users/sutee/Works/E-Tipitaka.icns',
- 'packages': ['whoosh', 'pony', 'xhtml2pdf', 'reportlab'],
+ 'packages': ['wx', 'whoosh', 'pony', 'xhtml2pdf', 'reportlab'],
  'plist': {'CFBundleIdentifier': 'com.watnapp.etipitaka',
            'CFBundleGetInfoString': 'E-Tipitaka.app built using py2app'}
 }

@@ -284,8 +284,8 @@ class Presenter(object):
         content = self._model.GetPage(self._currentVolume, self._currentPage)
         
         # work around for fixing font size problem on win32
+        # self._view.SetText(content, focus=focus)        
         self._view.SetText(content, focus=focus)        
-        self._view.SetText(content, focus=focus)
         self.SetStatusText(u'', 0)        
         self.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
 
@@ -450,7 +450,7 @@ class Presenter(object):
         if self._stopOpen: return
         
         if isinstance(event, wx.TreeEvent):
-            volume, page, section = self._view.BookList.GetItemPyData(event.GetItem())
+            volume, page, section = self._view.BookList.GetItemData(event.GetItem())
             self.OpenBook(volume, page, section if section is not None else self._model.GetSection(volume, page))
         elif isinstance(event, wx.CommandEvent):
             self.OpenBook(event.GetSelection()+1, self._model.GetFirstPageNumber(event.GetSelection()+1))
@@ -871,7 +871,8 @@ class Presenter(object):
             app_path = os.path.dirname(os.path.realpath(sys.argv[0]))
             font_path = os.path.join(app_path, 'fonts','TF Chiangsaen.ttf')
             
-            style = '<style>\n'
+            style = '<meta http-equiv="content-type" content="text/html; charset=utf-8">\n'
+            style += '<style>\n'
             style += '@font-face { font-family: "TF Chiangsaen"; src: url(\'%s\') } \n' % font_path
             style += 'body { font-family: "TF Chiangsaen"; font-size: 26px; line-height: 1; } \n'
             style += '</style>'
@@ -900,8 +901,8 @@ class Presenter(object):
             dest = os.path.join(constants.DATA_PATH, 'printing.pdf')
             
             html = '<html>' + style + text + '</html>'
-
-            pdf = pisa.CreatePDF(cStringIO.StringIO(html.encode('utf-8')), file(dest, "wb"), encoding='utf-8')
+            
+            pdf = pisa.CreatePDF(cStringIO.StringIO(html.encode('utf-8')), file(dest, 'wb'), encoding='utf-8')
             if pdf.err:
                 print pdf.err
             else:
@@ -914,7 +915,7 @@ class Presenter(object):
     def _ShowConfirmSaveDialog(self, code, volume, start, end, text):
         dlg = wx.FileDialog(self._view, u'โปรดเลือกไฟล์', self._saveDirectory, 
             '%s_volumn-%02d_page-%04d-%04d' % (code, volume, start+1, end+1), 
-            u'Plain Text (*.txt)|*.txt', wx.SAVE|wx.OVERWRITE_PROMPT)
+            u'Plain Text (*.txt)|*.txt', wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             with codecs.open(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w', 'utf-8') as f:
                 f.write(text)

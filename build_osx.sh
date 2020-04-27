@@ -1,16 +1,21 @@
 rm -rf build dist
 rm -f config/*.fav config/history.log
-export VERSIONER_PYTHON_PREFER_32_BIT=yes
-ARCHFLAGS="-arch i386 -arch x86_64" arch -i386 python-32 setup.py py2app --arch i386 
 
-#ditto --rsrc --arc i386 dist/E-Tipitaka.app dist/E-Tipitaka-32bit.app
-#rm -rf dist/E-Tipitaka.app
-#mv dist/E-Tipitaka-32bit.app dist/E-Tipitaka.app
+pipenv run python setup.py py2app
 
 # code signing
-codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libwx_macud-2.8.0.8.0.dylib
 codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/Python.framework
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libcrypto.1.0.0.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libgdbm.6.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libjpeg.9.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/liblzma.5.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libopenjp2.2.3.1.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libsqlite3.0.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libssl.1.0.0.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libtiff.5.dylib
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/Frameworks/libz.1.2.11.dylib
 codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/MacOS/python
+codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app/Contents/MacOS/E-Tipitaka
 codesign --force --verify --verbose --sign "Developer ID Application: Sutee Sudprasert (A6DJDJ7527)" dist/E-Tipitaka.app
 
 # verify code signing

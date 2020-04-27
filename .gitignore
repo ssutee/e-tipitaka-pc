@@ -7,5 +7,7 @@
 run.sh
 build/
 dist/
+.vscode/
 error.log
 data_path.cfg
+run.spec

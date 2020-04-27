@@ -64,7 +64,7 @@ class BookmarkManager(object):
                     child = wx.Menu()
                     folder = item.keys()[0]
                     _MakeMenu(child, item[folder])
-                    root.AppendMenu(-1, folder, child)
+                    root.Append(-1, folder, child)
                 elif isinstance(item, tuple):
                     menuItem = root.Append(-1, item[2])
                     menuItem.volume = item[0]

@@ -99,14 +99,14 @@ class ThaiFiveBooksViewComponents(ViewComponents):
         keys.sort()
         for key in keys:
             volume = tree.AppendItem(root, constants.FIVE_BOOKS_NAMES[int(key)-1])
-            tree.SetPyData(volume, tuple(constants.FIVE_BOOKS_TOC[key][0]) + (None,) )
+            tree.SetItemData(volume, tuple(constants.FIVE_BOOKS_TOC[key][0]) + (None,) )
             if int(key) == 1:
                 self.FirstVolume = volume
             secs = map(int, constants.FIVE_BOOKS_TOC[key][1].keys())
             secs.sort()            
             for sec in secs:
                 section = tree.AppendItem(volume, constants.FIVE_BOOKS_SECTIONS[int(key)][int(sec)])
-                tree.SetPyData(section, tuple(constants.FIVE_BOOKS_TOC[key][1][str(sec)]) + (int(sec),))
+                tree.SetItemData(section, tuple(constants.FIVE_BOOKS_TOC[key][1][str(sec)]) + (int(sec),))
         child, cookie = tree.GetFirstChild(root)
         tree.Expand(child)
     
@@ -128,7 +128,7 @@ class ScriptViewComponents(ViewComponents):
         def _traverse(toc, tree, root):
             for node in toc['items']:
                 leaf = tree.AppendItem(root, node['name'])
-                tree.SetPyData(leaf, node['info']+[0])
+                tree.SetItemData(leaf, node['info']+[0])
                 _traverse(node, tree, leaf)
 
         root_tree = tree.AddRoot('root')
@@ -343,7 +343,7 @@ class View(AuiBaseFrame):
         naviSizer = wx.StaticBoxSizer(wx.StaticBox(naviPanel, wx.ID_ANY, u'เลือกอ่านที่'), orient=wx.HORIZONTAL)
 
         self._bookFontsButton = wx.BitmapButton(naviPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(30,30))
+            wx.Bitmap(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(30,30))
         labelPage = wx.StaticText(naviPanel, wx.ID_ANY, u'หน้า: ')
         labelItem = wx.StaticText(naviPanel, wx.ID_ANY, u'ข้อ: ')
         
@@ -436,22 +436,16 @@ class View(AuiBaseFrame):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         s,t = readPanel.Body.GetSelection() if selection is None else selection
         font = readPanel.Body.GetFont()
-
-        if 'wxMac' in wx.PlatformInfo:
-            readPanel.Body.SetStyle(s, t, wx.TextAttr('blue', utils.LoadThemeBackgroundHex(constants.READ), 
-                wx.Font(font.GetPointSize()+2, font.GetFamily(), font.GetStyle(), wx.FONTWEIGHT_BOLD, False, font.GetFaceName())))
-        else:
-            readPanel.Body.SetStyle(s, t, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 'yellow', font))
-            
+        attr = wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 'yellow', font)
+        readPanel.Body.SetStyle(s, t, attr)
         return s,t
             
     def UnmarkText(self, code, index, selection=None):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         s,t = readPanel.Body.GetSelection() if selection is None else selection
-        font = readPanel.Body.GetFont()        
-        readPanel.Body.SetStyle(s, t, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
-            utils.LoadThemeBackgroundHex(constants.READ), font))    
-
+        font = readPanel.Body.GetFont() 
+        attr = wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), utils.LoadThemeBackgroundHex(constants.READ), font)
+        readPanel.Body.SetStyle(s, t, attr)
         return s,t
         
     def ClearMarks(self, code, index):
@@ -459,33 +453,29 @@ class View(AuiBaseFrame):
         font = readPanel.Body.GetFont()
         text = readPanel.Body.GetValue()
         readPanel.Body.SetFont(font)   
-        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
-        readPanel.Body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
+        readPanel.Body.SetStyle(0, len(text), wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
             utils.LoadThemeBackgroundHex(constants.READ), font))    
                 
-    def FormatText(self, formatter, code=None, index=1):
+    def FormatText(self, formatter, code=None, index=1):    
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         font = readPanel.Body.GetFont()
         fontSize = font.GetPointSize()
-        
-
-        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
-
-        if wx.__version__[:3]<='2.8':
-            readPanel.Body.Freeze()
 
         if 'wxMac' in wx.PlatformInfo:
             readPanel.SetContentFont(font)            
+        
+        readPanel.Body.SetStyle(0, len(readPanel.Body.GetValue())-1,
+            wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), wx.NullColour, font))
 
         for token in formatter.split():
             tag,x,y = token.split('|')
             if tag == 's3' or tag == 'p3':
                 colorCode, diffSize = constants.FOOTER_STYLE
                 font.SetPointSize(fontSize-diffSize)
-                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr(colorCode, wx.NullColour, font))                    
+                readPanel.Body.SetStyle(int(x), int(y)-1, wx.TextAttr(colorCode, wx.NullColour, font)) 
             elif tag == 'h1' or tag == 'h2' or tag == 'h3':
                 font.SetPointSize(fontSize)
-                readPanel.Body.SetStyle(int(x)-offset, int(y)-offset, wx.TextAttr('blue', wx.NullColour, font))  
+                readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('blue', wx.NullColour, font))  
             elif tag == 'eh1':
                 font.SetPointSize(fontSize*1.2)
                 readPanel.Body.SetStyle(int(x), int(y), 
@@ -504,9 +494,6 @@ class View(AuiBaseFrame):
             elif tag == 'fn':
                 font.SetPointSize(fontSize*0.8)
                 readPanel.Body.SetStyle(int(x), int(y), wx.TextAttr('#3CBF3F', wx.NullColour, font))  
-
-        if wx.__version__[:3]<='2.8':                
-            readPanel.Body.Thaw()     
         
     def ShowFindDialog(self, code, index, text, flags):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]

@@ -13,9 +13,9 @@ import search.model
 
 from pony.orm import db_session
 
-class DataXferCheckboxValidator(wx.PyValidator):
+class DataXferCheckboxValidator(wx.Validator):
     def __init__(self, data, key):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self.data = data
         self.key = key
 
@@ -35,9 +35,9 @@ class DataXferCheckboxValidator(wx.PyValidator):
     def Validate(self, win):
         return True
 
-class DataXferFontValidator(wx.PyValidator):
+class DataXferFontValidator(wx.Validator):
     def __init__(self, data, key):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self._data = data
         self._key = key
         self.Bind(wx.EVT_CHAR, self.OnChar)
@@ -73,9 +73,9 @@ class DataXferFontValidator(wx.PyValidator):
             
         event.Skip()        
 
-class DataXferPathValidator(wx.PyValidator):
+class DataXferPathValidator(wx.Validator):
     def __init__(self, data, key):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self.data = data
         self.key = key
 
@@ -91,7 +91,7 @@ class DataXferPathValidator(wx.PyValidator):
             textctrl.Refresh()
             return False
         else:
-            textctrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textctrl.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
             textctrl.Refresh()
             return True    
 
@@ -106,9 +106,9 @@ class DataXferPathValidator(wx.PyValidator):
         return True
 
 
-class DataXferPagesValidator(wx.PyValidator):
+class DataXferPagesValidator(wx.Validator):
     def __init__(self, data, key):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self.data = data
         self.key = key
         self.Bind(wx.EVT_CHAR, self.OnChar)
@@ -125,7 +125,7 @@ class DataXferPagesValidator(wx.PyValidator):
             combo.Refresh()
             return False
         else:
-            combo.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            combo.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
             combo.Refresh()
             return True
         
@@ -706,13 +706,13 @@ class BookmarkManagerDialog(wx.Dialog):
                 if isinstance(item, dict):
                     folder = item.keys()[0]
                     child = tree.AppendItem(root, folder)
-                    tree.SetPyData(child, item)
+                    tree.SetItemData(child, item)
                     tree.SetItemImage(child, self.fldridx, wx.TreeItemIcon_Normal)
                     tree.SetItemImage(child, self.fldropenidx, wx.TreeItemIcon_Expanded)
                     Load(tree, child, item[folder])
                 elif isinstance(item, tuple):
                     child = tree.AppendItem(root, item[2])
-                    tree.SetPyData(child, item)
+                    tree.SetItemData(child, item)
                     tree.SetItemImage(child, self.fileidx, wx.TreeItemIcon_Normal)
                     
         self._tree.DeleteAllItems()
@@ -726,7 +726,7 @@ class BookmarkManagerDialog(wx.Dialog):
         self.il = il
         
         root = self._tree.AddRoot("root")
-        self._tree.SetPyData(root, None)
+        self._tree.SetItemData(root, None)
         Load(self._tree, root, self._items)
         self._tree.ExpandAll()
 
@@ -760,7 +760,7 @@ class BookmarkFolderDialog(wx.Dialog):
                 if isinstance(item ,dict) and item is not self._dataSource:
                     folder = item.keys()[0]
                     child = tree.AppendItem(root, folder)
-                    tree.SetPyData(child, item[folder])
+                    tree.SetItemData(child, item[folder])
                     tree.SetItemImage(child, self.fldridx, wx.TreeItemIcon_Normal)
                     tree.SetItemImage(child, self.fldropenidx, wx.TreeItemIcon_Expanded)
                     Create(tree, child, item[folder])
@@ -773,7 +773,7 @@ class BookmarkFolderDialog(wx.Dialog):
         self.il = il
             
         root = self._tree.AddRoot(u'หลัก')
-        self._tree.SetPyData(root, self._items)
+        self._tree.SetItemData(root, self._items)
         Create(self._tree, root, self._items)
         self._tree.ExpandAll()
 

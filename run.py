@@ -66,7 +66,8 @@ class ParentFrame(aui.AuiMDIParentFrame):
             pos=pos, size=size, style=wx.DEFAULT_FRAME_STYLE)
 
         icon = wx.IconBundle()
-        icon.AddIconFromFile(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)
+        icon.AddIcon(constants.ICON_IMAGE, wx.BITMAP_TYPE_ANY)
+
         self.SetIcons(icon)
 
         self.Bind(wx.EVT_CLOSE, self.OnFrameClose)
@@ -83,6 +84,7 @@ class ParentFrame(aui.AuiMDIParentFrame):
 
         if rect is None:
             self.CenterOnScreen()
+
 
     def _CreateStatusBar(self):
         self._statusBar = self.CreateStatusBar()
@@ -121,6 +123,8 @@ class ParentFrame(aui.AuiMDIParentFrame):
 
 
     def Read(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords=None):
+        self._presenter.SetFocus()
+
         presenter = None if self._presenters.get(code) is None else self._presenters.get(code)[0]
 
         if not presenter or shouldOpenNewWindow:
@@ -162,14 +166,18 @@ class MyApp(wx.App):
 
     def OnInit(self):
         mfs = wx.MemoryFSHandler()
-        noteImage = wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
-        okImage = wx.BitmapFromImage(wx.Image(constants.OK_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
-        notOkImage = wx.BitmapFromImage(wx.Image(constants.NOT_OK_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
+        noteImage = wx.Bitmap(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
+        okImage = wx.Bitmap(wx.Image(constants.OK_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
+        notOkImage = wx.Bitmap(wx.Image(constants.NOT_OK_IMAGE, wx.BITMAP_TYPE_PNG).Scale(24,24))
         mfs.AddFile("edit-notes.png", noteImage, wx.BITMAP_TYPE_PNG)
         mfs.AddFile("ok.png", okImage, wx.BITMAP_TYPE_PNG)
         mfs.AddFile("not-ok.png", notOkImage, wx.BITMAP_TYPE_PNG)
-        wx.FileSystem_AddHandler(mfs)
+        wx.FileSystem.AddHandler(mfs)
         return True
+
+    def MacReopenApp(self):
+        """Called when the doc icon is clicked, and ???"""
+        self.GetTopWindow().Raise()
 
 utils.MoveOldUserData()
 
@@ -182,6 +190,6 @@ app = MyApp(redirect=False, clearSigInt=True, useBestVisual=True)
 parent = ParentFrame(None)
 parent.PostInit()
 
-parent.Show()
+parent.Show(True)
 
 app.MainLoop()

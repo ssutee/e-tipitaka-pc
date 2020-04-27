@@ -174,7 +174,7 @@ class View(AuiBaseFrame):
             self._filterCtrl.SetFont(font)
         
         self._deleteButton = wx.BitmapButton(panel, wx.ID_ANY,
-            wx.BitmapFromImage(wx.Image(constants.FILE_DELETE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(18,18)))
+            wx.Bitmap(wx.Image(constants.FILE_DELETE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(18,18)))
 
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
 

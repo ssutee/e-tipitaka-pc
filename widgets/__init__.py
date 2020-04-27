@@ -44,15 +44,15 @@ class CustomTableGrid(wx.grid.Grid):
         self.SetMargins(0,0)
         self.AutoSizeColumns(False)
 
-        wx.grid.EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDClick)
+        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnLeftDClick)
 
     def OnLeftDClick(self, evt):
         self._delegate.OnLeftDClick(evt.Col, evt.Row)
 
 
-class CustomDataTable(wx.grid.PyGridTableBase):
+class CustomDataTable(wx.grid.GridTableBase):
     def __init__(self, dataSource):
-        wx.grid.PyGridTableBase.__init__(self)
+        wx.grid.GridTableBase.__init__(self)
         self.dataSource = dataSource
 
     def GetNumberRows(self):
@@ -128,7 +128,7 @@ class SearchAndCompareWindow(wx.Frame):
         self.SetBackgroundColour('#EEEEEE')
 
         icon = wx.IconBundle()
-        icon.AddIconFromFile(constants.SEARCH_AND_COMPARE_ICON, wx.BITMAP_TYPE_ANY)
+        icon.AddIcon(constants.SEARCH_AND_COMPARE_ICON, wx.BITMAP_TYPE_ANY)
         self.SetIcons(icon)
 
         self.SetWindowStyle( self.GetWindowStyle() | wx.STAY_ON_TOP) 
@@ -459,7 +459,7 @@ class DictWindow(wx.Frame):
         wx.Frame.__init__(self, *args, **kwargs)
         self.SetBackgroundColour('#EEEEEE')
         icon = wx.IconBundle()
-        icon.AddIconFromFile(constants.DICT_ICON, wx.BITMAP_TYPE_ANY)
+        icon.AddIcon(constants.DICT_ICON, wx.BITMAP_TYPE_ANY)
         self.SetIcons(icon)
 
         self.SetWindowStyle( self.GetWindowStyle() | wx.STAY_ON_TOP ) 
@@ -561,7 +561,7 @@ class DictWindow(wx.Frame):
         event.Skip()
 
     def OnSelectWord(self, event):
-        self.currentItem =  event.m_itemIndex
+        self.currentItem =  event.GetIndex()
         word = self.wordList.GetItemText(self.currentItem)
         item = self.LookupDictSQLite(word)
         if item != None:
@@ -586,7 +586,7 @@ class EnglishDictWindow(DictWindow):
             items = self.LookupDictSQLite(text, None, prefix=True)
             if len(items) > 0:
                 for i,item in enumerate(items):
-                    self.wordList.InsertStringItem(i,item[0])
+                    self.wordList.InsertItem(i,item[0])
             else:
                 self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
         else:
@@ -650,7 +650,7 @@ class ThaiDictWindow(DictWindow):
             items = self.LookupDictSQLite(text, None, prefix=True)
             if len(items) > 0:
                 for i,item in enumerate(items):
-                    self.wordList.InsertStringItem(i,item[0])
+                    self.wordList.InsertItem(i,item[0])
             else:
                 self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
         else:
@@ -685,7 +685,7 @@ class PaliDictWindow(DictWindow):
             items = self.LookupDictSQLite(text1,text2,prefix=True)
             if len(items) > 0:
                 for i,item in enumerate(items):
-                    self.wordList.InsertStringItem(i,item[0])
+                    self.wordList.InsertItem(i,item[0])
             else:
                 self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
         else:
@@ -732,6 +732,7 @@ class AuiBaseFrame(aui.AuiMDIChildFrame):
         config = wx.Config(appName)
         perspective = self._mgr.SavePerspective()
         config.Write("perspective", perspective)
+        self._mgr.UnInit()
         event.Skip()
         
     def AddPane(self, pane, auiInfo):
@@ -801,7 +802,7 @@ class MySearchCtrl(wx.SearchCtrl):
         item = wx.MenuItem(menu, wx.ID_ANY, _('Latest search'))
         item.SetFont(font)
         item.Enable(False)
-        menu.AppendItem(item)
+        menu.Append(item)
 
         for idx, txt in enumerate(self._searches):
             item = wx.MenuItem(menu, idx+1, txt)
@@ -950,9 +951,9 @@ class ReadToolPanel(wx.Panel):
         self._viewPanel = wx.Panel(self, wx.ID_ANY)
         viewSizer = wx.StaticBoxSizer(wx.StaticBox(self._viewPanel, wx.ID_ANY, u'อ่านทีละหน้า'), orient=wx.HORIZONTAL)
         self._backwardButton = wx.BitmapButton(self._viewPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.LEFT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+            wx.Bitmap(wx.Image(constants.LEFT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._forwardButton = wx.BitmapButton(self._viewPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.RIGHT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+            wx.Bitmap(wx.Image(constants.RIGHT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         viewSizer.Add(self._backwardButton, flag=wx.ALIGN_CENTER)
         viewSizer.Add(self._forwardButton, flag=wx.ALIGN_CENTER)        
         self._viewPanel.SetSizer(viewSizer)
@@ -971,43 +972,43 @@ class ReadToolPanel(wx.Panel):
         toolsSizer = wx.StaticBoxSizer(wx.StaticBox(self._toolsPanel, wx.ID_ANY, u'เครื่องมือ'), orient=wx.HORIZONTAL)
         
         self._searchButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.SEARCH_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.SEARCH_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._searchButton.SetToolTip(wx.ToolTip(u'ค้นหาจากข้อความที่ถูกเลือก'))
         
         self._starButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._starButton.SetToolTip(wx.ToolTip(u'ที่คั่นหน้า'))
 
         self._notesButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+            wx.Bitmap(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
 
         self._markButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+            wx.Bitmap(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._markButton.SetToolTip(wx.ToolTip(u'รายการไฮไลท์'))
                 
         self._bookListButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.LAYOUT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(32,32)))
+            wx.Bitmap(wx.Image(constants.LAYOUT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(32,32)))
         self._bookListButton.SetToolTip(wx.ToolTip(u'แสดง/ซ่อน หน้าต่างเลือกหนังสือ'))
                 
         self._fontsButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=self._searchButton.GetSize())
+            wx.Bitmap(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=self._searchButton.GetSize())
         self._fontsButton.SetToolTip(wx.ToolTip(u'เปลี่ยนรูปแบบตัวหนังสือ'))
         
         self._incFontButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.INC_IMAGE, wx.BITMAP_TYPE_GIF)), size=self._searchButton.GetSize())
+            wx.Bitmap(wx.Image(constants.INC_IMAGE, wx.BITMAP_TYPE_GIF)), size=self._searchButton.GetSize())
         self._incFontButton.SetToolTip(wx.ToolTip(u'เพิ่มขนาดตัวหนังสือ'))
         
         self._decFontButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.DEC_IMAGE, wx.BITMAP_TYPE_GIF)), size=self._searchButton.GetSize())
+            wx.Bitmap(wx.Image(constants.DEC_IMAGE, wx.BITMAP_TYPE_GIF)), size=self._searchButton.GetSize())
         self._decFontButton.SetToolTip(wx.ToolTip(u'ลดขนาดตัวหนังสือ'))
                 
         self._saveButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
+            wx.Bitmap(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
         self._saveButton.SetToolTip(wx.ToolTip(u'บันทึกข้อมูลลงไฟล์'))
 
         self._printButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.PRINT_IMAGE, wx.BITMAP_TYPE_PNG)))
+            wx.Bitmap(wx.Image(constants.PRINT_IMAGE, wx.BITMAP_TYPE_PNG)))
         self._printButton.SetToolTip(wx.ToolTip(u'พิมพ์หน้าที่ต้องการ'))                        
         
         toolsSizer.Add(self._bookListButton, flag=wx.ALIGN_CENTER)
@@ -1033,13 +1034,13 @@ class ReadToolPanel(wx.Panel):
         self._dictPanel = wx.Panel(self, wx.ID_ANY)
         dictSizer = wx.StaticBoxSizer(wx.StaticBox(self._dictPanel, wx.ID_ANY, u'พจนานุกรม'), orient=wx.HORIZONTAL)        
         self._paliDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._paliDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
         self._thaiDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))        
         self._englishDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.ENGLISH_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.ENGLISH_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._englishDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-อังกฤษ'))        
 
 
@@ -1149,9 +1150,14 @@ class ReadPanel(wx.Panel):
         self._item = wx.html.HtmlWindow(self, size=(-1, 28), style=wx.html.HW_SCROLLBAR_NEVER)
         self._item.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
+        foreground = utils.LoadThemeForegroundHex(constants.READ)
+        background = utils.LoadThemeBackgroundHex(constants.READ)
         self._body = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)        
-        self._body.SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))
-        self._body.SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
+        self._body.SetForegroundColour(foreground)
+        self._body.SetBackgroundColour(background)        
+        font = self._body.GetFont()
+        attr = wx.TextAttr(foreground, background, font)
+        self._body.SetDefaultStyle(attr)    
         self._body.Bind(wx.EVT_SET_FOCUS, self.OnTextBodySetFocus)
         self._body.Bind(wx.EVT_KILL_FOCUS, self.OnTextBodyKillFocus)
         self._body.Bind(wx.EVT_CHAR, self.OnCharKeyPress)
@@ -1167,34 +1173,34 @@ class ReadPanel(wx.Panel):
         self._paintPanel = wx.Panel(self, wx.ID_ANY)                
 
         self._markButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+            wx.Bitmap(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
         self._markButton.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
         self._markButton.Bind(wx.EVT_BUTTON, self.OnMarkButtonClick)
         
         self._unmarkButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.WHITE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+            wx.Bitmap(wx.Image(constants.WHITE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
         self._unmarkButton.SetToolTip(wx.ToolTip(u'ลบสีข้อความที่ถูกเลือก'))
         self._unmarkButton.Bind(wx.EVT_BUTTON, self.OnUnmarkButtonClick)
 
         self._saveButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+            wx.Bitmap(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
         self._saveButton.SetToolTip(wx.ToolTip(u'บันทึกการระบายสีข้อความ'))
         self._saveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)        
         self._saveButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateSaveButton)
         
         self._clearButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.CLEAR_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+            wx.Bitmap(wx.Image(constants.CLEAR_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
         self._clearButton.SetToolTip(wx.ToolTip(u'ลบบันทึกการระบายสีข้อความทั้งหมด'))
         self._clearButton.Bind(wx.EVT_BUTTON, self.OnClearButtonClick)
         self._clearButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateClearButton)
         
         self._toggleNoteButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))        
+            wx.Bitmap(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))        
         self._toggleNoteButton.SetToolTip(wx.ToolTip(u'เปิด/ปิด บันทึกข้อความเพิ่มเติม'))
         self._toggleNoteButton.Bind(wx.EVT_BUTTON, self.OnToggleNoteButtonClick)
 
         self._toggleHeaderButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.HEADER_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+            wx.Bitmap(wx.Image(constants.HEADER_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
         self._toggleHeaderButton.SetToolTip(wx.ToolTip(u'เปิด/ปิด ส่วนแสดงด้านบน'))
         self._toggleHeaderButton.Bind(wx.EVT_BUTTON, self.OnToggleHeaderClick)
         
@@ -1303,11 +1309,6 @@ class ReadPanel(wx.Panel):
 
     def SetBody(self, text, focus=True):
         self._body.SetValue(text)
-        font = self._body.GetFont()
-        offset = 1 if 'wxMac' in wx.PlatformInfo else 0
-        self._body.SetStyle(0, len(text)+offset, wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 
-            utils.LoadThemeBackgroundHex(constants.READ), font))
-        
         if focus:
             self._body.SetFocus()
         
@@ -1506,23 +1507,23 @@ class NotePanel(wx.Panel):
      
         self._toolBar.SetToolBitmapSize((22,22))
      
-        self._saveItem = self._toolBar.AddTool(-1, images._rt_save.GetBitmap(), shortHelpString=_("Save"))
+        self._saveItem = self._toolBar.AddTool(-1, _("Save"), images._rt_save.GetBitmap(), shortHelp=_("Save"))
         self._toolBar.AddSeparator()
-        self._boldItem = self._toolBar.AddTool(-1, images._rt_bold.GetBitmap(), isToggle=False, shortHelpString=_("Bold"))
-        self._italicItem = self._toolBar.AddTool(-1, images._rt_italic.GetBitmap(), isToggle=True, shortHelpString=_("Italic"))
-        self._underlineItem = self._toolBar.AddTool(-1, images._rt_underline.GetBitmap(), isToggle=True, shortHelpString=_("Underline"))   
+        self._boldItem = self._toolBar.AddTool(-1, _("Bold"), images._rt_bold.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Bold"))
+        self._italicItem = self._toolBar.AddTool(-1, _("Itatic"), images._rt_italic.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Italic"))
+        self._underlineItem = self._toolBar.AddTool(-1, _("Underline"), images._rt_underline.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Underline"))   
         self._toolBar.AddSeparator()
-        self._alignLeftItem = self._toolBar.AddTool(-1, images._rt_alignleft.GetBitmap(), isToggle=True, shortHelpString=_("Align Left"))
-        self._centerItem = self._toolBar.AddTool(-1, images._rt_centre.GetBitmap(), isToggle=True, shortHelpString=_("Center"))
-        self._alignRightItem = self._toolBar.AddTool(-1, images._rt_alignright.GetBitmap(), isToggle=True, shortHelpString=_("Align Right"))   
+        self._alignLeftItem = self._toolBar.AddTool(-1, _("Align Left"), images._rt_alignleft.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Align Left"))
+        self._centerItem = self._toolBar.AddTool(-1, _("Center"), images._rt_centre.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Center"))
+        self._alignRightItem = self._toolBar.AddTool(-1, ("Align Right"), images._rt_alignright.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Align Right"))   
         self._toolBar.AddSeparator()
-        self._indentLessItem = self._toolBar.AddTool(-1, images._rt_indentless.GetBitmap(), shortHelpString=_("Indent Less"))
-        self._indentMoreItem = self._toolBar.AddTool(-1, images._rt_indentmore.GetBitmap(), shortHelpString=_("Indent More"))   
+        self._indentLessItem = self._toolBar.AddTool(-1, _("Indent Less"), images._rt_indentless.GetBitmap(), shortHelp=_("Indent Less"))
+        self._indentMoreItem = self._toolBar.AddTool(-1, _("Indent More"), images._rt_indentmore.GetBitmap(), shortHelp=_("Indent More"))   
         self._toolBar.AddSeparator()
-        self._fontItem = self._toolBar.AddTool(-1, images._rt_font.GetBitmap(), shortHelpString=_("Font"))
-        self._fontColorItem = self._toolBar.AddTool(-1, images._rt_colour.GetBitmap(), shortHelpString=_("Font Color"))
+        self._fontItem = self._toolBar.AddTool(-1, _("Font"), images._rt_font.GetBitmap(), shortHelp=_("Font"))
+        self._fontColorItem = self._toolBar.AddTool(-1, _("Font Color"), images._rt_colour.GetBitmap(), shortHelp=_("Font Color"))
         self._toolBar.AddSeparator()
-        self._keyEnterItem = self._toolBar.AddTool(-1, images._rt_enter.GetBitmap(), shortHelpString=_("Newline"))
+        self._keyEnterItem = self._toolBar.AddTool(-1, _("Newline"), images._rt_enter.GetBitmap(), shortHelp=_("Newline"))
         
         self._toolBar.Realize()
         
@@ -1783,19 +1784,19 @@ class SearchToolPanel(wx.Panel):
         self._volumesRadio = wx.RadioBox(self, wx.ID_ANY, _('Choose volumes'), choices=[_('All'), _('Custom')], majorDimension=2)
         
         self._findButton = buttons.GenBitmapTextButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.SEARCH_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)), _('Search'), size=(65,35))
+            wx.Bitmap(wx.Image(constants.SEARCH_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)), _('Search'), size=(65,35))
         
         self._symbolPanel = wx.Panel(self, wx.ID_ANY)
         symbolSizer = wx.StaticBoxSizer(wx.StaticBox(self._symbolPanel, wx.ID_ANY, _('Special characters')), orient=wx.HORIZONTAL)
 
         self._nikhahitButton = wx.BitmapButton(self._symbolPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.NIKHAHIT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(16,16)))         
+            wx.Bitmap(wx.Image(constants.NIKHAHIT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(16,16)))         
 
         self._thothanButton = wx.BitmapButton(self._symbolPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.THOTHAN_IMAGE, wx.BITMAP_TYPE_GIF).Scale(16,16)))                 
+            wx.Bitmap(wx.Image(constants.THOTHAN_IMAGE, wx.BITMAP_TYPE_GIF).Scale(16,16)))                 
 
         self._yoyingButton = wx.BitmapButton(self._symbolPanel, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.YOYING_IMAGE, wx.BITMAP_TYPE_GIF).Scale(16,16)))         
+            wx.Bitmap(wx.Image(constants.YOYING_IMAGE, wx.BITMAP_TYPE_GIF).Scale(16,16)))         
         symbolSizer.Add(self._nikhahitButton)
         symbolSizer.Add(self._thothanButton)
         symbolSizer.Add(self._yoyingButton)
@@ -1804,57 +1805,57 @@ class SearchToolPanel(wx.Panel):
             self._symbolPanel.Hide()         
         
         self._fontsButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(-1, 40))
+            wx.Bitmap(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(-1, 40))
         self._fontsButton.SetToolTip(wx.ToolTip(_('Change font')))
         
         self._prevButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.LEFT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+            wx.Bitmap(wx.Image(constants.LEFT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         
         self._nextButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.RIGHT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
+            wx.Bitmap(wx.Image(constants.RIGHT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
         
         self._prevButton.Disable()
         self._nextButton.Disable()
         
         self._importButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.IMPORT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.IMPORT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._importButton.SetToolTip(wx.ToolTip(_('Import data')))
         
         self._exportButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))         
+            wx.Bitmap(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))         
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
 
         self._settingButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.SETTING_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.SETTING_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._settingButton.SetToolTip(wx.ToolTip(u'ตั้งค่าตำแหน่งเก็บข้อมูล'))
         
-        self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.READ_IMAGE, wx.BITMAP_TYPE_PNG)))
+        self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.READ_IMAGE, wx.BITMAP_TYPE_PNG)))
             
-        self._aboutButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.ABOUT_IMAGE, wx.BITMAP_TYPE_PNG)))
+        self._aboutButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.ABOUT_IMAGE, wx.BITMAP_TYPE_PNG)))
         self._aboutButton.SetToolTip(wx.ToolTip(_('About E-Tipitaka')))        
         
         self._checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'เปิดหน้าใหม่ทุกครั้ง')
                 
-        self._starButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
+        self._starButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._starButton.SetToolTip(wx.ToolTip(u'ที่คั่นหน้า'))
 
-        self._notesButton = wx.BitmapButton(self, wx.ID_ANY, wx.BitmapFromImage(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
+        self._notesButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
                                 
         self._paliDictButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._paliDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
         
         self._thaiDictButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))                        
                 
         self._englishDictButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.ENGLISH_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.ENGLISH_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._englishDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-อังกฤษ'))                        
 
         self._searchAndCompareButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.BitmapFromImage(wx.Image(constants.SEARCH_AND_COMPARE_IMAGE, wx.BITMAP_TYPE_PNG))) 
+            wx.Bitmap(wx.Image(constants.SEARCH_AND_COMPARE_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._searchAndCompareButton.SetToolTip(wx.ToolTip(u'ค้นหาพร้อมจับคู่เลขข้อ'))                        
 
         themes = [u'ขาว', u'น้ำตาลอ่อน'] 
