@@ -1761,11 +1761,11 @@ class SearchToolPanel(wx.Panel):
             
     def _CreateAttributes(self):
         self._text = MySearchCtrl(self, constants.LOG_FILE)        
-        if 'wxMac' not in wx.PlatformInfo and self._font != None and self._font.IsOk():
+        if self._font != None and self._font.IsOk():
             self._font.SetPointSize(16)
             self._text.SetFont(self._font)
         else:   
-            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
             font.SetFaceName('Tahoma')            
             self._text.SetFont(font)
 
