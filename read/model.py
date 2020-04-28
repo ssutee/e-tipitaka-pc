@@ -554,8 +554,8 @@ class ThaiSupremeEngine(Engine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับมหาเถรฯ (ภาษาไทย)'
-        return u'พระไตรปิฎก ฉบับมหาเถรฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return u'พระไตรปิฎก ฉบับเฉลิมพระเกียรติ ๒๕๔๙ (ภาษาไทย)'
+        return u'พระไตรปิฎก ฉบับเฉลิมพระเกียรติ ๒๕๔๙ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
     
     def ProcessResult(self, result):
         r = {}

@@ -298,7 +298,7 @@ def ShortName(code):
     if code == constants.PALI_MAHACHULA_CODE:
         return u'มหาจุฬา (บาลี)'
     if code == constants.THAI_SUPREME_CODE:
-        return u'มหาเถระ'
+        return u'เฉลิมพระเกียรติ ๒๕๔๙'
     if code == constants.THAI_VINAYA_CODE:
         return u'อริยวินัย'
     if code == constants.PALI_SIAM_NEW_CODE:

@@ -629,7 +629,7 @@ class ThaiSupremeSearchModel(Model):
 
 
     def NotFoundMessage(self):
-        return u'<div align="center"><h2>%s</h2></div>' % ((u'ไม่พบ %s ในพระไตรปิฎก (ภาษาไทย ฉบับมหาเถรฯ)') % (self._keywords))
+        return u'<div align="center"><h2>%s</h2></div>' % ((u'ไม่พบ %s ในพระไตรปิฎก (ภาษาไทย ฉบับเฉลิมพระเกียรติ ๒๕๔๙)') % (self._keywords))
 
 
 class PaliMahaChulaSearchModel(Model):
