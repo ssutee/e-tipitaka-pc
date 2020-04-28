@@ -402,6 +402,7 @@ class Model(object):
         pages = self.GetPages()        
         text = ''        
         for idx, volume, page, items, excerpts in self.GetDisplayResult('%d:%d'%mark):
+            volume, page = int(volume), int(page)
             stateImage = ''
             noteText = ''
             if idx in self._notes:
