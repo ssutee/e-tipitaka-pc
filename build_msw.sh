@@ -15,7 +15,7 @@ pyinstaller \
     --hidden-import reportlab.graphics.barcode.eanbc \
     --hidden-import reportlab.graphics.barcode.fourstate \
     --hidden-import reportlab.graphics.barcode.ecc200datamatrix \
-    -y -n e-tipitaka run.py
+    -y -w -n e-tipitaka run.py
 
 cp -r resources dist/e-tipitaka
 cp -r fonts dist/e-tipitaka
