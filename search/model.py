@@ -427,7 +427,8 @@ class Model(object):
         keywords = self._keywords.replace('+',' ')
         if len(keywords.split()) > 1:
             return []
-        return self._spellChecker.suggest(keywords, number=5) if self._spellChecker else []
+        return [] # disable suggestion
+        # return self._spellChecker.suggest(keywords, number=5) if self._spellChecker else []
         
     def GetBookName(self, volume):
         return constants.BOOK_NAMES['%s_%s' % (self.Code, str(volume).lstrip('0'))].decode('utf8','ignore')
