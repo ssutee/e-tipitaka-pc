@@ -17,7 +17,7 @@ pyinstaller \
     --hidden-import reportlab.graphics.barcode.ecc200datamatrix \
     -y -w -n e-tipitaka --onefile run.py
 
-mkdir dist/e-tipitaka
+mkdir -p dist/e-tipitaka
 cp dist/e-tipitaka.exe dist/e-tipitaka/
 cp -r resources dist/e-tipitaka
 cp -r fonts dist/e-tipitaka
