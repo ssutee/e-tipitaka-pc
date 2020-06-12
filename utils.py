@@ -200,11 +200,13 @@ def LoadThemeBackgroundColour(prefix):
 def SaveFont(font, path, code=None):
     t = u'%s,%d,%d,%d,%d' % (font.GetFaceName(),font.GetFamily(),font.GetStyle(),font.GetWeight(),font.GetPointSize())
     path = path if code is None else path + '.' + code
+    if not os.path.exists(constants.CONFIG_PATH):
+        os.mkdir(constants.CONFIG_PATH)
     with codecs.open(path,'w','utf8') as f:
         f.write(t)        
 
 def LoadFont(path, code=None):
-    font = wx.Font(24, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+    font = wx.Font(14 if wx.Port == '__WXGTK__' else 24, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
     font.SetFaceName(constants.DEFAULT_FONT)
     path = path if code is None else path + '.' + code    
     if not os.path.exists(path):

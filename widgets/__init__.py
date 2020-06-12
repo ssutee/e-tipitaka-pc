@@ -801,13 +801,12 @@ class MySearchCtrl(wx.SearchCtrl):
         menu = wx.Menu()
         item = wx.MenuItem(menu, wx.ID_ANY, _('Latest search'))
         item.SetFont(font)
-        item.Enable(False)
         menu.Append(item)
 
         for idx, txt in enumerate(self._searches):
             item = wx.MenuItem(menu, idx+1, txt)
             item.SetFont(font)
-            menu.AppendItem(item)
+            menu.Append(item)
         return menu
         
     def LoadSearches(self):
@@ -1316,17 +1315,17 @@ class ReadPanel(wx.Panel):
         if 'wxMSW' in wx.PlatformInfo:
             self._title.SetValue(title1 if self._delegate.IsSmallScreen() else title1 + '\n' + title2)
         elif self._delegate.IsSmallScreen():
-            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="5">%s</font></div>''' % (title1))            
+            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="4">%s</font></div>''' % (title1))            
         else:
-            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="5">%s</font></div>
-                <div align="center"><font color="#0000FF" size="5">%s</font></div>''' % (title1, title2))
+            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="4">%s</font></div>
+                <div align="center"><font color="#0000FF" size="4">%s</font></div>''' % (title1, title2))
     
     def SetPageNumber(self, number):        
         if number is None:
             self._page.SetPage('')
         else:
             text = _('Page') + ' ' + utils.ArabicToThai(unicode(number))
-            self._page.SetPage(u'<div align="left"><font color="#378000" size="4">%s</font></div>' % (text))
+            self._page.SetPage(u'<div align="left"><font color="#378000" size="3">%s</font></div>' % (text))
         
     def SetItemNumber(self, *numbers):
         if len(numbers) == 0 or numbers[0] is None:
@@ -1335,7 +1334,7 @@ class ReadPanel(wx.Panel):
             text = _('Item') + ' ' + utils.ArabicToThai(unicode(numbers[0]))
             if len(numbers) > 1:
                 text += ' - ' + utils.ArabicToThai(unicode(numbers[-1]))
-            self._item.SetPage(u'<div align="right"><font color="#378000" size="4">%s</font></div>' % (text))
+            self._item.SetPage(u'<div align="right"><font color="#378000" size="3">%s</font></div>' % (text))
 
     def ToggleTitles(self):
         if self._title.IsShown():

@@ -48,8 +48,8 @@ LANG_PALI = 'pali'
 SEARCH = 'search'
 READ = 'read'
 
-DEFAULT_FONT = 'TF Chiangsaen'
-ROMAN_SCRIPT_DEFAULT_FONT = 'Times New Roman'
+DEFAULT_FONT = 'TF Chiangsaen' if wx.Port != '__WXGTK__' else 'Sans'
+ROMAN_SCRIPT_DEFAULT_FONT = 'Times New Roman' if wx.Port != '__WXGTK__' else 'Sans'
 
 ITEMS_PER_PAGE = 20
 

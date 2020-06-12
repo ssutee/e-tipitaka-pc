@@ -66,6 +66,8 @@ class ViewComponents(object):
         bookList = wx.ListBox(parent if parent else self._parent, wx.ID_ANY, 
             choices=choices, style=wx.LB_SINGLE|wx.NO_BORDER)
         font = utils.LoadFont(constants.BOOK_FONT, self._code)
+        if wx.Port == '__WXGTK__':
+            font.SetPointSize(12)
         bookList.SetFont(font)
         bookList.SetSelection(0)
         return bookList
