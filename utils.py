@@ -37,10 +37,12 @@ class BookmarkManager(object):
                         root.append((int(tokens[1]), int(tokens[3]), text.strip()))
                     except UnicodeEncodeError, e:
                         continue
+                    except IndexError, e:
+                        continue
+
         map(lambda x:x.sort(), roots)
         
     def Save(self):
-
         def _Save(items, out, depth=0):
             for item in items:
                 if isinstance(item, dict):
@@ -53,8 +55,9 @@ class BookmarkManager(object):
         if not os.path.exists(constants.BOOKMARKS_PATH):
             os.makedirs(constants.BOOKMARKS_PATH)
         
-        with codecs.open(os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code)),'w','utf8') as out:
-            _Save(self._items, out)
+        out = codecs.open(os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code)),'w','utf8')
+        _Save(self._items, out)
+        out.close()
 
         
     def MakeMenu(self, menu, handler):        

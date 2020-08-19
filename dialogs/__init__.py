@@ -624,7 +624,7 @@ class BookmarkManagerDialog(wx.Dialog):
         event.Skip()
         
     def OnEditButton(self, event):
-        item = self._tree.GetPyData(self._tree.GetSelection())
+        item = self._tree.GetItemData(self._tree.GetSelection())
         if isinstance(item ,dict):
             dialog = wx.TextEntryDialog(self, u'กรุณาป้อนชื่อกลุ่ม', u'เปลี่ยนชื่อกลุ่ม')
             dialog.SetValue(item.keys()[0])
@@ -646,7 +646,7 @@ class BookmarkManagerDialog(wx.Dialog):
             dialog.Destroy()
         
     def OnMoveButton(self, event):
-        source = self._tree.GetPyData(self._tree.GetSelection())
+        source = self._tree.GetItemData(self._tree.GetSelection())
         if source != None:
             dialog = BookmarkFolderDialog(self, self._items, source)
             if dialog.ShowModal() == wx.ID_OK:
@@ -671,7 +671,7 @@ class BookmarkManagerDialog(wx.Dialog):
         dialog = wx.TextEntryDialog(self, u'กรุณาป้อนชื่อกลุ่ม', u'สร้างกลุ่ม')
         dialog.Center()
         if dialog.ShowModal() == wx.ID_OK:
-            item = self._tree.GetPyData(self._tree.GetSelection()) if self._tree.GetSelection() else None
+            item = self._tree.GetItemData(self._tree.GetSelection()) if self._tree.GetSelection() else None
             container = self.FindContainer(item, self._items) if item != None else self._items
             folder = dialog.GetValue().strip()
             container.append({folder:[]})
@@ -688,7 +688,7 @@ class BookmarkManagerDialog(wx.Dialog):
                 self.Delete(child.values()[0], item)
         
     def OnDeleteButton(self, event):    
-        item = self._tree.GetPyData(self._tree.GetSelection())
+        item = self._tree.GetItemData(self._tree.GetSelection())
         if item != None:
             dialog = wx.MessageDialog(self, u'คุณต้องการลบการจดจำนี้หรือไม่?' + 
                 u' (ถ้าลบกลุ่ม การจดจำทั้งหมดในกลุ่มจะถูกลบไปด้วย)', u'ยืนยันการลบ', 
@@ -719,9 +719,9 @@ class BookmarkManagerDialog(wx.Dialog):
 
         isz = (16,16)
         il = wx.ImageList(isz[0], isz[1])
-        self.fldridx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
-        self.fldropenidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
-        self.fileidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
+        self.fldridx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
+        self.fldropenidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
+        self.fileidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, isz))
         self._tree.SetImageList(il)        
         self.il = il
         
@@ -747,7 +747,7 @@ class BookmarkFolderDialog(wx.Dialog):
         self.CreateTree()
 
     def OnSelectButton(self, event):
-        self.value = self._tree.GetPyData(self._tree.GetSelection())
+        self.value = self._tree.GetItemData(self._tree.GetSelection())
         self.EndModal(wx.ID_OK)
 
     def GetValue(self):
@@ -767,8 +767,8 @@ class BookmarkFolderDialog(wx.Dialog):
             
         isz = (16,16)
         il = wx.ImageList(isz[0], isz[1])
-        self.fldridx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
-        self.fldropenidx = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
+        self.fldridx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
+        self.fldropenidx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
         self._tree.SetImageList(il)        
         self.il = il
             
@@ -825,7 +825,7 @@ class BookMarkDialog(wx.Dialog):
         def _CreateComboBox(comboBox, root, items):
             for item in items:
                 if isinstance(item, dict):
-                    child = comboBox.Append(item.keys()[0], root, clientData=item.values()[0])
+                    child = comboBox.Append(item.keys()[0], parent=root, clientData=item.values()[0])
                     _CreateComboBox(comboBox, child, item.values()[0])
                     
         comboBox = ComboTreeBox(self, wx.CB_READONLY) 
