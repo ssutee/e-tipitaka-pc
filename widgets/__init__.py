@@ -560,13 +560,16 @@ class DictWindow(wx.Frame):
         self.Hide()
         event.Skip()
 
+    def MakeContent(self, word, item):
+        return word+u'\n\n'+item[1]            
+
     def OnSelectWord(self, event):
         self.currentItem =  event.GetIndex()
         word = self.wordList.GetItemText(self.currentItem)
         item = self.LookupDictSQLite(word)
         if item != None:
-            tran = item[1]
-            self.text.SetValue(word+u'\n\n'+tran)
+            content = self.MakeContent(word, item)
+            self.text.SetValue(content)            
         event.Skip()
 
     def OnDoubleClick(self, event):
@@ -672,6 +675,17 @@ class PaliDictWindow(DictWindow):
     def ConnectDatabase(self):
         conn = sqlite3.connect(constants.PALI_DICT_DB)
         return conn
+
+    def OnSelectWord(self, event):
+        self.currentItem =  event.GetIndex()
+        word = self.wordList.GetItemText(self.currentItem)
+        uid = self.wordList.GetItemData(self.currentItem)
+        item = self.LookupDictSQLite(word, uid=uid)
+        if item != None:
+            content = self.MakeContent(word, item)
+            self.text.SetValue(content)            
+        event.Skip()
+
         
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
@@ -685,7 +699,8 @@ class PaliDictWindow(DictWindow):
             items = self.LookupDictSQLite(text1,text2,prefix=True)
             if len(items) > 0:
                 for i,item in enumerate(items):
-                    self.wordList.InsertItem(i,item[0])
+                    item_id = self.wordList.InsertItem(i,item[1])
+                    self.wordList.SetItemData(item_id, item[0])
             else:
                 self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
         else:
@@ -693,21 +708,33 @@ class PaliDictWindow(DictWindow):
 
         event.Skip()
         
-    def LookupDictSQLite(self, word1, word2=None, prefix=False):
+    def LookupDictSQLite(self, word1, word2=None, prefix=False, uid=None):
         cursor = self.conn.cursor()
         if prefix:
             if word2:                
-                cursor.execute("SELECT * FROM p2t WHERE headword LIKE ? OR headword LIKE ? ", (word1+'%', word2+'%'))
+                cursor.execute("SELECT * FROM p2t WHERE headword LIKE ? OR headword LIKE ? ORDER BY headword", (word1+'%', word2+'%'))
             else:
-                cursor.execute("SELECT * FROM p2t WHERE headword LIKE ?", (word1+'%', ))
+                cursor.execute("SELECT * FROM p2t WHERE headword LIKE ? ORDER BY headword", (word1+'%', ))
             return cursor.fetchmany(size=50)
         else:
             if word2:
-                cursor.execute("SELECT * FROM p2t WHERE headword = ? OR headword = ?", (word1, word2))
+                cursor.execute("SELECT * FROM p2t WHERE headword = ? OR headword = ? ORDER BY headword", (word1, word2))
+            elif uid:
+                cursor.execute("SELECT * FROM p2t WHERE _id = ? ORDER BY headword", (uid, ))
             else:
-                cursor.execute("SELECT * FROM p2t WHERE headword = ?", (word1, ))
+                cursor.execute("SELECT * FROM p2t WHERE headword = ? ORDER BY headword", (word1, ))
             return cursor.fetchone()            
 
+    def MakeContent(self, word, item):        
+        return word+u'\n\n' + \
+            u'คำแปล: ' + item[2] + '\n' + \
+            u'คำอ่าน: ' + item[8] + '\n' + \
+            u'หมวดหมู่: ' + item[7] + '\n' +  \
+            u'ประเภทคำ: ' + item[3] + '\n' + \
+            u'ลิงค์: ' + item[4] + '\n' + \
+            u'วจนะ: ' + item[5] + '\n' + \
+            u'วิภัติ: ' + item[6] + '\n' + \
+            u'คำอธิบายเพิ่มเดิม: ' + item[9]
 
 class AuiBaseFrame(aui.AuiMDIChildFrame):
     
