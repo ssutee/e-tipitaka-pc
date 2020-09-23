@@ -186,10 +186,6 @@ class Presenter(object):
         return self._lastFocus
         
     @property
-    def BookmarkItems(self):
-        return self._bookmarkManager.Items
-
-    @property
     def Delegate(self):
         return self._delegate
         
@@ -200,6 +196,11 @@ class Presenter(object):
     @property
     def Keywords(self):
         return self._keywords
+
+    @property
+    def Code(self):
+        return self._model.Code
+    
         
     @Keywords.setter
     def Keywords(self, keywords):
@@ -409,12 +410,11 @@ class Presenter(object):
 
         self.OpenAnotherBook(code, index, volume, page)                
 
-    def SaveBookmark(self):        
-        self._bookmarkManager.Save()
+    def SaveBookmark(self, note, volume, page ,pid):    
+        self._bookmarkManager.Save(self.Code, note, volume, page, pid)
 
     def Close(self):
         self._stopOpen = True
-        self.SaveBookmark()        
         if hasattr(self._delegate, 'OnReadWindowClose'):
             self._delegate.OnReadWindowClose(self._code, self)
             

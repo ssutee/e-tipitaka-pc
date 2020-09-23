@@ -3,13 +3,14 @@
 import wx
 from wx.lib.combotreebox import ComboTreeBox
 import wx.richtext as rt
-import sys, os, re, json
+import sys, os, re, json, sqlite3
 import i18n
 _ = i18n.language.ugettext
 
 import settings, constants, utils
 import read.model
 import search.model
+from utils import ArabicToThai
 
 from pony.orm import db_session
 
@@ -589,11 +590,11 @@ class PageRangeDialog(wx.Dialog):
             self.checkBox.Enable()
 
 class BookmarkManagerDialog(wx.Dialog):
-    def __init__(self, parent, items):
+    def __init__(self, parent, code):
         wx.Dialog.__init__(self, parent, -1, u'ตัวจัดการที่คั่นหน้า', size=(600, 400))
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Center()
-        self._items = items
+        self._code = code
         sizer = wx.BoxSizer(wx.VERTICAL)
         self._tree = wx.TreeCtrl(self, -1, style=wx.TR_DEFAULT_STYLE|wx.TR_HIDE_ROOT)
 
@@ -625,68 +626,80 @@ class BookmarkManagerDialog(wx.Dialog):
         
     def OnEditButton(self, event):
         item = self._tree.GetItemData(self._tree.GetSelection())
-        if isinstance(item ,dict):
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()                            
+        cursor.execute('SELECT volume, note FROM %s WHERE ROWID=?'%(self._code), (item,))
+        volume, note = cursor.fetchone()
+        dialog = None
+        if volume == 0:
             dialog = wx.TextEntryDialog(self, u'กรุณาป้อนชื่อกลุ่ม', u'เปลี่ยนชื่อกลุ่ม')
-            dialog.SetValue(item.keys()[0])
-            dialog.Center()
-            if dialog.ShowModal() == wx.ID_OK:
-                item[dialog.GetValue().strip()] = item.pop(item.keys()[0])
-                self.Reload()
-            dialog.Destroy()
-        elif isinstance(item, tuple):
-            dialog = wx.TextEntryDialog(self, u'กรุณาป้อนข้อมูลของคั่นหน้า', u'เปลี่ยนข้อมูลคั่นหน้า')
-            dialog.SetValue(':'.join(item[2].split(':')[1:]).strip())
-            dialog.Center()
-            if dialog.ShowModal() == wx.ID_OK:
-                container = self.FindContainer(item, self._items)
-                note = item[2].split(':')[0].strip() + ' : ' + dialog.GetValue().strip()
-                container.append((item[0], item[1], note))
-                self.Delete(container, item)
-                self.Reload()
-            dialog.Destroy()
+        else:
+            dialog = wx.TextEntryDialog(self, u'กรุณาป้อนข้อมูลของคั่นหน้า', u'เปลี่ยนข้อความคั่นหน้า')
+        dialog.SetValue(note)
+        dialog.Center()
+        if dialog.ShowModal() == wx.ID_OK:
+            textInput = dialog.GetValue().strip()
+            if volume != 0 or len(textInput) > 0:
+                cursor.execute('UPDATE %s SET note=? WHERE ROWID=?'%(self._code), (textInput, item))
+                conn.commit()
+            self.Reload()
+        dialog.Destroy()        
+        conn.close()
         
     def OnMoveButton(self, event):
         source = self._tree.GetItemData(self._tree.GetSelection())
-        if source != None:
-            dialog = BookmarkFolderDialog(self, self._items, source)
+        
+        if source == None: return
+
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()                            
+        cursor.execute('SELECT volume FROM %s WHERE ROWID=?'%(self._code), (source,))
+        row = cursor.fetchone()
+        if row[0] > 0:
+            dialog = BookmarkFolderDialog(self, self._code)
             if dialog.ShowModal() == wx.ID_OK:
                 target = dialog.GetValue()
-                if isinstance(target, list):
-                    self.Delete(self._items, source)
-                    target.append(source)
-                    self.Reload()
+                cursor.execute('UPDATE %s SET parent_id=? WHERE ROWID=?'%(self._code), (target, source))
+                conn.commit()
+                self.Reload()
             dialog.Destroy()
-    
-    def FindContainer(self, item, items):
-        for i in xrange(len(items)):
-            if item is items[i]:
-                return items
-            elif isinstance(items[i], dict):
-                container = self.FindContainer(item, items[i].values()[0])
-                if container != None: return container
-        return None
 
-        
+        conn.close()
+            
     def OnCreateButton(self, event):    
         dialog = wx.TextEntryDialog(self, u'กรุณาป้อนชื่อกลุ่ม', u'สร้างกลุ่ม')
         dialog.Center()
         if dialog.ShowModal() == wx.ID_OK:
-            item = self._tree.GetItemData(self._tree.GetSelection()) if self._tree.GetSelection() else None
-            container = self.FindContainer(item, self._items) if item != None else self._items
             folder = dialog.GetValue().strip()
-            container.append({folder:[]})
-            container.sort()
+            if len(folder) > 0:
+                rowId = self._tree.GetItemData(self._tree.GetSelection()) if self._tree.GetSelection() else 0
+                conn = sqlite3.connect(constants.FAV_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT volume, parent_id FROM %s WHERE ROWID=?'%(self._code), (rowId,))
+                volume, pid = cursor.fetchone()
+                rootId = rowId if volume == 0 else pid
+                cursor.execute('INSERT INTO %s VALUES (?,?,?,?)'%(self._code), (folder, 0, 0, rootId))
+                conn.commit()
+                conn.close()
             self.Reload()
         dialog.Destroy()
+                
+    def Delete(self, item):
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()
+
+        def _delete(item):
+            cursor.execute('SELECT ROWID FROM %s WHERE parent_id=?'%(self._code), (item,))
+            rows =  cursor.fetchall()
+            for rowId, in rows:
+                _delete(rowId)
+                cursor.execute('DELETE FROM %s WHERE ROWID=?'%(self._code), (rowId,))
+            cursor.execute('DELETE FROM %s WHERE ROWID=?'%(self._code), (item,))
         
-    def Delete(self, items, item):
-        for i,child in enumerate(items):
-            if child is item:
-                del items[i]
-                break;
-            elif isinstance(child, dict):
-                self.Delete(child.values()[0], item)
-        
+        _delete(item)
+        conn.commit()
+        conn.close()
+
     def OnDeleteButton(self, event):    
         item = self._tree.GetItemData(self._tree.GetSelection())
         if item != None:
@@ -695,24 +708,29 @@ class BookmarkManagerDialog(wx.Dialog):
                 wx.YES_NO | wx.ICON_INFORMATION)
             dialog.Center()
             if dialog.ShowModal() == wx.ID_YES:
-                self.Delete(self._items, item)
+                self.Delete(item)
                 self.Reload()                
             dialog.Destroy()
         
     def Reload(self):
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()                    
 
-        def Load(tree, root, items):
-            for item in items:
-                if isinstance(item, dict):
-                    folder = item.keys()[0]
-                    child = tree.AppendItem(root, folder)
-                    tree.SetItemData(child, item)
+        def Load(tree, root, pid):
+            cursor.execute('SELECT ROWID, note, volume, page, parent_id FROM %s WHERE parent_id=? ORDER BY volume, page'%(self._code), (pid,))
+            rows =cursor.fetchall()
+            for row in rows:
+                rowId, note, volume, page, pid = row
+                if volume == 0:
+                    child = tree.AppendItem(root, note)
+                    tree.SetItemData(child, rowId)
                     tree.SetItemImage(child, self.fldridx, wx.TreeItemIcon_Normal)
                     tree.SetItemImage(child, self.fldropenidx, wx.TreeItemIcon_Expanded)
-                    Load(tree, child, item[folder])
-                elif isinstance(item, tuple):
-                    child = tree.AppendItem(root, item[2])
-                    tree.SetItemData(child, item)
+                    Load(tree, child, rowId)
+                else:
+                    note = u'เล่มที่ %d หน้าที่ %d : %s'%(volume, page, note)
+                    child = tree.AppendItem(root, ArabicToThai(note))
+                    tree.SetItemData(child, rowId)
                     tree.SetItemImage(child, self.fileidx, wx.TreeItemIcon_Normal)
                     
         self._tree.DeleteAllItems()
@@ -727,16 +745,15 @@ class BookmarkManagerDialog(wx.Dialog):
         
         root = self._tree.AddRoot("root")
         self._tree.SetItemData(root, None)
-        Load(self._tree, root, self._items)
+        Load(self._tree, root, 0)
         self._tree.ExpandAll()
 
 class BookmarkFolderDialog(wx.Dialog):
-    def __init__(self, parent, items, dataSource=None):
+    def __init__(self, parent, code):
         wx.Dialog.__init__(self, parent, -1, u'เลือกกลุ่ม', size=(300, 350))
-        self._dataSource = dataSource
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Center()
-        self._items = items
+        self._code = code
         sizer = wx.BoxSizer(wx.VERTICAL)
         self._tree = wx.TreeCtrl(self, -1, style=wx.TR_DEFAULT_STYLE)
         sizer.Add(self._tree, 1, wx.EXPAND|wx.ALL, 10)
@@ -754,17 +771,20 @@ class BookmarkFolderDialog(wx.Dialog):
         return getattr(self, 'value', None)
 
     def CreateTree(self):
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()                    
             
-        def Create(tree, root, items):
-            for item in items:
-                if isinstance(item ,dict) and item is not self._dataSource:
-                    folder = item.keys()[0]
-                    child = tree.AppendItem(root, folder)
-                    tree.SetItemData(child, item[folder])
-                    tree.SetItemImage(child, self.fldridx, wx.TreeItemIcon_Normal)
-                    tree.SetItemImage(child, self.fldropenidx, wx.TreeItemIcon_Expanded)
-                    Create(tree, child, item[folder])
-            
+        def Create(tree, root, pid):
+            cursor.execute('SELECT ROWID, note FROM %s WHERE parent_id=? AND volume=0 ORDER BY volume, page'%(self._code), (pid,))
+            rows =cursor.fetchall()
+            for row in rows:
+                rowId, folder = row
+                child = tree.AppendItem(root, folder)
+                tree.SetItemData(child, rowId)
+                tree.SetItemImage(child, self.fldridx, wx.TreeItemIcon_Normal)
+                tree.SetItemImage(child, self.fldropenidx, wx.TreeItemIcon_Expanded)
+                Create(tree, child, rowId)
+
         isz = (16,16)
         il = wx.ImageList(isz[0], isz[1])
         self.fldridx = il.Add(wx.ArtProvider.GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
@@ -773,18 +793,20 @@ class BookmarkFolderDialog(wx.Dialog):
         self.il = il
             
         root = self._tree.AddRoot(u'หลัก')
-        self._tree.SetItemData(root, self._items)
-        Create(self._tree, root, self._items)
+        self._tree.SetItemData(root, 0)
+        Create(self._tree, root, 0)
         self._tree.ExpandAll()
+        
+        conn.close()
 
     def OnClose(self, event):
         self._tree.DeleteAllItems()
         event.Skip()
 
-class BookMarkDialog(wx.Dialog):
-    def __init__(self, parent, items):
+class BookmarkDialog(wx.Dialog):
+    def __init__(self, parent, code):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, u'โปรดใส่ข้อมูลของคั่นหน้า')
-        self._items = items
+        self._code = code
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         sizer1 = wx.BoxSizer(wx.HORIZONTAL)
         sizer1.Add(wx.StaticText(self, -1, u'หมายเหตุ :', size=(70,-1), style=wx.ALIGN_RIGHT), 0, wx.ALIGN_CENTER)
@@ -820,29 +842,34 @@ class BookMarkDialog(wx.Dialog):
     def GetValue(self):
         return getattr(self, 'value', None)
 
-    def CreateComboBox(self):
+    def CreateComboBox(self):        
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()                    
+        def _makeChoice(note, pid):
+            if pid == 0: return note
+            cursor.execute('SELECT note, parent_id FROM %s WHERE ROWID=?'%(self._code), (pid,))
+            if cursor.rowcount == 0:
+                return note
+            root, pid = cursor.fetchone()
+            return _makeChoice(root+'>'+note, pid)
         
-        def _CreateComboBox(comboBox, root, items):
-            for item in items:
-                if isinstance(item, dict):
-                    child = comboBox.Append(item.keys()[0], parent=root, clientData=item.values()[0])
-                    _CreateComboBox(comboBox, child, item.values()[0])
-                    
-        comboBox = ComboTreeBox(self, wx.CB_READONLY) 
-        root = comboBox.Append(u'หลัก', clientData=self._items)
-        _CreateComboBox(comboBox, root, self._items)
-        comboBox.SetSelection(root)
-        comboBox.GetTree().ExpandAll()       
+        comboBox = wx.ComboBox(self, wx.CB_READONLY, choices=[])
+        comboBox.Append(u'หลัก', 0)
+        rows = cursor.execute('SELECT ROWID, note, parent_id FROM %s WHERE volume=0'%(self._code)).fetchall()
+        for rowId, note, pid in rows:
+            choice = _makeChoice(note, pid)
+            comboBox.Append(choice, clientData=rowId)
+        comboBox.SetSelection(0)
+        conn.close()
         return comboBox
         
     def OnSaveButton(self, event):
         item = self.ComboBox.GetSelection()
         note = self.NoteText.GetValue()
         if item:
-            container = self.ComboBox.GetClientData(item)
-            self.value = (container, note.strip())
+            pid = self.ComboBox.GetClientData(item)
+            self.value = (pid, note.strip())
             self.EndModal(wx.ID_OK)
-
 
 class VolumesDialog(wx.Dialog):
     def __init__(self, parent, volumes, dataSource):        

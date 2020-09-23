@@ -4,7 +4,7 @@ import wx
 import os, sys, os.path
 import widgets, constants, utils
 from widgets import AuiBaseFrame
-from dialogs import BookMarkDialog, BookmarkManagerDialog
+from dialogs import BookmarkDialog, BookmarkManagerDialog
 
 try:
     import wx.aui as aui
@@ -574,14 +574,13 @@ class View(AuiBaseFrame):
         if page != 0:
             x,y = self.StarButton.GetScreenPosition()
             w,h = self.StarButton.GetSize()        
-            dialog = BookMarkDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.BookmarkItems)
+            dialog = BookmarkDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.Code)
             if dialog.ShowModal() == wx.ID_OK:
                 result = dialog.GetValue()
                 if result != None and len(result) == 2:
-                    container, note = result
+                    pid, note = result
                     note = u'%s : %s' %(utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d'%(volume, page)), note)
-                    container.append((volume, page, note))                    
-                    self._delegate.SaveBookmark()
+                    self._delegate.SaveBookmark(note, volume, page, pid)
             dialog.Destroy()
         else:
             wx.MessageBox(u'หน้ายังไม่ได้ถูกเลือก',u'พบข้อผิดพลาด')
@@ -591,9 +590,8 @@ class View(AuiBaseFrame):
             self._bookList.SetSelection(volume-1)
         
     def OnMenuManageBookmarkSelected(self, event):
-        dlg = BookmarkManagerDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.BookmarkItems)
+        dlg = BookmarkManagerDialog(self.ReadPanel(*utils.SplitKey(self._delegate.LastFocus)), self._delegate.Code)
         dlg.ShowModal()
-        self._delegate.SaveBookmark()
         dlg.Destroy()
         
     def SetSelection(self, content, start, end, code, index):

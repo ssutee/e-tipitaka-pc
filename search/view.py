@@ -237,9 +237,8 @@ class View(AuiBaseFrame):
         return self._bookmarkMenu.FindItemById(itemId)
                 
     def OnMenuManageBookmarkSelected(self, event):
-        dlg = BookmarkManagerDialog(self, self._delegate.BookmarkItems)
+        dlg = BookmarkManagerDialog(self, self._delegate.Code)
         dlg.ShowModal()
-        self._delegate.SaveBookmark()
         dlg.Destroy()        
         
     def ShowVolumesDialog(self, dataSource, volumes, OnDismiss):

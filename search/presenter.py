@@ -58,10 +58,6 @@ class Presenter(object):
     @Delegate.setter
     def Delegate(self, value):
         self._delegate = value
-
-    @property
-    def BookmarkItems(self):
-        return self._bookmarkManager.Items
                 
     @property
     def Model(self):
@@ -71,6 +67,10 @@ class Presenter(object):
     def CanBeClosed(self):
         return self._canBeClosed
     
+    @property
+    def Code(self):
+        return self.Model.Code
+
     def ShowAboutDialog(self):
         dialog = AboutDialog(self._view)
         dialog.Center()
@@ -552,9 +552,6 @@ class Presenter(object):
             volume, page, code = dlg.Result
             self.OpenBook(volume, page, code)
         dlg.Destroy()
-
-    def SaveBookmark(self):        
-        self._bookmarkManager.Save()        
         
     def LoadBookmarks(self, menu):
 
@@ -565,7 +562,6 @@ class Presenter(object):
             volume, page = int(tokens[1]), int(tokens[3])            
             self.OpenBook(volume, page)
 
-        self._bookmarkManager.Load()
         self._bookmarkManager.MakeMenu(menu, OnBookmark)
         
     def OpenPaliDict(self):

@@ -165,6 +165,7 @@ NOT_OK_IMAGE = os.path.join(RESOURCES_DIR, 'not_ok.png')
 
 DATA_DB = os.path.join(DATA_PATH, 'data.sqlite')
 NOTE_DB = os.path.join(DATA_PATH, 'note.sqlite')
+FAV_DB = os.path.join(DATA_PATH, 'fav.sqlite')
 
 THAI_FIVE_BOOKS_DB = os.path.join(RESOURCES_DIR, 'thaibt.sqlite')
 THAI_ROYAL_DB = os.path.join(RESOURCES_DIR, 'thai.sqlite')

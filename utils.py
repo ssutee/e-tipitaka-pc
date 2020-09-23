@@ -8,72 +8,40 @@ from appdirs import user_data_dir
 
 class BookmarkManager(object):
     def __init__(self, view, code):
-        self._items = []
         self._view = view
         self._code = code
         self.Load()
                 
-    def Load(self):
-        filename = os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code))
-        if not os.path.exists(filename): return
-        self._items = []
-        roots = [self._items]
-        with codecs.open(filename,'r','utf8') as f:
-            for text in f:
-                if text.strip() == '': continue
-                n_root = text.rstrip().count(u'\t')
-                if n_root > len(roots): continue
-                root = roots[n_root]
-                if text.strip()[0] == '~':
-                    child = []
-                    root.append({text.strip().strip(u'~') : child})
-                    try:
-                        roots[n_root+1] = child
-                    except IndexError,e:
-                        roots.append(child)
-                else:
-                    tokens = ArabicToThai(text.strip()).split()
-                    try:
-                        root.append((int(tokens[1]), int(tokens[3]), text.strip()))
-                    except UnicodeEncodeError, e:
-                        continue
-                    except IndexError, e:
-                        continue
-
-        map(lambda x:x.sort(), roots)
-        
-    def Save(self):
-        def _Save(items, out, depth=0):
-            for item in items:
-                if isinstance(item, dict):
-                    folder = item.keys()[0]
-                    out.write(u'\t'*depth + '~' + folder + '\n')
-                    _Save(item[folder], out, depth+1)
-                elif isinstance(item, tuple):
-                    out.write(u'\t'*depth + item[2] + '\n')
-
-        if not os.path.exists(constants.BOOKMARKS_PATH):
-            os.makedirs(constants.BOOKMARKS_PATH)
-        
-        out = codecs.open(os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(self._code)),'w','utf8')
-        _Save(self._items, out)
-        out.close()
+    def Save(self, code, note, volume, page, pid):
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO %s VALUES (?,?,?,?)'%(code), (note, volume, page, pid))
+        conn.commit()        
+        conn.close()
 
         
-    def MakeMenu(self, menu, handler):        
-        def _MakeMenu(root, items):
-            for item in items:
-                if isinstance(item, dict):
+    def MakeMenu(self, menu, evtHandler):
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()                    
+        
+        def _MakeMenu(root, pid):            
+            cursor.execute('SELECT ROWID, note, volume, page, parent_id FROM %s WHERE parent_id=?'%(self._code), (pid,))
+            rows =cursor.fetchall()
+            for row in rows:
+                rowId, note, volume, page, pid = row
+                if volume == 0:
                     child = wx.Menu()
-                    folder = item.keys()[0]
-                    _MakeMenu(child, item[folder])
-                    root.Append(-1, folder, child)
-                elif isinstance(item, tuple):
-                    menuItem = root.Append(-1, item[2])
-                    menuItem.volume = item[0]
-                    menuItem.page = item[1]
-                    self._view.Bind(wx.EVT_MENU, handler, menuItem)
-        _MakeMenu(menu, self._items)
+                    _MakeMenu(child, rowId)
+                    root.Append(wx.ID_ANY, note, child)
+                else:
+                    note = u'เล่มที่ %d หน้าที่ %d : %s'%(volume, page, note)                    
+                    menuItem = root.Append(wx.ID_ANY, ArabicToThai(note))
+                    menuItem.volume = volume
+                    menuItem.page = page
+                    self._view.Bind(wx.EVT_MENU, evtHandler, menuItem)
+        _MakeMenu(menu, 0)
+
+        conn.close()
         
     @property
     def Items(self):
@@ -128,6 +96,40 @@ def UpdateDatabases():
             cursor.execute('ALTER TABLE temp_table RENAME TO Note')
             cursor.execute('PRAGMA user_version=2')
             conn.commit()                
+        conn.close()
+
+    if not os.path.exists(constants.FAV_DB):
+        conn = sqlite3.connect(constants.FAV_DB)
+        cursor = conn.cursor()
+        cursor.execute('PRAGMA user_version=1')
+        
+        for code in constants.CODES:
+            cursor.execute('CREATE TABLE IF NOT EXISTS %s (note TEXT, volume INTEGER, page INTEGER, parent_id INTEGER)'%(code))
+            favfile = os.path.join(constants.BOOKMARKS_PATH,'%s.fav'%(code))
+            if os.path.exists(favfile):
+                pids = [0]
+                with codecs.open(favfile,'r','utf8') as f:
+                    for text in f:
+                        if text.strip() == '': continue
+                        level = text.rstrip().count(u'\t')
+                        if level > len(pids): continue
+                        pid = pids[level]
+                        if text.strip()[0] == '~': # folder item
+                            cursor.execute('INSERT INTO %s VALUES (?,?,?,?)'%(code), (text.strip().strip(u'~'), 0, 0, pid))
+                            try:
+                                pids[level+1] = cursor.lastrowid
+                            except IndexError,e:
+                                pids.append(cursor.lastrowid)
+                        else: # note item
+                            tokens = ArabicToThai(text.strip()).split()
+                            _, note = text.strip().split(':')
+                            try:
+                                cursor.execute('INSERT INTO %s VALUES (?,?,?,?)'%(code), (note.strip(), int(tokens[1]), int(tokens[3]), pid))
+                            except UnicodeEncodeError, e:
+                                continue
+                            except IndexError, e:
+                                continue
+        conn.commit()
         conn.close()
 
 def ConvertToPaliSearch(search, force=False):
