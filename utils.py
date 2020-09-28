@@ -10,7 +10,6 @@ class BookmarkManager(object):
     def __init__(self, view, code):
         self._view = view
         self._code = code
-        self.Load()
                 
     def Save(self, code, note, volume, page, pid):
         conn = sqlite3.connect(constants.FAV_DB)

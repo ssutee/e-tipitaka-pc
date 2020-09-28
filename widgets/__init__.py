@@ -989,6 +989,7 @@ class ReadToolPanel(wx.Panel):
         compareSizer = wx.StaticBoxSizer(wx.StaticBox(self._comparePanel, wx.ID_ANY, u'เทียบเคียงกับ'), orient=wx.HORIZONTAL)
         self._comboCompare = wx.ComboBox(self._comparePanel, wx.ID_ANY, 
             choices=self._dataSource.GetCompareChoices(), style=wx.CB_DROPDOWN|wx.CB_READONLY)
+        self._comboCompare.SetSelection(-1)
         compareSizer.Add(self._comboCompare, flag=wx.ALIGN_CENTER)
         self._comparePanel.SetSizer(compareSizer) 
         self._comparePanel.Fit()       
