@@ -1329,16 +1329,16 @@ class ReadPanel(wx.Panel):
         self.Delegate.MarkText(self._code, self._index, True, 'yellow')
 
     def OnMarkButton2Click(self, event):
-        self.Delegate.MarkText(self._code, self._index, True, '#66B2FF')
+        self.Delegate.MarkText(self._code, self._index, True, '#99CCFF')
 
     def OnMarkButton3Click(self, event):
-        self.Delegate.MarkText(self._code, self._index, True, '#66FFFF')
+        self.Delegate.MarkText(self._code, self._index, True, '#99FFFF')
 
     def OnMarkButton4Click(self, event):
-        self.Delegate.MarkText(self._code, self._index, True, '#66FFB2')
+        self.Delegate.MarkText(self._code, self._index, True, '#99FFCC')
 
     def OnMarkButton5Click(self, event):
-        self.Delegate.MarkText(self._code, self._index, True, '#FF6666')
+        self.Delegate.MarkText(self._code, self._index, True, '#FF9999')
         
     def OnUnmarkButtonClick(self, event):
         self.Delegate.UnmarkText(self._code, self._index)
