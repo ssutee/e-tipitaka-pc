@@ -1150,6 +1150,14 @@ class ReadPanel(wx.Panel):
         return self._markButton
 
     @property
+    def MarkButton2(self):
+        return self._markButton2
+
+    @property
+    def MarkButton3(self):
+        return self._markButton3
+
+    @property
     def UnmarkButton(self):
         return self._unmarkButton
         
@@ -1204,6 +1212,26 @@ class ReadPanel(wx.Panel):
         self._markButton.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
         self._markButton.Bind(wx.EVT_BUTTON, self.OnMarkButtonClick)
         
+        self._markButton2 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.Bitmap(wx.Image(constants.MARK2_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._markButton2.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton2.Bind(wx.EVT_BUTTON, self.OnMarkButton2Click)
+
+        self._markButton3 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.Bitmap(wx.Image(constants.MARK3_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._markButton3.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton3.Bind(wx.EVT_BUTTON, self.OnMarkButton3Click)
+
+        self._markButton4 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.Bitmap(wx.Image(constants.MARK4_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._markButton4.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton4.Bind(wx.EVT_BUTTON, self.OnMarkButton4Click)
+
+        self._markButton5 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
+            wx.Bitmap(wx.Image(constants.MARK5_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
+        self._markButton5.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton5.Bind(wx.EVT_BUTTON, self.OnMarkButton5Click)
+
         self._unmarkButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.WHITE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
         self._unmarkButton.SetToolTip(wx.ToolTip(u'ลบสีข้อความที่ถูกเลือก'))
@@ -1233,6 +1261,10 @@ class ReadPanel(wx.Panel):
         
         paintSizer = wx.BoxSizer(wx.HORIZONTAL)
         paintSizer.Add(self._markButton)
+        paintSizer.Add(self._markButton2)
+        paintSizer.Add(self._markButton3)
+        paintSizer.Add(self._markButton4)
+        paintSizer.Add(self._markButton5)
         paintSizer.Add(self._unmarkButton)
         paintSizer.Add((10,-1))
         paintSizer.Add(self._saveButton)
@@ -1294,7 +1326,19 @@ class ReadPanel(wx.Panel):
         self.Delegate.JumpToPage(event.GetSelection(), self._code, self._index)
         
     def OnMarkButtonClick(self, event):
-        self.Delegate.MarkText(self._code, self._index)
+        self.Delegate.MarkText(self._code, self._index, True, 'yellow')
+
+    def OnMarkButton2Click(self, event):
+        self.Delegate.MarkText(self._code, self._index, True, '#66B2FF')
+
+    def OnMarkButton3Click(self, event):
+        self.Delegate.MarkText(self._code, self._index, True, '#66FFFF')
+
+    def OnMarkButton4Click(self, event):
+        self.Delegate.MarkText(self._code, self._index, True, '#66FFB2')
+
+    def OnMarkButton5Click(self, event):
+        self.Delegate.MarkText(self._code, self._index, True, '#FF6666')
         
     def OnUnmarkButtonClick(self, event):
         self.Delegate.UnmarkText(self._code, self._index)

@@ -253,8 +253,8 @@ class Presenter(object):
         else:
             self._marks[key] = []
                 
-        for marked, s, t in self._marks[key]:
-            self._view.MarkText(code, index, (s,t)) if marked else self._view.UnmarkText(code, index, (s,t))
+        for marked, s, t, color in self._marks[key]:
+            self._view.MarkText(code, index, (s,t), color) if marked else self._view.UnmarkText(code, index, (s,t))
 
     def OpenBook(self, volume, page, section=None, selectItem=False, showBookList=None, focus=True):
         self._findTextHandler.Reset()
@@ -673,15 +673,15 @@ class Presenter(object):
         self._HighlightKeywords(content, self._keywords, self._currentVolume, self._currentPage)
         self._HighlightItems(content)
 
-    def MarkText(self, code, index, mark=True):
-        s,t = self._view.MarkText(code, index) if mark else self._view.UnmarkText(code, index)
+    def MarkText(self, code, index, mark=True, color='yellow'):
+        s,t = self._view.MarkText(code, index, None, color) if mark else self._view.UnmarkText(code, index)
         volume = self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code,index)]
         page = self._currentPage if code is None else self._comparePage[utils.MakeKey(code,index)]
         key = self._MarkKey(code, volume, page)
         if key not in self._marks:
-            self._marks[key] = [(mark, s, t)]
+            self._marks[key] = [(mark, s, t, color)]
         else:
-            self._marks[key] += [(mark, s, t)]
+            self._marks[key] += [(mark, s, t, color)]
 
     def UnmarkText(self, code, index):
         self.MarkText(code, index, False)        

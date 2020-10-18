@@ -434,11 +434,11 @@ class View(AuiBaseFrame):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         return readPanel.Body.GetStringSelection()
         
-    def MarkText(self, code, index, selection=None):
+    def MarkText(self, code, index, selection=None, color='yellow'):
         readPanel = self._readPanel if code is None else self._comparePanel[utils.MakeKey(code, index)]
         s,t = readPanel.Body.GetSelection() if selection is None else selection
         font = readPanel.Body.GetFont()
-        attr = wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), 'yellow', font)
+        attr = wx.TextAttr(utils.LoadThemeForegroundHex(constants.READ), color, font)
         readPanel.Body.SetStyle(s, t, attr)
         return s,t
             
