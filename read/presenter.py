@@ -253,7 +253,11 @@ class Presenter(object):
         else:
             self._marks[key] = []
                 
-        for marked, s, t, color in self._marks[key]:
+        for data in self._marks[key]:
+            if len(data) == 4:
+                marked, s, t, color = data
+            else:
+                marked, s, t, color = data + ('yellow',)                
             self._view.MarkText(code, index, (s,t), color) if marked else self._view.UnmarkText(code, index, (s,t))
 
     def OpenBook(self, volume, page, section=None, selectItem=False, showBookList=None, focus=True):
