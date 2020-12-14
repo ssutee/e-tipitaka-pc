@@ -400,7 +400,7 @@ class ThaiPocketBookEngine(Engine):
         return item, 1
 
     def GetSectionBoundary(self, position):
-        return 19
+        return 20
 
     def GetFirstPageNumber(self, volume):
         return 1
