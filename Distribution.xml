@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+    <title>E-Tipitaka</title>
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <pkg-ref id="com.watnapp.etipitaka"/>
+    <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.watnapp.etipitaka"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="com.watnapp.etipitaka" visible="false">
+        <pkg-ref id="com.watnapp.etipitaka"/>
+    </choice>
+    <pkg-ref id="com.watnapp.etipitaka" version="3.1.1" onConclusion="none">E-Tipitaka.pkg</pkg-ref>
+</installer-gui-script>
