@@ -531,21 +531,21 @@ class DictWindow(wx.Frame):
         return
 
     def SetupFont(self):
-        fontError = False
+        font, fontError = None, False
         try:
-            font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
             font.SetFaceName('TF Chiangsaen')            
             self.input.SetFont(font)
         except wx.PyAssertionError, e:
             fontError = True
-            font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
+            font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
             self.input.SetFont(font)
             self.input.SetValue(u'กรุณาติดตั้งฟอนต์ TF Chiangsaen เพื่อการแสดงผลที่ถูกต้อง')
-
         try:
+            font.SetPointSize(28)
             self.text.SetFont(font)
         except wx.PyAssertionError, e:        
-            font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
+            font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
             self.text.SetFont(font)
 
         return font, fontError
