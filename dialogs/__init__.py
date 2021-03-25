@@ -383,6 +383,9 @@ class SimpleFontDialog(wx.Dialog):
             if fontData.GetInitialFont().GetFaceName() == facename:
                 self._listBox.SetSelection(i)
                 break
+        
+        selected = self._listBox.GetSelection()
+        self._listBox.EnsureVisible(selected+3 if selected+3 <= self._listBox.GetCount() else self._listBox.GetCount())
     
         mainSizer.Add(self._listBox, (1,0), flag=wx.EXPAND)        
         

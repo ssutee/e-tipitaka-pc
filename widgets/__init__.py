@@ -26,6 +26,7 @@ import random
 
 from pony.orm import db_session, commit
 from search.model import SearchAndCompareHistory, SearchAndCompareHistoryReadItem
+from dialogs import SimpleFontDialog
 
 _ = i18n.language.ugettext
 
@@ -472,13 +473,20 @@ class DictWindow(wx.Frame):
         self.hboxToolbar = wx.BoxSizer(wx.HORIZONTAL)
 
         labelWord = wx.StaticText(self, -1, u'ค้นหา: ')
-        self.input = wx.SearchCtrl(self, -1, pos=(0,0), size=(-1,-1), style=wx.TE_PROCESS_ENTER)
+        self.input = wx.SearchCtrl(self, -1, pos=(0,0), size=(-1, -1), style=wx.TE_PROCESS_ENTER)     
+
+        self.fontsButton = wx.BitmapButton(self, wx.ID_ANY, 
+            wx.Bitmap(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(30,30))
+        self.fontsButton.SetToolTip(wx.ToolTip(u'เปลี่ยนรูปแบบตัวหนังสือ'))
+        self.fontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClicked)
 
         self.input.Bind(wx.EVT_TEXT_ENTER, self.OnTextEntered)
         self.input.Bind(wx.EVT_TEXT, self.OnTextEntered)
 
         self.hboxToolbar.Add(labelWord, 0, wx.ALL | wx.CENTER | wx.ALIGN_RIGHT, 5)
         self.hboxToolbar.Add(self.input, 1, wx.ALL | wx.CENTER, 1)
+        self.hboxToolbar.Add(self.fontsButton, 0, wx.ALL | wx.CENTER | wx.ALIGN_RIGHT, 5)
+
         
         mainSizer.Add(self.hboxToolbar,0,wx.EXPAND | wx.ALL)
 
@@ -488,9 +496,7 @@ class DictWindow(wx.Frame):
         mainSizer.Add(self.sp,1,wx.EXPAND)
         
         self.rightPanel = wx.Panel(self.sp,-1)
-        self.text = wx.TextCtrl(self.rightPanel, -1, style=wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)
-
-        font, fontError = self.SetupFont()
+        self.text = wx.TextCtrl(self.rightPanel, -1, style=wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)        
 
         rightSizer = wx.StaticBoxSizer(wx.StaticBox(self.rightPanel, -1, u'คำแปล'), wx.VERTICAL)
         rightSizer.Add(self.text,1,wx.ALL | wx.EXPAND,0)
@@ -503,8 +509,7 @@ class DictWindow(wx.Frame):
         tID = wx.NewId()
         self.wordList = wx.ListCtrl(self.sp,tID,style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SINGLE_SEL)
         self.wordList.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectWord)
-        self.wordList.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)
-        self.wordList.SetFont(font)
+        self.wordList.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)        
         self.wordList.InsertColumn(0,u"คำศัพท์")
         self.wordList.SetColumnWidth(0, 250)
         
@@ -514,6 +519,8 @@ class DictWindow(wx.Frame):
         self.SetSizer(mainSizer)
 
         self.conn = self.ConnectDatabase()
+
+        font, fontError = self.SetupFont()
 
         if not fontError:
             self.input.SetValue(u'')
@@ -527,13 +534,31 @@ class DictWindow(wx.Frame):
     def OnTextEntered(self, event):        
         return
 
+    def OnFontsButtonClicked(self, event):
+        self.Show(False)
+        curFont = utils.LoadFont(constants.DICT_FONT)
+        fontData = wx.FontData()
+        fontData.EnableEffects(False)
+        if curFont != None:
+            fontData.SetInitialFont(curFont)
+        dialog = SimpleFontDialog(self.GetParent(), fontData) if 'wxMac' in wx.PlatformInfo else wx.FontDialog(self.GetParent(), fontData)
+        if dialog.ShowModal() == wx.ID_OK:
+            data = dialog.GetFontData()
+            font = data.GetChosenFont()
+            if font.IsOk():
+                utils.SaveFont(font, constants.DICT_FONT)
+                self.SetupFont()
+        
+        self.Show(True)
+        dialog.Destroy()
+
     def SetupAdditionalToolbar(self, mainSizer):
         return
 
     def SetupFont(self):
         font, fontError = None, False
         try:
-            font = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
+            font = wx.Font(22, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
             font.SetFaceName('TF Chiangsaen')            
             self.input.SetFont(font)
         except wx.PyAssertionError, e:
@@ -542,8 +567,9 @@ class DictWindow(wx.Frame):
             self.input.SetFont(font)
             self.input.SetValue(u'กรุณาติดตั้งฟอนต์ TF Chiangsaen เพื่อการแสดงผลที่ถูกต้อง')
         try:
-            font.SetPointSize(28)
+            font = utils.LoadFont(constants.DICT_FONT)
             self.text.SetFont(font)
+            self.wordList.SetFont(font)
         except wx.PyAssertionError, e:        
             font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
             self.text.SetFont(font)
