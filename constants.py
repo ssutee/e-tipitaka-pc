@@ -188,9 +188,9 @@ THAI_VINAYA_DB = os.path.join(RESOURCES_DIR, 'thaivn.sqlite')
 PALI_SIAM_DB = os.path.join(RESOURCES_DIR, 'pali.sqlite')
 PALI_SIAM_NEW_DB = os.path.join(RESOURCES_DIR, 'palinew.sqlite')
 
-PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict_v2.sqlite')
+PALI_DICT_DB = os.path.join(RESOURCES_DIR, 'p2t_dict_v3.sqlite')
 THAI_DICT_DB = os.path.join(RESOURCES_DIR, 'thaidict.sqlite')
-ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english.sqlite')
+ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english_v2.sqlite')
 
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
