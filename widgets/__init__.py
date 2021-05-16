@@ -751,16 +751,41 @@ class PaliDictWindow(DictWindow):
                 cursor.execute("SELECT * FROM p2t WHERE headword = ? ORDER BY headword", (word1, ))
             return cursor.fetchone()            
 
-    def MakeContent(self, word, item):        
-        return word+u'\n\n' + \
-            u'คำแปล: ' + item[2] + '\n' + \
-            u'คำอ่าน: ' + item[8] + '\n' + \
-            u'หมวดหมู่: ' + item[7] + '\n' +  \
-            u'ประเภทคำ: ' + item[3] + '\n' + \
-            u'ลิงค์: ' + item[4] + '\n' + \
-            u'วจนะ: ' + item[5] + '\n' + \
-            u'วิภัติ: ' + item[6] + '\n' + \
-            u'คำอธิบายเพิ่มเดิม: ' + item[9]
+    def MakeContent(self, word, item):
+        word = word + u'\n'
+        if item[2] and item[2].strip() != '':
+            word += '\n' + u'คำแปล: ' + item[2].strip()
+        if item[8] and item[8].strip() != '':
+            word += '\n' + u'คำอ่าน: ' + item[8].strip()
+        if item[7] and item[7].strip() != '':
+            word += '\n' + u'หมวดหมู่: ' + item[7].strip()
+        if item[3] and item[3].strip() != '':
+            word += '\n' + u'ประเภทคำ: ' + item[3].strip()
+        if item[4] and item[4].strip() != '':
+            word += '\n' + u'ลิงค์: ' + item[4].strip()
+        if item[5] and item[5].strip() != '':
+            word += '\n' + u'วจนะ: ' + item[5].strip()
+        if item[6] and item[6].strip() != '':
+            word += '\n' + u'วิภัติ: ' + item[6].strip()
+        if item[9] and item[9].strip() != '':
+            word += '\n' + u'คำอธิบายเพิ่มเติม: ' + item[9].strip()
+        if item[10] and item[10].strip() != '':
+            word += '\n' + u'อักษรโรมัน: ' + item[10].strip()
+        if item[11] and item[11].strip() != '':
+            word += '\n' + u'คำแปล (อังกฤษ): ' + item[11].strip()
+        if item[12] and item[12].strip() != '':
+            word += '\n' + u'ที่มา: ' + item[12].strip()
+
+        return word
+        # return word+u'\n\n' + \
+        #     u'คำแปล: ' + item[2] + '\n' + \
+        #     u'คำอ่าน: ' + item[8] + '\n' + \
+        #     u'หมวดหมู่: ' + item[7] + '\n' +  \
+        #     u'ประเภทคำ: ' + item[3] + '\n' + \
+        #     u'ลิงค์: ' + item[4] + '\n' + \
+        #     u'วจนะ: ' + item[5] + '\n' + \
+        #     u'วิภัติ: ' + item[6] + '\n' + \
+        #     u'คำอธิบายเพิ่มเติม: ' + item[9]
 
 class AuiBaseFrame(aui.AuiMDIChildFrame):
     

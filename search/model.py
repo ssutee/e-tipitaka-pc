@@ -714,7 +714,7 @@ class RomanScriptSearchModel(ScriptSearchModel):
         return u'<div align="center"><h2>%s</h2></div>' % ((_('Not found %s in Tipitaka Roman Script')) % (self._keywords) )
 
     def GetBookName(self, volume):
-        return constants.ROMAN_SCRIPT_TITLES[volume][1]
+        return constants.ROMAN_SCRIPT_TITLES[str(volume)][1]
 
     def HasVolumeSelection(self):
         return True                
