@@ -775,17 +775,7 @@ class PaliDictWindow(DictWindow):
             word += '\n' + u'คำแปล (อังกฤษ): ' + item[11].strip()
         if item[12] and item[12].strip() != '':
             word += '\n' + u'ที่มา: ' + item[12].strip()
-
         return word
-        # return word+u'\n\n' + \
-        #     u'คำแปล: ' + item[2] + '\n' + \
-        #     u'คำอ่าน: ' + item[8] + '\n' + \
-        #     u'หมวดหมู่: ' + item[7] + '\n' +  \
-        #     u'ประเภทคำ: ' + item[3] + '\n' + \
-        #     u'ลิงค์: ' + item[4] + '\n' + \
-        #     u'วจนะ: ' + item[5] + '\n' + \
-        #     u'วิภัติ: ' + item[6] + '\n' + \
-        #     u'คำอธิบายเพิ่มเติม: ' + item[9]
 
 class AuiBaseFrame(aui.AuiMDIChildFrame):
     
