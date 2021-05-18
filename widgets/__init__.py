@@ -772,9 +772,9 @@ class PaliDictWindow(DictWindow):
         if item[10] and item[10].strip() != '':
             word += '\n' + u'อักษรโรมัน: ' + item[10].strip()
         if item[11] and item[11].strip() != '':
-            word += '\n' + u'คำแปล (อังกฤษ): ' + item[11].strip()
+            word += '\n\n' + u'คำแปล (อังกฤษ): ' + item[11].strip()
         if item[12] and item[12].strip() != '':
-            word += '\n' + u'ที่มา: ' + item[12].strip()
+            word += '\n\n' + u'ที่มา: ' + item[12].strip()
         return word
 
 class AuiBaseFrame(aui.AuiMDIChildFrame):
