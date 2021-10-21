@@ -866,10 +866,10 @@ class BookmarkDialog(wx.Dialog):
         conn.close()
         return comboBox
         
-    def OnSaveButton(self, event):
+    def OnSaveButton(self, event):        
         item = self.ComboBox.GetSelection()
         note = self.NoteText.GetValue()
-        if item:
+        if item != None:
             pid = self.ComboBox.GetClientData(item)
             self.value = (pid, note.strip())
             self.EndModal(wx.ID_OK)
