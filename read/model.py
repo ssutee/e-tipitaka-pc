@@ -1009,7 +1009,8 @@ class Model(object):
         return self._engine[self._code].GetTitle(volume), self._engine[self._code].GetSubtitle(volume, section)
 
     def GetPage(self, volume, page):
-        return self._engine[self._code].GetPage(volume, page)
+        content = self._engine[self._code].GetPage(volume, page)
+        return '' if content is None else self._engine[self._code].GetPage(volume, page)
         
     def GetFormatter(self, volume, page):        
         return self._engine[self._code].GetFormatter(volume, page)
