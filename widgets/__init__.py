@@ -1438,7 +1438,8 @@ class ReadPanel(wx.Panel):
             self._page.SetPage('')
         else:
             text = _('Page') + ' ' + utils.ArabicToThai(unicode(number))
-            self._page.SetPage(u'<div align="left"><font color="#378000" size="3">%s</font></div>' % (text))
+            size = 5 if 'wxMSW' in wx.PlatformInfo else 3
+            self._page.SetPage(u'<div align="left"><font color="#378000" size="%d">%s</font></div>' % (size, text))
         
     def SetItemNumber(self, *numbers):
         if len(numbers) == 0 or numbers[0] is None:
@@ -1447,7 +1448,8 @@ class ReadPanel(wx.Panel):
             text = _('Item') + ' ' + utils.ArabicToThai(unicode(numbers[0]))
             if len(numbers) > 1:
                 text += ' - ' + utils.ArabicToThai(unicode(numbers[-1]))
-            self._item.SetPage(u'<div align="right"><font color="#378000" size="3">%s</font></div>' % (text))
+            size = 5 if 'wxMSW' in wx.PlatformInfo else 3
+            self._item.SetPage(u'<div align="right"><font color="#378000" size="%d">%s</font></div>' % (size, text))
 
     def ToggleTitles(self):
         if self._title.IsShown():
