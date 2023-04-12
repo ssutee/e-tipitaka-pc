@@ -9,10 +9,11 @@ pylint = "<2.0.0"
 [packages]
 py2app = "*"
 pdfkit = "*"
-wxpython = "==4.0.7"
 appdirs = "*"
-pony = "*"
-xhtml2pdf = "*"
+pony = "==0.7.7"
+wxpython = "==4.0.7"
+webencodings = "*"
+html5lib = "==1.0b8"
 
 [requires]
-python_version = "2.7"
+python_version = "2.7.18"
