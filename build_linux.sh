@@ -1,7 +1,6 @@
 #!/bin/sh
 
-pipenv run pyinstaller \
-    --hidden-import tkinter \
+pyinstaller \
     --hidden-import wx.adv \
     --hidden-import wx.html \
     --hidden-import wx.xml \
@@ -17,7 +16,7 @@ pipenv run pyinstaller \
     --hidden-import reportlab.graphics.barcode.ecc200datamatrix \
     -y -w -n e-tipitaka-gtk --onefile run.py
 
-mkdir dist/e-tipitaka
-cp dist/e-tipitaka-gtk dist/e-tipitaka/e-tipitaka
+mkdir -p dist/e-tipitaka
+mv dist/e-tipitaka-gtk dist/e-tipitaka/e-tipitaka
 cp -r resources dist/e-tipitaka
 cp -r fonts dist/e-tipitaka
