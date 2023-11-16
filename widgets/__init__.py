@@ -1602,7 +1602,7 @@ class NotePanel(wx.Panel):
         return self.Parent.Delegate
 
     def _DoBind(self, item, handler, updateUI=None):
-        self.View.Bind(wx.EVT_TOOL, handler, item)
+        self.View.Bind(wx.EVT_BUTTON, handler, item)
         if updateUI is not None:
             self.View.Bind(wx.EVT_UPDATE_UI, updateUI, item)
         
@@ -1612,34 +1612,69 @@ class NotePanel(wx.Panel):
         self._noteTextCtrl = rt.RichTextCtrl(self, size=(-1, 50 if self.Parent.Delegate.IsSmallScreen() else 80), style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
         self._noteTextCtrl.SetModified(False)        
 
-        self._toolBar = wx.ToolBar(self, style=wx.TB_HORIZONTAL|wx.NO_BORDER|wx.TB_FLAT)
+        self._toolBar = wx.Panel(self, wx.ID_ANY)
+        toolsSizer = wx.BoxSizer(wx.HORIZONTAL)
                 
         self._sizer.Add(self._noteTextCtrl, 1, wx.EXPAND)        
         self._sizer.Add(self._toolBar, 0, wx.EXPAND)
         
         self.SetSizer(self._sizer)
      
-        self._toolBar.SetToolBitmapSize((22,22))
-     
-        self._saveItem = self._toolBar.AddTool(-1, _("Save"), images._rt_save.GetBitmap(), shortHelp=_("Save"))
-        self._toolBar.AddSeparator()
-        self._boldItem = self._toolBar.AddTool(-1, _("Bold"), images._rt_bold.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Bold"))
-        self._italicItem = self._toolBar.AddTool(-1, _("Itatic"), images._rt_italic.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Italic"))
-        self._underlineItem = self._toolBar.AddTool(-1, _("Underline"), images._rt_underline.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Underline"))   
-        self._toolBar.AddSeparator()
-        self._alignLeftItem = self._toolBar.AddTool(-1, _("Align Left"), images._rt_alignleft.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Align Left"))
-        self._centerItem = self._toolBar.AddTool(-1, _("Center"), images._rt_centre.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Center"))
-        self._alignRightItem = self._toolBar.AddTool(-1, ("Align Right"), images._rt_alignright.GetBitmap(), kind=wx.ITEM_CHECK, shortHelp=_("Align Right"))   
-        self._toolBar.AddSeparator()
-        self._indentLessItem = self._toolBar.AddTool(-1, _("Indent Less"), images._rt_indentless.GetBitmap(), shortHelp=_("Indent Less"))
-        self._indentMoreItem = self._toolBar.AddTool(-1, _("Indent More"), images._rt_indentmore.GetBitmap(), shortHelp=_("Indent More"))   
-        self._toolBar.AddSeparator()
-        self._fontItem = self._toolBar.AddTool(-1, _("Font"), images._rt_font.GetBitmap(), shortHelp=_("Font"))
-        self._fontColorItem = self._toolBar.AddTool(-1, _("Font Color"), images._rt_colour.GetBitmap(), shortHelp=_("Font Color"))
-        self._toolBar.AddSeparator()
-        self._keyEnterItem = self._toolBar.AddTool(-1, _("Newline"), images._rt_enter.GetBitmap(), shortHelp=_("Newline"))
-        
-        self._toolBar.Realize()
+        self._saveItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_save.GetBitmap())
+        self._saveItem.SetToolTip(wx.ToolTip(_("Save")))
+
+        self._boldItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_bold.GetBitmap())
+        self._boldItem.SetToolTip(wx.ToolTip(_("Bold")))
+
+        self._italicItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_italic.GetBitmap())
+        self._italicItem.SetToolTip(wx.ToolTip(_("Itatic")))
+
+        self._underlineItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_underline.GetBitmap())
+        self._underlineItem.SetToolTip(wx.ToolTip(_("Underline")))
+
+        self._alignLeftItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_alignleft.GetBitmap())
+        self._alignLeftItem.SetToolTip(wx.ToolTip(_("Align Left")))
+
+        self._centerItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_centre.GetBitmap())
+        self._centerItem.SetToolTip(wx.ToolTip(_("Center")))
+
+        self._alignRightItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_alignright.GetBitmap())
+        self._alignRightItem.SetToolTip(wx.ToolTip(_("Align Right")))
+
+        self._indentLessItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_indentless.GetBitmap())
+        self._indentLessItem.SetToolTip(wx.ToolTip(_("Indent Less")))
+
+        self._indentMoreItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_indentmore.GetBitmap())
+        self._indentMoreItem.SetToolTip(wx.ToolTip(_("Indent More")))
+
+        self._fontItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_font.GetBitmap())
+        self._fontItem.SetToolTip(wx.ToolTip(_("Font")))
+
+        self._fontColorItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_colour.GetBitmap())
+        self._fontColorItem.SetToolTip(wx.ToolTip(_("Font Color")))
+
+        self._keyEnterItem = wx.BitmapButton(self._toolBar, wx.ID_ANY, images._rt_enter.GetBitmap().ConvertToImage().Scale(16, 16).ConvertToBitmap())
+        self._keyEnterItem.SetToolTip(wx.ToolTip(_("Newline")))
+
+        toolsSizer.Add(self._saveItem)
+        toolsSizer.Add((10, -1))
+        toolsSizer.Add(self._boldItem)
+        toolsSizer.Add(self._italicItem)
+        toolsSizer.Add(self._underlineItem)
+        toolsSizer.Add((10, -1))
+        toolsSizer.Add(self._alignLeftItem)
+        toolsSizer.Add(self._centerItem)
+        toolsSizer.Add(self._alignRightItem)
+        toolsSizer.Add((10, -1))
+        toolsSizer.Add(self._indentLessItem)
+        toolsSizer.Add(self._indentMoreItem)
+        toolsSizer.Add((10, -1))
+        toolsSizer.Add(self._fontItem)
+        toolsSizer.Add(self._fontColorItem)
+        toolsSizer.Add((10, -1))
+        toolsSizer.Add(self._keyEnterItem)
+
+        self._toolBar.SetSizer(toolsSizer)
         
     def _BindAttributes(self):
         self._DoBind(self._keyEnterItem, self.OnEnter)
