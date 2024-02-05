@@ -36,10 +36,10 @@ THAI_VINAYA_CODE = 'thaivn'
 CODES = ['thai', 'pali', 'thaiwn', 'thaimm', 'thaimc', 'thaipb', 'thaibt', 'romanct', 'palimc', 'thaims', 'thaivn', 'palinew', 'thaimc2']
 
 COMPARE_CHOICES = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ พ.ศ.๒๕๓๘)', u'บาลี (สยามรัฐ พ.ศ.๒๔๗๐)',
-                   u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ ๑)', u'ไทย (มหาจุฬาฯ ๒)', u'ไทย (เฉลิมพระเกียรติ ๒๕๔๙)', u'บาลี (มหาจุฬาฯ)', u'Roman Script']
+                   u'พุทธวจนปิฎก ๓๓ เล่ม', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ ๑)', u'ไทย (มหาจุฬาฯ ๒)', u'ไทย (เฉลิมพระเกียรติ ๒๕๔๙)', u'บาลี (มหาจุฬาฯ)', u'Roman Script']
 COMPARE_ORDER = [0,1,11,2,3,4,12,9,8,7]
 
-LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ พ.ศ.๒๕๓๘)', u'บาลี (สยามรัฐ พ.ศ.๒๔๗๐)', u'พุทธวจนปิฎก', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ ๑)', u'ไทย (มหาจุฬาฯ ๒)', u'ไทย (เฉลิมพระเกียรติ ๒๕๔๙)', u'บาลี (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'อริยวินัย', u'Roman Script']
+LANGS = [u'ไทย (ฉบับหลวง)', u'บาลี (สยามรัฐ พ.ศ.๒๕๓๘)', u'บาลี (สยามรัฐ พ.ศ.๒๔๗๐)', u'พุทธวจนปิฎก ๓๓ เล่ม', u'ไทย (มหามกุฏฯ)', u'ไทย (มหาจุฬาฯ ๑)', u'ไทย (มหาจุฬาฯ ๒)', u'ไทย (เฉลิมพระเกียรติ ๒๕๔๙)', u'บาลี (มหาจุฬาฯ)', u'พุทธวจน หมวดธรรม', u'ชุดจากพระโอษฐ์ ๕ เล่ม', u'อริยวินัย', u'Roman Script']
 LANGS_ORDER = [0,1,11,2,3,4,12,9,8,5,6,10,7]
 
 LANG_THAI = 'thai'
@@ -179,7 +179,7 @@ THAI_MAHACHULA2_DB = os.path.join(RESOURCES_DIR, 'thaimc2.sqlite')
 THAI_MAHAMAKUT_DB = os.path.join(RESOURCES_DIR, 'thaimm.sqlite')
 THAI_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'thaict.sqlite')
 ROMAN_SCRIPT_DB = os.path.join(RESOURCES_DIR, 'romanct.sqlite')
-THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn-v6.sqlite')
+THAI_WATNA_DB = os.path.join(RESOURCES_DIR, 'thaiwn-v7.sqlite')
 THAI_POCKET_BOOK_DB = os.path.join(RESOURCES_DIR, 'thaipb-v14.sqlite')
 PALI_MAHACHULA_DB = os.path.join(RESOURCES_DIR, 'palimc.sqlite')
 THAI_SUPREME_DB = os.path.join(RESOURCES_DIR, 'thaims-v2.sqlite')

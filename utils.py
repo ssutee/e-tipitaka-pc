@@ -298,7 +298,7 @@ def ShortName(code):
     if code == constants.THAI_FIVE_BOOKS_CODE:
         return u'จากพระโอษฐ์'
     if code == constants.THAI_WATNA_CODE:
-        return u'พุทธวจนปิฎก'
+        return u'พุทธวจนปิฎก ๓๓ เล่ม'
     if code == constants.THAI_POCKET_BOOK_CODE:
         return u'หมวดธรรม'
     if code == constants.PALI_MAHACHULA_CODE:
