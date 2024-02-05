@@ -430,10 +430,10 @@ class Presenter(object):
 
     def _DoForward(self, code=None, index=1):
         if code is None:
-            self.OpenBook(self._currentVolume, self._currentPage+1, self._model.GetSection(self._currentVolume, self._currentPage))
+            self.OpenBook(self._currentVolume, self._currentPage+1, self._model.GetSection(self._currentVolume, self._currentPage), focus=False)
         else:            
             key = utils.MakeKey(code, index)
-            self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] + 1)
+            self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] + 1, focus=False)
 
     def Forward(self, code=None):        
         code, index = utils.SplitKey(self._lastFocus)
@@ -441,10 +441,10 @@ class Presenter(object):
         
     def _DoBackward(self, code=None, index=1):
         if code is None:
-            self.OpenBook(self._currentVolume, self._currentPage-1, self._model.GetSection(self._currentVolume, self._currentPage))
+            self.OpenBook(self._currentVolume, self._currentPage-1, self._model.GetSection(self._currentVolume, self._currentPage), focus=False)
         else:
             key = utils.MakeKey(code, index)
-            self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] - 1)
+            self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key] - 1, focus=False)
                 
     def Backward(self, code=None):
         code, index = utils.SplitKey(self._lastFocus)
