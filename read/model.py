@@ -59,7 +59,9 @@ class Engine(object):
         return r
     
     def GetTotalPages(self, volume):
-        return int(constants.BOOK_PAGES.get('%s_%d' % (self.BookCode, volume), 0))
+        self._searcher.execute('SELECT COUNT(page) FROM main WHERE volume=?', ('%02d'%(int(volume)),))
+        result = self._searcher.fetchone()
+        return result[0] if result is not None else 0  
         
     def GetFirstPageNumber(self, volume):
         return 0
@@ -201,7 +203,6 @@ class ThaiRoyalEngine(Engine):
         select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
         args = ('%02d'%(volume), '%04d'%(page))
         return select, args
-
 
     def GetTitle(self, volume=None):
         if not volume:
