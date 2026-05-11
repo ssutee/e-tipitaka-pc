@@ -1,0 +1,1 @@
+{"nodes": [{"id": "porter_stem", "label": "Porter stem()", "file_type": "code", "source_file": "whoosh/lang/porter.py", "source_location": "L78", "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

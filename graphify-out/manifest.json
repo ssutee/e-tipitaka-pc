@@ -1,0 +1,474 @@
+{
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/__init__.py": {
+    "mtime": 1699609300.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/constants.py": {
+    "mtime": 1776330496.0,
+    "hash": "56744ca843ee2a5bfef83556e2dacff1"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/i18n.py": {
+    "mtime": 1685754711.0,
+    "hash": "488f73485ae462d3435374193b39d503"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/images.py": {
+    "mtime": 1572320901.0,
+    "hash": "b05db77e16f957ec02468291d98e88e9"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/run.py": {
+    "mtime": 1685754711.0,
+    "hash": "cbd24fdd900f60d0eb67c5d9e2a4c666"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/settings.py": {
+    "mtime": 1707089739.0,
+    "hash": "26560c528b2b8a7d1898f228aa8724f7"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/setup.py": {
+    "mtime": 1627524400.0,
+    "hash": "1a9f8879a93e551d4b6a9e1fc2b95faa"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/test.py": {
+    "mtime": 1572320947.0,
+    "hash": "4198f74e50b7b377f6073a4f499b0298"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/utils.py": {
+    "mtime": 1707175483.0,
+    "hash": "dc8fb1888ee972bd4c41a55029f307c5"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/dialogs/__init__.py": {
+    "mtime": 1685754711.0,
+    "hash": "51ff35bb94b17a5ed049ec72ff353e05"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/formatters/__init__.py": {
+    "mtime": 1685754711.0,
+    "hash": "7c878e23ea979624302d0c84ea13eeb5"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/__init__.py": {
+    "mtime": 1699609300.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/interactor.py": {
+    "mtime": 1685754711.0,
+    "hash": "e1492856d0e0d5393f786cc1a5265c54"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/model.py": {
+    "mtime": 1706919376.0,
+    "hash": "1a3c9243fa3de5324fe190840cb6d8cd"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/presenter.py": {
+    "mtime": 1707129881.0,
+    "hash": "1d76bb07e853edba7b8a135afc0d9326"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/view.py": {
+    "mtime": 1699611237.0,
+    "hash": "c5111f616f93e315c8fc278836233b40"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/spell_pali/_SPELL_1.toc": {
+    "mtime": 1294409066.0,
+    "hash": "fd347c345e912547e01e23d874c8edaa"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/spell_thai/_SPELL_1.toc": {
+    "mtime": 1294409066.0,
+    "hash": "513ef692519616bfeb2499988be3abce"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/__init__.py": {
+    "mtime": 1699609303.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/interactor.py": {
+    "mtime": 1572320947.0,
+    "hash": "6cdc2d3b2985bbb614e6b2dbf061e9d8"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/model.py": {
+    "mtime": 1685754711.0,
+    "hash": "6b218ce3208478d144540f6d533a28a7"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/presenter.py": {
+    "mtime": 1685754711.0,
+    "hash": "44a63ad175b91e8db97737091c4d9c06"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/view.py": {
+    "mtime": 1699610649.0,
+    "hash": "fa65cbefc8f4f5a95bc47143469beee3"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/__init__.py": {
+    "mtime": 1699609303.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_threads.py": {
+    "mtime": 1572320947.0,
+    "hash": "b797681fe84cc8db2198236175c096a0"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/threads/__init__.py": {
+    "mtime": 1685754711.0,
+    "hash": "672a001a93bc1df1339b63900a31a260"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/__init__.py": {
+    "mtime": 1572320947.0,
+    "hash": "fcae9717bae847a3ef3fc7e0ef9078a4"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/analysis.py": {
+    "mtime": 1685754711.0,
+    "hash": "a5d08100cba8e9eb954ee56b0dd6f8aa"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/classify.py": {
+    "mtime": 1572320947.0,
+    "hash": "456de6bea73a7acc3ab50692dbd83fe1"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/fields.py": {
+    "mtime": 1685754711.0,
+    "hash": "3e726590b2968c4ec9e21642fb7a1c16"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/formats.py": {
+    "mtime": 1685754711.0,
+    "hash": "6a066d4bcb655447f69c7ad75bb8cc9e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/highlight.py": {
+    "mtime": 1685754711.0,
+    "hash": "e49d9dc334c665be45295135492f0a0c"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/index.py": {
+    "mtime": 1685754711.0,
+    "hash": "d572d995617531f3599d08a5fb7bba65"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/matching.py": {
+    "mtime": 1685754711.0,
+    "hash": "1eb0b6dd463babf4887390ce0b5a6143"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/query.py": {
+    "mtime": 1685754711.0,
+    "hash": "b533d77cf038d653b304bde37a5b608c"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/reading.py": {
+    "mtime": 1572320947.0,
+    "hash": "5c673f284091de56243845751215b361"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/scoring.py": {
+    "mtime": 1572320947.0,
+    "hash": "7f3a53d020bb5ceea6c065ffde88010b"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/searching.py": {
+    "mtime": 1572320947.0,
+    "hash": "a887c2fd97ae8e28da26e9cc0ecfa8f4"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/spans.py": {
+    "mtime": 1572320947.0,
+    "hash": "7bd4d072326ea7c342c9382150274014"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/spelling.py": {
+    "mtime": 1572320947.0,
+    "hash": "fbb313b88256f539b14d64db7c633483"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/store.py": {
+    "mtime": 1572320947.0,
+    "hash": "fde03356cad2626f26d98e6f7110efa7"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/system.py": {
+    "mtime": 1572320947.0,
+    "hash": "51f9362f7968618e282258a43c142c49"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/util.py": {
+    "mtime": 1685754711.0,
+    "hash": "775980a1ad072de5d07114b91c2876a0"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/writing.py": {
+    "mtime": 1572320947.0,
+    "hash": "07b7c5f048971e00de51c3af005ade74"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/__init__.py": {
+    "mtime": 1699609303.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/fileindex.py": {
+    "mtime": 1572320947.0,
+    "hash": "36acff665f296a2e0a8cd8bde274d89f"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filepostings.py": {
+    "mtime": 1572320947.0,
+    "hash": "b857e4b505387706d3cd56d19c4ff29f"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filereading.py": {
+    "mtime": 1572320947.0,
+    "hash": "8516cb506470fd5e26c9edda12e4d534"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filestore.py": {
+    "mtime": 1685754711.0,
+    "hash": "eb1ec4cc65a06a8a18be37bc0773cf4e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filetables.py": {
+    "mtime": 1572320947.0,
+    "hash": "7cbba5a7b68d3789399326115c88961f"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filewriting.py": {
+    "mtime": 1572320947.0,
+    "hash": "854a68141c5c1e35e8865808588c1d16"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/multiproc.py": {
+    "mtime": 1572320947.0,
+    "hash": "e5f59cb57e193b8b2fc5200486d3f86c"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/pools.py": {
+    "mtime": 1572320947.0,
+    "hash": "bfbd4013bcf433c67f8bf14b76c51a58"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/structfile.py": {
+    "mtime": 1685754711.0,
+    "hash": "ea8d8524f608e85bd243323dd4461b5a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/__init__.py": {
+    "mtime": 1699609303.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/lovins.py": {
+    "mtime": 1572320947.0,
+    "hash": "04b9be2739578c2429e35b4e571a16c3"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/morph_en.py": {
+    "mtime": 1685754711.0,
+    "hash": "8ca333d8c39be6fdbdc14cdb5c659ae9"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/paicehusk.py": {
+    "mtime": 1572320947.0,
+    "hash": "167dd290ca70dbec4bf9cf616fbf01ee"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/porter.py": {
+    "mtime": 1685754711.0,
+    "hash": "1693e5daf260a8cdeba5dbec4e29cd4a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/porter2.py": {
+    "mtime": 1572320947.0,
+    "hash": "dd26c9dc983f19caca81a451c7891b1b"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/wordnet.py": {
+    "mtime": 1572320947.0,
+    "hash": "d22cee30a37e3834d5f3ce3f37254140"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/qparser/__init__.py": {
+    "mtime": 1572320947.0,
+    "hash": "9769266c3679078fc386fdad43678a7c"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/qparser/dateparse.py": {
+    "mtime": 1572320947.0,
+    "hash": "4a2228292d12c4b60975644ec7f67f25"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/qparser/default.py": {
+    "mtime": 1572320947.0,
+    "hash": "0c1e7c9396fa706dcbf41c27507649dd"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/ramdb/__init__.py": {
+    "mtime": 1699609303.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/ramdb/ramindex.py": {
+    "mtime": 1572320947.0,
+    "hash": "b441df9b1e5eb89db2241758139384fa"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/ramdb/ramreading.py": {
+    "mtime": 1572320947.0,
+    "hash": "efa1159e72249af02be0252f393e2657"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/__init__.py": {
+    "mtime": 1699609303.0,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/bitvector.py": {
+    "mtime": 1572320947.0,
+    "hash": "ed6219f7e748a2955848c426de822307"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/charset.py": {
+    "mtime": 1572320947.0,
+    "hash": "8b5e2ac937f0069a9874be2f1af89342"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/filelock.py": {
+    "mtime": 1685754711.0,
+    "hash": "4c0e44ad2f742ac62c751810bf58baf6"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/levenshtein.py": {
+    "mtime": 1572320947.0,
+    "hash": "8ff104a1a530d684477d8148b2beba1a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/numeric.py": {
+    "mtime": 1685754711.0,
+    "hash": "0148304f3cf7ef5ec978f51f7239f9df"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/relativedelta.py": {
+    "mtime": 1685754711.0,
+    "hash": "a4fa4e1ad6108019242a6215a00a8228"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/times.py": {
+    "mtime": 1572320947.0,
+    "hash": "192bd500932eea04d06cdae2c157c102"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/unicode.py": {
+    "mtime": 1572320947.0,
+    "hash": "b2724e4656ead278c7d2e1151efc821d"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/widgets/__init__.py": {
+    "mtime": 1700093361.0,
+    "hash": "435ec79f0ecf997c33120639d215aba4"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/README.md": {
+    "mtime": 1627524397.0,
+    "hash": "8c62a8a5831d7d350ee8b067355c7dd1"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/requirements.txt": {
+    "mtime": 1685754711.0,
+    "hash": "06d3eff51e6e059687a65270599b0197"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/roman_names.txt": {
+    "mtime": 1538642007.0,
+    "hash": "1b325c18a8776f5e5ccf95ee603a887b"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/about.png": {
+    "mtime": 1404867533.0,
+    "hash": "151254cd93265e1f4fbaa5d37a59c79e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/books.png": {
+    "mtime": 1294409004.0,
+    "hash": "8a38774d6fde2459213f06748c59afdd"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/clear.png": {
+    "mtime": 1381578306.0,
+    "hash": "b3ef1b43c1e8494e7a9728aca7dd03ca"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/close.png": {
+    "mtime": 1294409005.0,
+    "hash": "a6ffb3774e1dd45d8524396c20e9f953"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/dict.png": {
+    "mtime": 1294409005.0,
+    "hash": "b5c0e1a9956d5c8c7c018034dde4bf7e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/edit-notes.png": {
+    "mtime": 1381985380.0,
+    "hash": "af8a2c5d4ff6ab50b68b3f37fcadcde8"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/export.png": {
+    "mtime": 1404867544.0,
+    "hash": "680a8b6ca5cf2912b17768b27b463b6e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/file_delete.png": {
+    "mtime": 1381893335.0,
+    "hash": "420f755a1c34b57be2ba6eb07d79d768"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/fontSizeDown.gif": {
+    "mtime": 1294409005.0,
+    "hash": "4577f43aa2b27367420f226cd3311155"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/fontSizeUp.gif": {
+    "mtime": 1294409005.0,
+    "hash": "cc1d0cc4a7d2dd0f5778efe66554723e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/fonts.png": {
+    "mtime": 1294409005.0,
+    "hash": "da31914c2958833d3b22290680741ea2"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/header.png": {
+    "mtime": 1410016487.0,
+    "hash": "12cc2575c095729148abea730a223e6b"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/import.png": {
+    "mtime": 1404867559.0,
+    "hash": "e1958326d3f208fc4b8f35b256388d11"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/key_enter.png": {
+    "mtime": 1381796211.0,
+    "hash": "ebebcbf23dbab48992636a4679e32177"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/layout.gif": {
+    "mtime": 1294409005.0,
+    "hash": "11b02fad69fa20cda0aec411df62f7c0"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/left.png": {
+    "mtime": 1404867571.0,
+    "hash": "c6f58cb77583c81536213196b02eab8a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/mark2.png": {
+    "mtime": 1627524397.0,
+    "hash": "32aa0af03742ecbee52c0679ff1941eb"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/mark3.png": {
+    "mtime": 1627524397.0,
+    "hash": "abeecdb3b65e48d2a5be5243ca3fc70a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/mark4.png": {
+    "mtime": 1627524397.0,
+    "hash": "132892c8437d680d6d5c75b8ecf65d85"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/mark5.png": {
+    "mtime": 1627524398.0,
+    "hash": "7ddd4015a737c979e8dccd3fa4332013"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/nikhahit.gif": {
+    "mtime": 1294409006.0,
+    "hash": "946864e234f5e39b585a1ed7b44fab4c"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/not_ok.png": {
+    "mtime": 1443620235.0,
+    "hash": "2d6effb36e0483d6e617469ccbe45239"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/ok.png": {
+    "mtime": 1443620231.0,
+    "hash": "deaecb8764618ee7d0517859f1e3905c"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/palidict.png": {
+    "mtime": 1404867581.0,
+    "hash": "df1226822c6de813a61e26d6b19a1170"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/palieng.png": {
+    "mtime": 1426061124.0,
+    "hash": "32c2100af8cbdae31789187c529c77cc"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/print.png": {
+    "mtime": 1311000299.0,
+    "hash": "1ba2abe180265587004714bbadf98133"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/read.png": {
+    "mtime": 1404867591.0,
+    "hash": "983facd149cd736a8b03d281721e85d9"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/right.png": {
+    "mtime": 1404867605.0,
+    "hash": "236111f5486a3b24955fea4b9b7fa2c1"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/save.png": {
+    "mtime": 1294409014.0,
+    "hash": "25a6a049d4c34fedfd10d0a01f1df6bd"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/search.png": {
+    "mtime": 1294409014.0,
+    "hash": "1bcd2ff56d75787bbb1853117d547110"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/setting.png": {
+    "mtime": 1516158700.0,
+    "hash": "4e250c9768d37800decc8b7832d5b1d8"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/star.png": {
+    "mtime": 1294409014.0,
+    "hash": "971e2412e6dcf31c8fd56142a5c9262a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/thaidict.png": {
+    "mtime": 1404867616.0,
+    "hash": "233a37ce2d74479247a5c1e4004f418b"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/thothan.gif": {
+    "mtime": 1294409038.0,
+    "hash": "d9cad10c48ee18d7f7af28b891222e17"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/white.png": {
+    "mtime": 1404867631.0,
+    "hash": "572c39bf711458f2f236235a48bf9a42"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/yellow.png": {
+    "mtime": 1294409038.0,
+    "hash": "53ba6a122ab7b69413df30d27863efe1"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/yoying.gif": {
+    "mtime": 1294409038.0,
+    "hash": "47667f27f286a50a146fc4182da6aeef"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/zoom_paper.png": {
+    "mtime": 1486998169.0,
+    "hash": "9c029474cb5c16bcfe021eb0ab5c3466"
+  }
+}
