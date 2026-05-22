@@ -37,7 +37,8 @@ in an isolated git worktree.
   `i18n.py`, `images.py`, `settings.py`, and packages `read/`, `search/`,
   `dialogs/`, `widgets/`, `threads/`, `formatters/`, `tests/`.
 - Vendored `whoosh/` 1.4.1 (~35 files), Python 2-only.
-- Already on wxPython 4.0.7 (Phoenix) — 4.0→4.2 is a minor API check, not a rewrite.
+- Already on wxPython 4.0.7 (Phoenix), but 4.0→4.2 carries real API changes
+  (see "wxPython 4.0→4.2 audit" below) — not a no-op.
 - App imports of Whoosh are narrow: `highlight`, `HtmlFormatter`,
   `SimpleFragmenter`, `NgramTokenizer` (search/read views); `SpellChecker`,
   `FileStorage`, `open_dir` (spelling).
@@ -82,8 +83,29 @@ Dependency usage to be confirmed during implementation before final removal.
 3. **Data/logic** — `read/model.py`, `search/model.py`, interactors,
    `formatters/`, `threads/`.
 4. **UI** — `read/` + `search/` view & presenter, `dialogs/`, `widgets/`;
-   resolve any wxPython 4.0→4.2 API changes.
+   apply the wxPython 4.0→4.2 audit below.
 5. **Entrypoint** — `run.py` and `tests/`.
+
+### wxPython 4.0→4.2 audit
+
+4.2.x is not source-compatible with 4.0.7. Audit every wx call site against the
+official wxPython changelog (4.1.0, 4.1.1, 4.2.0, 4.2.1) before assuming a file
+ports cleanly. Known watch items, to be verified — not assumed:
+
+- **`wx.aui` vs `wx.lib.agw.aui`** — `widgets/__init__.py` imports both; AUI
+  behavior and pane APIs shifted across 4.1/4.2.
+- **`wx.ToolBar.AddTool`** — argument signature changed; positional calls break.
+- **ID helpers** — `wx.NewId()` deprecated in favor of `wx.NewIdRef()`.
+- **Tooltips** — `SetToolTipString()` removed; use `SetToolTip()`.
+- **Removed constants/helpers** — e.g. `wx.EmptyString`, `wx.EmptyBitmap`.
+- **`wx.lib.pubsub`** — removed; if used, move to the standalone `pypubsub`
+  package or `wx.lib.newevent`.
+- **`wx.grid` / `wx.richtext` / `wx.html`** — method renames and signature
+  changes; the app imports all three.
+- **Bitmap/image constructors** — some positional forms deprecated.
+- **macOS** — DPI scaling and dark-mode behavior differ on 4.2.
+
+Deliverable: a checklist of every wx API touched, its 4.2 status, and the fix.
 
 ### Cross-cutting concerns
 - `print()`, `except E as e`, `dict` view methods, `xrange`, `unicode`/`basestring`,
@@ -110,7 +132,10 @@ Run `tests/` (`test_threads.py`) under Py3.
   the layered verification order exists to localize these.
 - **`*.pkl` resources** pickled under Python 2 — may need `encoding='latin-1'`
   on load, or regeneration from their `*.json` siblings.
-- **wxPython 4.2 API drift** — minor; surfaced during Phase 2 step 4.
+- **wxPython 4.0→4.2 API drift** — real, not minor. Removed/renamed methods,
+  AUI changes, deprecated ID and tooltip helpers. Failures are a mix of
+  import-time errors and silent runtime breakage. Mitigated by the dedicated
+  audit in Phase 2 step 4.
 
 ## Out-of-scope follow-ups
 
