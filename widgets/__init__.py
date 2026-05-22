@@ -1205,8 +1205,8 @@ class ReadPanel(wx.Panel):
         self._body.SetFont(font)
         # wxPython 4.2: text written via the default style keeps its old
         # font, so update the default style and restyle existing content.
-        attr = self._body.GetDefaultStyle()
-        attr.SetFont(font)
+        attr = wx.TextAttr(utils.LoadThemeForegroundColour(constants.READ),
+            utils.LoadThemeBackgroundColour(constants.READ), font)
         self._body.SetDefaultStyle(attr)
         self._body.SetStyle(0, self._body.GetLastPosition(), attr)
 
