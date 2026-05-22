@@ -31,7 +31,7 @@ class QueryParserError(Exception):
 
 
 def rcompile(pattern, flags=0):
-    if not isinstance(pattern, basestring):
+    if not isinstance(pattern, str):
         # If it's not a string, assume it's already a compiled pattern
         return pattern
     return re.compile(pattern, re.UNICODE | flags)
@@ -75,7 +75,7 @@ class Group(SyntaxObject):
             r += "^%s" % self.boost
         return r
     
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.tokens)
     
     def __iter__(self):
@@ -303,7 +303,7 @@ class BasicSyntax(Token):
             if field.self_parsing():
                 try:
                     return field.parse_query(fieldname, self.text, boost=self.boost)
-                except QueryParserError, e:
+                except QueryParserError as e:
                     return query.NullQuery
             
             text = parser.get_single_text(field, text,
@@ -429,7 +429,7 @@ class RangePlugin(Plugin):
                                                    boost=self.boost)
                         if rangeq is not None:
                             return rangeq
-                    except QueryParserError, e:
+                    except QueryParserError as e:
                         return query.NullQuery
                     
                 if start:
@@ -441,9 +441,9 @@ class RangePlugin(Plugin):
                                                  removestops=False)
             
             if start is None:
-                start = u''
+                start = ''
             if end is None:
-                end = u'\uFFFF'
+                end = '\\uFFFF'
             
             return query.TermRange(fieldname, start, end, self.startexcl,
                                    self.endexcl, boost=self.boost)
@@ -560,7 +560,7 @@ class WildcardPlugin(Plugin):
         # \u055E = Armenian question mark
         # \u061F = Arabic question mark
         # \u1367 = Ethiopic question mark
-        expr = rcompile(u"[^ \t\r\n*?\u055E\u061F\u1367]*[*?\u055E\u061F\u1367]\\S*")
+        expr = rcompile("[^ \t\r\n*?\\u055E\\u061F\\u1367]*[*?\\u055E\\u061F\\u1367]\\S*")
         qclass = query.Wildcard
         
         def __repr__(self):
@@ -681,7 +681,7 @@ class FieldsPlugin(Plugin):
         return newstream
     
     class Field(Token):
-        expr = rcompile(u"(\w[\w\d]*):")
+        expr = rcompile("(\w[\w\d]*):")
         
         def __init__(self, fieldname):
             self.fieldname = fieldname
@@ -763,7 +763,7 @@ class CompoundsPlugin(Plugin):
                 else:
                     cls = OrGroup
                 
-                if cls != type(newstream) and ismiddle:
+                if not isinstance(newstream, cls) and ismiddle:
                     last = newstream.pop()
                     rest = self.do_compounds(parser, cls(stream[i+1:]))
                     newstream.append(cls([last, rest]))
@@ -981,7 +981,7 @@ class DisMaxPlugin(Plugin):
             for that in the DisjuctionMax query.
         """
         
-        self.fieldboosts = fieldboosts.items()
+        self.fieldboosts = list(fieldboosts.items())
         self.tiebreak = tiebreak
     
     def filters(self, parser):
@@ -1015,7 +1015,7 @@ class FieldAliasPlugin(Plugin):
         
         self.fieldmap = fieldmap
         self.reverse = {}
-        for key, values in fieldmap.iteritems():
+        for key, values in list(fieldmap.items()):
             for value in values:
                 self.reverse[value] = key
         
@@ -1169,15 +1169,15 @@ class QueryParser(object):
         """
         
         if debug:
-            print "Tokenizing %r" % text
+            print(("Tokenizing %r" % text))
         stream = self._tokenize(text, debug=debug)
         if debug:
-            print "Stream=", stream
+            print(("Stream=", stream))
         stream = self._filterize(stream, debug)
         
         q = stream.query(self)
         if debug:
-            print "Pre-normalized query=", q
+            print(("Pre-normalized query=", q))
         if normalize:
             q = q.normalize()
         return q
@@ -1191,14 +1191,14 @@ class QueryParser(object):
         while i < len(text):
             matched = False
             
-            if debug: print ".matching at %r" % text[i:]
+            if debug: print((".matching at %r" % text[i:]))
             for tk in tokens:
-                if debug: print "..trying token %r" % tk
+                if debug: print(("..trying token %r" % tk))
                 m = tk.match(text, i)
                 if m:
                     item = tk.create(self, m)
                     if debug:
-                        print "...matched %r item %r" % (m.group(0), item)
+                        print(("...matched %r item %r" % (m.group(0), item)))
                     
                     if item:
                         if item.endpos is not None:
@@ -1210,7 +1210,7 @@ class QueryParser(object):
                             raise Exception("Parser element %r did not move the cursor forward (pos=%s match=%r)" % (tk, i, m.group(0)))
                         
                         if prev < i:
-                            if debug:  print "...Adding in-between %r as a term" % text[prev:i]
+                            if debug:  print(("...Adding in-between %r as a term" % text[prev:i]))
                             stack.append(Word(text[prev:i]))
                         
                         stack.append(item)
@@ -1219,7 +1219,7 @@ class QueryParser(object):
                         break
             
             if debug:
-                print ".stack is now %r" % (stack, )
+                print((".stack is now %r" % (stack, )))
             
             if not matched:
                 i += 1
@@ -1227,20 +1227,20 @@ class QueryParser(object):
         if prev < len(text):
             stack.append(Word(text[prev:]))
         
-        if debug: print "Final stack %r" % (stack, )
+        if debug: print(("Final stack %r" % (stack, )))
         return self.group(stack)
     
     def _filterize(self, stream, debug=False):
         if debug:
-            print "Tokenized stream=", stream
+            print(("Tokenized stream=", stream))
         
         for f in self.filters():
             if debug:
-                print "Applying filter", f
+                print(("Applying filter", f))
             
             stream = f(self, stream)
             if debug:
-                print "Stream=", stream
+                print(("Stream=", stream))
             
             if stream is None:
                 raise Exception("Function %s did not return a stream" % f)

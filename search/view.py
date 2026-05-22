@@ -6,7 +6,7 @@ import widgets
 
 try:
     import wx.aui as aui
-except ImportError,e:
+except ImportError as e:
     import wx.lib.agw.aui as aui
 
 import i18n
@@ -141,7 +141,7 @@ class View(AuiBaseFrame):
         self.SetBackgroundColour(wx.Colour(0xED,0xED,0xED,0xFF))
         
         self._resultsWindow = widgets.ResultsWindow(self)
-        self._resultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
+        self._resultsWindow.SetPage('<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         
         self._font = utils.LoadFont(constants.SEARCH_FONT)
         if self._font and self._font.IsOk():
@@ -228,7 +228,7 @@ class View(AuiBaseFrame):
         if self._bookmarkMenu is not None:
             self._bookmarkMenu.Destroy()
         self._bookmarkMenu = wx.Menu()
-        self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, u'จัดการคั่นหน้า'))        
+        self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, 'จัดการคั่นหน้า'))        
         self._bookmarkMenu.AppendSeparator()                
         self._delegate.LoadBookmarks(self._bookmarkMenu)
         self._topBar.PopupMenu(self._bookmarkMenu, (x,y))        

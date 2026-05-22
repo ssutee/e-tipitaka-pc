@@ -2,7 +2,7 @@
 
 import unittest
 import threads
-import Queue as queue
+import queue as queue
 
 class TestSearchThread(unittest.TestCase):
             
@@ -16,7 +16,7 @@ class TestSearchThread(unittest.TestCase):
         
     def testSearch2(self):
         q = queue.Queue()
-        keywords = u'not found'
+        keywords = 'not found'
         thread = self.cls(keywords, [], None, q)
         thread.start()
         result = q.get()        
@@ -28,7 +28,7 @@ class TestThaiRoyalSearchThread(TestSearchThread):
     def __init__(self, methodName):
         super(TestThaiRoyalSearchThread, self).__init__(methodName)
         self.cls = threads.ThaiRoyalSearchThread
-        self.keywords = u'กรรม'
+        self.keywords = 'กรรม'
         self.expected = 3184    
 
 class TestPaliSiamSearchThread(TestSearchThread):    
@@ -36,7 +36,7 @@ class TestPaliSiamSearchThread(TestSearchThread):
     def __init__(self, methodName):
         super(TestPaliSiamSearchThread, self).__init__(methodName)
         self.cls = threads.PaliSiamSearchThread
-        self.keywords = u'อานาปา'
+        self.keywords = 'อานาปา'
         self.expected = 88
                     
 class TestThaiMahaChulaSearchThread(TestSearchThread):
@@ -44,7 +44,7 @@ class TestThaiMahaChulaSearchThread(TestSearchThread):
     def __init__(self, methodName):
         super(TestThaiMahaChulaSearchThread, self).__init__(methodName)
         self.cls = threads.ThaiMahaChulaSearchThread
-        self.keywords = u'กรรม'
+        self.keywords = 'กรรม'
         self.expected = 3330
 
 class TestThaiMahaMakutSearchThread(TestSearchThread):
@@ -52,7 +52,7 @@ class TestThaiMahaMakutSearchThread(TestSearchThread):
     def __init__(self, methodName):
         super(TestThaiMahaMakutSearchThread, self).__init__(methodName)
         self.cls = threads.ThaiMahaMakutSearchThread
-        self.keywords = u'กรรม'
+        self.keywords = 'กรรม'
         self.expected = 10785
         
 class TestThaiFiveBooksSearchThread(TestSearchThread):
@@ -60,7 +60,7 @@ class TestThaiFiveBooksSearchThread(TestSearchThread):
     def __init__(self, methodName):
         super(TestThaiFiveBooksSearchThread, self).__init__(methodName)
         self.cls = threads.ThaiFiveBooksSearchThread
-        self.keywords = u'กรรม'
+        self.keywords = 'กรรม'
         self.expected = 300
 
 class TestThaiScriptSearchThread(TestSearchThread):
@@ -68,7 +68,7 @@ class TestThaiScriptSearchThread(TestSearchThread):
     def __init__(self, methodName):
         super(TestThaiScriptSearchThread, self).__init__(methodName)
         self.cls = threads.ThaiScriptSearchThread
-        self.keywords = u'อานาปา'
+        self.keywords = 'อานาปา'
         self.expected = 65
 
 class TestRomanScriptSearchThread(TestSearchThread):
@@ -76,7 +76,7 @@ class TestRomanScriptSearchThread(TestSearchThread):
     def __init__(self, methodName):
         super(TestRomanScriptSearchThread, self).__init__(methodName)
         self.cls = threads.RomanScriptSearchThread
-        self.keywords = u'bhikkhu'
+        self.keywords = 'bhikkhu'
         self.expected = 2696
                     
 def suite():

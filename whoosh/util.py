@@ -39,11 +39,11 @@ except ImportError:
         r = n if r is None else r
         if r > n:
             return
-        indices = range(n)
-        cycles = range(n, n-r, -1)
+        indices = list(range(n))
+        cycles = list(range(n, n-r, -1))
         yield tuple(pool[i] for i in indices[:r])
         while n:
-            for i in reversed(range(r)):
+            for i in reversed(list(range(r))):
                 cycles[i] -= 1
                 if cycles[i] == 0:
                     indices[i:] = indices[i+1:] + indices[i:i+1]
@@ -124,7 +124,7 @@ def _varint(i):
 
 _varint_cache_size = 512
 _varint_cache = []
-for i in xrange(0, _varint_cache_size):
+for i in range(0, _varint_cache_size):
     _varint_cache.append(_varint(i))
 _varint_cache = tuple(_varint_cache)
 
@@ -254,7 +254,7 @@ def length_to_byte(length):
 def _byte_to_length(n):
     return int(round((pow(1.033, n)-1)*27))
 
-_length_byte_cache = array("i", (_byte_to_length(i) for i in xrange(256)))
+_length_byte_cache = array("i", (_byte_to_length(i) for i in range(256)))
 byte_to_length = _length_byte_cache.__getitem__
 
 # Prefix encoding functions
@@ -267,7 +267,7 @@ def first_diff(a, b):
     """
 
     i = -1
-    for i in xrange(0, len(a)):
+    for i in range(0, len(a)):
         if a[i] != b[1]:
             return i
         if i == 255: return i
@@ -288,7 +288,7 @@ def prefix_encode_all(ls):
     as UTF-8.
     """
 
-    last = u''
+    last = ''
     for w in ls:
         i = first_diff(last, w)
         yield chr(i) + w[i:].encode("utf8")
@@ -298,7 +298,7 @@ def prefix_decode_all(ls):
     """Decompresses a list of strings compressed by prefix_encode().
     """
 
-    last = u''
+    last = ''
     for w in ls:
         i = ord(w[0])
         decoded = last[:i] + w[1:].decode("utf8")
@@ -365,7 +365,7 @@ class LRUCache(object):
     def __init__(self, size):
         self.size = size
         self.clock = []
-        for i in xrange(0, size):
+        for i in range(0, size):
             self.clock.append([None, False])
         self.hand = 0
         self.data = {}

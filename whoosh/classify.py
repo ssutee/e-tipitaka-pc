@@ -18,7 +18,7 @@
 documents.
 """
 
-from __future__ import division
+
 from collections import defaultdict
 from math import log, sqrt
 
@@ -89,7 +89,7 @@ class Expander(object):
         self.ixreader = ixreader
         self.fieldname = fieldname
         
-        if type(model) is type:
+        if isinstance(model, type):
             model = model(self.ixreader.doc_count_all(),
                           self.ixreader.field_length(fieldname))
         self.model = model
@@ -148,7 +148,7 @@ class Expander(object):
         maxweight = 0
         collection_freq = self.collection_freq
         
-        for word, weight in self.topN_weight.iteritems():
+        for word, weight in list(self.topN_weight.items()):
             if word in collection_freq:
                 score = model.score(weight, collection_freq[word], self.top_total)
                 if score > maxweight: maxweight = score
@@ -181,7 +181,7 @@ def mean(nums):
 
 def minkowski_distance(x, y, p=2):
     assert(len(y)==len(x))
-    s = sum(abs(x[i] - y[i]) ** p for i in xrange(len(x)))
+    s = sum(abs(x[i] - y[i]) ** p for i in range(len(x)))
     return s ** 1.0/p
    
 
@@ -204,17 +204,17 @@ def list_to_matrix(ls, f, symmetric=False, diagonal=None):
 
 
 def magnitude(v):
-    return sqrt(sum(v[i] ** 2 for i in xrange(len(v))))
+    return sqrt(sum(v[i] ** 2 for i in range(len(v))))
     
 
 def dot_product(v1, v2):
     assert len(v1) == len(v2)
-    return sum(v1[i] * v2[i] for i in xrange(len(v1)))
+    return sum(v1[i] * v2[i] for i in range(len(v1)))
 
 
 def centroid(points, method=median):
     return tuple(method([point[i] for point in points])
-                 for i in xrange(len(points[0])))
+                 for i in range(len(points[0])))
 
 
 class Cluster(object):
@@ -254,12 +254,12 @@ class Cluster(object):
                 yield item
                 
     def dump(self, tab=0):
-        print "%s-" % (" " * tab, )
+        print(("%s-" % (" " * tab, )))
         for item in self.items:
             if isinstance(item, Cluster):
                 item.dump(tab+2)
             else:
-                print "%s%r" % (" " * tab, item)
+                print(("%s%r" % (" " * tab, item)))
     
 
 class HierarchicalClustering(object):
@@ -344,7 +344,7 @@ class KMeansClustering(object):
             return data
         
         
-        clusters = [Cluster() for _ in xrange(count)]
+        clusters = [Cluster() for _ in range(count)]
         for i, item in enumerate(data):
             clusters[i % count].append(item)
         
@@ -373,9 +373,9 @@ class KMeansClustering(object):
 
 def shingles(input, size=2):
     d = defaultdict(int)
-    for shingle in (input[i:i+size] for i in xrange(len(input)-(size-1))):
+    for shingle in (input[i:i+size] for i in range(len(input)-(size-1))):
         d[shingle] += 1
-    return d.iteritems()
+    return iter(list(d.items()))
 
 
 def simhash(features, hashbits=32):
@@ -387,7 +387,7 @@ def simhash(features, hashbits=32):
     vs = [0] * hashbits
     for feature, weight in features:
         h = hashfn(feature)
-        for i in xrange(hashbits):
+        for i in range(hashbits):
             if h & (1 << i):
                 vs[i] += weight
             else:

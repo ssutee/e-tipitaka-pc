@@ -18,7 +18,7 @@
 This module contains classes for scoring (and sorting) search results.
 """
 
-from __future__ import division
+
 from collections import defaultdict
 from math import log, pi, log10
 
@@ -172,7 +172,7 @@ class BM25F(WeightingModel):
         self.K1 = K1
         
         self._field_B = {}
-        for k, v in kwargs.iteritems():
+        for k, v in list(kwargs.items()):
             if k.endswith("_B"):
                 fieldname = k[:-2]
                 self._field_B[fieldname] = v

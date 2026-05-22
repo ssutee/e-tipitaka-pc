@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys, traceback, datetime
-import constants
+from . import constants
 
 if not os.path.exists(constants.DATA_PATH):
     os.makedirs(constants.DATA_PATH)
@@ -9,28 +9,28 @@ if not os.path.exists(constants.DATA_PATH):
 if not os.path.exists(constants.LOG_PATH):
     os.makedirs(constants.LOG_PATH)
 
-import utils, settings
+from . import utils, settings
 
 utils.UpdateDatabases()
 
-import search.view
-import search.interactor
-import search.presenter
-import search.model
+from . import search.view
+from . import search.interactor
+from . import search.presenter
+from . import search.model
 
-import read.model
-import read.interactor
-import read.view
-import read.presenter
+from . import read.model
+from . import read.interactor
+from . import read.view
+from . import read.presenter
 
 import wx
 
 try:
     import wx.aui as aui
-except ImportError,e:
+except ImportError as e:
     import wx.lib.agw.aui as aui
 
-import i18n
+from . import i18n
 _ = i18n.language.ugettext
 
 class ParentFrame(aui.AuiMDIParentFrame):
@@ -112,7 +112,7 @@ class ParentFrame(aui.AuiMDIParentFrame):
             if isinstance(child, aui.AuiMDIChildFrame):
                 try:
                     child.Close()
-                except wx.PyAssertionError,e:
+                except wx.PyAssertionError as e:
                     pass
         event.Skip()
 
@@ -129,7 +129,7 @@ class ParentFrame(aui.AuiMDIParentFrame):
 
         if not presenter or shouldOpenNewWindow:
             model = read.model.Model(code)
-            view = read.view.View(self, u'%s'%(utils.ShortName(code)), code)
+            view = read.view.View(self, '%s'%(utils.ShortName(code)), code)
             interactor = read.interactor.Interactor()
             presenter = read.presenter.Presenter(model, view, interactor, code)
             presenter.Delegate = self._presenter
@@ -160,7 +160,7 @@ def excepthook(type, value, tb):
     message += ''.join(traceback.format_exception(type, value, tb))
     with open(constants.ERROR_LOG_PATH, 'a') as log:
         log.write(message+'\n')
-    print message
+    print(message)
 
 class MyApp(wx.App):
 

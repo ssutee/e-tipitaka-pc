@@ -17,8 +17,8 @@
 import mmap, os, sys
 from array import array
 from copy import copy
-from cPickle import dump as dump_pickle
-from cPickle import load as load_pickle
+from pickle import dump as dump_pickle
+from pickle import load as load_pickle
 from struct import calcsize
 
 from whoosh.system import (_INT_SIZE, _SHORT_SIZE, _FLOAT_SIZE, _LONG_SIZE,
@@ -98,7 +98,7 @@ class StructFile(object):
         _self = self
         class fakemap(object):
             def __getitem__(self, slice):
-                if isinstance(slice, (int, long)):
+                if isinstance(slice, int):
                     _self.seek(slice)
                     return _self.read(1)
                 else:

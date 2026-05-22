@@ -76,7 +76,7 @@ class MultiSegmentWriter(IndexWriter):
         self.postingqueue = Queue()
         #self.resultqueue = Queue()
         
-        names = [index._next_segment_name() for _ in xrange(procs)]
+        names = [index._next_segment_name() for _ in range(procs)]
         
         self.tasks = [SegmentWritingTask(index.storage, index.indexname,
                                          segname, writerargs, self.postingqueue)
@@ -94,10 +94,10 @@ class MultiSegmentWriter(IndexWriter):
         
     def commit(self):
         procs = len(self.tasks)
-        for _ in xrange(procs):
+        for _ in range(procs):
             self.postingqueue.put(None)
         for task in self.tasks:
-            print "Joining", task
+            print(("Joining", task))
             task.join()
             self.index.segments.append(task.get_segment())
         self.index.commit()
@@ -153,7 +153,7 @@ class MultiPool(PoolBase):
         
         self.tasks = [PoolWritingTask(self.schema, self.dir, self.postingqueue,
                                       self.resultsqueue, self.limitmb)
-                      for _ in xrange(procs)]
+                      for _ in range(procs)]
         for task in self.tasks:
             task.start()
     
@@ -182,7 +182,7 @@ class MultiPool(PoolBase):
         pqueue = self.postingqueue
         rqueue = self.resultsqueue
         
-        for _ in xrange(self.procs):
+        for _ in range(self.procs):
             pqueue.put((-1, doccount))
         
         #print "Joining..."
@@ -199,9 +199,9 @@ class MultiPool(PoolBase):
             taskruns, flentotals, flenmaxes, lenfilename = rqueue.get()
             runs.extend(taskruns)
             lenfilenames.append(lenfilename)
-            for fieldnum, total in flentotals.iteritems():
+            for fieldnum, total in list(flentotals.items()):
                 _fieldlength_totals[fieldnum] += total
-            for fieldnum, length in flenmaxes.iteritems():
+            for fieldnum, length in list(flenmaxes.items()):
                 if length > self._fieldlength_maxes.get(fieldnum, 0):
                     self._fieldlength_maxes[fieldnum] = length
         #print "Results:", now() - t

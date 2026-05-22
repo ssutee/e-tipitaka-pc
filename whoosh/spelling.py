@@ -79,7 +79,7 @@ class SpellChecker(object):
         didn't already exist).
         """
 
-        import index
+        from . import index
         if create or not self._index:
             create = create or not index.exists(self.storage, indexname=self.indexname)
             if create:
@@ -91,14 +91,14 @@ class SpellChecker(object):
     def _schema(self):
         # Creates a schema given this object's mingram and maxgram attributes.
 
-        from fields import Schema, FieldType, Frequency, ID, STORED
-        from analysis import SimpleAnalyzer
+        from .fields import Schema, FieldType, Frequency, ID, STORED
+        from .analysis import SimpleAnalyzer
 
         idtype = ID()
         freqtype = FieldType(format=Frequency(SimpleAnalyzer()))
 
         fls = [("word", STORED), ("score", STORED)]
-        for size in xrange(self.mingram, self.maxgram + 1):
+        for size in range(self.mingram, self.maxgram + 1):
             fls.extend([("start%s" % size, idtype),
                         ("end%s" % size, idtype),
                         ("gram%s" % size, freqtype)])
@@ -129,14 +129,14 @@ class SpellChecker(object):
             weighting = scoring.TF_IDF()
 
         grams = defaultdict(list)
-        for size in xrange(self.mingram, self.maxgram + 1):
+        for size in range(self.mingram, self.maxgram + 1):
             key = "gram%s" % size
             nga = analysis.NgramAnalyzer(size)
             for t in nga(text):
                 grams[key].append(t.text)
 
         queries = []
-        for size in xrange(self.mingram, min(self.maxgram + 1, len(text))):
+        for size in range(self.mingram, min(self.maxgram + 1, len(text))):
             key = "gram%s" % size
             gramlist = grams[key]
             queries.append(query.Term("start%s" % size, gramlist[0],
@@ -220,7 +220,7 @@ class SpellChecker(object):
         writer = self.index().writer()
         for text, score in ws:
             fields = {"word": text, "score": score}
-            for size in xrange(self.mingram, self.maxgram + 1):
+            for size in range(self.mingram, self.maxgram + 1):
                 nga = analysis.NgramAnalyzer(size)
                 gramlist = [t.text for t in nga(text)]
                 if len(gramlist) > 0:

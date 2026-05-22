@@ -240,7 +240,7 @@ def blockname(ch):
     None
     """
 
-    assert isinstance(ch, unicode) and len(ch) == 1, repr(ch)
+    assert isinstance(ch, str) and len(ch) == 1, repr(ch)
     cp = ord(ch)
     i = bisect_right(_starts, cp)-1
     end = _ends[i]

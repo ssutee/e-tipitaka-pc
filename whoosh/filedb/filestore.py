@@ -15,7 +15,7 @@
 #===============================================================================
 
 import os
-from cStringIO import StringIO
+from io import StringIO
 from threading import Lock
 
 from whoosh.index import _DEF_INDEX_NAME
@@ -57,7 +57,7 @@ class FileStorage(Storage):
         try:
             f = StructFile(open(self._fpath(name), "rb"), name=name, *args, **kwargs)
         except IOError:
-            print "Tried to open %r, files=%r" % (name, self.list())
+            print(("Tried to open %r, files=%r" % (name, self.list())))
             raise
         return f
 
@@ -119,7 +119,7 @@ class RamStorage(FileStorage):
         return iter(self.list())
 
     def list(self):
-        return self.files.keys()
+        return list(self.files.keys())
 
     def clean(self):
         self.files = {}

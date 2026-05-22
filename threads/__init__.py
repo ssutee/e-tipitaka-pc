@@ -1,5 +1,5 @@
 import wx
-import threading, sqlite3, os.path, sys, urllib2, httplib
+import threading, sqlite3, os.path, sys, urllib.request, urllib.error, urllib.parse, http.client
 from cgi import escape as htmlescape
 
 import constants, utils
@@ -16,14 +16,14 @@ class CheckNewUpdateThread(threading.Thread):
         
     def run(self):
         try:
-            response = urllib2.urlopen(constants.CHECK_VERSION_URL, timeout=3)
+            response = urllib.request.urlopen(constants.CHECK_VERSION_URL, timeout=3)
             if hasattr(self._delegate, 'CheckNewUpdateDidFinish'):                
                 wx.CallAfter(self._delegate.CheckNewUpdateDidFinish, response.read().strip())
-        except urllib2.URLError as err:
+        except urllib.error.URLError as err:
             pass
-        except urllib2.HTTPError as err:
+        except urllib.error.HTTPError as err:
             pass
-        except httplib.HTTPException as err:
+        except http.client.HTTPException as err:
             pass
 
 class SearchThread(threading.Thread):
@@ -50,7 +50,7 @@ class SearchThread(threading.Thread):
 
         searcher.execute("SELECT name FROM sqlite_master WHERE type='table';")
         
-        terms = map(lambda term: term.replace('+',' '),self._keywords.split())
+        terms = [term.replace('+',' ') for term in self._keywords.split()]
         
         query, args = self.PrepareStatement(terms)
 
@@ -119,8 +119,8 @@ class ScriptSearchThread(SearchThread):
         
     def ProcessResult(self, result):
         r = {}
-        r['volume'] = unicode(result[1])
-        r['page'] = unicode(result[2])
+        r['volume'] = str(result[1])
+        r['page'] = str(result[2])
         r['items'] = result[3]
         r['content'] = result[4]
         return r        
@@ -174,15 +174,15 @@ class ThaiFiveBooksSearchThread(SearchThread):
                     query += ' ('
                     for vol in term[2:].split(','):
                         if '-' in vol and len(vol.split('-')) == 2:
-                            start, end = map(int, vol.split('-'))
-                            for i in xrange(start, end+1, 1):
+                            start, end = list(map(int, vol.split('-')))
+                            for i in range(start, end+1, 1):
                                 query += 'book = ? OR '
                                 args += (i,)
                         else:
                             query += 'book = ? OR '
                             args += (int(vol),)
                     query = query.rstrip(' OR ') + ') AND'
-                except ValueError, e:
+                except ValueError as e:
                     pass                    
             elif '|' in term:
                 tmp = ''
@@ -467,7 +467,7 @@ class DisplayThread(threading.Thread):
     
     def run(self):
         keywords = self._keywords.replace('+',' ')
-        keywords = ' '.join(filter(lambda x:x.find('v:') != 0 or x[0] == '~', keywords.split()))
+        keywords = ' '.join([x for x in keywords.split() if x.find('v:') != 0 or x[0] == '~'])
 
         termset = []
         for term in keywords.split():
@@ -500,7 +500,7 @@ class DisplayThread(threading.Thread):
         return excerpts
         
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
+        return (self._mark[0]+idx+1, str(result['volume']), str(result['page']), result['items'], excerpts)
         
 class PaliSiamDisplayThread(DisplayThread):
     
@@ -510,17 +510,17 @@ class PaliSiamDisplayThread(DisplayThread):
 class ThaiPocketBookDisplayThread(DisplayThread):
     
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), u'0', excerpts)
+        return (self._mark[0]+idx+1, str(result['volume']), str(result['page']), '0', excerpts)
 
 class ThaiVinayaDisplayThread(DisplayThread):
     
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), u'0', excerpts)        
+        return (self._mark[0]+idx+1, str(result['volume']), str(result['page']), '0', excerpts)        
 
 class ThaiFiveBooksDisplayThread(DisplayThread):
     
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), u'0', excerpts)
+        return (self._mark[0]+idx+1, str(result['volume']), str(result['page']), '0', excerpts)
         
 class ThaiRoyalDisplayThread(DisplayThread):
     pass
@@ -534,7 +534,7 @@ class ThaiMahaChulaDisplayThread(DisplayThread):
 class ThaiSupremeDisplayThread(DisplayThread):
 
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
+        return (self._mark[0]+idx+1, str(result['volume']), str(result['page']), result['items'], excerpts)
 
 class PaliMahaChulaDisplayThread(DisplayThread):
 
@@ -542,12 +542,12 @@ class PaliMahaChulaDisplayThread(DisplayThread):
         return utils.ConvertToThaiSearch(excerpts, True)
 
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
+        return (self._mark[0]+idx+1, str(result['volume']), str(result['page']), result['items'], excerpts)
 
 class ThaiWatnaDisplayThread(DisplayThread):
 
     def ProcessResult(self, idx, result, excerpts):
-        return (self._mark[0]+idx+1, unicode(result['volume']), unicode(result['page']), result['items'], excerpts)
+        return (self._mark[0]+idx+1, str(result['volume']), str(result['page']), result['items'], excerpts)
 
 class ScriptDisplayThread(DisplayThread):
 

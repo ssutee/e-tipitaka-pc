@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import wx
-import sqlite3, cPickle, re
+import sqlite3, pickle, re
 import constants, utils
 
 import i18n
@@ -14,9 +14,9 @@ db = Database('sqlite', constants.NOTE_DB, create_db=True)
 class Note(db.Entity):
     volume = Required(int)
     page = Required(int)
-    code = Required(unicode)
-    filename = Optional(unicode)
-    text = Optional(unicode)
+    code = Required(str)
+    filename = Optional(str)
+    text = Optional(str)
 
 db.generate_mapping(create_tables=True)
 
@@ -67,30 +67,29 @@ class Engine(object):
         return 0
         
     def GetSubItemsInVolume(self, volume):
-        return constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume].keys()
+        return list(constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume].keys())
         
     def GetItemsInVolume(self, volume, sub):
-        return constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume][sub].keys()
+        return list(constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume][sub].keys())
         
     def GetFirstPage(self, volume):
-        pages = map(lambda x:u'%s'%(x), range(0, self.GetTotalPages(volume)))
+        pages = ['%s'%(x) for x in range(0, self.GetTotalPages(volume))]
         
 
         if len(pages) == 0:
-            return u''
+            return ''
 
-        text1 = u'\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0])+1, int(pages[-1]))
-        text2 = u''
+        text1 = '\nพระไตรปิฎกเล่มที่ %d มี\n\tตั้งแต่หน้าที่ %d - %d'%(volume, int(pages[0])+1, int(pages[-1]))
+        text2 = ''
 
         sub = self.GetSubItemsInVolume(volume)
         if len(sub) == 1:
             items = self.GetItemsInVolume(volume, 1)
-            text2 = u'\n\tตั้งแต่ข้อที่ %s - %s'%(items[0],items[-1])
+            text2 = '\n\tตั้งแต่ข้อที่ %s - %s'%(items[0],items[-1])
         else:
-            text2 = u'\n\tแบ่งเป็น %d เล่มย่อย มีข้อดังนี้'%(len(sub))
+            text2 = '\n\tแบ่งเป็น %d เล่มย่อย มีข้อดังนี้'%(len(sub))
             for s in sub:
-                items = self.GetItemsInVolume(volume, s)
-                items.sort()
+                items = sorted(self.GetItemsInVolume(volume, s))
                 text2 = text2 + '\n\t\t %d) %s.%d - %s.%d'%(s, items[0], s, items[-1], s)
 
         return utils.ArabicToThai(text1 + text2)
@@ -106,17 +105,17 @@ class Engine(object):
                     
         header = result.get('header')
         if header is not None and len(header) > 0:
-            formatter += u' h1|0|%d'%(len(header))
+            formatter += ' h1|0|%d'%(len(header))
             
         footer = result.get('footer')
         if footer is not None and len(footer) > 0:
-            formatter += u' s3|%d|%d'%(len(content)-len(footer), len(content)+1)
+            formatter += ' s3|%d|%d'%(len(content)-len(footer), len(content)+1)
 
         return formatter
         
     def GetItems(self, volume, page):
         result = self.Query(volume, page)
-        return map(int, result['items'].split()) if len(result) > 0 else []
+        return list(map(int, result['items'].split())) if len(result) > 0 else []
         
     def GetSection(self, volume, page):
         return self.Query(volume, page).get('section', 0)
@@ -168,9 +167,9 @@ class Engine(object):
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
             return constants.BOOK_ITEMS[self.BookCode][volume][sub][item][0]
-        except KeyError, e:
+        except KeyError as e:
             return 0
-        except TypeError, e:
+        except TypeError as e:
             return 0
 
     def ConvertVolume(self, volume, item, sub):
@@ -206,8 +205,8 @@ class ThaiRoyalEngine(Engine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
-        return u'พระไตรปิฎก ฉบับหลวง (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับหลวง (ภาษาไทย)'
+        return 'พระไตรปิฎก ฉบับหลวง (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
         
     def GetSectionName(self, volume):
         if volume <= 8:
@@ -244,11 +243,11 @@ class PaliSiamEngine(Engine):
         
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๕๓๘ (ภาษาบาลี)'
-        return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๕๓๘ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๕๓๘ (ภาษาบาลี)'
+        return 'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๕๓๘ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
         
     def GetPage(self, volume, page):
-        return super(PaliSiamEngine, self).GetPage(volume, page).replace(u'ฐ',u'\uf700').replace(u'ญ',u'\uf70f').replace(u'\u0e4d',u'\uf711')
+        return super(PaliSiamEngine, self).GetPage(volume, page).replace('ฐ','\\uf700').replace('ญ','\\uf70f').replace('\\u0e4d','\\uf711')
 
     def GetSectionName(self, volume):
         if volume <= 8:
@@ -286,11 +285,11 @@ class PaliSiamNewEngine(PaliSiamEngine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๔๗๐ (ภาษาบาลี )'
-        return u'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๔๗๐ (ภาษาบาลี ) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๔๗๐ (ภาษาบาลี )'
+        return 'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๔๗๐ (ภาษาบาลี ) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', '')
 
 
 class ThaiVinayaEngine(Engine):
@@ -310,7 +309,7 @@ class ThaiVinayaEngine(Engine):
         return result.get('content')
 
     def GetTitle(self, volume=None):
-        return u'อริยวินัย'
+        return 'อริยวินัย'
 
     def ProcessResult(self, result):
         r = {}
@@ -334,7 +333,7 @@ class ThaiVinayaEngine(Engine):
     def GetItems(self, volume, page):
         self._searcher.execute('SELECT content FROM main WHERE volume=? AND page=?', (int(volume), int(page)))
         result = self._searcher.fetchone()
-        return [] if volume > 9 else map(int, map(utils.ThaiToArabic, re.findall(ur'\[([๐-๙]+)\]', result[0])))
+        return [] if volume > 9 else list(map(int, list(map(utils.ThaiToArabic, re.findall(r'\[([๐-๙]+)\]', result[0])))))
 
     def GetSubtitle(self, volume, section=None):
         tokens = constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore').split()
@@ -376,7 +375,7 @@ class ThaiPocketBookEngine(Engine):
         return result.get('content')
 
     def GetTitle(self, volume=None):
-        return u'%s เล่มที่ %s' % (_('Thai Pocket Book'), utils.ArabicToThai(unicode(volume)))
+        return '%s เล่มที่ %s' % (_('Thai Pocket Book'), utils.ArabicToThai(str(volume)))
 
     def GetSubtitle(self, volume, section=None):
         return constants.BOOK_NAMES['%s_%s' % ('thaipb', str(volume))].decode('utf8','ignore') if volume else _('Thai Pocket Book')
@@ -431,7 +430,7 @@ class ThaiWatnaEngine(Engine):
         return result.get('content')
 
     def GetTitle(self, volume=None):
-        return u'พุทธวจนปิฎก เล่มที่ %s'%(utils.ArabicToThai(unicode(volume))) if volume else _('Buddhawajana Pitaka')
+        return 'พุทธวจนปิฎก เล่มที่ %s'%(utils.ArabicToThai(str(volume))) if volume else _('Buddhawajana Pitaka')
 
     def ProcessResult(self, result):
         r = {}
@@ -489,12 +488,12 @@ class PaliMahaChulaEngine(Engine):
         return select, args
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', '')
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาบาลี)'
-        return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาบาลี)'
+        return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
 
     def ProcessResult(self, result):
         r = {}
@@ -510,7 +509,7 @@ class PaliMahaChulaEngine(Engine):
     def GetSubItem(self, volume, page, item): 
         item, sub = super(PaliMahaChulaEngine, self).GetSubItem(volume, page, item)
         page = constants.BOOK_ITEMS['thaimc'][volume][sub][item][0]
-        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
+        return list(map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)]))
 
     def GetSectionName(self, volume):
         if volume <= 8:
@@ -525,9 +524,9 @@ class PaliMahaChulaEngine(Engine):
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
             return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
-        except KeyError, e:
+        except KeyError as e:
             return 0
-        except TypeError, e:
+        except TypeError as e:
             return 0
 
     def CanSelectComparingItem(self):
@@ -551,12 +550,12 @@ class ThaiSupremeEngine(Engine):
         return select, args
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', '')
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับเฉลิมพระเกียรติ ๒๕๔๙ (ภาษาไทย)'
-        return u'พระไตรปิฎก ฉบับเฉลิมพระเกียรติ ๒๕๔๙ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับเฉลิมพระเกียรติ ๒๕๔๙ (ภาษาไทย)'
+        return 'พระไตรปิฎก ฉบับเฉลิมพระเกียรติ ๒๕๔๙ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
     
     def ProcessResult(self, result):
         r = {}
@@ -570,14 +569,14 @@ class ThaiSupremeEngine(Engine):
         return r
 
     def GetSubItem(self, volume, page, item):
-        return map(int, constants.MAP_MS_TO_SIAM['v%d-p%d'%(volume, page)])
+        return list(map(int, constants.MAP_MS_TO_SIAM['v%d-p%d'%(volume, page)]))
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
             return int(constants.MAP_MS_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
-        except KeyError, e:
+        except KeyError as e:
             return 0
-        except TypeError, e:
+        except TypeError as e:
             return 0
 
     def CanSelectComparingItem(self):
@@ -602,12 +601,12 @@ class ThaiMahaChulaEngine(Engine):
         return select, args
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('header', u'') + result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('header', '') + result.get('content').rstrip() + '\n\n' + result.get('footer', '')
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๑)'
-        return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๑) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๑)'
+        return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๑) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
 
     def ProcessResult(self, result):
         r = {}
@@ -622,7 +621,7 @@ class ThaiMahaChulaEngine(Engine):
         return r
         
     def GetSubItem(self, volume, page, item):
-        return map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)])
+        return list(map(int, constants.MAP_MC_TO_SIAM['v%d-p%d'%(volume, page)]))
         
     @property
     def HighlightOffset(self):
@@ -638,9 +637,9 @@ class ThaiMahaChulaEngine(Engine):
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
             return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
-        except KeyError, e:
+        except KeyError as e:
             return 0
-        except TypeError, e:
+        except TypeError as e:
             return 0
 
     def CanSelectComparingItem(self):
@@ -665,13 +664,13 @@ class ThaiMahaChula2Engine(ThaiMahaChulaEngine):
         return select, args
 
     def GetContent(self, result):
-        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', u'')
+        return None if result.get('content') is None else result.get('content').rstrip() + '\n\n' + result.get('footer', '')
 
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๒)'
-        return u'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๒) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๒)'
+        return 'พระไตรปิฎก ฉบับมหาจุฬาฯ (ภาษาไทย ๒) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
 
     def ProcessResult(self, result):
         r = {}
@@ -695,8 +694,8 @@ class ThaiMahaMakutEngine(Engine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย)'
-        return u'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(unicode(volume)))
+            return 'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย)'
+        return 'พระไตรปิฎก ฉบับมหามกุฏฯ (ภาษาไทย) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
 
     def PrepareStatement(self, volume, page):
         select = 'SELECT * FROM main WHERE volume = ? AND page = ?'
@@ -761,7 +760,7 @@ class ThaiFiveBooksEngine(Engine):
 
     def GetTitle(self, volume=None):
         if not volume:
-            return u'ชุดห้าเล่มจากพระโอษฐ์'
+            return 'ชุดห้าเล่มจากพระโอษฐ์'
         return constants.FIVE_BOOKS_NAMES[volume-1]
 
     def GetSubtitle(self, volume, section=None):
@@ -830,7 +829,7 @@ class ScriptEngine(Engine):
     def GetItemsInVolume(self, volume, sub):
         results = []
         for item in constants.SCRIPT_ITEMS[str(volume)]:
-            if str(sub) in constants.SCRIPT_ITEMS[str(volume)][str(item)].keys():
+            if str(sub) in list(constants.SCRIPT_ITEMS[str(volume)][str(item)].keys()):
                 results.append(int(item))
         results.sort()
         return results    
@@ -838,9 +837,9 @@ class ScriptEngine(Engine):
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
             return constants.SCRIPT_ITEMS[str(volume)][str(item)][str(sub)]
-        except KeyError, e:
+        except KeyError as e:
             return 0
-        except TypeError, e:
+        except TypeError as e:
             return 0
 
     def CanSelectComparingItem(self):
@@ -942,15 +941,15 @@ class Model(object):
         return note
 
     @staticmethod
-    def GetNoteListItems(code, text=u'', creation=False):
+    def GetNoteListItems(code, text='', creation=False):
         
         def trim(text):
-            return text if len(text) < 25 else text[:25] + u'...'
+            return text if len(text) < 25 else text[:25] + '...'
         
-        return [utils.ArabicToThai(u'%s เล่มที่ %2s ข้อที่ %2s : %s' % (utils.ShortName(note.code) if code is None else u'', note.volume, note.page, trim(note.text))) for note in Model.GetNotes(code, text, creation)]
+        return [utils.ArabicToThai('%s เล่มที่ %2s ข้อที่ %2s : %s' % (utils.ShortName(note.code) if code is None else '', note.volume, note.page, trim(note.text))) for note in Model.GetNotes(code, text, creation)]
         
     @staticmethod
-    def GetNotes(code, text=u'', creation=False):
+    def GetNotes(code, text='', creation=False):
         if code is None and creation:
             return select(note for note in Note if text in note.text).order_by(desc(Note.id))
         elif code is None:

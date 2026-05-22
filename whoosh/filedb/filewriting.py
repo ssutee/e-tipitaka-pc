@@ -220,10 +220,10 @@ class SegmentWriter(IndexWriter):
         fieldnames = set(self.schema.names())
         
         # Add stored documents, vectors, and field lengths
-        for docnum in xrange(reader.doc_count_all()):
+        for docnum in range(reader.doc_count_all()):
             if (not has_deletions) or (not reader.is_deleted(docnum)):
                 d = dict(item for item
-                         in reader.stored_fields(docnum).iteritems()
+                         in list(reader.stored_fields(docnum).items())
                          if item[0] in fieldnames)
                 # We have to append a dictionary for every document, even if
                 # it's empty.
@@ -257,7 +257,7 @@ class SegmentWriter(IndexWriter):
                     
                     self.pool.add_posting(fieldname, text, newdoc,
                                           postreader.weight(), valuestring)
-                    postreader.next()
+                    next(postreader)
                     
         self._added = True
     
@@ -266,7 +266,7 @@ class SegmentWriter(IndexWriter):
         schema = self.schema
         
         # Sort the keys
-        fieldnames = sorted([name for name in fields.keys()
+        fieldnames = sorted([name for name in list(fields.keys())
                              if not name.startswith("_")])
         
         # Check if the caller gave us a bogus field
@@ -311,11 +311,11 @@ class SegmentWriter(IndexWriter):
         _unique_cache = self._unique_cache
         
         # Check which of the supplied fields are unique
-        unique_fields = [name for name, field in self.schema.items()
+        unique_fields = [name for name, field in list(self.schema.items())
                          if name in fields and field.unique]
         if not unique_fields:
             raise IndexingError("None of the fields in %r"
-                                " are unique" % fields.keys())
+                                " are unique" % list(fields.keys()))
         
         # Delete documents matching the unique terms
         delset = set()
@@ -372,7 +372,7 @@ class SegmentWriter(IndexWriter):
         vpostwriter = self.vpostwriter
         offset = vpostwriter.start(self.schema[fieldname].vector)
         for text, weight, valuestring in vlist:
-            assert isinstance(text, unicode), "%r is not unicode" % text
+            assert isinstance(text, str), "%r is not unicode" % text
             vpostwriter.write(text, weight, valuestring, 0)
         vpostwriter.finish()
         
@@ -384,7 +384,7 @@ class SegmentWriter(IndexWriter):
         while vreader.is_active():
             # text, weight, valuestring, fieldlen
             vpostwriter.write(vreader.id(), vreader.weight(), vreader.value(), 0)
-            vreader.next()
+            next(vreader)
         vpostwriter.finish()
         
         self.vectorindex.add((docnum, fieldname), offset)

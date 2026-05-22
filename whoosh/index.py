@@ -18,7 +18,7 @@
 an index.
 """
 
-from __future__ import division
+
 import os.path
 
 from whoosh import fields, store
@@ -187,7 +187,7 @@ def version(storage, indexname=None):
         
         ix = storage.open_index(indexname)
         return (ix.release, ix.version)
-    except IndexVersionError, e:
+    except IndexVersionError as e:
         return (None, e.version)
 
 

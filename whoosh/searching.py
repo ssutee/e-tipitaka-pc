@@ -18,7 +18,7 @@
 """
 
 
-from __future__ import division
+
 from array import array
 from collections import defaultdict
 from heapq import heappush, heapreplace
@@ -57,7 +57,7 @@ class Searcher(object):
                      "field", "field_names"):
             setattr(self, name, getattr(self.ixreader, name))
 
-        if type(weighting) is type:
+        if isinstance(weighting, type):
             self.weighting = weighting()
         else:
             self.weighting = weighting
@@ -220,7 +220,7 @@ class Searcher(object):
         """
 
         subqueries = []
-        for key, value in kw.iteritems():
+        for key, value in list(kw.items()):
             field = self.schema[key]
             text = field.to_text(value)
             subqueries.append(query.Term(key, text))
@@ -301,7 +301,7 @@ class Searcher(object):
         return sorter
 
     def sort_query(self, query, sortedby, reverse=False):
-        if isinstance(sortedby, basestring):
+        if isinstance(sortedby, str):
             sorter = self._field_sorter(sortedby)
         elif isinstance(sortedby, (list, tuple)):
             sorter = scoring.MultiFieldSorter([self._field_sorter(fname)
@@ -463,7 +463,7 @@ def pull_results(matcher, usequality=True, replace=True):
         
         # Move to the next document. This method returns True if the matcher
         # has entered a new block, so we should check block quality again.
-        checkquality = matcher.next()
+        checkquality = next(matcher)
         
         # Ask the matcher to replace itself with a more efficient version if
         # possible
@@ -519,7 +519,7 @@ def collect(searcher, matcher, limit=10, usequality=True, replace=True):
                 if not matcher.is_active():
                     break
             
-            matcher.next()
+            next(matcher)
     
     else:
         # Heap of (score, docnum, postingquality) tuples
@@ -624,7 +624,7 @@ class Results(object):
         if isinstance(n, slice):
             start, stop, step = n.indices(len(self))
             return [Hit(self.searcher, i, self.top_n[i], self.score(i))
-                    for i in xrange(start, stop, step)]
+                    for i in range(start, stop, step)]
         else:
             return Hit(self.searcher, n, self.top_n[n], self.score(n))
 
@@ -632,7 +632,7 @@ class Results(object):
         """Yields the stored fields of each result document in ranked order.
         """
         
-        for i in xrange(len(self.top_n)):
+        for i in range(len(self.top_n)):
             yield Hit(self.searcher, i, self.top_n[i], self.score(i))
         
     def __contains__(self, docnum):
@@ -713,7 +713,7 @@ class Results(object):
         """
         
         if self.scores:
-            return zip(self.top_n, self.scores)
+            return list(zip(self.top_n, self.scores))
         else:
             return [(docnum, 0) for docnum in self.top_n]
         
@@ -757,7 +757,7 @@ class Results(object):
         """
         
         docs = self.docs()
-        items = results.items()
+        items = list(results.items())
         for docnum, score in items:
             if docnum not in docs:
                 self.top_n.append(docnum)
@@ -771,7 +771,7 @@ class Results(object):
         if not len(results): return
 
         docs = self.docs() & results.docs()
-        items = [(docnum, score) for docnum, score in self.items()
+        items = [(docnum, score) for docnum, score in list(self.items())
                  if docnum in docs]
         self._setitems(items)
         self._docs = docs
@@ -789,7 +789,7 @@ class Results(object):
 
         if not len(results): return
 
-        items = self.items()
+        items = list(self.items())
         otherdocs = results.docs()
         arein = [(docnum, score) for docnum, score in items
                  if docnum in otherdocs]
@@ -813,7 +813,7 @@ class Results(object):
 
         if not len(results): return
 
-        items = self.items()
+        items = list(self.items())
         docs = self.docs()
         otherdocs = results.docs()
 
@@ -821,7 +821,7 @@ class Results(object):
                  if docnum in otherdocs]
         notin = [(docnum, score) for docnum, score in items
                  if docnum not in otherdocs]
-        other = [(docnum, score) for docnum, score in results.items()
+        other = [(docnum, score) for docnum, score in list(results.items())
                  if docnum not in docs]
 
         self._docs = docs | otherdocs
@@ -868,7 +868,7 @@ class Hit(object):
             return False
     
     def __iter__(self):
-        return self.fields().iterkeys()
+        return iter(list(self.fields().keys()))
     
     def __getitem__(self, key):
         return self.fields().__getitem__(key)
@@ -1078,7 +1078,7 @@ class Facets(object):
         """
         
         self.searcher = searcher
-        self.queries = queries.items()
+        self.queries = list(queries.items())
         self.map = None
     
     def add_facet(self, name, q):
@@ -1203,7 +1203,7 @@ class Facets(object):
         # the categorized list in scored order. If not all the results are
         # scored, 
         if len(results) == len(results.docs()):
-            items = results.items()
+            items = list(results.items())
         else:
             items = ((docnum, None) for docnum in results.docs())
         

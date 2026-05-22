@@ -187,14 +187,14 @@ class Presenter(object):
         self._bookmarkManager = BookmarkManager(self._view, self._model.Code)
 
         self._view.SearchCtrl.SetValue(self._model.Keywords)
-        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
-        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
+        self._view.SetPage('<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
+        self._view.SetPage('<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
 
         self._model.ReloadDisplay()
 
     def SelectTheme(self, index):
         utils.SaveTheme(index, constants.SEARCH)
-        self._view.ResultsWindow.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
+        self._view.ResultsWindow.SetPage('<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         self._model.ReloadDisplay()
         
     def SelectVolumes(self, index):
@@ -226,7 +226,7 @@ class Presenter(object):
         self._view.SetProgress((progress * 100.0) / constants.ITEMS_PER_PAGE)
         
     def DisplayWillStart(self):
-        self._view.SetPage(u'<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
+        self._view.SetPage('<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         self._view.SetProgress(0)
         self._view.SetStatusText(_('Displaying results'), 0)
         
@@ -281,7 +281,7 @@ class Presenter(object):
                     for filename in files:
                             fn = os.path.join(base, filename)
                             fz.write(fn, fn[rootlen:])                
-            wx.MessageBox(_('Export data complete'), u'E-Tipitaka')
+            wx.MessageBox(_('Export data complete'), 'E-Tipitaka')
         dlg.Destroy()
 
     def ImportHistory(self, keywords, total, code, read, skimmed, pages, notes):
@@ -325,7 +325,7 @@ class Presenter(object):
             for col in cursor.fetchall():
                 if len(col) == 7:
                     pk, keywords, total, code, read, skimmed, pages = col
-                    notes = u''
+                    notes = ''
                 elif len(col) == 8:
                     pk, keywords, total, code, read, skimmed, pages, notes = col
                 self.ImportHistory(keywords, total, code, read, skimmed, pages, notes)
@@ -361,11 +361,11 @@ class Presenter(object):
 
         para_layout = root.find('{http://www.wxwidgets.org}paragraphlayout')
 
-        original_text = u''
+        original_text = ''
         for para in para_layout:
             for text in para:
                 original_text += text.text
-            original_text += u'\n'
+            original_text += '\n'
 
         for line in note.split('\n'):
             para_node = ET.SubElement(para_layout, '{http://www.wxwidgets.org}paragraph')
@@ -441,7 +441,7 @@ class Presenter(object):
             elif path.split('.')[-1] == 'js':
                 self.ImportAndroidData(path)
 
-            wx.MessageBox(_('Import data complete'), u'E-Tipitaka')
+            wx.MessageBox(_('Import data complete'), 'E-Tipitaka')
             self.RefreshHistoryList(self._view.TopBar.LanguagesComboBox.GetSelection(), self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())                    
         dlg.Destroy()
 
@@ -478,7 +478,7 @@ class Presenter(object):
             recursive_overwrite(oldpath, newpath)
 
         utils.SaveUserDataDir(newpath)
-        wx.MessageBox(u'โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', u'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
+        wx.MessageBox('โปรแกรมจะปิดตัวเพื่อตั้งค่าใหม่ กรุณาเปิดโปรแกรมใหม่อีกครั้ง', 'การตั้งค่าใหม่สำเร็จแล้ว', wx.OK | wx.ICON_INFORMATION)
         sys.exit(0)
         
     def InputSpecialCharacter(self, charCode):
@@ -573,7 +573,7 @@ class Presenter(object):
         if self._paliDictWindow is None:
             self._paliDictWindow = widgets.PaliDictWindow(self._view)
             self._paliDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._paliDictWindow.SetTitle(u'พจนานุกรม บาลี-ไทย')
+            self._paliDictWindow.SetTitle('พจนานุกรม บาลี-ไทย')
 
         self._paliDictWindow.Show()        
         self._paliDictWindow.Raise()
@@ -587,7 +587,7 @@ class Presenter(object):
         if self._thaiDictWindow is None:
             self._thaiDictWindow = widgets.ThaiDictWindow(self._view)
             self._thaiDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._thaiDictWindow.SetTitle(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน')
+            self._thaiDictWindow.SetTitle('พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน')
 
         self._thaiDictWindow.Show()        
         self._thaiDictWindow.Raise()
@@ -601,7 +601,7 @@ class Presenter(object):
         if self._englishDictWindow is None:
             self._englishDictWindow = widgets.EnglishDictWindow(self._view)
             self._englishDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._englishDictWindow.SetTitle(u'Pali-English Dictionary')
+            self._englishDictWindow.SetTitle('Pali-English Dictionary')
 
         self._englishDictWindow.Show()        
         self._englishDictWindow.Raise()        
@@ -627,7 +627,7 @@ class Presenter(object):
             self._searchAndCompareWindow = widgets.SearchAndCompareWindow(self._view.GetMDIParentFrame())
             self._searchAndCompareWindow.Delegate = self
             self._searchAndCompareWindow.Bind(wx.EVT_CLOSE, OnClose)
-            self._searchAndCompareWindow.SetTitle(u'ค้นหาพร้อมจับคู่เลขข้อ')
+            self._searchAndCompareWindow.SetTitle('ค้นหาพร้อมจับคู่เลขข้อ')
 
         self._searchAndCompareWindow.Show()
         self._searchAndCompareWindow.Raise()

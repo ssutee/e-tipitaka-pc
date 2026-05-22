@@ -37,7 +37,7 @@ def rcompile(pattern):
 
 
 def print_debug(level, msg, *args):
-    if level > 0: print ("  " * (level-1)) + (msg % args)
+    if level > 0: print((("  " * (level-1)) + (msg % args)))
 
 
 # Parser element objects
@@ -63,7 +63,7 @@ class ParserBase(object):
     """
     
     def to_parser(self, e):
-        if isinstance(e, basestring):
+        if isinstance(e, str):
             return Regex(e)
         else:
             return e
@@ -439,7 +439,7 @@ class Regex(ParserBase):
     
     def extract(self, match):
         d = match.groupdict()
-        for key, value in d.iteritems():
+        for key, value in list(d.items()):
             try:
                 value = int(value)
                 d[key] = value
@@ -738,7 +738,7 @@ class DateParserPlugin(Plugin):
         
         from whoosh.fields import DATETIME
         datefields = frozenset(fieldname for fieldname, field
-                               in parser.schema.items()
+                               in list(parser.schema.items())
                                if isinstance(field, DATETIME))
         
         newstream = stream.empty()
@@ -756,7 +756,7 @@ class DateParserPlugin(Plugin):
                             t = ErrorToken(t)
                         else:
                             t = DateToken(t.fieldname, dt, t.boost)
-                    except DateParseError, e:
+                    except DateParseError as e:
                         if self.callback:
                             self.callback("%s (%r)" % (str(e), text))
                         t = ErrorToken(t)

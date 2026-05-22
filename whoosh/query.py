@@ -18,7 +18,7 @@
 objects are composable to form complex query trees.
 """
 
-from __future__ import division
+
 
 __all__ = ("QueryError", "Query", "CompoundQuery", "MultiTerm", "Term", "And",
            "Or", "DisjunctionMax", "Not", "Prefix", "Wildcard", "FuzzyTerm",
@@ -299,9 +299,9 @@ class CompoundQuery(Query):
         return r
 
     def __unicode__(self):
-        r = u"("
-        r += (self.JOINT).join([unicode(s) for s in self.subqueries])
-        r += u")"
+        r = "("
+        r += (self.JOINT).join([str(s) for s in self.subqueries])
+        r += ")"
         return r
 
     def __eq__(self, other):
@@ -473,7 +473,7 @@ class Term(Query):
     >>> Term("content", u"render")
     """
 
-    __inittypes__ = dict(fieldname=str, text=unicode, boost=float)
+    __inittypes__ = dict(fieldname=str, text=str, boost=float)
 
     def __init__(self, fieldname, text, boost=1.0):
         self.fieldname = fieldname
@@ -496,9 +496,9 @@ class Term(Query):
         return r
 
     def __unicode__(self):
-        t = u"%s:%s" % (self.fieldname, self.text)
+        t = "%s:%s" % (self.fieldname, self.text)
         if self.boost != 1:
-            t += u"^" + unicode(self.boost)
+            t += "^" + str(self.boost)
         return t
 
     def _all_terms(self, termset, phrases=True):
@@ -583,11 +583,11 @@ class Or(CompoundQuery):
         return r
 
     def __unicode__(self):
-        r = u"("
-        r += (self.JOINT).join([unicode(s) for s in self.subqueries])
-        r += u")"
+        r = "("
+        r += (self.JOINT).join([str(s) for s in self.subqueries])
+        r += ")"
         if self.minmatch:
-            r += u">%s" % self.minmatch
+            r += ">%s" % self.minmatch
         return r
 
     def estimate_size(self, ixreader):
@@ -613,11 +613,11 @@ class DisjunctionMax(CompoundQuery):
         self.tiebreak = tiebreak
 
     def __unicode__(self):
-        r = u"DisMax("
-        r += " ".join([unicode(s) for s in self.subqueries])
-        r += u")"
+        r = "DisMax("
+        r += " ".join([str(s) for s in self.subqueries])
+        r += ")"
         if self.tiebreak:
-            s += u"~" + unicode(self.tiebreak)
+            s += "~" + str(self.tiebreak)
         return r
 
     def estimate_size(self, ixreader):
@@ -665,7 +665,7 @@ class Not(Query):
         return "%s(%s)" % (self.__class__.__name__, repr(self.query))
 
     def __unicode__(self):
-        return u"NOT " + unicode(self.query)
+        return "NOT " + str(self.query)
 
     def copy(self):
         return self.__class__(self.query)
@@ -709,7 +709,7 @@ class Prefix(MultiTerm):
     >>> Prefix("content", u"comp")
     """
 
-    __inittypes__ = dict(fieldname=str, text=unicode, boost=float)
+    __inittypes__ = dict(fieldname=str, text=str, boost=float)
 
     def __init__(self, fieldname, text, boost=1.0):
         self.fieldname = fieldname
@@ -746,7 +746,7 @@ class Wildcard(MultiTerm):
     >>> Wildcard("content", u"in*f?x")
     """
 
-    __inittypes__ = dict(fieldname=str, text=unicode, boost=float)
+    __inittypes__ = dict(fieldname=str, text=str, boost=float)
 
     def __init__(self, fieldname, text, boost=1.0):
         """
@@ -830,7 +830,7 @@ class FuzzyTerm(MultiTerm):
     """Matches documents containing words similar to the given term.
     """
 
-    __inittypes__ = dict(fieldname=str, text=unicode, boost=float,
+    __inittypes__ = dict(fieldname=str, text=str, boost=float,
                          minsimilarity=float, prefixlength=int)
 
     def __init__(self, fieldname, text, boost=1.0, minsimilarity=0.5,
@@ -872,7 +872,7 @@ class FuzzyTerm(MultiTerm):
                                          self.ratio)
 
     def __unicode__(self):
-        return u"~" + self.text
+        return "~" + self.text
 
     def copy(self):
         return self.__class__(self.fieldname, self.text, boost=self.boost,
@@ -917,10 +917,10 @@ class TermRange(MultiTerm):
 
         self.fieldname = fieldname
         if start is None:
-            start = u''
+            start = ''
         self.start = start
         if end is None:
-            end = u'\uffff'
+            end = '\\uffff'
         self.end = end
         self.startexcl = startexcl
         self.endexcl = endexcl
@@ -947,7 +947,7 @@ class TermRange(MultiTerm):
         if self.startexcl: startchar = "{"
         endchar = "]"
         if self.endexcl: endchar = "}"
-        return u"%s:%s%s TO %s%s" % (self.fieldname,
+        return "%s:%s%s TO %s%s" % (self.fieldname,
                                      startchar, self.start, self.end, endchar)
 
     def copy(self):
@@ -956,7 +956,7 @@ class TermRange(MultiTerm):
                               boost=self.boost)
 
     def normalize(self):
-        if self.start in ('', None) and self.end in (u'\uffff', None):
+        if self.start in ('', None) and self.end in ('\\uffff', None):
             return Every(self.fieldname, boost=self.boost)
         elif self.start == self.end:
             if self.startexcl or self.endexcl:
@@ -1056,7 +1056,7 @@ class NumericRange(Query):
         if self.startexcl: startchar = "{"
         endchar = "]"
         if self.endexcl: endchar = "}"
-        return u"%s:%s%s TO %s%s" % (self.fieldname,
+        return "%s:%s%s TO %s%s" % (self.fieldname,
                                      startchar, self.start, self.end, endchar)
     
     def copy(self):
@@ -1180,7 +1180,7 @@ class Variations(MultiTerm):
         return [word for word in self.words if (fieldname, word) in ixreader]
 
     def __unicode__(self):
-        return u"%s:<%s>" % (self.fieldname, self.text)
+        return "%s:<%s>" % (self.fieldname, self.text)
 
     def replace(self, oldtext, newtext):
         if oldtext == self.text:
@@ -1218,7 +1218,7 @@ class Phrase(MultiTerm):
                                                   self.slop, self.boost)
 
     def __unicode__(self):
-        return u'%s:"%s"' % (self.fieldname, u" ".join(self.words))
+        return '%s:"%s"' % (self.fieldname, " ".join(self.words))
 
     def copy(self):
         return self.__class__(self.fieldname, self.words[:], boost=self.boost)
@@ -1310,7 +1310,7 @@ class Every(Query):
                 and self.boost == other.boost)
 
     def __unicode__(self):
-        return u"%s:*" % self.fieldname
+        return "%s:*" % self.fieldname
 
     def copy(self):
         return self.__class__(self.fieldname, boost=self.boost)
@@ -1545,7 +1545,7 @@ class AndNot(Query):
                                self.positive, self.negative)
 
     def __unicode__(self):
-        return u"%s ANDNOT %s" % (self.positive, self.negative)
+        return "%s ANDNOT %s" % (self.positive, self.negative)
 
     def copy(self):
         return self.__class__(self.positive, self.negative, boost=self.boost)

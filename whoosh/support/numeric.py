@@ -23,8 +23,8 @@ _qstruct = struct.Struct("<q")
 _dpack, _dunpack = _dstruct.pack, _dstruct.unpack
 _qpack, _qunpack = _qstruct.pack, _qstruct.unpack
 
-_max_sortable_int = 4294967295L
-_max_sortable_long = 18446744073709551615L
+_max_sortable_int = 4294967295
+_max_sortable_long = 18446744073709551615
 
 
 # Functions for converting numbers to and from sortable representations
@@ -105,14 +105,14 @@ def text_to_float(text, signed=True):
 def sortable_int_to_text(x, shift=0):
     if shift:
         x >>= shift
-    text = chr(shift) + u"%08x" % x
+    text = chr(shift) + "%08x" % x
     assert len(text) == 9
     return text
 
 def sortable_long_to_text(x, shift=0):
     if shift:
         x >>= shift
-    text = chr(shift) + u"%016x" % x
+    text = chr(shift) + "%016x" % x
     assert len(text) == 17
     return text
 
@@ -122,7 +122,7 @@ def text_to_sortable_int(text):
 
 def text_to_sortable_long(text):
     #assert len(text) == 17
-    return long(text[1:], 16)
+    return int(text[1:], 16)
 
 
 # Functions for generating tiered ranges
@@ -176,7 +176,7 @@ def tiered_ranges(numtype, signed, start, end, shift_step, startexcl, endexcl):
     else:
         if numtype is int:
             start = int_to_sortable_int(start, signed)
-        elif numtype is long:
+        elif numtype is int:
             start = long_to_sortable_long(start, signed)
         elif numtype is float:
             start = float_to_sortable_long(start, signed)
@@ -187,7 +187,7 @@ def tiered_ranges(numtype, signed, start, end, shift_step, startexcl, endexcl):
     else:
         if numtype is int:
             end = int_to_sortable_int(end, signed)
-        elif numtype is long:
+        elif numtype is int:
             end = long_to_sortable_long(end, signed)
         elif numtype is float:
             end = float_to_sortable_long(end, signed)

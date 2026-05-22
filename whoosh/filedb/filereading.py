@@ -126,14 +126,14 @@ class SegmentReader(IndexReader):
     def stored_fields(self, docnum):
         schema = self.schema
         return dict(item for item
-                    in self.storedfields[docnum].iteritems()
+                    in list(self.storedfields[docnum].items())
                     if item[0] in schema)
 
     @protected
     def all_stored_fields(self):
         is_deleted = self.segment.is_deleted
         sf = self.stored_fields
-        for docnum in xrange(self.segment.doc_count_all()):
+        for docnum in range(self.segment.doc_count_all()):
             if not is_deleted(docnum):
                 yield sf(docnum)
 

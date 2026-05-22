@@ -148,11 +148,11 @@ class IndexWriter(object):
         """
         
         # Check which of the supplied fields are unique
-        unique_fields = [name for name, field in self.schema.items()
+        unique_fields = [name for name, field in list(self.schema.items())
                          if name in fields and field.unique]
         if not unique_fields:
             raise IndexingError("None of the fields in %r"
-                                " are unique" % fields.keys())
+                                " are unique" % list(fields.keys()))
         
         # Find the set of documents matching the unique terms
         delset = set()

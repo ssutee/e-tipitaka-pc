@@ -47,7 +47,7 @@ class RamIndexReader(IndexReader):
     
     def all_stored_fields(self):
         sfs = self.ix.storedfields
-        for docnum in xrange(self.ix.doc_count_all()):
+        for docnum in range(self.ix.doc_count_all()):
             if docnum in sfs:
                 yield sfs[docnum]
             
@@ -77,7 +77,7 @@ class RamIndexReader(IndexReader):
         tls = self.ix.termlists
         inv = self.ix.invertedindex
         ixf = self.ix.indexfreqs
-        for fieldname in sorted(tls.iterkeys()):
+        for fieldname in sorted(tls.keys()):
             for text in tls[fieldname]:
                 docfreq = len(inv[fieldname][text])
                 indexfreq = ixf[(fieldname, text)]
@@ -94,7 +94,7 @@ class RamIndexReader(IndexReader):
         inv = self.ix.invertedindex
         ixf = self.ix.indexfreqs
         
-        fnms = sorted(fn for fn in tls.iterkeys() if fn >= fieldname)
+        fnms = sorted(fn for fn in list(tls.keys()) if fn >= fieldname)
         for fn in fnms:
             texts = tls[fn]
             start = 0
@@ -162,7 +162,7 @@ class RamPostingReader(Matcher):
     def all_ids(self):
         return (x[0] for x in self.postings)
     
-    def next(self):
+    def __next__(self):
         if not self.is_active():
             raise ReadTooFar
         self.i += 1

@@ -34,7 +34,7 @@ mo_location = LOCALE_DIR
  
 # Lets tell those details to gettext
 #  (nothing to change here for you)
-gettext.install(True, localedir=None, unicode=1)
+gettext.install(True, localedir=None, str=1)
  
 gettext.find(constants.APP_NAME, mo_location)
  

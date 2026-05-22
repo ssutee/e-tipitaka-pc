@@ -137,7 +137,7 @@ class adatetime(object):
         """
         
         newadatetime = self.copy()
-        for key, value in kwargs.iteritems():
+        for key, value in list(kwargs.items()):
             if key in self.units:
                 setattr(newadatetime, key, value)
             else:

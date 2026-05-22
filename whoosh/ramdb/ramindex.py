@@ -73,11 +73,11 @@ class RamIndex(Index):
         return len(self.storedfields) - len(self.deleted)
     
     def field_length(self, fieldname):
-        return sum(l for docnum_fieldname, l in self.fieldlengths.iteritems()
+        return sum(l for docnum_fieldname, l in list(self.fieldlengths.items())
                    if docnum_fieldname[1] == fieldname)
         
     def max_field_length(self, fieldname):
-        return max(l for docnum_fieldname, l in self.fieldlengths.iteritems()
+        return max(l for docnum_fieldname, l in list(self.fieldlengths.items())
                    if docnum_fieldname[1] == fieldname)
     
     def reader(self):
@@ -95,18 +95,18 @@ class RamIndex(Index):
         self.schema.remove_field(fieldname)
         if fieldname in self.termlists:
             del self.termlists[fieldname]
-        for fn, text in self.indexfreqs.iterkeys():
+        for fn, text in list(self.indexfreqs.keys()):
             if fn == fieldname:
                 del self.indexfreqs[(fn, text)]
-        for sfields in self.storedfields.itervalues():
+        for sfields in list(self.storedfields.values()):
             if fieldname in sfields:
                 del sfields[fieldname]
-        for docnum, fn in self.fieldlengths.iterkeys():
+        for docnum, fn in list(self.fieldlengths.keys()):
             if fn == fieldname:
                 del self.fieldlengths[(docnum, fn)]
         if fieldname in self.fieldlength_maxes:
             del self.fieldlength_maxes[fieldname]
-        for docnum, fn in self.vectors.iterkeys():
+        for docnum, fn in list(self.vectors.keys()):
             if fn == fieldname:
                 del self.vectors[(docnum, fn)]
     
@@ -149,12 +149,12 @@ class RamIndex(Index):
         removedterms = defaultdict(set)
         for fieldname in self.schema.names():
             inv = self.invertedindex[fieldname]
-            for term, postlist in inv.iteritems():
+            for term, postlist in list(inv.items()):
                 inv[term] = [x for x in postlist if x[0] not in deleted]
             
             # Remove terms that no longer have any postings after the
             # documents are deleted
-            for term in inv.keys():
+            for term in list(inv.keys()):
                 if not inv[term]:
                     removedterms[fieldname].add(term)
                     del inv[term]
@@ -162,7 +162,7 @@ class RamIndex(Index):
         # If terms were removed as a result of document deletion,
         # update termlists and indexfreqs
         termlists = self.termlists
-        for fieldname, removed in removedterms.iteritems():
+        for fieldname, removed in list(removedterms.items()):
             termlists[fieldname] = [t for t in termlists[fieldname]
                                    if t not in removed]
             for text in removed:
@@ -170,13 +170,13 @@ class RamIndex(Index):
         
         # Remove documents from field lengths
         fieldlengths = self.fieldlengths
-        for docnum, fieldname in fieldlengths.keys():
+        for docnum, fieldname in list(fieldlengths.keys()):
             if docnum in deleted:
                 del fieldlengths[(docnum, fieldname)]
                 
         # Remove documents from vectors
         vectors = self.vectors
-        for docnum, fieldname in vectors.keys():
+        for docnum, fieldname in list(vectors.keys()):
             if docnum in deleted:
                 del vectors[(docnum, fieldname)]
             
@@ -256,10 +256,10 @@ class RamIndex(Index):
         
         fieldnames = set(self.schema.names())
         
-        for docnum in xrange(reader.doc_count_all()):
+        for docnum in range(reader.doc_count_all()):
             if (not has_deletions) or (not reader.is_deleted(docnum)):
                 d = dict(item for item
-                         in reader.stored_fields(docnum).iteritems()
+                         in list(reader.stored_fields(docnum).items())
                          if item[0] in fieldnames)
                 self.storedfields[self.docnum] = d
                 
@@ -293,7 +293,7 @@ class RamIndex(Index):
                     self.invertedindex[fieldname][text].append((newdoc,
                                                                 weight,
                                                                 valuestring))
-                    postreader.next()
+                    next(postreader)
     
     
     

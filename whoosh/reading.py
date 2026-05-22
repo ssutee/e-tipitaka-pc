@@ -126,7 +126,7 @@ class IndexReader(ClosableMixin):
         # persistent ID strings.
         
         is_deleted = self.is_deleted
-        return (docnum for docnum in xrange(self.doc_count_all())
+        return (docnum for docnum in range(self.doc_count_all())
                 if not is_deleted(docnum))
         
     def is_deleted(self, docnum):
@@ -146,7 +146,7 @@ class IndexReader(ClosableMixin):
         """Yields the stored fields for all documents.
         """
         
-        for docnum in xrange(self.doc_count_all()):
+        for docnum in range(self.doc_count_all()):
             if not self.is_deleted(docnum):
                 yield self.stored_fields(docnum)
 
@@ -303,13 +303,13 @@ class IndexReader(ClosableMixin):
         if astype == "weight":
             while vec.is_active():
                 yield (vec.id(), vec.weight())
-                vec.next()
+                next(vec)
         else:
             format = self.format(fieldname)
             decoder = format.decoder(astype)
             while vec.is_active():
                 yield (vec.id(), decoder(vec.value()))
-                vec.next()
+                next(vec)
 
     def most_frequent_terms(self, fieldname, number=5, prefix=''):
         """Returns the top 'number' most frequent terms in the given field as a
@@ -450,7 +450,7 @@ class MultiReader(IndexReader):
 
         current = []
         for it in iterlist:
-            fnum, text, docfreq, termcount = it.next()
+            fnum, text, docfreq, termcount = next(it)
             current.append((fnum, text, docfreq, termcount, it))
         heapify(current)
 
@@ -468,7 +468,7 @@ class MultiReader(IndexReader):
                 termcount += current[0][3]
                 it = current[0][4]
                 try:
-                    fn, t, df, tc = it.next()
+                    fn, t, df, tc = next(it)
                     heapreplace(current, (fn, t, df, tc, it))
                 except StopIteration:
                     heappop(current)

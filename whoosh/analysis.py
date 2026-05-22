@@ -136,7 +136,7 @@ class Token(object):
     
     def __repr__(self):
         parms = ", ".join("%s=%r" % (name, value)
-                          for name, value in self.__dict__.iteritems())
+                          for name, value in list(self.__dict__.items()))
         return "%s(%s)" % (self.__class__.__name__, parms)
         
     def copy(self):
@@ -155,7 +155,7 @@ class Composable(object):
         if self.__dict__:
             attrs = ", ".join("%s=%r" % (key, value)
                               for key, value
-                              in self.__dict__.iteritems())
+                              in list(self.__dict__.items()))
         return self.__class__.__name__ + "(%s)" % attrs
 
 
@@ -182,7 +182,7 @@ class IDTokenizer(Tokenizer):
                  keeporiginal=False, removestops=True,
                  start_pos=0, start_char=0, mode='',
                  **kwargs):
-        assert isinstance(value, unicode), "%r is not unicode" % value
+        assert isinstance(value, str), "%r is not unicode" % value
         t = Token(positions, chars, removestops=removestops, mode=mode)
         t.text = value
         if keeporiginal:
@@ -204,7 +204,7 @@ class RegexTokenizer(Tokenizer):
     [u"hi", u"there", u"3.141", u"big", u"time", u"under_score"]
     """
     
-    __inittypes__ = dict(expression=unicode, gaps=bool)
+    __inittypes__ = dict(expression=str, gaps=bool)
     
     def __init__(self, expression=r"\w+(\.?\w+)*", gaps=False):
         """
@@ -216,7 +216,7 @@ class RegexTokenizer(Tokenizer):
             than matching on the expression.
         """
         
-        if isinstance(expression, basestring):
+        if isinstance(expression, str):
             self.expression = re.compile(expression, re.UNICODE)
         else:
             self.expression = expression
@@ -245,7 +245,7 @@ class RegexTokenizer(Tokenizer):
         :param tokenize: if True, the text should be tokenized. 
         """
         
-        assert isinstance(value, unicode), "%r is not unicode" % value
+        assert isinstance(value, str), "%r is not unicode" % value
         
         t = Token(positions, chars, removestops=removestops, mode=mode)
         if not tokenize:
@@ -361,7 +361,7 @@ class CharsetTokenizer(Tokenizer):
         :param tokenize: if True, the text should be tokenized. 
         """
         
-        assert isinstance(value, unicode), "%r is not unicode" % value
+        assert isinstance(value, str), "%r is not unicode" % value
         
         t = Token(positions, chars, removestops=removestops, mode=mode)
         if not tokenize:
@@ -372,7 +372,7 @@ class CharsetTokenizer(Tokenizer):
                 t.endchar = start_char + len(value)
             yield t
         else:
-            text = u""
+            text = ""
             charmap = self.charmap
             pos = start_pos
             startchar = currentchar = start_char
@@ -393,7 +393,7 @@ class CharsetTokenizer(Tokenizer):
                             t.endchar = currentchar
                         yield t
                     startchar = currentchar + 1
-                    text = u""
+                    text = ""
                     
                 currentchar += 1
             
@@ -472,7 +472,7 @@ class NgramTokenizer(Tokenizer):
                  keeporiginal=False, removestops=True,
                  start_pos=0, start_char=0, mode='',
                  **kwargs):
-        assert isinstance(value, unicode), "%r is not unicode" % value
+        assert isinstance(value, str), "%r is not unicode" % value
         
         inlen = len(value)
         t = Token(positions, chars, removestops=removestops, mode=mode)
@@ -480,7 +480,7 @@ class NgramTokenizer(Tokenizer):
         
         if mode == "query":
             size = min(self.max, inlen)
-            for start in xrange(0, inlen - size + 1):
+            for start in range(0, inlen - size + 1):
                 end = start + size
                 if end > inlen: continue
                 
@@ -496,8 +496,8 @@ class NgramTokenizer(Tokenizer):
                 yield t
                 pos += 1
         else:
-            for start in xrange(0, inlen - self.min + 1):
-                for size in xrange(self.min, self.max + 1):
+            for start in range(0, inlen - self.min + 1):
+                for size in range(self.min, self.max + 1):
                     end = start + size
                     if end > inlen: continue
                     
@@ -585,9 +585,9 @@ class MultiFilter(Filter):
     
     def __call__(self, tokens):
         # Only selects on the first token
-        t = tokens.next()
+        t = next(tokens)
         filter = self.filters[t.mode]
-        return filter(chain([t], tokens))
+        return list(filter(chain([t], tokens)))
         
 
 class LowercaseFilter(Filter):
@@ -874,7 +874,7 @@ class NgramFilter(Filter):
                         t.startchar = t.endchar - size
                     yield t
                 else:
-                    for start in xrange(0, len(text) - size + 1):
+                    for start in range(0, len(text) - size + 1):
                         t.text = text[start:start+size]
                         if chars:
                             t.startchar = startchar + start
@@ -883,7 +883,7 @@ class NgramFilter(Filter):
             else:
                 if at == -1:
                     limit = min(self.max, len(text))
-                    for size in xrange(self.min, limit + 1):
+                    for size in range(self.min, limit + 1):
                         t.text = text[:size]
                         if chars:
                             t.endchar = startchar + size
@@ -891,14 +891,14 @@ class NgramFilter(Filter):
                         
                 elif at == 1:
                     start = max(0, len(text)-self.max)
-                    for i in xrange(start, len(text) - self.min + 1):
+                    for i in range(start, len(text) - self.min + 1):
                         t.text = text[i:]
                         if chars:
                             t.startchar = t.endchar - size
                         yield t
                 else:
-                    for start in xrange(0, len(text) - self.min + 1):
-                        for size in xrange(self.min, self.max + 1):
+                    for start in range(0, len(text) - self.min + 1):
+                        for size in range(self.min, self.max + 1):
                             end = start + size
                             if end > len(text): continue
                             
@@ -968,8 +968,8 @@ class IntraWordFilter(Filter):
     digits = array("u")
     uppers = array("u")
     lowers = array("u")
-    for n in xrange(2 ** 16 - 1):
-        ch = unichr(n)
+    for n in range(2 ** 16 - 1):
+        ch = chr(n)
         if ch.islower(): lowers.append(ch)
         elif ch.isupper(): uppers.append(ch)
         elif ch.isdigit(): digits.append(ch)
@@ -980,10 +980,10 @@ class IntraWordFilter(Filter):
     lowers = re.escape("".join(lowers))
     letters = uppers + lowers
     
-    __inittypes__ = dict(delims=unicode, splitwords=bool, splitnums=bool,
+    __inittypes__ = dict(delims=str, splitwords=bool, splitnums=bool,
                          mergewords=bool, mergenums=bool)
     
-    def __init__(self, delims=u"-_'\"()!@#$%^&*[]{}<>\|;:,./?`~=+",
+    def __init__(self, delims="-_'\"()!@#$%^&*[]{}<>\|;:,./?`~=+",
                  splitwords=True, splitnums=True,
                  mergewords=False, mergenums=False):
         """
@@ -1001,22 +1001,22 @@ class IntraWordFilter(Filter):
         self.delims = re.escape(delims)
         
         # Expression for splitting at delimiter characters
-        self.splitter = re.compile(u"[%s]+" % (self.delims,), re.UNICODE)
+        self.splitter = re.compile("[%s]+" % (self.delims,), re.UNICODE)
         # Expression for removing "'s" from the end of sub-words
-        dispat = u"(?<=[%s])'[Ss](?=$|[%s])" % (self.letters, self.delims)
+        dispat = "(?<=[%s])'[Ss](?=$|[%s])" % (self.letters, self.delims)
         self.disposses = re.compile(dispat, re.UNICODE)
         
         # Expression for finding case and letter-number transitions
-        lower2upper = u"[%s][%s]" % (self.lowers, self.uppers)
-        letter2digit = u"[%s][%s]" % (self.letters, self.digits)
-        digit2letter = u"[%s][%s]" % (self.digits, self.letters)
+        lower2upper = "[%s][%s]" % (self.lowers, self.uppers)
+        letter2digit = "[%s][%s]" % (self.letters, self.digits)
+        digit2letter = "[%s][%s]" % (self.digits, self.letters)
         if splitwords and splitnums:
-            splitpat = u"(%s|%s|%s)" % (lower2upper, letter2digit, digit2letter)
+            splitpat = "(%s|%s|%s)" % (lower2upper, letter2digit, digit2letter)
             self.boundary = re.compile(splitpat, re.UNICODE)
         elif splitwords:
-            self.boundary = re.compile(unicode(lower2upper), re.UNICODE)
+            self.boundary = re.compile(str(lower2upper), re.UNICODE)
         elif splitnums:
-            numpat = u"(%s|%s)" % (letter2digit, digit2letter)
+            numpat = "(%s|%s)" % (letter2digit, digit2letter)
             self.boundary = re.compile(numpat, re.UNICODE)
         
         self.splitting = splitwords or splitnums
@@ -1080,7 +1080,7 @@ class IntraWordFilter(Filter):
                 if len(buf) > 1:
                     # If the buffer has at least two parts in it, merge them
                     # and add them to the original list of parts.
-                    parts.insert(insertat, (pos - 1, u"".join(buf)))
+                    parts.insert(insertat, (pos - 1, "".join(buf)))
                     insertat += 1
                 # Reset the buffer
                 buf = [part]
@@ -1090,7 +1090,7 @@ class IntraWordFilter(Filter):
         # If there are parts left in the buffer at the end, merge them and add
         # them to the original list.
         if len(buf) > 1:
-            parts.append((pos, u"".join(buf)))
+            parts.append((pos, "".join(buf)))
     
     def __call__(self, tokens):
         disposses = self.disposses.sub
@@ -1377,7 +1377,7 @@ def RegexAnalyzer(expression=r"\w+(\.?\w+)*", gaps=False):
     """
     
     return RegexTokenizer(expression=expression, gaps=gaps)
-RegexAnalyzer.__inittypes__ = dict(expression=unicode, gaps=bool)
+RegexAnalyzer.__inittypes__ = dict(expression=str, gaps=bool)
 
 
 def SimpleAnalyzer(expression=r"\w+(\.?\w+)*", gaps=False):
@@ -1393,7 +1393,7 @@ def SimpleAnalyzer(expression=r"\w+(\.?\w+)*", gaps=False):
     """
     
     return RegexTokenizer(expression=expression, gaps=gaps) | LowercaseFilter()
-SimpleAnalyzer.__inittypes__ = dict(expression=unicode, gaps=bool)
+SimpleAnalyzer.__inittypes__ = dict(expression=str, gaps=bool)
 
 def StandardAnalyzer(expression=r"\w+(\.?\w+)*", stoplist=STOP_WORDS,
                      minsize=2, maxsize=None, gaps=False):
@@ -1419,7 +1419,7 @@ def StandardAnalyzer(expression=r"\w+(\.?\w+)*", stoplist=STOP_WORDS,
         chain = chain | StopFilter(stoplist=stoplist, minsize=minsize,
                                    maxsize=maxsize)
     return chain
-StandardAnalyzer.__inittypes__ = dict(expression=unicode, gaps=bool,
+StandardAnalyzer.__inittypes__ = dict(expression=str, gaps=bool,
                                       stoplist=list, minsize=int, maxsize=int)
 
 
@@ -1448,7 +1448,7 @@ def StemmingAnalyzer(expression=r"\w+(\.?\w+)*", stoplist=STOP_WORDS,
         chain = chain | StopFilter(stoplist=stoplist, minsize=minsize,
                                    maxsize=maxsize)
     return chain | StemFilter(stemfn=stemfn, ignore=ignore)
-StemmingAnalyzer.__inittypes__ = dict(expression=unicode, gaps=bool,
+StemmingAnalyzer.__inittypes__ = dict(expression=str, gaps=bool,
                                       stoplist=list, minsize=int, maxsize=int)
 
 
@@ -1478,7 +1478,7 @@ def FancyAnalyzer(expression=r"\s+", stoplist=STOP_WORDS, minsize=2,
     swf = StopFilter(stoplist=stoplist, minsize=minsize)
     
     return ret | iwf | lcf | swf
-FancyAnalyzer.__inittypes__ = dict(expression=unicode, gaps=bool,
+FancyAnalyzer.__inittypes__ = dict(expression=str, gaps=bool,
                                    stoplist=list, minsize=int, maxsize=int)
 
 

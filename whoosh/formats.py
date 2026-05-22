@@ -22,7 +22,7 @@ occurance of a term.
 
 from collections import defaultdict
 from struct import Struct
-from cStringIO import StringIO
+from io import StringIO
 
 from whoosh.analysis import unstopped
 from whoosh.system import _INT_SIZE, _FLOAT_SIZE, pack_uint, unpack_uint
@@ -192,7 +192,7 @@ class Frequency(Format):
         
         encode = self.encode
         return ((w, freq, float(freq), encode(freq))
-                for w, freq in seen.iteritems())
+                for w, freq in list(seen.items()))
 
     def encode(self, freq):
         return pack_uint(freq)
@@ -221,7 +221,7 @@ class DocBoosts(Frequency):
         
         encode = self.encode
         return ((w, freq, freq * doc_boost, encode((freq, doc_boost)))
-                for w, freq in seen.iteritems())
+                for w, freq in list(seen.items()))
     
     def encode(self, freq_docboost):
         freq, docboost = freq_docboost
@@ -259,7 +259,7 @@ class Positions(Format):
         
         encode = self.encode
         return ((w, len(poslist), float(len(poslist)), encode(poslist))
-                for w, poslist in seen.iteritems())
+                for w, poslist in list(seen.items()))
     
     def encode(self, positions):
         # positions = [pos1, pos2, ...]
@@ -277,7 +277,7 @@ class Positions(Format):
         freq = unpack_uint(read(_INT_SIZE))[0]
         position = 0
         positions = []
-        for _ in xrange(freq):
+        for _ in range(freq):
             position = read_varint(read) + position
             positions.append(position)
         return positions
@@ -311,7 +311,7 @@ class Characters(Positions):
         
         encode = self.encode
         return ((w, len(ls), float(len(ls)), encode(ls))
-                for w, ls in seen.iteritems())
+                for w, ls in list(seen.items()))
     
     def encode(self, posns_chars):
         # posns_chars = [(pos, startchar, endchar), ...]
@@ -332,7 +332,7 @@ class Characters(Positions):
         position = 0
         endchar = 0
         posns_chars = []
-        for _ in xrange(freq):
+        for _ in range(freq):
             position = read_varint(read) + position
             startchar = endchar + read_varint(read)
             endchar = startchar + read_varint(read)
@@ -365,7 +365,7 @@ class PositionBoosts(Positions):
         
         encode = self.encode
         return ((w, len(poslist), sum(p[1] for p in poslist), encode(poslist))
-                for w, poslist in seen.iteritems())
+                for w, poslist in list(seen.items()))
     
     def encode(self, posns_boosts):
         # posns_boosts = [(pos, boost), ...]
@@ -389,7 +389,7 @@ class PositionBoosts(Positions):
         
         position = 0
         posns_boosts = []
-        for _ in xrange(freq):
+        for _ in range(freq):
             position = read_varint(read) + position
             boost = byte_to_float(read(1))
             posns_boosts.append((position, boost))
@@ -405,7 +405,7 @@ class PositionBoosts(Positions):
         
         position = 0
         positions = []
-        for _ in xrange(freq):
+        for _ in range(freq):
             position = read_varint(read) + position
             # Skip boost
             seek(1, 1)
@@ -442,7 +442,7 @@ class CharacterBoosts(Characters):
         
         encode = self.encode
         return ((w, len(poslist), sum(p[3] for p in poslist), encode(poslist))
-                for w, poslist in seen.iteritems())
+                for w, poslist in list(seen.items()))
     
     def encode(self, posns_chars_boosts):
         # posns_chars_boosts = [(pos, startchar, endchar, boost), ...]
@@ -474,7 +474,7 @@ class CharacterBoosts(Characters):
         position = 0
         endchar = 0
         posns_chars = []
-        for _ in xrange(freq):
+        for _ in range(freq):
             position = read_varint(read) + position
             startchar = endchar + read_varint(read)
             endchar = startchar + read_varint(read)

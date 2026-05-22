@@ -19,7 +19,7 @@ excerpts from hit documents in the search results you present to the user, with
 query terms highlighted.
 """
 
-from __future__ import division
+
 from heapq import nlargest
 from cgi import escape as htmlescape
 

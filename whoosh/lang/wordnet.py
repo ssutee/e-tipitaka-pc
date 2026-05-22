@@ -64,9 +64,9 @@ def make_index(storage, indexname, word2nums, num2words):
     schema = Schema(word=ID, syns=STORED)
     ix = storage.create_index(schema, indexname=indexname)
     w = ix.writer()
-    for word in word2nums.iterkeys():
+    for word in list(word2nums.keys()):
         syns = synonyms(word2nums, num2words, word)
-        w.add_document(word=unicode(word), syns=syns)
+        w.add_document(word=str(word), syns=syns)
     w.commit()
     return ix
 
@@ -250,10 +250,10 @@ if __name__ == "__main__":
     
     t = clock()
     th = Thesaurus.from_storage(st)
-    print clock() - t
+    print((clock() - t))
     
     t = clock()
-    print th.synonyms("hail")
-    print clock() - t
+    print((th.synonyms("hail")))
+    print((clock() - t))
     
     

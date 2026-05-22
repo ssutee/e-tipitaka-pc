@@ -10,7 +10,7 @@ from pony.orm import Database, Required, Optional, db_session, select, desc
 from read.model import Model
 from utils import BookmarkManager
 
-import cStringIO
+import io
 import xhtml2pdf.pisa as pisa
 
 import i18n
@@ -269,8 +269,8 @@ class Presenter(object):
         self._currentPage = page
 
         if self._model.GetTotalPages(volume) == 0: 
-            self._view.SetText(u'ฐานข้อมูลยังจัดทำไม่เสร็จ', focus=focus)
-            self._view.SetText(u'ฐานข้อมูลยังจัดทำไม่เสร็จ', focus=focus)
+            self._view.SetText('ฐานข้อมูลยังจัดทำไม่เสร็จ', focus=focus)
+            self._view.SetText('ฐานข้อมูลยังจัดทำไม่เสร็จ', focus=focus)
             return
 
         if page > self._model.GetTotalPages(volume) or page < self._model.GetFirstPageNumber(volume): return
@@ -291,8 +291,8 @@ class Presenter(object):
         # work around for fixing font size problem on win32
         # self._view.SetText(content, focus=focus)        
         self._view.SetText(content, focus=focus)        
-        self.SetStatusText(u'', 0)        
-        self.SetStatusText(u'คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else u'', 1)
+        self.SetStatusText('', 0)        
+        self.SetStatusText('คำค้นหาคือ "%s"'%(self._keywords) if self._keywords is not None and len(self._keywords) > 0 else '', 1)
 
         self._view.FormatText(self._model.GetFormatter(self._currentVolume, self._currentPage))
 
@@ -344,7 +344,7 @@ class Presenter(object):
 
     def _HighlightItems(self, content, code=None, index=1):
         n = -1
-        for item in re.findall(ur'({[๐๑๒๓๔๕๖๗๘๙0-9\.:;]+})', content):
+        for item in re.findall(r'({[๐๑๒๓๔๕๖๗๘๙0-9\.:;]+})', content):
             n = content.find(item, n+1)
             
             body = self._view.Body if code == None else self._view.FocusBody(code, index)
@@ -361,7 +361,7 @@ class Presenter(object):
 
 
     def _HighlightKeywords(self, content, keywords, volume, page, code=None, index=1):
-        if content == u'' or keywords is None: return
+        if content == '' or keywords is None: return
 
         body = self._view.Body if code == None else self._view.FocusBody(code, index)
 
@@ -461,7 +461,7 @@ class Presenter(object):
 
     def HandleTextSelection(self, text, code, index):
         text = text.strip().split('\n')[0]        
-        self.SetStatusText(u'คำที่เลือกคือ "%s"' % text if len(text) > 0 else u'', 0)
+        self.SetStatusText('คำที่เลือกคือ "%s"' % text if len(text) > 0 else '', 0)
         if self._paliDictWindow is not None:            
             self._paliDictWindow.SetInput(text)
         if self._thaiDictWindow is not None:
@@ -481,10 +481,10 @@ class Presenter(object):
 
         try:
             if len(item.split('.')) == 2:
-                item, sub = map(int, item.split('.'))
+                item, sub = list(map(int, item.split('.')))
             elif len(item.split('.')) == 1:
                 item, sub = int(item), 1
-        except ValueError, e:
+        except ValueError as e:
             pass
 
         try:
@@ -492,7 +492,7 @@ class Presenter(object):
             self._model.Code = code if code is not None else currentCode            
             page = self._model.ConvertItemToPage(self._currentVolume if code is None else self._compareVolume[utils.MakeKey(code, index)], item, sub, self._view.CheckBox.IsChecked())
             self._model.Code = currentCode
-        except ValueError, e:
+        except ValueError as e:
             pass
             
         self.JumpToPage(page, code, index)
@@ -517,8 +517,8 @@ class Presenter(object):
         item = None    
         items = self._model.GetItems(self._currentVolume, self._currentPage)
         if len(items) > 1 and self._model.CanSelectComparingItem():
-            dialog = wx.SingleChoiceDialog(self._view, u'เลือกข้อที่ต้องการเทียบเคียง', 
-                self._model.GetTitle(self._currentVolume), map(lambda x: u'ข้อที่ ' + utils.ArabicToThai(x), items))
+            dialog = wx.SingleChoiceDialog(self._view, 'เลือกข้อที่ต้องการเทียบเคียง', 
+                self._model.GetTitle(self._currentVolume), ['ข้อที่ ' + utils.ArabicToThai(x) for x in items])
             if dialog.ShowModal() == wx.ID_OK:
                 item = items[dialog.GetSelection()]
             dialog.Destroy()
@@ -616,12 +616,12 @@ class Presenter(object):
         if n > -1:
             self._view.SetSelection(content, n, n+len(text), code, index)
         elif found:
-            dlg = wx.MessageDialog(self._view, u'การค้นหาสิ้นสุดแล้ว', 'Find', style=wx.ICON_INFORMATION)
+            dlg = wx.MessageDialog(self._view, 'การค้นหาสิ้นสุดแล้ว', 'Find', style=wx.ICON_INFORMATION)
             dlg.ShowModal()
             dlg.Destroy()
             self._findTextHandler.Reset()
         else:
-            dlg = wx.MessageDialog(self._view, u'ไม่พบคำที่ค้นหา', 'Find', style=wx.ICON_INFORMATION)
+            dlg = wx.MessageDialog(self._view, 'ไม่พบคำที่ค้นหา', 'Find', style=wx.ICON_INFORMATION)
             dlg.ShowModal()
             dlg.Destroy()
             self._findTextHandler.Reset()            
@@ -704,12 +704,12 @@ class Presenter(object):
         if len(titles[1]) > 0:
             ref += titles[1] + '  '
             
-        ref += _('Page') + ' ' + utils.ArabicToThai(unicode(page))
+        ref += _('Page') + ' ' + utils.ArabicToThai(str(page))
 
         if len(items) != 0 and items[0] is not None:
-            ref += '  ' + _('Item') + ' ' + utils.ArabicToThai(unicode(items[0]))
+            ref += '  ' + _('Item') + ' ' + utils.ArabicToThai(str(items[0]))
             if len(items) > 1:
-                ref += ' - ' + utils.ArabicToThai(unicode(items[-1]))
+                ref += ' - ' + utils.ArabicToThai(str(items[-1]))
 
         return ref                        
     
@@ -815,9 +815,9 @@ class Presenter(object):
         real_code = code if code is not None else self._model.Code
 
         cursor.execute('SELECT * FROM Note WHERE volume=? AND page=? AND code=?', (volume, page, real_code))
-        if cursor.fetchone() and text != u'':
+        if cursor.fetchone() and text != '':
             cursor.execute('UPDATE Note SET text=? WHERE volume=? AND page=? AND code=?', (text, volume, page, real_code))
-        elif text != u'':
+        elif text != '':
             cursor.execute('INSERT INTO Note (volume,page,code,filename,text) VALUES (?,?,?,?,?)', 
                            (volume, page, real_code, filename, text))
         else:
@@ -838,7 +838,7 @@ class Presenter(object):
             with open(filename, 'w') as f: json.dump(self._marks[key], f)
         
     def ClearMarkedText(self, code, index):
-        dlg = wx.MessageDialog(self._view.ReadPanel(code, index), u'คุณต้องการลบการระบายสีข้อความทั้งหมดหรือไม่?', u'ยืนยันการลบ', 
+        dlg = wx.MessageDialog(self._view.ReadPanel(code, index), 'คุณต้องการลบการระบายสีข้อความทั้งหมดหรือไม่?', 'ยืนยันการลบ', 
             wx.YES_NO|wx.ICON_EXCLAMATION)
         if dlg.ShowModal() == wx.ID_YES:
             self._marks[self._CurrentMarkKey(code, index)] = []
@@ -850,7 +850,7 @@ class Presenter(object):
         return os.path.exists(self._CurrentMarkFilename(code, index)) if self._CurrentMarkFilename(code, index) is not None else False
         
     def HasMarkText(self, code, index):
-        return any(map(lambda x:x[0], self._marks.get(self._CurrentMarkKey(code, index), [])))
+        return any([x[0] for x in self._marks.get(self._CurrentMarkKey(code, index), [])])
         
     def ShowBookmarkPopup(self, x, y):
         code, index = utils.SplitKey(self._lastFocus)
@@ -867,7 +867,7 @@ class Presenter(object):
         total = self._model.GetTotalPages(volume)
 
         data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0, 'sep':False}
-        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการพิมพ์', title1, title2, total, data)
+        dlg = dialogs.PageRangeDialog(self._view, 'โปรดเลือกหน้าที่ต้องการพิมพ์', title1, title2, total, data)
         
         if dlg.ShowModal() == wx.ID_OK:
             font = utils.LoadFont(constants.READ_FONT, self._model.Code)
@@ -881,34 +881,34 @@ class Presenter(object):
             style += 'body { font-family: "TF Chiangsaen"; font-size: 26px; line-height: 1; } \n'
             style += '</style>'
 
-            text = u'<body>'
+            text = '<body>'
             
-            ptext = u'หน้าที่ %s ถึง %s' % (utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')), 
+            ptext = 'หน้าที่ %s ถึง %s' % (utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')), 
                 utils.ArabicToThai(str(data['to']+1).decode('utf8','ignore')))
             if data['from'] == data['to']:
-                ptext = u'หน้าที่ %s' % (utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')))                
+                ptext = 'หน้าที่ %s' % (utils.ArabicToThai(str(data['from']+1).decode('utf8','ignore')))                
             
-            text += u"<div align=center><b>%s</b><br><b>%s</b><br>%s</div><hr>" % (title1, title2, ptext)
+            text += "<div align=center><b>%s</b><br><b>%s</b><br>%s</div><hr>" % (title1, title2, ptext)
             
-            for p in range(data['from'], data['to']+1) if data['from'] <= data['to'] else range(data['from'], data['to']-1, -1):
-                content = self._model.GetPage(volume, p+1).replace(u'\t', u'&nbsp;'*7).replace(u'\x0a', u'<br>')
-                content = content.replace(u'\x0b', u'<br>').replace(u'\x0c', u'<br>').replace(u'\x0d', u'<br>')
+            for p in list(range(data['from'], data['to']+1)) if data['from'] <= data['to'] else list(range(data['from'], data['to']-1, -1)):
+                content = self._model.GetPage(volume, p+1).replace('\t', '&nbsp;'*7).replace('\x0a', '<br>')
+                content = content.replace('\x0b', '<br>').replace('\x0c', '<br>').replace('\x0d', '<br>')
 
                 if data['sep']:
-                    text += u'<div align=right>หน้าที่ %s</div>'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore')))
-                    text += u'%s<br><br>'%(content)
+                    text += '<div align=right>หน้าที่ %s</div>'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore')))
+                    text += '%s<br><br>'%(content)
                 else:
-                    text += u'%s<br>'%(content)
+                    text += '%s<br>'%(content)
                     
-            text = text.rstrip('<br>') + u'</body>'
+            text = text.rstrip('<br>') + '</body>'
 
             dest = os.path.join(constants.DATA_PATH, 'printing.pdf')
             
             html = '<html>' + style + text + '</html>'
             
-            pdf = pisa.CreatePDF(cStringIO.StringIO(html.encode('utf-8')), file(dest, 'wb'), encoding='utf-8')
+            pdf = pisa.CreatePDF(io.StringIO(html.encode('utf-8')), file(dest, 'wb'), encoding='utf-8')
             if pdf.err:
-                print pdf.err
+                print((pdf.err))
             else:
                 pisa.startViewer(dest)
 
@@ -917,9 +917,9 @@ class Presenter(object):
         self._model.Code = currentCode
 
     def _ShowConfirmSaveDialog(self, code, volume, start, end, text):
-        dlg = wx.FileDialog(self._view, u'โปรดเลือกไฟล์', self._saveDirectory, 
+        dlg = wx.FileDialog(self._view, 'โปรดเลือกไฟล์', self._saveDirectory, 
             '%s_volumn-%02d_page-%04d-%04d' % (code, volume, start+1, end+1), 
-            u'Plain Text (*.txt)|*.txt', wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+            'Plain Text (*.txt)|*.txt', wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             with codecs.open(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w', 'utf-8') as f:
                 f.write(text)
@@ -927,25 +927,25 @@ class Presenter(object):
         dlg.Destroy()
         
     def _SavePagesToText(self, title1, title2, volume, start, end, sep):
-        text = u'%s\n%s\n\n' % (title1, title2)
-        for p in range(start, end+1) if start <= end else range(start, end-1, -1):
+        text = '%s\n%s\n\n' % (title1, title2)
+        for p in list(range(start, end+1)) if start <= end else list(range(start, end-1, -1)):
             content = self._model.GetPage(volume, p+1)
-            text += u' '*60 + u'หน้าที่ %s\n\n'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore'))) if sep else ''
-            text += u'%s\n\n\n' % (content)
+            text += ' '*60 + 'หน้าที่ %s\n\n'%(utils.ArabicToThai(str(p+1).decode('utf8','ignore'))) if sep else ''
+            text += '%s\n\n\n' % (content)
         self._ShowConfirmSaveDialog(self._model.Code, volume, start, end, text)
 
     def _SavePagesToPDF(self, volume, start, end):
-        import urllib2, webbrowser
+        import urllib.request, urllib.error, urllib.parse, webbrowser
         start, end = (end, start) if start > end else (start, end)
         url = constants.PALI_PDF_URL_PATTERN % (volume, start+1, end+1)
-        response = urllib2.urlopen(url).read()
+        response = urllib.request.urlopen(url).read()
         obj = json.loads(response)
         if obj.get('success', False):
             webbrowser.open_new(obj.get('url'))
         else:
             dlg = wx.MessageDialog(self._view, 
-                                   u'เนื่องจากข้อมูลยังไม่สมบูรณ์ กรุณาทดลองใหม่ภายหลัง', 
-                                   u'ไม่พบไฟล์ PDF ต้นฉบับ', style=wx.ICON_ERROR)
+                                   'เนื่องจากข้อมูลยังไม่สมบูรณ์ กรุณาทดลองใหม่ภายหลัง', 
+                                   'ไม่พบไฟล์ PDF ต้นฉบับ', style=wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
         
@@ -960,7 +960,7 @@ class Presenter(object):
         total = self._model.GetTotalPages(volume)
 
         data = {'from':page-1 if page > 0 else 0, 'to':page-1 if page > 0 else 0}
-        dlg = dialogs.PageRangeDialog(self._view, u'โปรดเลือกหน้าที่ต้องการบันทึก', title1, title2, total, data, self._model.HasPdf)        
+        dlg = dialogs.PageRangeDialog(self._view, 'โปรดเลือกหน้าที่ต้องการบันทึก', title1, title2, total, data, self._model.HasPdf)        
         if dlg.ShowModal() == wx.ID_OK:
             if data.get('pdf', False):
                 self._SavePagesToPDF(volume, data['from'], data['to'])
@@ -1003,7 +1003,7 @@ class Presenter(object):
         if self._paliDictWindow is None:
             self._paliDictWindow = widgets.PaliDictWindow(self._view)
             self._paliDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._paliDictWindow.SetTitle(u'พจนานุกรม บาลี-ไทย')
+            self._paliDictWindow.SetTitle('พจนานุกรม บาลี-ไทย')
             
         self._paliDictWindow.Show()        
         self._paliDictWindow.Raise()
@@ -1019,7 +1019,7 @@ class Presenter(object):
         if self._thaiDictWindow is None:
             self._thaiDictWindow = widgets.ThaiDictWindow(self._view)
             self._thaiDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._thaiDictWindow.SetTitle(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน')
+            self._thaiDictWindow.SetTitle('พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน')
 
         self._thaiDictWindow.Show()        
         self._thaiDictWindow.Raise()
@@ -1035,7 +1035,7 @@ class Presenter(object):
         if self._englishDictWindow is None:
             self._englishDictWindow = widgets.EnglishDictWindow(self._view)
             self._englishDictWindow.Bind(wx.EVT_CLOSE, OnDictClose)
-            self._englishDictWindow.SetTitle(u'Pali-English Dictionary')
+            self._englishDictWindow.SetTitle('Pali-English Dictionary')
 
         self._englishDictWindow.Show()
         self._englishDictWindow.Raise()
@@ -1094,7 +1094,7 @@ class Presenter(object):
 
     def SelectTheme(self, theme):
         utils.SaveTheme(theme, constants.READ)
-        for key in [None]+self._compareVolume.keys():
+        for key in [None]+list(self._compareVolume.keys()):
             code, index = utils.SplitKey(key)
             self._view.FocusBody(code, index).SetBackgroundColour(utils.LoadThemeBackgroundColour(constants.READ))
             self._view.FocusBody(code, index).SetForegroundColour(utils.LoadThemeForegroundColour(constants.READ))

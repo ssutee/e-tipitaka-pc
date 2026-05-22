@@ -22,7 +22,7 @@ D. J. Bernstein's CDB format (http://cr.yp.to/cdb.html).
 from sys import byteorder
 from array import array
 from collections import defaultdict
-from cPickle import loads, dumps
+from pickle import loads, dumps
 from struct import Struct
 
 from whoosh.system import (_INT_SIZE, _LONG_SIZE, pack_ushort, pack_uint,
@@ -94,7 +94,7 @@ class HashWriter(object):
         directory = self.directory = []
 
         pos = dbfile.tell()
-        for i in xrange(0, 256):
+        for i in range(0, 256):
             entries = hashes[i]
             numslots = 2 * len(entries)
             directory.append((pos, numslots))
@@ -158,7 +158,7 @@ class HashReader(object):
             yield (keypos, keylen, datapos, datalen)
 
     def __iter__(self):
-        return self.items()
+        return list(self.items())
 
     def items(self):
         read = self.read
@@ -221,7 +221,7 @@ class HashReader(object):
             return
 
         slotpos = hpos + (((keyhash >> 8) % hslots) * pointer_size)
-        for _ in xrange(hslots):
+        for _ in range(hslots):
             slothash, pos = unpack_pointer(read(slotpos, pointer_size))
             if not pos:
                 return
@@ -518,7 +518,7 @@ class TermIndexReader(CodedOrderedReader):
         dbfile.seek(self.indexbase + self.length * _LONG_SIZE)
         self.fieldmap = dbfile.read_pickle()
         self.names = [None] * len(self.fieldmap)
-        for name, num in self.fieldmap.iteritems():
+        for name, num in list(self.fieldmap.items()):
             self.names[num] = name
     
     def keycoder(self, key):
@@ -587,14 +587,14 @@ class LengthWriter(object):
         for docnum, fieldname, byte in items:
             if byte:
                 if fieldname not in lengths:
-                    lengths[fieldname] = array("B",  (0 for _ in xrange(self.doccount)))
+                    lengths[fieldname] = array("B",  (0 for _ in range(self.doccount)))
                 lengths[fieldname][docnum] = byte
     
     def add(self, docnum, fieldname, byte):
         lengths = self.lengths
         if byte:
             if fieldname not in lengths:
-                lengths[fieldname] = array("B",  (0 for _ in xrange(self.doccount)))
+                lengths[fieldname] = array("B",  (0 for _ in range(self.doccount)))
             lengths[fieldname][docnum] = byte
     
     def reader(self):
@@ -602,7 +602,7 @@ class LengthWriter(object):
     
     def close(self):
         self.dbfile.write_ushort(len(self.lengths))
-        for fieldname, arry in self.lengths.iteritems():
+        for fieldname, arry in list(self.lengths.items()):
             self.dbfile.write_string(fieldname)
             self.dbfile.write_array(arry)
         self.dbfile.close()
@@ -617,13 +617,13 @@ class LengthReader(object):
         else:
             self.lengths = {}
             count = dbfile.read_ushort()
-            for _ in xrange(count):
+            for _ in range(count):
                 fieldname = dbfile.read_string()
                 self.lengths[fieldname] = dbfile.read_array("B", self.doccount)
             dbfile.close()
     
     def __iter__(self):
-        for fieldname in self.lengths.keys():
+        for fieldname in list(self.lengths.keys()):
             for docnum, byte in enumerate(self.lengths[fieldname]):
                 yield docnum, fieldname, byte
     
@@ -659,7 +659,7 @@ class StoredFieldWriter(object):
         name_map = self.name_map
         
         vlist = [None] * len(name_map)
-        for k, v in values.iteritems():
+        for k, v in list(values.items()):
             if k in name_map:
                 vlist[name_map[k]] = v
             else:
@@ -695,7 +695,7 @@ class StoredFieldReader(object):
         dbfile.seek(pos)
         name_map = dbfile.read_pickle()
         self.names = [None] * len(name_map)
-        for name, pos in name_map.iteritems():
+        for name, pos in list(name_map.items()):
             self.names[pos] = name
         self.directory_offset = dbfile.tell()
         
@@ -719,7 +719,7 @@ class StoredFieldReader(object):
         # Recreate a dictionary by putting the field names and values back
         # together by position. We can't just use dict(zip(...)) because we
         # want to filter out the None values.
-        values = dict((names[i], vlist[i]) for i in xrange(len(names))
+        values = dict((names[i], vlist[i]) for i in range(len(names))
                       if vlist[i] is not None)
         
         # Pull out an extra stored dynamic field values off the end of the list
@@ -736,23 +736,23 @@ def dump_hash(hashreader):
     read = hashreader.read
     eod = hashreader.end_of_data
 
-    print "HEADER_SIZE=", HEADER_SIZE, "eod=", eod
+    print(("HEADER_SIZE=", HEADER_SIZE, "eod=", eod))
 
     # Dump hashtables
-    for bucketnum in xrange(0, 256):
+    for bucketnum in range(0, 256):
         pos, numslots = unpack_header_entry(read(bucketnum * header_entry_size, header_entry_size))
         if numslots:
-            print "Bucket %d: %d slots" % (bucketnum, numslots)
+            print(("Bucket %d: %d slots" % (bucketnum, numslots)))
 
             dbfile.seek(pos)
-            for _ in xrange(0, numslots):
-                print "  %X : %d" % unpack_pointer(read(pos, pointer_size))
+            for _ in range(0, numslots):
+                print(("  %X : %d" % unpack_pointer(read(pos, pointer_size))))
                 pos += pointer_size
         else:
-            print "Bucket %d empty: %s, %s" % (bucketnum, pos, numslots)
+            print(("Bucket %d empty: %s, %s" % (bucketnum, pos, numslots)))
 
     # Dump keys and values
-    print "-----"
+    print("-----")
     pos = HEADER_SIZE
     dbfile.seek(pos)
     while pos < eod:
@@ -761,7 +761,7 @@ def dump_hash(hashreader):
         datapos = pos + lengths_size + keylen
         key = read(keypos, keylen)
         data = read(datapos, datalen)
-        print "%d +%d,%d:%r->%r" % (pos, keylen, datalen, key, data)
+        print(("%d +%d,%d:%r->%r" % (pos, keylen, datalen, key, data)))
         pos = datapos + datalen
 
 

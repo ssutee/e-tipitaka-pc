@@ -8,7 +8,7 @@ from dialogs import BookmarkDialog, BookmarkManagerDialog
 
 try:
     import wx.aui as aui
-except ImportError,e:
+except ImportError as e:
     import wx.lib.agw.aui as aui
 
 import i18n
@@ -97,15 +97,13 @@ class ThaiFiveBooksViewComponents(ViewComponents):
         
     def _InitTree(self, data, tree):                
         root = tree.AddRoot('root')        
-        keys = constants.FIVE_BOOKS_TOC.keys()
-        keys.sort()
+        keys = sorted(list(constants.FIVE_BOOKS_TOC.keys()))
         for key in keys:
             volume = tree.AppendItem(root, constants.FIVE_BOOKS_NAMES[int(key)-1])
             tree.SetItemData(volume, tuple(constants.FIVE_BOOKS_TOC[key][0]) + (None,) )
             if int(key) == 1:
                 self.FirstVolume = volume
-            secs = map(int, constants.FIVE_BOOKS_TOC[key][1].keys())
-            secs.sort()            
+            secs = sorted(map(int, list(constants.FIVE_BOOKS_TOC[key][1].keys())))
             for sec in secs:
                 section = tree.AppendItem(volume, constants.FIVE_BOOKS_SECTIONS[int(key)][int(sec)])
                 tree.SetItemData(section, tuple(constants.FIVE_BOOKS_TOC[key][1][str(sec)]) + (int(sec),))
@@ -302,7 +300,7 @@ class View(AuiBaseFrame):
         return self._readPanel.Body
         
     def SetStatusText(self, text, field):
-        self._parent.StatusBar.SetStatusText(u'', 2)
+        self._parent.StatusBar.SetStatusText('', 2)
         self._parent.StatusBar.SetStatusText(text, field)
 
     def ReadPanel(self, code, index):
@@ -342,23 +340,23 @@ class View(AuiBaseFrame):
         self._bookList = self._components.GetBookList(panel)
         
         naviPanel = wx.Panel(panel, wx.ID_ANY)
-        naviSizer = wx.StaticBoxSizer(wx.StaticBox(naviPanel, wx.ID_ANY, u'เลือกอ่านที่'), orient=wx.HORIZONTAL)
+        naviSizer = wx.StaticBoxSizer(wx.StaticBox(naviPanel, wx.ID_ANY, 'เลือกอ่านที่'), orient=wx.HORIZONTAL)
 
         self._bookFontsButton = wx.BitmapButton(naviPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(30,30))
-        labelPage = wx.StaticText(naviPanel, wx.ID_ANY, u'หน้า: ')
-        labelItem = wx.StaticText(naviPanel, wx.ID_ANY, u'ข้อ: ')
+        labelPage = wx.StaticText(naviPanel, wx.ID_ANY, 'หน้า: ')
+        labelItem = wx.StaticText(naviPanel, wx.ID_ANY, 'ข้อ: ')
         
         self._inputPage = wx.TextCtrl(naviPanel, wx.ID_ANY, size=(50,-1), style=wx.TE_PROCESS_ENTER)
 		
         self._inputItem = wx.TextCtrl(naviPanel, wx.ID_ANY, size=(50,-1), style=wx.TE_PROCESS_ENTER)
         
-        self._checkBox = wx.CheckBox(naviPanel, wx.ID_ANY, label=u'=สยามรัฐฯ')
+        self._checkBox = wx.CheckBox(naviPanel, wx.ID_ANY, label='=สยามรัฐฯ')
 		
         naviSizer.Add(self._bookFontsButton, 0, wx.RIGHT, 5)
         naviSizer.Add(labelPage, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(self._inputPage, flag=wx.ALIGN_CENTER_VERTICAL)
-        naviSizer.Add(wx.StaticText(panel, wx.ID_ANY, u'  หรือ  '), flag=wx.ALIGN_CENTER_VERTICAL)
+        naviSizer.Add(wx.StaticText(panel, wx.ID_ANY, '  หรือ  '), flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(labelItem, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(self._inputItem, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add((5,-1))
@@ -374,7 +372,7 @@ class View(AuiBaseFrame):
         return panel        
         
     def AddReadPanel(self, code):
-        index = 1 if len(self._comparePanel.keys()) == 0 else sum(map(lambda k:int(k.startswith(code)), self._comparePanel.keys()))+1
+        index = 1 if len(list(self._comparePanel.keys())) == 0 else sum([int(k.startswith(code)) for k in list(self._comparePanel.keys())])+1
         
         self._comparePanel[utils.MakeKey(code,index)] = ReadPanelCreator.Create(self, code, index, self._font, self._delegate)
         info = aui.AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
@@ -510,8 +508,8 @@ class View(AuiBaseFrame):
         if self._bookmarkMenu is not None:
             self._bookmarkMenu.Destroy()
         self._bookmarkMenu = wx.Menu()
-        self.Bind(wx.EVT_MENU, self.OnMenuAddBookmarkSelected, self._bookmarkMenu.Append(-1, u'คั่นหน้านี้'))
-        self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, u'จัดการคั่นหน้า'))        
+        self.Bind(wx.EVT_MENU, self.OnMenuAddBookmarkSelected, self._bookmarkMenu.Append(-1, 'คั่นหน้านี้'))
+        self.Bind(wx.EVT_MENU, self.OnMenuManageBookmarkSelected, self._bookmarkMenu.Append(-1, 'จัดการคั่นหน้า'))        
         self._bookmarkMenu.AppendSeparator()        
         self._delegate.LoadBookmarks(self._bookmarkMenu, code, index)
         self._toolPanel.PopupMenu(self._bookmarkMenu, (x,y))
@@ -536,20 +534,20 @@ class View(AuiBaseFrame):
             window.SelectAll()
             
         def OnSearch(event):
-            text = u''
+            text = ''
             if isinstance(window, wx.html.HtmlWindow):
                 text = window.SelectionToText()
             elif isinstance(window, wx.TextCtrl):
                 text = window.GetStringSelection()
             self._delegate.SearchSelection(text)
 
-        cmd = u'⌘' if 'wxMac' in wx.PlatformInfo else u'Ctrl+'
-        aux = u'⌥' if 'wxMac' in wx.PlatformInfo else u'Shift+'
+        cmd = '⌘' if 'wxMac' in wx.PlatformInfo else 'Ctrl+'
+        aux = '⌥' if 'wxMac' in wx.PlatformInfo else 'Shift+'
         menu = wx.Menu()
-        search = menu.Append(constants.ID_SEARCH, u'ค้นหา')
+        search = menu.Append(constants.ID_SEARCH, 'ค้นหา')
         menu.AppendSeparator()
-        copy = menu.Append(constants.ID_COPY, u'คัดลอก' + 17*' ' + cmd + u'C')
-        copyref = menu.Append(constants.ID_COPY_REFERENCE, u'คัดลอก (อ้างอิง)' + 6*' ' + cmd + aux + u'C')
+        copy = menu.Append(constants.ID_COPY, 'คัดลอก' + 17*' ' + cmd + 'C')
+        copyref = menu.Append(constants.ID_COPY_REFERENCE, 'คัดลอก (อ้างอิง)' + 6*' ' + cmd + aux + 'C')
         menu.AppendSeparator()        
         if isinstance(window, wx.TextCtrl):
             copy.Enable(window.CanCopy())
@@ -558,7 +556,7 @@ class View(AuiBaseFrame):
             copy.Enable(len(window.SelectionToText()) > 0)
             copyref.Enable(len(window.SelectionToText()) > 0)            
             
-        selectAll = menu.Append(constants.ID_SELECT_ALL, u'เลือกทั้งหมด' + 11*' ' + cmd + u'A')
+        selectAll = menu.Append(constants.ID_SELECT_ALL, 'เลือกทั้งหมด' + 11*' ' + cmd + 'A')
         wx.EVT_MENU(menu, constants.ID_COPY, OnCopy)
         wx.EVT_MENU(menu, constants.ID_COPY_REFERENCE, OnCopyReference)
         wx.EVT_MENU(menu, constants.ID_SELECT_ALL, OnSelectAll)
@@ -579,11 +577,11 @@ class View(AuiBaseFrame):
                 result = dialog.GetValue()
                 if result != None and len(result) == 2:
                     pid, note = result
-                    note = u'%s : %s' %(utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d'%(volume, page)), note)
+                    note = '%s : %s' %(utils.ArabicToThai('เล่มที่ %d หน้าที่ %d'%(volume, page)), note)
                     self._delegate.SaveBookmark(note, volume, page, pid)
             dialog.Destroy()
         else:
-            wx.MessageBox(u'หน้ายังไม่ได้ถูกเลือก',u'พบข้อผิดพลาด')
+            wx.MessageBox('หน้ายังไม่ได้ถูกเลือก','พบข้อผิดพลาด')
         
     def SetBookListSelection(self, volume):
         if isinstance(self._bookList, wx.ListBox):

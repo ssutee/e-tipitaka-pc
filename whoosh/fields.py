@@ -120,7 +120,7 @@ class FieldType(object):
         
         if not self.format:
             raise Exception("%s field cannot index without a format" % self.__class__)
-        if not isinstance(value, unicode):
+        if not isinstance(value, str):
             raise ValueError("%r is not unicode" % value)
         return self.format.word_values(value, mode="index", **kwargs)
     
@@ -264,7 +264,7 @@ class NUMERIC(FieldType):
         if self.type is int:
             self._to_text = int_to_text
             self._from_text = text_to_int
-        elif self.type is long:
+        elif self.type is int:
             self._to_text = long_to_text
             self._from_text = text_to_long
         elif self.type is float:
@@ -291,7 +291,7 @@ class NUMERIC(FieldType):
         else:
             bitlen = 64
         
-        for shift in xrange(0, bitlen, self.shift_step):
+        for shift in range(0, bitlen, self.shift_step):
             yield self.to_text(num, shift=shift)
     
     def index(self, num):
@@ -337,7 +337,7 @@ class NUMERIC(FieldType):
         
         try:
             text = self.to_text(qstring)
-        except Exception, e:
+        except Exception as e:
             raise QueryParserError(e)
         
         return query.Term(fieldname, text, boost=boost)
@@ -351,7 +351,7 @@ class NUMERIC(FieldType):
                 start = self.from_text(self.to_text(start))
             if end is not None:
                 end = self.from_text(self.to_text(end))
-        except Exception, e:
+        except Exception as e:
             raise QueryParserError(e)
         
         return query.NumericRange(fieldname, start, end, startexcl, endexcl,
@@ -391,13 +391,13 @@ class DATETIME(NUMERIC):
         :param unique: Whether the value of this field is unique per-document.
         """
         
-        super(DATETIME, self).__init__(type=long, stored=stored, unique=unique,
+        super(DATETIME, self).__init__(type=int, stored=stored, unique=unique,
                                        shift_step=8)
     
     def to_text(self, x, shift=0):
         if isinstance(x, datetime.datetime):
             x = datetime_to_long(x)
-        elif not isinstance(x, (int, long)):
+        elif not isinstance(x, int):
             raise ValueError("DATETIME.to_text field doesn't know what to do "
                              "with %r" % x)
         
@@ -471,9 +471,9 @@ class BOOLEAN(FieldType):
     >>> w.commit()
     """
     
-    strings = (u"f", u"t")
-    trues = frozenset((u"t", u"true", u"yes", u"1"))
-    falses = frozenset((u"f", u"false", u"no", u"0"))
+    strings = ("f", "t")
+    trues = frozenset(("t", "true", "yes", "1"))
+    falses = frozenset(("f", "false", "no", "0"))
     
     __inittypes__ = dict(stored=bool)
     
@@ -487,7 +487,7 @@ class BOOLEAN(FieldType):
         self.format = Existence(None)
     
     def to_text(self, bit):
-        if isinstance(bit, basestring):
+        if isinstance(bit, str):
             bit = bit in self.trues
         elif not isinstance(bit, bool):
             raise ValueError("%r is not a boolean")
@@ -712,7 +712,7 @@ class Schema(object):
     
     def __eq__(self, other):
         return (other.__class__ is self.__class__
-                and self.items() == other.items())
+                and list(self.items()) == list(other.items()))
     
     def __repr__(self):
         return "<%s: %r>" % (self.__class__, self.names())
@@ -721,7 +721,7 @@ class Schema(object):
         """Returns the field objects in this schema.
         """
         
-        return self._fields.itervalues()
+        return iter(list(self._fields.values()))
     
     def __getitem__(self, name):
         """Returns the field associated with the given field name.
@@ -730,7 +730,7 @@ class Schema(object):
         if name in self._fields:
             return self._fields[name]
         
-        for expr, fieldtype in self._dyn_fields.itervalues():
+        for expr, fieldtype in list(self._dyn_fields.values()):
             if expr.match(name):
                 return fieldtype
         
@@ -791,10 +791,10 @@ class Schema(object):
         
         # If the user passed a type rather than an instantiated field object,
         # instantiate it automatically
-        if type(fieldtype) is type:
+        if isinstance(fieldtype, type):
             try:
                 fieldtype = fieldtype()
-            except Exception, e:
+            except Exception as e:
                 raise FieldConfigurationError("Error: %s instantiating field %r: %r" % (e, name, fieldtype))
         
         if not isinstance(fieldtype, FieldType):
@@ -827,20 +827,20 @@ class Schema(object):
         """Returns a list of the names of fields that are stored.
         """
         
-        return [name for name, field in self.items() if field.stored]
+        return [name for name, field in list(self.items()) if field.stored]
 
     def scorable_names(self):
         """Returns a list of the names of fields that store field
         lengths.
         """
         
-        return [name for name, field in self.items() if field.scorable]
+        return [name for name, field in list(self.items()) if field.scorable]
 
     def vector_names(self):
         """Returns a list of the names of fields that store vectors.
         """
         
-        return [name for name, field in self.items() if field.vector]
+        return [name for name, field in list(self.items()) if field.vector]
 
     def analyzer(self, fieldname):
         """Returns the content analyzer for the given fieldname, or None if

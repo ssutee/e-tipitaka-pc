@@ -101,7 +101,7 @@ class Interactor(object):
     def OnInputPageEnter(self, event):
         try:
             self.Presenter.JumpToPage(int(self.View.InputPage.GetValue()))
-        except ValueError,e:
+        except ValueError as e:
             self.Presenter.JumpToPage(0)
                 
     def OnInputItemEnter(self, event):        

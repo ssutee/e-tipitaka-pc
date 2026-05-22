@@ -305,7 +305,7 @@ class FilePostingReader(Matcher):
     def __init__(self, postfile, offset, format, scorer=None,
                  fieldname=None, text=None, stringids=False):
         
-        assert isinstance(offset, (int, long)), "offset is %r/%s" % (offset, type(offset))
+        assert isinstance(offset, int), "offset is %r/%s" % (offset, type(offset))
         assert isinstance(format, Format), "format is %r/%s" % (format, type(format))
         
         self.postfile = postfile
@@ -376,7 +376,7 @@ class FilePostingReader(Matcher):
     
     def all_ids(self):
         nextoffset = self.baseoffset
-        for _ in xrange(self.blockcount):
+        for _ in range(self.blockcount):
             blockinfo = self._read_blockinfo(nextoffset)
             nextoffset = blockinfo.nextoffset
             ids, __ = self._read_ids(blockinfo.dataoffset, blockinfo.postcount,
@@ -384,7 +384,7 @@ class FilePostingReader(Matcher):
             for id in ids:
                 yield id
 
-    def next(self):
+    def __next__(self):
         if self.i == self.blockinfo.postcount - 1:
             self._next_block()
             return True
@@ -426,7 +426,7 @@ class FilePostingReader(Matcher):
         
         if self.stringids:
             rs = pf.read_string
-            ids = [utf8decode(rs())[0] for _ in xrange(postcount)]
+            ids = [utf8decode(rs())[0] for _ in range(postcount)]
             newoffset = pf.tell()
         elif idslen:
             ids = array("I")
@@ -472,7 +472,7 @@ class FilePostingReader(Matcher):
                 # Format has a fixed posting size, just chop up the values
                 # equally
                 values = [values_string[i * posting_size: i * posting_size + posting_size]
-                          for i in xrange(postcount)]
+                          for i in range(postcount)]
             else:
                 # Format has a variable posting size, use the array of lengths
                 # to chop up the values.

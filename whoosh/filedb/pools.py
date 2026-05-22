@@ -27,7 +27,7 @@ from whoosh.util import length_to_byte, now
 
 _unique_name_chars = string.ascii_letters + string.digits + "_"
 def unique_name(length=16):
-    return "".join(random.choice(_unique_name_chars) for _ in xrange(length))
+    return "".join(random.choice(_unique_name_chars) for _ in range(length))
     
 
 def imerge(iterators):
@@ -40,7 +40,7 @@ def imerge(iterators):
     # Initialize the current list with the first item from each iterator
     for g in iterators:
         try:
-            current.append((g.next(), g))
+            current.append((next(g), g))
         except StopIteration:
             pass
         
@@ -53,7 +53,7 @@ def imerge(iterators):
         item, gen = heappop(current)
         yield item
         try:
-            heappush(current, (gen.next(), gen))
+            heappush(current, (next(gen), gen))
         except StopIteration:
             pass
     
@@ -171,15 +171,15 @@ class PoolBase(object):
         arry = self.length_arrays[fieldname]
         
         if len(arry) <= docnum:
-            for _ in xrange(docnum - len(arry) + 1):
+            for _ in range(docnum - len(arry) + 1):
                 arry.append(0)
         arry[docnum] = length_to_byte(length)
     
     def _fill_lengths(self, doccount):
-        for fieldname in self.length_arrays.keys():
+        for fieldname in list(self.length_arrays.keys()):
             arry = self.length_arrays[fieldname]
             if len(arry) < doccount:
-                for _ in xrange(doccount - len(arry)):
+                for _ in range(doccount - len(arry)):
                     arry.append(0)
     
     def add_content(self, docnum, fieldname, field, value):

@@ -4,12 +4,12 @@ import wx
 
 try:
     import wx.aui as aui
-except ImportError,e:
+except ImportError as e:
     import wx.lib.agw.aui as aui
 
 import wx.lib.buttons as buttons
 import wx.html
-import sys, os, os.path, sys, codecs, re, cPickle, sqlite3
+import sys, os, os.path, sys, codecs, re, pickle, sqlite3
 import wx.richtext as rt
 import wx.lib.buttons as buttons
 import wx.grid
@@ -92,9 +92,9 @@ class SearchAndCompareWindow(wx.Frame):
     def GetData(self, row, col):
         volume1, page1, item1, volume2, page2, item2 = self.matchItems[row]
         if col == 0:
-            return utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d ข้อที่ %d' % (volume1, page1, item1))
+            return utils.ArabicToThai('เล่มที่ %d หน้าที่ %d ข้อที่ %d' % (volume1, page1, item1))
         if col == 1:
-            return utils.ArabicToThai(u'เล่มที่ %d หน้าที่ %d ข้อที่ %d' % (volume2, page2, item2))
+            return utils.ArabicToThai('เล่มที่ %d หน้าที่ %d ข้อที่ %d' % (volume2, page2, item2))
         return ''
 
     def GetTypeName(self, row, col) :
@@ -105,7 +105,7 @@ class SearchAndCompareWindow(wx.Frame):
             return self.combo1.GetStringSelection()
         if col == 1:
             return self.combo2.GetStringSelection()
-        return u''
+        return ''
 
     @property
     def Delegate(self):
@@ -148,7 +148,7 @@ class SearchAndCompareWindow(wx.Frame):
         self.searchButton = wx.Button(mainPanel, wx.ID_ANY, _('Search'), size=(80,-1))
         self.searchButton.Bind(wx.EVT_BUTTON, self.OnSearchButtonClick)
 
-        self.openAllButton = wx.Button(mainPanel, wx.ID_ANY, u'เปิดอ่าน', size=(80,-1))
+        self.openAllButton = wx.Button(mainPanel, wx.ID_ANY, 'เปิดอ่าน', size=(80,-1))
         self.openAllButton.Bind(wx.EVT_BUTTON, self.OnOpenAllButtonClick)
 
         sizer1.Add(self.combo1, 0)
@@ -177,7 +177,7 @@ class SearchAndCompareWindow(wx.Frame):
         rightSizer = wx.StaticBoxSizer(wx.StaticBox(rightPanel, wx.ID_ANY, _('History')), orient=wx.VERTICAL)        
         self.historyList = wx.ListBox(rightPanel, wx.ID_ANY, choices=[], style=wx.LB_SINGLE|wx.LB_NEEDED_SB)
         self.historyList.Bind(wx.EVT_LISTBOX, self.OnHistoryListSelect)
-        self.deleteButton = wx.Button(rightPanel, wx.ID_ANY, u'ลบ', size=(80,-1))
+        self.deleteButton = wx.Button(rightPanel, wx.ID_ANY, 'ลบ', size=(80,-1))
         self.deleteButton.Bind(wx.EVT_BUTTON, self.OnDeleteButtonClick)
 
         rightSizer.Add(self.historyList, 1, wx.EXPAND)
@@ -213,7 +213,7 @@ class SearchAndCompareWindow(wx.Frame):
     def _LoadHistoryList(self):
         items = []        
         for history in SearchAndCompareHistory.select():
-            items.append(u'%s(%d):%s(%d) | %s:%s (%d)' % 
+            items.append('%s(%d):%s(%d) | %s:%s (%d)' % 
                          (history.keywords1, history.count1 if history.count1 is not None else 0, 
                           history.keywords2, history.count2 if history.count2 is not None else 0, 
                           utils.ShortName(history.code1), utils.ShortName(history.code2), history.total))
@@ -229,7 +229,7 @@ class SearchAndCompareWindow(wx.Frame):
         self._Search()
 
     def _ClearBackgroundColor(self, grid):
-        for row in xrange(grid.GetNumberRows()):
+        for row in range(grid.GetNumberRows()):
             grid.SetCellBackgroundColour(row, 0, grid.GetDefaultCellBackgroundColour())
             grid.SetCellBackgroundColour(row, 1, grid.GetDefaultCellBackgroundColour())
 
@@ -262,7 +262,7 @@ class SearchAndCompareWindow(wx.Frame):
         if self.historyList.GetSelection() == -1:
             return
 
-        dialog = wx.MessageDialog(self, u'คุณต้องการลบการประวัตินี้หรือไม่?', u'ยืนยันการลบ', 
+        dialog = wx.MessageDialog(self, 'คุณต้องการลบการประวัตินี้หรือไม่?', 'ยืนยันการลบ', 
                 wx.YES_NO | wx.ICON_INFORMATION)
         dialog.Center()
 
@@ -296,8 +296,8 @@ class SearchAndCompareWindow(wx.Frame):
             cols_start = top_left[1]
             cols_end = bottom_right[1]
 
-            rows = range(rows_start, rows_end+1)
-            cols = range(cols_start, cols_end+1)
+            rows = list(range(rows_start, rows_end+1))
+            cols = list(range(cols_start, cols_end+1))
 
             cells.extend([(row, col)
                 for row in rows
@@ -472,12 +472,12 @@ class DictWindow(wx.Frame):
 
         self.hboxToolbar = wx.BoxSizer(wx.HORIZONTAL)
 
-        labelWord = wx.StaticText(self, -1, u'ค้นหา: ')
+        labelWord = wx.StaticText(self, -1, 'ค้นหา: ')
         self.input = wx.SearchCtrl(self, -1, pos=(0,0), size=(-1, -1), style=wx.TE_PROCESS_ENTER)     
 
         self.fontsButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=(30,30))
-        self.fontsButton.SetToolTip(wx.ToolTip(u'เปลี่ยนรูปแบบตัวหนังสือ'))
+        self.fontsButton.SetToolTip(wx.ToolTip('เปลี่ยนรูปแบบตัวหนังสือ'))
         self.fontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClicked)
 
         self.input.Bind(wx.EVT_TEXT_ENTER, self.OnTextEntered)
@@ -498,7 +498,7 @@ class DictWindow(wx.Frame):
         self.rightPanel = wx.Panel(self.sp,-1)
         self.text = wx.TextCtrl(self.rightPanel, -1, style=wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2)        
 
-        rightSizer = wx.StaticBoxSizer(wx.StaticBox(self.rightPanel, -1, u'คำแปล'), wx.VERTICAL)
+        rightSizer = wx.StaticBoxSizer(wx.StaticBox(self.rightPanel, -1, 'คำแปล'), wx.VERTICAL)
         rightSizer.Add(self.text,1,wx.ALL | wx.EXPAND,0)
         self.rightPanel.SetSizer(rightSizer)
         self.rightPanel.SetAutoLayout(True)
@@ -510,7 +510,7 @@ class DictWindow(wx.Frame):
         self.wordList = wx.ListCtrl(self.sp,tID,style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SINGLE_SEL)
         self.wordList.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectWord)
         self.wordList.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)        
-        self.wordList.InsertColumn(0,u"คำศัพท์")
+        self.wordList.InsertColumn(0,"คำศัพท์")
         self.wordList.SetColumnWidth(0, 250)
         
         self.sp.SplitVertically(self.wordList,self.rightPanel,200)
@@ -523,7 +523,7 @@ class DictWindow(wx.Frame):
         font, fontError = self.SetupFont()
 
         if not fontError:
-            self.input.SetValue(u'')
+            self.input.SetValue('')
                 
     def LookupDictSQLite(self, word1, word2=None, prefix=False):
         return
@@ -561,16 +561,16 @@ class DictWindow(wx.Frame):
             font = wx.Font(22, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
             font.SetFaceName('TF Chiangsaen')            
             self.input.SetFont(font)
-        except wx.PyAssertionError, e:
+        except wx.PyAssertionError as e:
             fontError = True
             font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
             self.input.SetFont(font)
-            self.input.SetValue(u'กรุณาติดตั้งฟอนต์ TF Chiangsaen เพื่อการแสดงผลที่ถูกต้อง')
+            self.input.SetValue('กรุณาติดตั้งฟอนต์ TF Chiangsaen เพื่อการแสดงผลที่ถูกต้อง')
         try:
             font = utils.LoadFont(constants.DICT_FONT)
             self.text.SetFont(font)
             self.wordList.SetFont(font)
-        except wx.PyAssertionError, e:        
+        except wx.PyAssertionError as e:        
             font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL)  
             self.text.SetFont(font)
 
@@ -587,7 +587,7 @@ class DictWindow(wx.Frame):
         event.Skip()
 
     def MakeContent(self, word, item):
-        return word+u'\n\n'+item[1]            
+        return word+'\n\n'+item[1]            
 
     def OnSelectWord(self, event):
         self.currentItem =  event.GetIndex()
@@ -617,9 +617,9 @@ class EnglishDictWindow(DictWindow):
                 for i,item in enumerate(items):
                     self.wordList.InsertItem(i,item[0])
             else:
-                self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
+                self.text.SetValue(text + '\n\n'+'ไม่พบคำนี้ในพจนานุกรม')
         else:
-            self.text.SetValue(text + u'\n'+u'กรุณาป้อนคำที่ต้องการค้นหา')
+            self.text.SetValue(text + '\n'+'กรุณาป้อนคำที่ต้องการค้นหา')
         event.Skip()
 
     def LookupDictSQLite(self, word1, word2=None, prefix=False):
@@ -639,9 +639,9 @@ class EnglishDictWindow(DictWindow):
         return font, True
 
     def ConvertToLowercase(self, headword):
-        upperchars = u'ĀĪŪṄṂÑṬḌṆḶ'
-        lowerchars = u'āīūṅṃñṭḍṇḷ'
-        result = u''
+        upperchars = 'ĀĪŪṄṂÑṬḌṆḶ'
+        lowerchars = 'āīūṅṃñṭḍṇḷ'
+        result = ''
         for c in headword:
             pos = upperchars.find(c)
             result += lowerchars[pos] if pos > -1 else c.lower()
@@ -649,7 +649,7 @@ class EnglishDictWindow(DictWindow):
 
     def SetupAdditionalToolbar(self, mainSizer):
         lowerSizer = wx.BoxSizer(wx.HORIZONTAL)        
-        lowerChars = u'āīūṅṃñṭḍṇḷ'
+        lowerChars = 'āīūṅṃñṭḍṇḷ'
 
         def OnCharButton(event):
             button = event.GetEventObject()
@@ -681,9 +681,9 @@ class ThaiDictWindow(DictWindow):
                 for i,item in enumerate(items):
                     self.wordList.InsertItem(i,item[0])
             else:
-                self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
+                self.text.SetValue(text + '\n\n'+'ไม่พบคำนี้ในพจนานุกรม')
         else:
-            self.text.SetValue(text + u'\n'+u'กรุณาป้อนคำที่ต้องการค้นหา')
+            self.text.SetValue(text + '\n'+'กรุณาป้อนคำที่ต้องการค้นหา')
         event.Skip()
 
     def LookupDictSQLite(self, word1, word2=None, prefix=False):
@@ -716,8 +716,8 @@ class PaliDictWindow(DictWindow):
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
 
-        text1 = text.replace(u'\u0e0d',u'\uf70f').replace(u'\u0e4d',u'\uf711').replace(u'ฐ',u'\uf700')
-        text2 = text.replace(u'\u0e0d',u'\uf70f').replace(u'\u0e4d',u'\uf711')
+        text1 = text.replace('\\u0e0d','\\uf70f').replace('\\u0e4d','\\uf711').replace('ฐ','\\uf700')
+        text2 = text.replace('\\u0e0d','\\uf70f').replace('\\u0e4d','\\uf711')
 
         self.wordList.DeleteAllItems()
 
@@ -728,9 +728,9 @@ class PaliDictWindow(DictWindow):
                     item_id = self.wordList.InsertItem(i,item[1])
                     self.wordList.SetItemData(item_id, item[0])
             else:
-                self.text.SetValue(text + u'\n\n'+u'ไม่พบคำนี้ในพจนานุกรม')
+                self.text.SetValue(text + '\n\n'+'ไม่พบคำนี้ในพจนานุกรม')
         else:
-            self.text.SetValue(text + u'\n'+u'กรุณาป้อนคำที่ต้องการค้นหา')
+            self.text.SetValue(text + '\n'+'กรุณาป้อนคำที่ต้องการค้นหา')
 
         event.Skip()
         
@@ -752,29 +752,29 @@ class PaliDictWindow(DictWindow):
             return cursor.fetchone()            
 
     def MakeContent(self, word, item):
-        word = word + u'\n'
+        word = word + '\n'
         if item[2] and item[2].strip() != '':
-            word += '\n' + u'คำแปล: ' + item[2].strip()
+            word += '\n' + 'คำแปล: ' + item[2].strip()
         if item[8] and item[8].strip() != '':
-            word += '\n' + u'คำอ่าน: ' + item[8].strip()
+            word += '\n' + 'คำอ่าน: ' + item[8].strip()
         if item[7] and item[7].strip() != '':
-            word += '\n' + u'หมวดหมู่: ' + item[7].strip()
+            word += '\n' + 'หมวดหมู่: ' + item[7].strip()
         if item[3] and item[3].strip() != '':
-            word += '\n' + u'ประเภทคำ: ' + item[3].strip()
+            word += '\n' + 'ประเภทคำ: ' + item[3].strip()
         if item[4] and item[4].strip() != '':
-            word += '\n' + u'ลิงค์: ' + item[4].strip()
+            word += '\n' + 'ลิงค์: ' + item[4].strip()
         if item[5] and item[5].strip() != '':
-            word += '\n' + u'วจนะ: ' + item[5].strip()
+            word += '\n' + 'วจนะ: ' + item[5].strip()
         if item[6] and item[6].strip() != '':
-            word += '\n' + u'วิภัติ: ' + item[6].strip()
+            word += '\n' + 'วิภัติ: ' + item[6].strip()
         if item[9] and item[9].strip() != '':
-            word += '\n' + u'คำอธิบายเพิ่มเติม: ' + item[9].strip()
+            word += '\n' + 'คำอธิบายเพิ่มเติม: ' + item[9].strip()
         if item[10] and item[10].strip() != '':
-            word += '\n' + u'อักษรโรมัน: ' + item[10].strip()
+            word += '\n' + 'อักษรโรมัน: ' + item[10].strip()
         if item[11] and item[11].strip() != '':
-            word += '\n\n' + u'คำแปล (อังกฤษ): ' + item[11].strip()
+            word += '\n\n' + 'คำแปล (อังกฤษ): ' + item[11].strip()
         if item[12] and item[12].strip() != '':
-            word += '\n\n' + u'ที่มา: ' + item[12].strip()
+            word += '\n\n' + 'ที่มา: ' + item[12].strip()
         return word
 
 class AuiBaseFrame(aui.AuiMDIChildFrame):
@@ -887,7 +887,7 @@ class MySearchCtrl(wx.SearchCtrl):
                     self._searches.append(text.strip())
                     if len(self._searches) > self.MAX_SEARCH_HISTORY:
                         del self._searches[0]
-            except UnicodeDecodeError,e:
+            except UnicodeDecodeError as e:
                 with codecs.open(self._logFile, 'w','utf-8') as out:
                     out.write('')
             menu = self.MakeMenu()
@@ -901,7 +901,7 @@ class MySearchCtrl(wx.SearchCtrl):
             for search in self._searches:
                 if self._lang == constants.LANG_PALI:
                     search = utils.ConvertToPaliSearch(search)
-                out.write(u'%s\n' % (search))
+                out.write('%s\n' % (search))
         
     @property
     def Language(self):
@@ -1016,7 +1016,7 @@ class ReadToolPanel(wx.Panel):
 
     def _CreateAttributes(self):
         self._viewPanel = wx.Panel(self, wx.ID_ANY)
-        viewSizer = wx.StaticBoxSizer(wx.StaticBox(self._viewPanel, wx.ID_ANY, u'อ่านทีละหน้า'), orient=wx.HORIZONTAL)
+        viewSizer = wx.StaticBoxSizer(wx.StaticBox(self._viewPanel, wx.ID_ANY, 'อ่านทีละหน้า'), orient=wx.HORIZONTAL)
         self._backwardButton = wx.BitmapButton(self._viewPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.LEFT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
         self._forwardButton = wx.BitmapButton(self._viewPanel, wx.ID_ANY, 
@@ -1027,7 +1027,7 @@ class ReadToolPanel(wx.Panel):
         self._viewPanel.Fit()
                 
         self._comparePanel = wx.Panel(self, wx.ID_ANY)
-        compareSizer = wx.StaticBoxSizer(wx.StaticBox(self._comparePanel, wx.ID_ANY, u'เทียบเคียงกับ'), orient=wx.HORIZONTAL)
+        compareSizer = wx.StaticBoxSizer(wx.StaticBox(self._comparePanel, wx.ID_ANY, 'เทียบเคียงกับ'), orient=wx.HORIZONTAL)
         self._comboCompare = wx.ComboBox(self._comparePanel, wx.ID_ANY, 
             choices=self._dataSource.GetCompareChoices(), style=wx.CB_DROPDOWN|wx.CB_READONLY)
         self._comboCompare.SetSelection(-1)
@@ -1037,47 +1037,47 @@ class ReadToolPanel(wx.Panel):
 
         # tools
         self._toolsPanel = wx.Panel(self, wx.ID_ANY)
-        toolsSizer = wx.StaticBoxSizer(wx.StaticBox(self._toolsPanel, wx.ID_ANY, u'เครื่องมือ'), orient=wx.HORIZONTAL)
+        toolsSizer = wx.StaticBoxSizer(wx.StaticBox(self._toolsPanel, wx.ID_ANY, 'เครื่องมือ'), orient=wx.HORIZONTAL)
         
         self._searchButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.SEARCH_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._searchButton.SetToolTip(wx.ToolTip(u'ค้นหาจากข้อความที่ถูกเลือก'))
+        self._searchButton.SetToolTip(wx.ToolTip('ค้นหาจากข้อความที่ถูกเลือก'))
         
         self._starButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._starButton.SetToolTip(wx.ToolTip(u'ที่คั่นหน้า'))
+        self._starButton.SetToolTip(wx.ToolTip('ที่คั่นหน้า'))
 
         self._notesButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
-        self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
+        self._notesButton.SetToolTip(wx.ToolTip('ค้นหาบันทึกข้อความเพิ่มเติม'))
 
         self._markButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
-        self._markButton.SetToolTip(wx.ToolTip(u'รายการไฮไลท์'))
+        self._markButton.SetToolTip(wx.ToolTip('รายการไฮไลท์'))
                 
         self._bookListButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.LAYOUT_IMAGE, wx.BITMAP_TYPE_GIF).Scale(32,32)))
-        self._bookListButton.SetToolTip(wx.ToolTip(u'แสดง/ซ่อน หน้าต่างเลือกหนังสือ'))
+        self._bookListButton.SetToolTip(wx.ToolTip('แสดง/ซ่อน หน้าต่างเลือกหนังสือ'))
                 
         self._fontsButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.FONTS_IMAGE, wx.BITMAP_TYPE_PNG)), size=self._searchButton.GetSize())
-        self._fontsButton.SetToolTip(wx.ToolTip(u'เปลี่ยนรูปแบบตัวหนังสือ'))
+        self._fontsButton.SetToolTip(wx.ToolTip('เปลี่ยนรูปแบบตัวหนังสือ'))
         
         self._incFontButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.INC_IMAGE, wx.BITMAP_TYPE_GIF)), size=self._searchButton.GetSize())
-        self._incFontButton.SetToolTip(wx.ToolTip(u'เพิ่มขนาดตัวหนังสือ'))
+        self._incFontButton.SetToolTip(wx.ToolTip('เพิ่มขนาดตัวหนังสือ'))
         
         self._decFontButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.DEC_IMAGE, wx.BITMAP_TYPE_GIF)), size=self._searchButton.GetSize())
-        self._decFontButton.SetToolTip(wx.ToolTip(u'ลดขนาดตัวหนังสือ'))
+        self._decFontButton.SetToolTip(wx.ToolTip('ลดขนาดตัวหนังสือ'))
                 
         self._saveButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
-        self._saveButton.SetToolTip(wx.ToolTip(u'บันทึกข้อมูลลงไฟล์'))
+        self._saveButton.SetToolTip(wx.ToolTip('บันทึกข้อมูลลงไฟล์'))
 
         self._printButton = wx.BitmapButton(self._toolsPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.PRINT_IMAGE, wx.BITMAP_TYPE_PNG)))
-        self._printButton.SetToolTip(wx.ToolTip(u'พิมพ์หน้าที่ต้องการ'))                        
+        self._printButton.SetToolTip(wx.ToolTip('พิมพ์หน้าที่ต้องการ'))                        
         
         toolsSizer.Add(self._bookListButton, flag=wx.ALIGN_CENTER)
         toolsSizer.Add((5,-1))                
@@ -1100,16 +1100,16 @@ class ReadToolPanel(wx.Panel):
         self._toolsPanel.Fit()
         
         self._dictPanel = wx.Panel(self, wx.ID_ANY)
-        dictSizer = wx.StaticBoxSizer(wx.StaticBox(self._dictPanel, wx.ID_ANY, u'พจนานุกรม'), orient=wx.HORIZONTAL)        
+        dictSizer = wx.StaticBoxSizer(wx.StaticBox(self._dictPanel, wx.ID_ANY, 'พจนานุกรม'), orient=wx.HORIZONTAL)        
         self._paliDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._paliDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
+        self._paliDictButton.SetToolTip(wx.ToolTip('พจนานุกรมบาลี-ไทย'))
         self._thaiDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))        
+        self._thaiDictButton.SetToolTip(wx.ToolTip('พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))        
         self._englishDictButton = wx.BitmapButton(self._dictPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.ENGLISH_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._englishDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-อังกฤษ'))        
+        self._englishDictButton.SetToolTip(wx.ToolTip('พจนานุกรมบาลี-อังกฤษ'))        
 
 
         dictSizer.Add(self._paliDictButton, flag=wx.ALIGN_CENTER)
@@ -1119,9 +1119,9 @@ class ReadToolPanel(wx.Panel):
         self._dictPanel.SetSizer(dictSizer)        
         self._dictPanel.Fit()
         
-        themes = [u'ขาว', u'น้ำตาลอ่อน'] 
+        themes = ['ขาว', 'น้ำตาลอ่อน'] 
         self._themePanel = wx.Panel(self, wx.ID_ANY)
-        themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, u'สีพื้นหลัง'), orient=wx.HORIZONTAL)
+        themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, 'สีพื้นหลัง'), orient=wx.HORIZONTAL)
         self._themeComboBox = wx.ComboBox(self._themePanel, wx.ID_ANY, choices=themes, style=wx.CB_DROPDOWN|wx.CB_READONLY)
         self._themeComboBox.SetStringSelection(themes[utils.LoadTheme(constants.READ)])
         themeSizer.Add(self._themeComboBox, flag=wx.ALIGN_CENTER)
@@ -1250,54 +1250,54 @@ class ReadPanel(wx.Panel):
 
         self._markButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.YELLOW_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._markButton.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton.SetToolTip(wx.ToolTip('ระบายสีข้อความที่ถูกเลือก'))
         self._markButton.Bind(wx.EVT_BUTTON, self.OnMarkButtonClick)
         
         self._markButton2 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.MARK2_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._markButton2.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton2.SetToolTip(wx.ToolTip('ระบายสีข้อความที่ถูกเลือก'))
         self._markButton2.Bind(wx.EVT_BUTTON, self.OnMarkButton2Click)
 
         self._markButton3 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.MARK3_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._markButton3.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton3.SetToolTip(wx.ToolTip('ระบายสีข้อความที่ถูกเลือก'))
         self._markButton3.Bind(wx.EVT_BUTTON, self.OnMarkButton3Click)
 
         self._markButton4 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.MARK4_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._markButton4.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton4.SetToolTip(wx.ToolTip('ระบายสีข้อความที่ถูกเลือก'))
         self._markButton4.Bind(wx.EVT_BUTTON, self.OnMarkButton4Click)
 
         self._markButton5 = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.MARK5_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._markButton5.SetToolTip(wx.ToolTip(u'ระบายสีข้อความที่ถูกเลือก'))
+        self._markButton5.SetToolTip(wx.ToolTip('ระบายสีข้อความที่ถูกเลือก'))
         self._markButton5.Bind(wx.EVT_BUTTON, self.OnMarkButton5Click)
 
         self._unmarkButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.WHITE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._unmarkButton.SetToolTip(wx.ToolTip(u'ลบสีข้อความที่ถูกเลือก'))
+        self._unmarkButton.SetToolTip(wx.ToolTip('ลบสีข้อความที่ถูกเลือก'))
         self._unmarkButton.Bind(wx.EVT_BUTTON, self.OnUnmarkButtonClick)
 
         self._saveButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.SAVE_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._saveButton.SetToolTip(wx.ToolTip(u'บันทึกการระบายสีข้อความ'))
+        self._saveButton.SetToolTip(wx.ToolTip('บันทึกการระบายสีข้อความ'))
         self._saveButton.Bind(wx.EVT_BUTTON, self.OnSaveButtonClick)        
         self._saveButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateSaveButton)
         
         self._clearButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.CLEAR_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._clearButton.SetToolTip(wx.ToolTip(u'ลบบันทึกการระบายสีข้อความทั้งหมด'))
+        self._clearButton.SetToolTip(wx.ToolTip('ลบบันทึกการระบายสีข้อความทั้งหมด'))
         self._clearButton.Bind(wx.EVT_BUTTON, self.OnClearButtonClick)
         self._clearButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateClearButton)
         
         self._toggleNoteButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))        
-        self._toggleNoteButton.SetToolTip(wx.ToolTip(u'เปิด/ปิด บันทึกข้อความเพิ่มเติม'))
+        self._toggleNoteButton.SetToolTip(wx.ToolTip('เปิด/ปิด บันทึกข้อความเพิ่มเติม'))
         self._toggleNoteButton.Bind(wx.EVT_BUTTON, self.OnToggleNoteButtonClick)
 
         self._toggleHeaderButton = wx.BitmapButton(self._paintPanel, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.HEADER_IMAGE, wx.BITMAP_TYPE_PNG).Scale(16,16)))
-        self._toggleHeaderButton.SetToolTip(wx.ToolTip(u'เปิด/ปิด ส่วนแสดงด้านบน'))
+        self._toggleHeaderButton.SetToolTip(wx.ToolTip('เปิด/ปิด ส่วนแสดงด้านบน'))
         self._toggleHeaderButton.Bind(wx.EVT_BUTTON, self.OnToggleHeaderClick)
         
         paintSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1409,8 +1409,8 @@ class ReadPanel(wx.Panel):
     def OnCharKeyPress(self, event):
         try:
             self.Delegate.ProcessKeyCommand(event, event.GetKeyCode(), self._code, self._index)
-        except ValueError, e:
-            print e
+        except ValueError as e:
+            print(e)
         event.Skip()
             
     def OnUpdateClearButton(self, event):
@@ -1428,28 +1428,28 @@ class ReadPanel(wx.Panel):
         if 'wxMSW' in wx.PlatformInfo:
             self._title.SetValue(title1 if self._delegate.IsSmallScreen() else title1 + '\n' + title2)
         elif self._delegate.IsSmallScreen():
-            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="4">%s</font></div>''' % (title1))            
+            self._title.SetPage('''<div align="center"><font color="#0000FF" size="4">%s</font></div>''' % (title1))            
         else:
-            self._title.SetPage(u'''<div align="center"><font color="#0000FF" size="4">%s</font></div>
+            self._title.SetPage('''<div align="center"><font color="#0000FF" size="4">%s</font></div>
                 <div align="center"><font color="#0000FF" size="4">%s</font></div>''' % (title1, title2))
     
     def SetPageNumber(self, number):        
         if number is None:
             self._page.SetPage('')
         else:
-            text = _('Page') + ' ' + utils.ArabicToThai(unicode(number))
+            text = _('Page') + ' ' + utils.ArabicToThai(str(number))
             size = 5 if 'wxMSW' in wx.PlatformInfo else 3
-            self._page.SetPage(u'<div align="left"><font color="#378000" size="%d">%s</font></div>' % (size, text))
+            self._page.SetPage('<div align="left"><font color="#378000" size="%d">%s</font></div>' % (size, text))
         
     def SetItemNumber(self, *numbers):
         if len(numbers) == 0 or numbers[0] is None:
             self._item.SetPage('')
         else:
-            text = _('Item') + ' ' + utils.ArabicToThai(unicode(numbers[0]))
+            text = _('Item') + ' ' + utils.ArabicToThai(str(numbers[0]))
             if len(numbers) > 1:
-                text += ' - ' + utils.ArabicToThai(unicode(numbers[-1]))
+                text += ' - ' + utils.ArabicToThai(str(numbers[-1]))
             size = 5 if 'wxMSW' in wx.PlatformInfo else 3
-            self._item.SetPage(u'<div align="right"><font color="#378000" size="%d">%s</font></div>' % (size, text))
+            self._item.SetPage('<div align="right"><font color="#378000" size="%d">%s</font></div>' % (size, text))
 
     def ToggleTitles(self):
         if self._title.IsShown():
@@ -1516,17 +1516,17 @@ class ReadWithReferencesPanel(ReadPanel):
                 
     def SetBody(self, text, focus=True):
         super(ReadWithReferencesPanel, self).SetBody(text, focus=focus)
-        refs = re.findall(ur'[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+', text, re.U)
+        refs = re.findall(r'[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+', text, re.U)
         if len(refs) > 0:
-            html = u'อ้างอิง:  '
+            html = 'อ้างอิง:  '
             for ref in refs:
-                ref = ref.strip().strip(u')').strip(u'(').strip(u',').strip()
-                html += u'<a href="%s">%s</a>  '%(ref, ref)
+                ref = ref.strip().strip(')').strip('(').strip(',').strip()
+                html += '<a href="%s">%s</a>  '%(ref, ref)
             self._refs.Show()
             self._refs.SetPage(html)
         else:
             self._refs.Hide()
-            self._refs.SetPage(u'')
+            self._refs.SetPage('')
         self.Layout()
 
 class NotePanel(wx.Panel):
@@ -1918,12 +1918,12 @@ class SearchToolPanel(wx.Panel):
             font.SetFaceName('Tahoma')            
             self._text.SetFont(font)
 
-        self._buddhawajOnly = wx.CheckBox(self, wx.ID_ANY, label=u'เฉพาะพุทธวจน')
+        self._buddhawajOnly = wx.CheckBox(self, wx.ID_ANY, label='เฉพาะพุทธวจน')
         self._buddhawajOnly.Disable()
 
         langs = constants.LANGS
         self._langPanel = wx.Panel(self, wx.ID_ANY)
-        langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, u'เลือก'), orient=wx.HORIZONTAL)
+        langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, 'เลือก'), orient=wx.HORIZONTAL)
         self._langComboBox = wx.ComboBox(self._langPanel, wx.ID_ANY, choices=langs, style=wx.CB_DROPDOWN|wx.CB_READONLY)
         self._langComboBox.SetStringSelection(langs[0])
         langSizer.Add(self._langComboBox)
@@ -1976,40 +1976,40 @@ class SearchToolPanel(wx.Panel):
 
         self._settingButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.SETTING_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._settingButton.SetToolTip(wx.ToolTip(u'ตั้งค่าตำแหน่งเก็บข้อมูล'))
+        self._settingButton.SetToolTip(wx.ToolTip('ตั้งค่าตำแหน่งเก็บข้อมูล'))
         
         self._readButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.READ_IMAGE, wx.BITMAP_TYPE_PNG)))
             
         self._aboutButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.ABOUT_IMAGE, wx.BITMAP_TYPE_PNG)))
         self._aboutButton.SetToolTip(wx.ToolTip(_('About E-Tipitaka')))        
         
-        self._checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'เปิดหน้าใหม่ทุกครั้ง')
+        self._checkBox = wx.CheckBox(self, wx.ID_ANY, label='เปิดหน้าใหม่ทุกครั้ง')
                 
         self._starButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.STAR_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._starButton.SetToolTip(wx.ToolTip(u'ที่คั่นหน้า'))
+        self._starButton.SetToolTip(wx.ToolTip('ที่คั่นหน้า'))
 
         self._notesButton = wx.BitmapButton(self, wx.ID_ANY, wx.Bitmap(wx.Image(constants.NOTES_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32))) 
-        self._notesButton.SetToolTip(wx.ToolTip(u'ค้นหาบันทึกข้อความเพิ่มเติม'))
+        self._notesButton.SetToolTip(wx.ToolTip('ค้นหาบันทึกข้อความเพิ่มเติม'))
                                 
         self._paliDictButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.PALI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._paliDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-ไทย'))
+        self._paliDictButton.SetToolTip(wx.ToolTip('พจนานุกรมบาลี-ไทย'))
         
         self._thaiDictButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.THAI_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._thaiDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))                        
+        self._thaiDictButton.SetToolTip(wx.ToolTip('พจนานุกรม ภาษาไทย ฉบับราชบัณฑิตยสถาน'))                        
                 
         self._englishDictButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.ENGLISH_DICT_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._englishDictButton.SetToolTip(wx.ToolTip(u'พจนานุกรมบาลี-อังกฤษ'))                        
+        self._englishDictButton.SetToolTip(wx.ToolTip('พจนานุกรมบาลี-อังกฤษ'))                        
 
         self._searchAndCompareButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.SEARCH_AND_COMPARE_IMAGE, wx.BITMAP_TYPE_PNG))) 
-        self._searchAndCompareButton.SetToolTip(wx.ToolTip(u'ค้นหาพร้อมจับคู่เลขข้อ'))                        
+        self._searchAndCompareButton.SetToolTip(wx.ToolTip('ค้นหาพร้อมจับคู่เลขข้อ'))                        
 
-        themes = [u'ขาว', u'น้ำตาลอ่อน'] 
+        themes = ['ขาว', 'น้ำตาลอ่อน'] 
         self._themePanel = wx.Panel(self, wx.ID_ANY)
-        themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, u'สีพื้นหลัง'), orient=wx.HORIZONTAL)
+        themeSizer = wx.StaticBoxSizer(wx.StaticBox(self._themePanel, wx.ID_ANY, 'สีพื้นหลัง'), orient=wx.HORIZONTAL)
         self._themeComboBox = wx.ComboBox(self._themePanel, wx.ID_ANY, choices=themes, style=wx.CB_DROPDOWN|wx.CB_READONLY)
         self._themeComboBox.SetStringSelection(themes[utils.LoadTheme(constants.SEARCH)])
         themeSizer.Add(self._themeComboBox, flag=wx.ALIGN_CENTER)
@@ -2033,7 +2033,7 @@ class ResultsWindow(wx.html.HtmlWindow):
     def OnLinkClicked(self, link):                                    
         cmd, body = link.GetHref().split(':')
         if cmd == 'n':
-            current, per, total = map(int, body.split(u'_'))
+            current, per, total = list(map(int, body.split('_')))
             if hasattr(self._delegate, 'ShowResults'):
                 self._delegate.ShowResults(current)
         elif cmd == 's':
@@ -2042,13 +2042,13 @@ class ResultsWindow(wx.html.HtmlWindow):
         elif cmd == 'p':
             if hasattr(self._delegate, 'SaveScrollPosition'):
                 self._delegate.SaveScrollPosition(self.GetScrollPos(wx.VERTICAL))            
-            volume, page, code, now, per, total, idx = body.split(u'_')
+            volume, page, code, now, per, total, idx = body.split('_')
             if hasattr(self._delegate, 'Read'):
                 self._delegate.Read(code, int(volume), int(page), int(idx))
         elif cmd == 'note':
             if hasattr(self._delegate, 'SaveScrollPosition'):
                 self._delegate.SaveScrollPosition(self.GetScrollPos(wx.VERTICAL))                        
-            idx, volume, page, code = body.split(u'_')
+            idx, volume, page, code = body.split('_')
             if hasattr(self._delegate, 'TakeNote'):
                 self._delegate.TakeNote(code, int(volume), int(page), int(idx))
                 
@@ -2069,11 +2069,11 @@ class ReferencesWindow(wx.html.HtmlWindow):
     def OnLinkClicked(self, link):
         href = link.GetHref()
         dlg = wx.SingleChoiceDialog(self.Parent, 
-            u'พระไตรปิฎก', u'เทียบเคียง', constants.COMPARE_CHOICES, wx.CHOICEDLG_STYLE)
+            'พระไตรปิฎก', 'เทียบเคียง', constants.COMPARE_CHOICES, wx.CHOICEDLG_STYLE)
         dlg.SetSize((250,280))
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
-            tokens = map(unicode.strip,href.split('/'))
+            tokens = list(map(str.strip,href.split('/')))
             volume = utils.ThaiToArabic(tokens[0])
             item = utils.ThaiToArabic(re.split(r'[–\-,\s]+', tokens[2])[0])
             if hasattr(self._delegate, 'OnLinkToReference'):

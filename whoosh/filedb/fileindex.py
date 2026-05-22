@@ -14,7 +14,7 @@
 # limitations under the License.
 #===============================================================================
 
-import cPickle, os, re
+import pickle, os, re
 from bisect import bisect_right
 from time import time
 from threading import Lock
@@ -49,7 +49,7 @@ def _segment_pattern(indexname):
     """
 
     return re.compile("(_%s_[0-9]+).(%s)" % (indexname,
-                                             Segment.EXTENSIONS.values()))
+                                             list(Segment.EXTENSIONS.values())))
 
 
 def _latest_generation(storage, indexname):
@@ -92,7 +92,7 @@ def _write_toc(storage, schema, indexname, gen, segment_counter, segments):
     for num in __version__[:3]:
         stream.write_varint(num)
 
-    stream.write_string(cPickle.dumps(schema, -1))
+    stream.write_string(pickle.dumps(schema, -1))
     stream.write_int(gen)
     stream.write_int(segment_counter)
     stream.write_pickle(segments)
@@ -104,7 +104,7 @@ def _write_toc(storage, schema, indexname, gen, segment_counter, segments):
 
 class Toc(object):
     def __init__(self, **kwargs):
-        for name, value in kwargs.iteritems():
+        for name, value in list(kwargs.items()):
             setattr(self, name, value)
         
 
@@ -140,7 +140,7 @@ def _read_toc(storage, schema, indexname):
     if schema:
         stream.skip_string()
     else:
-        schema = cPickle.loads(stream.read_string())
+        schema = pickle.loads(stream.read_string())
     
     # Generation
     assert gen == stream.read_int()
@@ -208,7 +208,7 @@ class FileIndex(Index):
             raise ValueError("%r is not a Storage object" % storage)
         if schema is not None and not isinstance(schema, Schema):
             raise ValueError("%r is not a Schema object" % schema)
-        if not isinstance(indexname, (str, unicode)):
+        if not isinstance(indexname, str):
             raise ValueError("indexname %r is not a string" % indexname)
         
         self.storage = storage
@@ -327,8 +327,8 @@ class Segment(object):
             deleted documents exist in this segment.
         """
 
-        assert isinstance(name, basestring)
-        assert isinstance(doccount, (int, long))
+        assert isinstance(name, str)
+        assert isinstance(doccount, int)
         assert fieldlength_totals is None or isinstance(fieldlength_totals, dict), "fl_totals=%r" % fieldlength_totals
         assert fieldlength_maxes is None or isinstance(fieldlength_maxes, dict), "fl_maxes=%r" % fieldlength_maxes
         
@@ -339,7 +339,7 @@ class Segment(object):
         self.deleted = deleted
         
         self._filenames = set()
-        for attr, ext in self.EXTENSIONS.iteritems():
+        for attr, ext in list(self.EXTENSIONS.items()):
             fname = "%s.%s" % (self.name, ext)
             setattr(self, attr + "_filename", fname)
             self._filenames.add(fname)

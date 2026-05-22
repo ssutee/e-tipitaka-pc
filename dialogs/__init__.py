@@ -87,7 +87,7 @@ class DataXferPathValidator(wx.Validator):
         textctrl = self.GetWindow()
         text = textctrl.GetValue()
         if len(text.strip()) == 0:
-            wx.MessageBox(u'ช่องนี้ไม่สามารถเว้นว่างได้',u'พบข้อผิดพลาด')
+            wx.MessageBox('ช่องนี้ไม่สามารถเว้นว่างได้','พบข้อผิดพลาด')
             textctrl.SetBackgroundColour('pink')
             textctrl.Refresh()
             return False
@@ -121,7 +121,7 @@ class DataXferPagesValidator(wx.Validator):
         combo = self.GetWindow()
         text = combo.GetValue()
         if len(text.strip()) == 0:
-            wx.MessageBox(u'ช่องนี้ไม่สามารถเว้นว่างได้',u'พบข้อผิดพลาด')
+            wx.MessageBox('ช่องนี้ไม่สามารถเว้นว่างได้','พบข้อผิดพลาด')
             combo.SetBackgroundColour('pink')
             combo.Refresh()
             return False
@@ -160,7 +160,7 @@ class DataXferPagesValidator(wx.Validator):
 
 class MarkManagerDialog(wx.Dialog):
     def __init__(self, parent, code=None, delegate=None):
-        super(MarkManagerDialog, self).__init__(parent, wx.ID_ANY, u'รายการไฮไลท์', size=(600,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+        super(MarkManagerDialog, self).__init__(parent, wx.ID_ANY, 'รายการไฮไลท์', size=(600,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
         self._result = None
         self._code = code
         self._delegate = delegate
@@ -184,7 +184,7 @@ class MarkManagerDialog(wx.Dialog):
         self._markListBox.Bind(wx.EVT_LISTBOX_DCLICK, self.OnMarkListBoxDoubleClick)
 
 
-        self._readButton = wx.Button(self, wx.ID_ANY, u'อ่าน')
+        self._readButton = wx.Button(self, wx.ID_ANY, 'อ่าน')
         self._readButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateReadButton)
         self._readButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
 
@@ -248,9 +248,9 @@ class MarkManagerDialog(wx.Dialog):
 
                     for mark in cleanData:
                         if mark[0]:
-                            items.append(u'เล่มที่ %d หน้าที่ %d : %s' % (volume, page, content[mark[1]:mark[2]]))
+                            items.append('เล่มที่ %d หน้าที่ %d : %s' % (volume, page, content[mark[1]:mark[2]]))
 
-        return map(utils.ArabicToThai,items)
+        return list(map(utils.ArabicToThai,items))
 
     def OnMarkListBoxDoubleClick(self, event):
         self._OpenMark(event.GetSelection())
@@ -284,7 +284,7 @@ class MarkManagerDialog(wx.Dialog):
 
 class NoteManagerDialog(wx.Dialog):
     def __init__(self, parent, code=None):
-        super(NoteManagerDialog, self).__init__(parent, wx.ID_ANY, u'ค้นหาบันทึกข้อความเพิ่มเติม', size=(700,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+        super(NoteManagerDialog, self).__init__(parent, wx.ID_ANY, 'ค้นหาบันทึกข้อความเพิ่มเติม', size=(700,500), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
         self._result = None
         self._code = code
         self.Center()        
@@ -302,7 +302,7 @@ class NoteManagerDialog(wx.Dialog):
 
         self._searchCtrl.SetFocus()
         self._searchCtrl.Bind(wx.EVT_TEXT, self.OnSearchCtrlTextEnter)
-        self._readButton = wx.Button(self, wx.ID_ANY, u'อ่าน')
+        self._readButton = wx.Button(self, wx.ID_ANY, 'อ่าน')
         self._readButton.Bind(wx.EVT_UPDATE_UI, self.OnUpdateReadButton)
         self._readButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
         
@@ -366,15 +366,14 @@ class FontData(object):
 
 class SimpleFontDialog(wx.Dialog):
     def __init__(self, parent, fontData):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, u'เลือกฟอนต์')
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, 'เลือกฟอนต์')
         data = {}
         mainSizer = wx.GridBagSizer()
         e = wx.FontEnumerator()
         e.EnumerateFacenames()
-        facenames = filter(lambda face: 'Bold' not in face and 'Italic' not in face, e.GetFacenames()) 
-        facenames.sort()
+        facenames = sorted([face for face in e.GetFacenames() if 'Bold' not in face and 'Italic' not in face]) 
 
-        mainSizer.Add(wx.StaticBox(self, wx.ID_ANY, u'Face names:', size=(400, -1)), (0,0), flag=wx.EXPAND)
+        mainSizer.Add(wx.StaticBox(self, wx.ID_ANY, 'Face names:', size=(400, -1)), (0,0), flag=wx.EXPAND)
         self._listBox = wx.ListBox(self, wx.ID_ANY, wx.DefaultPosition, (400, 150), facenames, wx.LB_SINGLE, validator=DataXferFontValidator(data, 'facename'))
         self._listBox.Bind(wx.EVT_LISTBOX, self.OnSelect)
         self._listBox.SetSelection(0)
@@ -389,7 +388,7 @@ class SimpleFontDialog(wx.Dialog):
     
         mainSizer.Add(self._listBox, (1,0), flag=wx.EXPAND)        
         
-        mainSizer.Add(wx.StaticBox(self, wx.ID_ANY, u'Size:', size=(100, -1)), (0,1), flag=wx.EXPAND)
+        mainSizer.Add(wx.StaticBox(self, wx.ID_ANY, 'Size:', size=(100, -1)), (0,1), flag=wx.EXPAND)
         
         spinPanel = wx.Panel(self, wx.ID_ANY)
         spinSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -407,7 +406,7 @@ class SimpleFontDialog(wx.Dialog):
         
         mainSizer.Add(spinPanel, (1,1), flag=wx.ALIGN_CENTER_HORIZONTAL)
         
-        self._text = wx.StaticText(self, wx.ID_ANY, u'ตถาคเต เอกนฺตคโต อภิปฺปสนฺโน', size=(500, 100), style=wx.ALIGN_CENTRE)
+        self._text = wx.StaticText(self, wx.ID_ANY, 'ตถาคเต เอกนฺตคโต อภิปฺปสนฺโน', size=(500, 100), style=wx.ALIGN_CENTRE)
         mainSizer.Add(self._text, (2,0), (1,2), flag=wx.ALIGN_CENTER|wx.EXPAND|wx.TOP, border=10)
 
         buttonPanel = wx.Panel(self, wx.ID_ANY)
@@ -444,7 +443,7 @@ class SimpleFontDialog(wx.Dialog):
         try:
             self._spin.SetValue(int(event.GetString()))
             self.UpdateText()
-        except ValueError, e:
+        except ValueError as e:
             pass
 
     def GetFontData(self):
@@ -454,12 +453,12 @@ class SimpleFontDialog(wx.Dialog):
 
 class SettingUserDataDirDialog(wx.Dialog):
     def __init__(self, parent, data):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, u'โปรดเลือกตำแหน่งเก็บข้อมูลใหม่', size=(600,150))
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, 'โปรดเลือกตำแหน่งเก็บข้อมูลใหม่', size=(600,150))
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         
         # DataXferPathValidator
         self.path = wx.TextCtrl(self, wx.ID_ANY, size=(500, -1), validator=DataXferPathValidator(data, 'path'))
-        self.browseButton = wx.Button(self, wx.ID_ANY, u'เลือก')
+        self.browseButton = wx.Button(self, wx.ID_ANY, 'เลือก')
         self.browseButton.Bind(wx.EVT_BUTTON, self.OnBrowseButtonClick)
 
         pathSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -467,11 +466,11 @@ class SettingUserDataDirDialog(wx.Dialog):
         pathSizer.Add((5,-1))
         pathSizer.Add(self.browseButton)
 
-        self.checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'สำเนาข้อมูลเดิมไปยังตำแหน่งใหม่', validator=DataXferCheckboxValidator(data,'copy'))
+        self.checkBox = wx.CheckBox(self, wx.ID_ANY, label='สำเนาข้อมูลเดิมไปยังตำแหน่งใหม่', validator=DataXferCheckboxValidator(data,'copy'))
         
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
-        btnOk = wx.Button(self, wx.ID_OK, u'ตกลง',size=(-1,-1))
-        btnCancel = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก', size=(-1,-1))
+        btnOk = wx.Button(self, wx.ID_OK, 'ตกลง',size=(-1,-1))
+        btnCancel = wx.Button(self, wx.ID_CANCEL, 'ยกเลิก', size=(-1,-1))
         btnOk.SetDefault()
         btnSizer.Add((20,-1), 1, flag=wx.EXPAND)
 
@@ -510,36 +509,36 @@ class PageRangeDialog(wx.Dialog):
         
         s1 = wx.BoxSizer(wx.HORIZONTAL)
         s1.Add((20,-1), 1, flag=wx.EXPAND)
-        s1.Add(wx.StaticText(self, -1, u'%s'%(msg1), style=wx.ALIGN_CENTER))
+        s1.Add(wx.StaticText(self, -1, '%s'%(msg1), style=wx.ALIGN_CENTER))
         s1.Add((20,-1), 1, flag=wx.EXPAND)
         
         s2 = wx.BoxSizer(wx.HORIZONTAL)
         s2.Add((20,-1), 1, flag=wx.EXPAND)
-        s2.Add(wx.StaticText(self, -1, u'%s'%(msg2), style=wx.ALIGN_CENTER))
+        s2.Add(wx.StaticText(self, -1, '%s'%(msg2), style=wx.ALIGN_CENTER))
         s2.Add((20,-1), 1, flag=wx.EXPAND)
 
         s3 = wx.BoxSizer(wx.HORIZONTAL)
         s3.Add((20,-1), 1, flag=wx.EXPAND)
-        s3.Add(wx.StaticText(self, wx.ID_ANY, u'หน้า', style=wx.ALIGN_CENTER))
+        s3.Add(wx.StaticText(self, wx.ID_ANY, 'หน้า', style=wx.ALIGN_CENTER))
         s3.Add((20,-1),1, flag=wx.EXPAND)
         
         rangeSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         fromChoice = wx.ComboBox(self, wx.ID_ANY, size=(70,-1),
-                                 choices=[u'%d'%(x) for x in range(1,num+1)], validator=DataXferPagesValidator(data,'from'))
+                                 choices=['%d'%(x) for x in range(1,num+1)], validator=DataXferPagesValidator(data,'from'))
         toChoice = wx.ComboBox(self, wx.ID_ANY, size=(70,-1),
-                               choices=[u'%d'%(x) for x in range(1,num+1)], validator=DataXferPagesValidator(data,'to'))
+                               choices=['%d'%(x) for x in range(1,num+1)], validator=DataXferPagesValidator(data,'to'))
         
         rangeSizer.Add((20,-1), 1, flag=wx.EXPAND)
         rangeSizer.Add(fromChoice)
         rangeSizer.Add((5,-1)) 
-        rangeSizer.Add(wx.StaticText(self, wx.ID_ANY, u' ถึง ', style=wx.ALIGN_CENTER), flag=wx.ALIGN_CENTER_VERTICAL)
+        rangeSizer.Add(wx.StaticText(self, wx.ID_ANY, ' ถึง ', style=wx.ALIGN_CENTER), flag=wx.ALIGN_CENTER_VERTICAL)
         rangeSizer.Add((5,-1))        
         rangeSizer.Add(toChoice)
         rangeSizer.Add((20,-1), 1, flag=wx.EXPAND)
         
-        self.checkBox = wx.CheckBox(self, wx.ID_ANY, label=u'แสดงเลขคั่นหน้า', validator=DataXferCheckboxValidator(data,'sep'))
-        self.checkBoxPDF = wx.CheckBox(self, wx.ID_ANY, label=u'ไฟล์ต้นฉบับ (PDF)', validator=DataXferCheckboxValidator(data,'pdf'))
+        self.checkBox = wx.CheckBox(self, wx.ID_ANY, label='แสดงเลขคั่นหน้า', validator=DataXferCheckboxValidator(data,'sep'))
+        self.checkBoxPDF = wx.CheckBox(self, wx.ID_ANY, label='ไฟล์ต้นฉบับ (PDF)', validator=DataXferCheckboxValidator(data,'pdf'))
 
         self.checkBoxPDF.Bind(wx.EVT_CHECKBOX, self.OnCheckBoxPDF)
 
@@ -549,8 +548,8 @@ class PageRangeDialog(wx.Dialog):
         checkSizer.Add(self.checkBoxPDF)
         
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
-        btnOk = wx.Button(self, wx.ID_OK, u'ตกลง',size=(-1,-1))
-        btnCancel = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก', size=(-1,-1))
+        btnOk = wx.Button(self, wx.ID_OK, 'ตกลง',size=(-1,-1))
+        btnCancel = wx.Button(self, wx.ID_CANCEL, 'ยกเลิก', size=(-1,-1))
         btnOk.SetDefault()
         btnSizer.Add((20,-1), 1, flag=wx.EXPAND)
 
@@ -594,7 +593,7 @@ class PageRangeDialog(wx.Dialog):
 
 class BookmarkManagerDialog(wx.Dialog):
     def __init__(self, parent, code):
-        wx.Dialog.__init__(self, parent, -1, u'ตัวจัดการที่คั่นหน้า', size=(600, 400))
+        wx.Dialog.__init__(self, parent, -1, 'ตัวจัดการที่คั่นหน้า', size=(600, 400))
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Center()
         self._code = code
@@ -603,13 +602,13 @@ class BookmarkManagerDialog(wx.Dialog):
 
         sizer.Add(self._tree, 1, wx.EXPAND|wx.ALL, 10)        
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.CreateButton = wx.Button(self, -1, u'สร้างกลุ่ม')
+        self.CreateButton = wx.Button(self, -1, 'สร้างกลุ่ม')
         self.CreateButton.Bind(wx.EVT_BUTTON, self.OnCreateButton)
-        self.DeleteButton = wx.Button(self, -1, u'ลบ')
+        self.DeleteButton = wx.Button(self, -1, 'ลบ')
         self.DeleteButton.Bind(wx.EVT_BUTTON, self.OnDeleteButton)
-        self.MoveButton = wx.Button(self, -1, u'ย้ายกลุ่ม')
+        self.MoveButton = wx.Button(self, -1, 'ย้ายกลุ่ม')
         self.MoveButton.Bind(wx.EVT_BUTTON, self.OnMoveButton)
-        self.EditButton = wx.Button(self, -1, u'แก้ไข')
+        self.EditButton = wx.Button(self, -1, 'แก้ไข')
         self.EditButton.Bind(wx.EVT_BUTTON, self.OnEditButton)
 
         bottomSizer.Add((10,-1), 0)
@@ -635,9 +634,9 @@ class BookmarkManagerDialog(wx.Dialog):
         volume, note = cursor.fetchone()
         dialog = None
         if volume == 0:
-            dialog = wx.TextEntryDialog(self, u'กรุณาป้อนชื่อกลุ่ม', u'เปลี่ยนชื่อกลุ่ม')
+            dialog = wx.TextEntryDialog(self, 'กรุณาป้อนชื่อกลุ่ม', 'เปลี่ยนชื่อกลุ่ม')
         else:
-            dialog = wx.TextEntryDialog(self, u'กรุณาป้อนข้อมูลของคั่นหน้า', u'เปลี่ยนข้อความคั่นหน้า')
+            dialog = wx.TextEntryDialog(self, 'กรุณาป้อนข้อมูลของคั่นหน้า', 'เปลี่ยนข้อความคั่นหน้า')
         dialog.SetValue(note)
         dialog.Center()
         if dialog.ShowModal() == wx.ID_OK:
@@ -670,7 +669,7 @@ class BookmarkManagerDialog(wx.Dialog):
         conn.close()
             
     def OnCreateButton(self, event):    
-        dialog = wx.TextEntryDialog(self, u'กรุณาป้อนชื่อกลุ่ม', u'สร้างกลุ่ม')
+        dialog = wx.TextEntryDialog(self, 'กรุณาป้อนชื่อกลุ่ม', 'สร้างกลุ่ม')
         dialog.Center()
         if dialog.ShowModal() == wx.ID_OK:
             folder = dialog.GetValue().strip()
@@ -706,8 +705,8 @@ class BookmarkManagerDialog(wx.Dialog):
     def OnDeleteButton(self, event):    
         item = self._tree.GetItemData(self._tree.GetSelection())
         if item != None:
-            dialog = wx.MessageDialog(self, u'คุณต้องการลบการจดจำนี้หรือไม่?' + 
-                u' (ถ้าลบกลุ่ม การจดจำทั้งหมดในกลุ่มจะถูกลบไปด้วย)', u'ยืนยันการลบ', 
+            dialog = wx.MessageDialog(self, 'คุณต้องการลบการจดจำนี้หรือไม่?' + 
+                ' (ถ้าลบกลุ่ม การจดจำทั้งหมดในกลุ่มจะถูกลบไปด้วย)', 'ยืนยันการลบ', 
                 wx.YES_NO | wx.ICON_INFORMATION)
             dialog.Center()
             if dialog.ShowModal() == wx.ID_YES:
@@ -731,7 +730,7 @@ class BookmarkManagerDialog(wx.Dialog):
                     tree.SetItemImage(child, self.fldropenidx, wx.TreeItemIcon_Expanded)
                     Load(tree, child, rowId)
                 else:
-                    note = u'เล่มที่ %d หน้าที่ %d : %s'%(volume, page, note)
+                    note = 'เล่มที่ %d หน้าที่ %d : %s'%(volume, page, note)
                     child = tree.AppendItem(root, ArabicToThai(note))
                     tree.SetItemData(child, rowId)
                     tree.SetItemImage(child, self.fileidx, wx.TreeItemIcon_Normal)
@@ -753,14 +752,14 @@ class BookmarkManagerDialog(wx.Dialog):
 
 class BookmarkFolderDialog(wx.Dialog):
     def __init__(self, parent, code):
-        wx.Dialog.__init__(self, parent, -1, u'เลือกกลุ่ม', size=(300, 350))
+        wx.Dialog.__init__(self, parent, -1, 'เลือกกลุ่ม', size=(300, 350))
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Center()
         self._code = code
         sizer = wx.BoxSizer(wx.VERTICAL)
         self._tree = wx.TreeCtrl(self, -1, style=wx.TR_DEFAULT_STYLE)
         sizer.Add(self._tree, 1, wx.EXPAND|wx.ALL, 10)
-        selectButton = wx.Button(self, -1, u'ตกลง')
+        selectButton = wx.Button(self, -1, 'ตกลง')
         selectButton.Bind(wx.EVT_BUTTON, self.OnSelectButton)
         sizer.Add(selectButton, 0, wx.ALIGN_CENTER|wx.BOTTOM, 10)
         self.SetSizer(sizer)
@@ -795,7 +794,7 @@ class BookmarkFolderDialog(wx.Dialog):
         self._tree.SetImageList(il)        
         self.il = il
             
-        root = self._tree.AddRoot(u'หลัก')
+        root = self._tree.AddRoot('หลัก')
         self._tree.SetItemData(root, 0)
         Create(self._tree, root, 0)
         self._tree.ExpandAll()
@@ -808,20 +807,20 @@ class BookmarkFolderDialog(wx.Dialog):
 
 class BookmarkDialog(wx.Dialog):
     def __init__(self, parent, code):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, u'โปรดใส่ข้อมูลของคั่นหน้า')
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, 'โปรดใส่ข้อมูลของคั่นหน้า')
         self._code = code
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         sizer1 = wx.BoxSizer(wx.HORIZONTAL)
-        sizer1.Add(wx.StaticText(self, -1, u'หมายเหตุ :', size=(70,-1), style=wx.ALIGN_RIGHT), 0, wx.ALIGN_CENTER)
+        sizer1.Add(wx.StaticText(self, -1, 'หมายเหตุ :', size=(70,-1), style=wx.ALIGN_RIGHT), 0, wx.ALIGN_CENTER)
         self.NoteText = wx.TextCtrl(self, -1)
         sizer1.Add(self.NoteText, 1, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.ALIGN_CENTER, 8)
         sizer2 = wx.BoxSizer(wx.HORIZONTAL)
-        sizer2.Add(wx.StaticText(self, -1, u'กลุ่ม :', size=(70,-1), style=wx.ALIGN_RIGHT), 0, wx.ALIGN_CENTER)
+        sizer2.Add(wx.StaticText(self, -1, 'กลุ่ม :', size=(70,-1), style=wx.ALIGN_RIGHT), 0, wx.ALIGN_CENTER)
         self.ComboBox = self.CreateComboBox()
         sizer2.Add(self.ComboBox, 1, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.ALIGN_CENTER, 8)
         sizer3 = wx.BoxSizer(wx.HORIZONTAL)
-        self.CancelButton = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก')
-        self.SaveButton = wx.Button(self, -1, u'บันทึก')
+        self.CancelButton = wx.Button(self, wx.ID_CANCEL, 'ยกเลิก')
+        self.SaveButton = wx.Button(self, -1, 'บันทึก')
         self.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButton)
         sizer3.Add((-1,-1), 1, wx.EXPAND)        
         
@@ -857,7 +856,7 @@ class BookmarkDialog(wx.Dialog):
             return _makeChoice(root+'>'+note, pid)
         
         comboBox = wx.ComboBox(self, wx.CB_READONLY, choices=[])
-        comboBox.Append(u'หลัก', 0)
+        comboBox.Append('หลัก', 0)
         rows = cursor.execute('SELECT ROWID, note, parent_id FROM %s WHERE volume=0'%(self._code)).fetchall()
         for rowId, note, pid in rows:
             choice = _makeChoice(note, pid)
@@ -964,7 +963,7 @@ class VolumesDialog(wx.Dialog):
 
 class NoteDialog(wx.Dialog):
     def __init__(self, parent, note, state, *args, **kwargs):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, u'จดบันทึก')
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, 'จดบันทึก')
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         mainSizer.Add((-1,10), 1, flag=wx.EXPAND)
         
@@ -976,7 +975,7 @@ class NoteDialog(wx.Dialog):
             font.SetFaceName('Tahoma')
             self._noteTextCtrl.SetFont(font)
 
-        self._stateRadioBox = wx.RadioBox(self, wx.ID_ANY, u'', choices=[u'', u'✕', u'✔︎'], majorDimension=3)
+        self._stateRadioBox = wx.RadioBox(self, wx.ID_ANY, '', choices=['', '✕', '✔︎'], majorDimension=3)
         self._stateRadioBox.SetSelection(state)
 
         mainSizer.Add(self._stateRadioBox, 0, wx.EXPAND|wx.ALL, 10)
@@ -984,8 +983,8 @@ class NoteDialog(wx.Dialog):
         mainSizer.Add(self._noteTextCtrl, 0, wx.EXPAND|wx.ALL, 10)
 
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.CancelButton = wx.Button(self, wx.ID_CANCEL, u'ยกเลิก')
-        self.SaveButton = wx.Button(self, -1, u'บันทึก')
+        self.CancelButton = wx.Button(self, wx.ID_CANCEL, 'ยกเลิก')
+        self.SaveButton = wx.Button(self, -1, 'บันทึก')
         self.SaveButton.Bind(wx.EVT_BUTTON, self.OnSaveButton)
         buttonSizer.Add((-1,-1), 1, wx.EXPAND)        
         
