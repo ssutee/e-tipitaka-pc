@@ -1520,17 +1520,19 @@ class ReadWithReferencesPanel(ReadPanel):
                 
     def SetBody(self, text, focus=True):
         super(ReadWithReferencesPanel, self).SetBody(text, focus=focus)
+        background = utils.LoadThemeBackgroundHex(constants.READ)
         refs = re.findall(r'[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+/[–๐๑๒๓๔๕๖๗๘๙\s\-,]+', text, re.U)
         if len(refs) > 0:
-            html = 'อ้างอิง:  '
+            html = '<body bgcolor="%s">อ้างอิง:  ' % background
             for ref in refs:
                 ref = ref.strip().strip(')').strip('(').strip(',').strip()
                 html += '<a href="%s">%s</a>  '%(ref, ref)
+            html += '</body>'
             self._refs.Show()
             self._refs.SetPage(html)
         else:
             self._refs.Hide()
-            self._refs.SetPage('')
+            self._refs.SetPage('<body bgcolor="%s"></body>' % background)
         self.Layout()
 
 class NotePanel(wx.Panel):
