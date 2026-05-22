@@ -372,8 +372,9 @@ class View(AuiBaseFrame):
         index = 1 if len(list(self._comparePanel.keys())) == 0 else sum([int(k.startswith(code)) for k in list(self._comparePanel.keys())])+1
         
         self._comparePanel[utils.MakeKey(code,index)] = ReadPanelCreator.Create(self, code, index, self._font, self._delegate)
-        info = aui.AuiPaneInfo().Floatable(False).Center().Row(len(self._comparePanel))
+        info = aui.AuiPaneInfo().CaptionVisible(False).Floatable(False).Center().Row(len(self._comparePanel))
         self.AddPane(self._comparePanel[utils.MakeKey(code,index)], info.Name(utils.MakeKey(code,index)))
+        utils.ApplyTheme(self._comparePanel[utils.MakeKey(code,index)], constants.READ)
         
         return index
         
