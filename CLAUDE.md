@@ -1,6 +1,17 @@
 # Project Overview
 
-E-Tipitaka is an application for reading Thai Tipitaka (พระไตรปิฎก) written in Python 2.7.
+E-Tipitaka is a desktop application for reading the Thai Tipitaka (พระไตรปิฎก).
+Built with Python 3.12 and wxPython 4.2; dependencies are managed with `uv`
+(`pyproject.toml`). The UI follows a Model–View–Presenter–Interactor split
+(see `read/` and `search/`).
+
+## Running and Testing
+
+- Run from source (macOS): `uv run --python /opt/homebrew/bin/python3.12 python run.py`
+  — `uv`'s standalone Python segfaults wxPython on macOS, so the Homebrew
+  framework Python is required.
+- Entry point: `run.py`.
+- Tests: `uv run --python /opt/homebrew/bin/python3.12 python test.py` (unittest).
 
 ## Context Navigation (Graphify)
 
