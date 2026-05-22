@@ -35,38 +35,57 @@ a = Analysis(
 
 pyz = PYZ(a.pure)
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    [],
-    exclude_binaries=True,
-    name='e-tipitaka',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=False,
-    console=False,
-    icon='resources/e-tri_64_icon.ico',
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=False,
-    name='e-tipitaka',
-)
-
-if sys.platform == 'darwin':
-    app = BUNDLE(
-        coll,
-        name='E-Tipitaka.app',
-        icon='resources/e-tipitaka.icns',
-        bundle_identifier='org.watnapahpong.etipitaka',
-        info_plist={
-            'NSRequiresAquaSystemAppearance': True,
-            'NSHighResolutionCapable': True,
-            'CFBundleShortVersionString': '3.2.0',
-        },
+if sys.platform == 'win32':
+    # Windows: single-file executable (resources bundled inside).
+    exe = EXE(
+        pyz,
+        a.scripts,
+        a.binaries,
+        a.datas,
+        [],
+        name='e-tipitaka',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=False,
+        runtime_tmpdir=None,
+        console=False,
+        icon='resources/e-tri_64_icon.ico',
     )
+else:
+    # macOS / Linux: one-dir bundle.
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        exclude_binaries=True,
+        name='e-tipitaka',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=False,
+        console=False,
+        icon='resources/e-tri_64_icon.ico',
+    )
+
+    coll = COLLECT(
+        exe,
+        a.binaries,
+        a.datas,
+        strip=False,
+        upx=False,
+        name='e-tipitaka',
+    )
+
+    if sys.platform == 'darwin':
+        app = BUNDLE(
+            coll,
+            name='E-Tipitaka.app',
+            icon='resources/e-tipitaka.icns',
+            bundle_identifier='org.watnapahpong.etipitaka',
+            info_plist={
+                'NSRequiresAquaSystemAppearance': True,
+                'NSHighResolutionCapable': True,
+                'CFBundleShortVersionString': '3.2.0',
+            },
+        )

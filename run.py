@@ -39,6 +39,28 @@ import wx
 
 import wx.lib.agw.aui as aui  # pure-Python AUI; C++ wx.aui MDI frames segfault on macOS
 
+# Work around an AGW AUI bug: AuiDefaultTabArt.GetBestTabCtrlSize uses a local
+# 'bmp' that is only bound when no standard bitmap size is enforced, so it
+# raises UnboundLocalError when one is (e.g. on Windows).
+import wx.lib.agw.aui.tabart as _tabart
+def _GetBestTabCtrlSize(self, wnd, pages, required_bmp_size):
+    dc = wx.ClientDC(wnd)
+    dc.SetFont(self._measuring_font)
+    measure_bmp = wx.NullBitmap
+    if required_bmp_size.IsFullySpecified():
+        measure_bmp = wx.Bitmap(required_bmp_size.x, required_bmp_size.y)
+    measure_bmp_isok = measure_bmp.IsOk()
+    max_y = 0
+    for page in pages:
+        bmp = measure_bmp if measure_bmp_isok else page.bitmap
+        s, x_ext = self.GetTabSize(dc, wnd, page.caption, bmp, True,
+                                   _tabart.AUI_BUTTON_STATE_HIDDEN, None)
+        max_y = max(max_y, s[1])
+        if page.control:
+            max_y = max(max_y, page.control.GetSize()[1] + 4)
+    return max_y + 2
+_tabart.AuiDefaultTabArt.GetBestTabCtrlSize = _GetBestTabCtrlSize
+
 import i18n
 _ = i18n.language.ugettext
 
