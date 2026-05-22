@@ -604,6 +604,7 @@ class View(AuiBaseFrame):
     def Start(self):
         self._PostInit()
         self._components.Filter(self)
+        utils.ApplyTheme(self, constants.READ)
 
         if wx.__version__[:3]<='2.8':
             self.Show()

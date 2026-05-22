@@ -1094,25 +1094,13 @@ class Presenter(object):
 
     def SelectTheme(self, theme):
         utils.SaveTheme(theme, constants.READ)
-        background = utils.LoadThemeBackgroundColour(constants.READ)
-        foreground = utils.LoadThemeForegroundColour(constants.READ)
+        utils.ApplyTheme(self._view, constants.READ)
         for key in [None]+list(self._compareVolume.keys()):
             code, index = utils.SplitKey(key)
-            body = self._view.FocusBody(code, index)
-            body.SetBackgroundColour(background)
-            body.SetForegroundColour(foreground)
-            # Also update the rich text style so re-rendered content uses the
-            # new colours; SetBackgroundColour alone leaves the text styled
-            # with the previous theme.
-            attr = body.GetDefaultStyle()
-            attr.SetBackgroundColour(background)
-            attr.SetTextColour(foreground)
-            body.SetDefaultStyle(attr)
-            body.SetStyle(0, body.GetLastPosition(), attr)
             if code is None:
-                self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))        
+                self.OpenBook(self._currentVolume, self._currentPage, self._model.GetSection(self._currentVolume, self._currentPage))
             else:
-                self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key])            
+                self.OpenAnotherBook(code, index, self._compareVolume[key], self._comparePage[key])
 
     def SetStatusText(self, text, field):
         self._view.SetStatusText(text, field)
