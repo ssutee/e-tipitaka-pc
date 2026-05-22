@@ -710,8 +710,8 @@ class PaliDictWindow(DictWindow):
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
 
-        text1 = text.replace('\\u0e0d','\\uf70f').replace('\\u0e4d','\\uf711').replace('ฐ','\\uf700')
-        text2 = text.replace('\\u0e0d','\\uf70f').replace('\\u0e4d','\\uf711')
+        text1 = text.replace('\u0e0d','\uf70f').replace('\u0e4d','\uf711').replace('ฐ','\uf700')
+        text2 = text.replace('\u0e0d','\uf70f').replace('\u0e4d','\uf711')
 
         self.wordList.DeleteAllItems()
 
@@ -1204,7 +1204,13 @@ class ReadPanel(wx.Panel):
 
     def SetContentFont(self, font):
         self._body.SetFont(font)
-        
+        # wxPython 4.2: text written via the default style keeps its old
+        # font, so update the default style and restyle existing content.
+        attr = self._body.GetDefaultStyle()
+        attr.SetFont(font)
+        self._body.SetDefaultStyle(attr)
+        self._body.SetStyle(0, self._body.GetLastPosition(), attr)
+
     def _CreateAttributes(self):
         divider = 2.0 if self._delegate.IsSmallScreen() else 1
         if 'wxMSW' in wx.PlatformInfo:

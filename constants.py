@@ -89,9 +89,9 @@ DOWN    = 1
 MODE_ALL    = 0
 MODE_CUSTOM = 1
 
-NIKHAHIT_CHAR   = '\\uf711'
-THOTHAN_CHAR    = '\\uf700'
-YOYING_CHAR     = '\\uf70f'
+NIKHAHIT_CHAR   = '\uf711'
+THOTHAN_CHAR    = '\uf700'
+YOYING_CHAR     = '\uf70f'
 
 RESOURCES_DIR = 'resources'
 NOTES_DIR = 'notes'

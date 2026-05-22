@@ -132,10 +132,10 @@ def UpdateDatabases():
         conn.close()
 
 def ConvertToPaliSearch(search, force=False):
-    return search.replace('ฐ', '\\uf700').replace('ญ', '\\uf70f').replace('\\u0e4d', '\\uf711') if force or 'wxMac' not in wx.PlatformInfo else search
+    return search.replace('ฐ', '\uf700').replace('ญ', '\uf70f').replace('\u0e4d', '\uf711') if force or 'wxMac' not in wx.PlatformInfo else search
 
 def ConvertToThaiSearch(search, force=False):
-    return search.replace('\\uf700', 'ฐ').replace('\\uf70f', 'ญ').replace('\\uf711', '\\u0e4d') if force or 'wxMac' in wx.PlatformInfo else search
+    return search.replace('\uf700', 'ฐ').replace('\uf70f', 'ญ').replace('\uf711', '\u0e4d') if force or 'wxMac' in wx.PlatformInfo else search
 
 def ThaiToArabic(number):
     if isinstance(number, int):

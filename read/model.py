@@ -247,7 +247,7 @@ class PaliSiamEngine(Engine):
         return 'พระไตรปิฎก ฉบับสยามรัฐ พ.ศ.๒๕๓๘ (ภาษาบาลี) เล่มที่ %s'%(utils.ArabicToThai(str(volume)))
         
     def GetPage(self, volume, page):
-        return super(PaliSiamEngine, self).GetPage(volume, page).replace('ฐ','\\uf700').replace('ญ','\\uf70f').replace('\\u0e4d','\\uf711')
+        return super(PaliSiamEngine, self).GetPage(volume, page).replace('ฐ','\uf700').replace('ญ','\uf70f').replace('\u0e4d','\uf711')
 
     def GetSectionName(self, volume):
         if volume <= 8:
