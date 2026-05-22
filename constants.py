@@ -195,7 +195,7 @@ ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english_v2.sqlite')
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
 
-BOOK_NAMES = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_name.pkl'), 'rb'), encoding='latin-1')
+BOOK_NAMES = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_name.pkl'), 'rb'), encoding='utf-8')
 BOOK_PAGES = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_page.pkl'),  'rb'), encoding='latin-1')
 BOOK_ITEMS = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_item.pkl'),  'rb'), encoding='latin-1')
 VOLUME_TABLE = pickle.load(open(os.path.join(RESOURCES_DIR, 'maps.pkl'),  'rb'), encoding='latin-1')

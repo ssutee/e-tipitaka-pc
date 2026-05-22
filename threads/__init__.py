@@ -1,6 +1,5 @@
 import wx
 import threading, sqlite3, os.path, sys, urllib.request, urllib.error, urllib.parse, http.client
-from html import escape as htmlescape
 
 import constants, utils
 
