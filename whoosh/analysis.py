@@ -959,8 +959,8 @@ class IntraWordFilter(Filter):
     
     >>> iwf = MultiFilter(index=IntraWordFilter(mergewords=True, mergenums=True),
                           query=IntraWordFilter(mergewords=False, mergenums=False))
-    >>> analyzer = RegexTokenizer(r"\S+") | iwf | LowercaseFilter()
-    
+    >>> analyzer = RegexTokenizer(r"\\S+") | iwf | LowercaseFilter()
+
     (See :class:`MultiFilter`.)
     """
 
@@ -983,7 +983,7 @@ class IntraWordFilter(Filter):
     __inittypes__ = dict(delims=str, splitwords=bool, splitnums=bool,
                          mergewords=bool, mergenums=bool)
     
-    def __init__(self, delims="-_'\"()!@#$%^&*[]{}<>\|;:,./?`~=+",
+    def __init__(self, delims="-_'\"()!@#$%^&*[]{}<>\\|;:,./?`~=+",
                  splitwords=True, splitnums=True,
                  mergewords=False, mergenums=False):
         """

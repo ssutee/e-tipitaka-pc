@@ -219,13 +219,13 @@ def to_7bit(x, islong):
         shift = 63
         nchars = 10
 
-    buffer = array("c", "\x00" * nchars)
+    buffer = bytearray(nchars)
     x += (1 << shift) - 1
     while x:
-        buffer[nchars - 1] = chr(x & 0x7f)
+        buffer[nchars - 1] = x & 0x7f
         x >>= 7
         nchars -= 1
-    return buffer.tostring()
+    return bytes(buffer)
 
 def from_7bit(text):
     if len(text) == 5:
@@ -238,7 +238,8 @@ def from_7bit(text):
     x = 0
     for char in text:
         x <<= 7
-        char = ord(char)
+        if not isinstance(char, int):
+            char = ord(char)
         if char > 0x7f:
             raise Exception
         x |= char

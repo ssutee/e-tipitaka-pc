@@ -100,7 +100,8 @@ class StructFile(object):
             def __getitem__(self, slice):
                 if isinstance(slice, int):
                     _self.seek(slice)
-                    return _self.read(1)
+                    # Match mmap semantics: integer indexing yields an int
+                    return _self.read(1)[0]
                 else:
                     _self.seek(slice.start)
                     return _self.read(slice.stop - slice.start)
@@ -152,15 +153,17 @@ class StructFile(object):
 
     def write_byte(self, n):
         """Writes a single byte to the wrapped file, shortcut for
-        ``file.write(chr(n))``.
+        ``file.write(bytes((n,)))``.
         """
-        self.file.write(chr(n))
+        self.file.write(bytes((n,)))
 
     def read_byte(self):
-        return ord(self.file.read(1))
+        return self.file.read(1)[0]
 
     def get_byte(self, position):
-        return ord(self.map[position])
+        # mmap integer indexing already yields an int in Python 3
+        b = self.map[position]
+        return b if isinstance(b, int) else ord(b)
 
     def write_8bitfloat(self, f, mantissabits=5, zeroexp=2):
         """Writes a byte-sized representation of floating point value f to the
@@ -171,7 +174,7 @@ class StructFile(object):
         :param zeroexp: the zero point for the exponent.
         """
 
-        self.write_byte(float_to_byte(f, mantissabits, zeroexp))
+        self.file.write(float_to_byte(f, mantissabits, zeroexp))
 
     def read_8bitfloat(self, mantissabits=5, zeroexp=2):
         """Reads a byte-sized representation of a floating point value.
@@ -190,7 +193,8 @@ class StructFile(object):
     def read_pickle(self):
         """Reads a pickled object from the wrapped file.
         """
-        return load_pickle(self.file)
+        # Data pickled by Python 2 needs an explicit encoding for str values
+        return load_pickle(self.file, encoding="latin-1")
 
     def write_sbyte(self, n):
         self.file.write(pack_sbyte(n))
@@ -211,7 +215,7 @@ class StructFile(object):
         if self.is_real:
             arry.tofile(self.file)
         else:
-            self.file.write(arry.tostring())
+            self.file.write(arry.tobytes())
 
     def read_sbyte(self):
         return unpack_sbyte(self.file.read(1))[0]
@@ -230,7 +234,7 @@ class StructFile(object):
         if self.is_real:
             a.fromfile(self.file, length)
         else:
-            a.fromstring(self.file.read(length * _SIZEMAP[typecode]))
+            a.frombytes(self.file.read(length * _SIZEMAP[typecode]))
         if IS_LITTLE: a.byteswap()
         return a
 
@@ -249,7 +253,7 @@ class StructFile(object):
     def get_array(self, position, typecode, length):
         source = self.map[position:position + length * _SIZEMAP[typecode]]
         a = array(typecode)
-        a.fromstring(source)
+        a.frombytes(source)
         if IS_LITTLE: a.byteswap()
         return a
 

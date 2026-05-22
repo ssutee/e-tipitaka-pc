@@ -15,7 +15,7 @@
 #===============================================================================
 
 import os
-from io import StringIO
+from io import BytesIO
 from threading import Lock
 
 from whoosh.index import _DEF_INDEX_NAME
@@ -153,13 +153,13 @@ class RamStorage(FileStorage):
     def create_file(self, name):
         def onclose_fn(sfile):
             self.files[name] = sfile.file.getvalue()
-        f = StructFile(StringIO(), name=name, onclose=onclose_fn)
+        f = StructFile(BytesIO(), name=name, onclose=onclose_fn)
         return f
 
     def open_file(self, name, *args, **kwargs):
         if name not in self.files:
             raise NameError("No such file %r" % name)
-        return StructFile(StringIO(self.files[name]), name=name, *args, **kwargs)
+        return StructFile(BytesIO(self.files[name]), name=name, *args, **kwargs)
 
     def lock(self, name):
         if name not in self.locks:

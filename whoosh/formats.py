@@ -22,7 +22,7 @@ occurance of a term.
 
 from collections import defaultdict
 from struct import Struct
-from io import StringIO
+from io import BytesIO
 
 from whoosh.analysis import unstopped
 from whoosh.system import _INT_SIZE, _FLOAT_SIZE, pack_uint, unpack_uint
@@ -142,10 +142,10 @@ class Existence(Format):
     def word_values(self, value, **kwargs):
         wordset = set(t.text for t
                       in unstopped(self.analyzer(value, **kwargs)))
-        return ((w, 1, 1.0, '') for w in wordset)
-    
+        return ((w, 1, 1.0, b'') for w in wordset)
+
     def encode(self, value):
-        return ''
+        return b''
     
     def decode_frequency(self, valuestring):
         return 1
@@ -268,12 +268,12 @@ class Positions(Format):
         for pos in positions:
             codes.append(varint(pos - base))
             base = pos
-        return pack_uint(len(positions)) + "".join(codes)
+        return pack_uint(len(positions)) + b"".join(codes)
 
         #return pack_uint(len(positions)) + array("I", positions).tostring()
     
     def decode_positions(self, valuestring):
-        read = StringIO(valuestring).read
+        read = BytesIO(valuestring).read
         freq = unpack_uint(read(_INT_SIZE))[0]
         position = 0
         positions = []
@@ -324,10 +324,10 @@ class Characters(Positions):
             codes.extend((varint(startchar - charbase),
                           varint(endchar - startchar)))
             charbase = endchar
-        return pack_uint(len(posns_chars)) + "".join(codes)
+        return pack_uint(len(posns_chars)) + b"".join(codes)
     
     def decode_characters(self, valuestring):
-        read = StringIO(valuestring).read
+        read = BytesIO(valuestring).read
         freq = unpack_uint(read(_INT_SIZE))[0]
         position = 0
         endchar = 0
@@ -377,10 +377,10 @@ class PositionBoosts(Positions):
             codes.extend((varint(pos - base), float_to_byte(boost)))
             base = pos
         
-        return self._pack(len(posns_boosts), summedboost) + "".join(codes)
+        return self._pack(len(posns_boosts), summedboost) + b"".join(codes)
     
     def decode_position_boosts(self, valuestring):
-        f = StringIO(valuestring)
+        f = BytesIO(valuestring)
         read = f.read
         freq = unpack_uint(read(_INT_SIZE))[0]
         
@@ -396,7 +396,7 @@ class PositionBoosts(Positions):
         return posns_boosts
     
     def decode_positions(self, valuestring):
-        f = StringIO(valuestring)
+        f = BytesIO(valuestring)
         read, seek = f.read, f.seek
         
         freq = unpack_uint(read(_INT_SIZE))[0]
@@ -461,10 +461,10 @@ class CharacterBoosts(Characters):
             charbase = endchar
         
         b = self._pack(len(posns_chars_boosts), summedboost)
-        return b + "".join(codes)
+        return b + b"".join(codes)
     
     def decode_character_boosts(self, valuestring):
-        f = StringIO(valuestring)
+        f = BytesIO(valuestring)
         read = f.read
         
         freq = unpack_uint(read(_INT_SIZE))[0]

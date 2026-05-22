@@ -57,7 +57,38 @@ HEADER_SIZE = 256 * header_entry_size
 
 #def _hash(value):
 #    return abs(hash(value))
-_hash = hash
+
+# The on-disk hash tables in the 2011-era Whoosh 1.x index were built using
+# Python 2's built-in hash() of byte strings. Python 3's hash() of bytes is
+# randomized per-process (PYTHONHASHSEED) and uses a different algorithm, so we
+# must reproduce CPython 2.x's deterministic string hash exactly to be able to
+# look up keys in the existing index.
+#
+# The shipped index (resources/spell_thai, resources/spell_pali) was built with
+# a 32-bit Python 2 build, so hash() wrapped at 32 bits (signed). The verified
+# stored hash values in the .trm files confirm 32-bit arithmetic.
+
+_MASK32 = (1 << 32) - 1
+
+def _hash(value):
+    """Reproduces CPython 2.x's hash() of a byte string on a 32-bit build.
+
+    This must stay bit-for-bit compatible with the algorithm used to build the
+    on-disk hash tables, or term lookups against the prebuilt index will fail.
+    """
+    if not value:
+        return 0
+    x = (value[0] << 7) & _MASK32
+    for c in value:
+        x = ((1000003 * x) & _MASK32) ^ c
+    x ^= len(value)
+    x &= _MASK32
+    # Interpret the result as a signed 32-bit integer
+    if x & (1 << 31):
+        x -= (1 << 32)
+    if x == -1:
+        x = -2
+    return x
 
 # Table classes
 
@@ -158,7 +189,7 @@ class HashReader(object):
             yield (keypos, keylen, datapos, datalen)
 
     def __iter__(self):
-        return list(self.items())
+        return iter(self.items())
 
     def items(self):
         read = self.read
@@ -644,7 +675,7 @@ class StoredFieldWriter(object):
     def __init__(self, dbfile, fieldnames):
         self.dbfile = dbfile
         self.length = 0
-        self.directory = ""
+        self.directory = b""
         
         self.dbfile.write_long(0)
         self.dbfile.write_uint(0)
@@ -713,7 +744,10 @@ class StoredFieldReader(object):
         if len(ptr) != stored_pointer_size:
             raise Exception("Error reading %r @%s %s < %s" % (dbfile, start, len(ptr), stored_pointer_size))
         position, length = unpack_stored_pointer(ptr)
-        vlist = loads(dbfile.map[position:position+length])
+        # The stored fields were pickled by Python 2; decode str values as
+        # latin-1 so byte strings round-trip correctly.
+        vlist = loads(bytes(dbfile.map[position:position+length]),
+                      encoding="latin-1")
         
         names = self.names
         # Recreate a dictionary by putting the field names and values back

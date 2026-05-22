@@ -140,7 +140,7 @@ def _read_toc(storage, schema, indexname):
     if schema:
         stream.skip_string()
     else:
-        schema = pickle.loads(stream.read_string())
+        schema = pickle.loads(stream.read_string(), encoding="latin-1")
     
     # Generation
     assert gen == stream.read_int()

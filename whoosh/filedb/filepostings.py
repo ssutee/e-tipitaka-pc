@@ -231,13 +231,13 @@ class FilePostingWriter(PostingWriter):
         compression = self.compression
 
         if not stringids and compressed:
-            compressed_ids = compress(ids.tostring(), compression)
+            compressed_ids = compress(ids.tobytes(), compression)
             idslen = len(compressed_ids)
         else:
             idslen = 0
-            
+
         if compressed:
-            compressed_weights = compress(weights.tostring(), compression)
+            compressed_weights = compress(weights.tobytes(), compression)
             weightslen = len(compressed_weights)
         else:
             weightslen = 0
@@ -276,17 +276,17 @@ class FilePostingWriter(PostingWriter):
 
         # Write the values
         if posting_size != 0:
-            values_string = ""
-            
+            values_string = b""
+
             # If the size of a posting value in this format is not fixed
             # (represented by a number less than zero), write an array of value
             # lengths
             if posting_size < 0:
                 lengths = array("i", (len(valuestring) for valuestring in values))
-                values_string += lengths.tostring()
-            
-            values_string += "".join(values)
-            
+                values_string += lengths.tobytes()
+
+            values_string += b"".join(values)
+
             if compressed:
                 values_string = compress(values_string, compression)
             
@@ -430,7 +430,7 @@ class FilePostingReader(Matcher):
             newoffset = pf.tell()
         elif idslen:
             ids = array("I")
-            ids.fromstring(decompress(pf.read(idslen)))
+            ids.frombytes(decompress(pf.read(idslen)))
             newoffset = offset + idslen
         else:
             ids = pf.read_array("I", postcount)
@@ -441,7 +441,7 @@ class FilePostingReader(Matcher):
     def _read_weights(self, offset, postcount, weightslen):
         if weightslen:
             weights = array("f")
-            weights.fromstring(decompress(self.postfile.read(weightslen)))
+            weights.frombytes(decompress(self.postfile.read(weightslen)))
             newoffset = offset + weightslen
         else:
             weights = self.postfile.get_array(offset, "f", postcount)
@@ -464,7 +464,7 @@ class FilePostingReader(Matcher):
             if posting_size < 0:
                 # Pull the array of value lengths off the front of the string
                 lengths = array("i")
-                lengths.fromstring(values_string[:_INT_SIZE * postcount])
+                lengths.frombytes(values_string[:_INT_SIZE * postcount])
                 values_string = values_string[_INT_SIZE * postcount:]
                 
             # Chop up the block string into individual valuestrings

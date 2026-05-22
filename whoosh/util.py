@@ -76,11 +76,11 @@ def array_to_string(a):
     if IS_LITTLE:
         a = copy(a)
         a.byteswap()
-    return a.tostring()
+    return a.tobytes()
 
 def string_to_array(typecode, s):
     a = array(typecode)
-    a.fromstring(s)
+    a.frombytes(s)
     if IS_LITTLE:
         a.byteswap()
     return a
@@ -115,12 +115,12 @@ def make_binary_tree(fn, args, **kwargs):
 # noticeable difference.
 
 def _varint(i):
-    s = ""
+    s = bytearray()
     while (i & ~0x7F) != 0:
-        s += chr((i & 0x7F) | 0x80)
+        s.append((i & 0x7F) | 0x80)
         i = i >> 7
-    s += chr(i)
-    return s
+    s.append(i)
+    return bytes(s)
 
 _varint_cache_size = 512
 _varint_cache = []
@@ -136,12 +136,12 @@ def varint(i):
     return _varint(i)
 
 def varint_to_int(vi):
-    b = ord(vi[0])
+    b = vi[0]
     p = 1
     i = b & 0x7f
     shift = 7
     while b & 0x80 != 0:
-        b = ord(vi[p])
+        b = vi[p]
         p += 1
         i |= (b & 0x7F) << shift
         shift += 7
@@ -173,12 +173,12 @@ def read_varint(readfn):
         like file.read().
     """
 
-    b = ord(readfn(1))
+    b = readfn(1)[0]
     i = b & 0x7F
 
     shift = 7
     while b & 0x80 != 0:
-        b = ord(readfn(1))
+        b = readfn(1)[0]
         i |= (b & 0x7F) << shift
         shift += 7
     return i
@@ -209,19 +209,20 @@ def float_to_byte(value, mantissabits=5, zeroexp=2):
         # Map negative numbers and 0 to 0
         # Map underflow to next smallest non-zero number
         if bits <= 0:
-            return chr(0)
+            return bytes((0,))
         else:
-            return chr(1)
+            return bytes((1,))
     elif smallfloat >= fzero + 0x100:
         # Map overflow to largest number
-        return chr(255)
+        return bytes((255,))
     else:
-        return chr(smallfloat - fzero)
+        return bytes((smallfloat - fzero,))
 
 def byte_to_float(b, mantissabits=5, zeroexp=2):
     """Decodes a floating point number stored in a single byte.
     """
-    b = ord(b)
+    if not isinstance(b, int):
+        b = b[0]
     if b == 0:
         return 0.0
 
@@ -278,7 +279,7 @@ def prefix_encode(a, b):
     the prefix it shares with a, followed by the suffix encoded as UTF-8.
     """
     i = first_diff(a, b)
-    return chr(i) + b[i:].encode("utf8")
+    return bytes((i,)) + b[i:].encode("utf8")
 
 
 def prefix_encode_all(ls):
@@ -291,7 +292,7 @@ def prefix_encode_all(ls):
     last = ''
     for w in ls:
         i = first_diff(last, w)
-        yield chr(i) + w[i:].encode("utf8")
+        yield bytes((i,)) + w[i:].encode("utf8")
         last = w
 
 def prefix_decode_all(ls):
@@ -300,7 +301,7 @@ def prefix_decode_all(ls):
 
     last = ''
     for w in ls:
-        i = ord(w[0])
+        i = w[0] if isinstance(w[0], int) else ord(w[0])
         decoded = last[:i] + w[1:].decode("utf8")
         yield decoded
         last = decoded

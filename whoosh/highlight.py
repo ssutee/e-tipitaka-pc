@@ -21,7 +21,7 @@ query terms highlighted.
 
 
 from heapq import nlargest
-from cgi import escape as htmlescape
+from html import escape as htmlescape
 
 # Fragment object
 
