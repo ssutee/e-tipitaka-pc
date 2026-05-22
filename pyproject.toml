@@ -9,6 +9,7 @@ dependencies = [
     "xhtml2pdf>=0.2.16",
     "Pillow>=10.0",
     "appdirs>=1.4.4",
+    "packaging>=23.0",
 ]
 
 [dependency-groups]

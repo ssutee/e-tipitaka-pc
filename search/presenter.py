@@ -15,7 +15,7 @@ import pony.orm
 from pony.orm import db_session
 import sqlite3
 
-from distutils.version import LooseVersion, StrictVersion
+from packaging.version import Version
 import settings, widgets
 
 import read.model
@@ -524,7 +524,7 @@ class Presenter(object):
     def CheckNewUpdateDidFinish(self, version):
         skipped = open(constants.SKIP_VERSION_FILE).read() if os.path.exists(constants.SKIP_VERSION_FILE) else None
 
-        if skipped == version or StrictVersion(version) <= StrictVersion(settings.VERSION): return
+        if skipped == version or Version(version) <= Version(settings.VERSION): return
         
         dlg = UpdateDialog(self._view, settings.VERSION, version)
         ret = dlg.ShowModal()

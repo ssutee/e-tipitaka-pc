@@ -11,7 +11,6 @@ import wx.lib.buttons as buttons
 import wx.html
 import sys, os, os.path, sys, codecs, re, pickle, sqlite3
 import wx.richtext as rt
-import wx.lib.buttons as buttons
 import wx.grid
 
 from wx.lib.splitter import MultiSplitterWindow
@@ -504,9 +503,9 @@ class DictWindow(wx.Frame):
         self.rightPanel.SetAutoLayout(True)
         rightSizer.Fit(self.rightPanel)
         
-        lpID = wx.NewId()
+        lpID = wx.ID_ANY
 
-        tID = wx.NewId()
+        tID = wx.ID_ANY
         self.wordList = wx.ListCtrl(self.sp,tID,style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SINGLE_SEL)
         self.wordList.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectWord)
         self.wordList.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)        
@@ -787,7 +786,6 @@ class AuiBaseFrame(aui.AuiMDIChildFrame):
             auiFlags -= aui.AUI_MGR_TRANSPARENT_HINT
             auiFlags |= aui.AUI_MGR_VENETIAN_BLINDS_HINT
         self._mgr = aui.AuiManager(self, flags=auiFlags)
-        self._mgr = aui.AuiManager(self)
         
         self.Bind(wx.EVT_CLOSE, self.OnAuiBaseClose)
         
@@ -1212,13 +1210,13 @@ class ReadPanel(wx.Panel):
     def _CreateAttributes(self):
         divider = 2.0 if self._delegate.IsSmallScreen() else 1
         if 'wxMSW' in wx.PlatformInfo:
-            self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, 58/divider), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)  
+            self._title = wx.TextCtrl(self, wx.ID_ANY, size=(-1, int(58/divider)), style=wx.TE_READONLY|wx.NO_BORDER|wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_CENTER|wx.TE_NO_VSCROLL)
             self._title.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL))          
             self._title.SetForegroundColour(wx.BLUE)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)        
             self._title.Bind(wx.EVT_CONTEXT_MENU, lambda event: None)            
         else:
-            self._title = wx.html.HtmlWindow(self, size=(-1, 58/divider), style=wx.html.HW_SCROLLBAR_NEVER)
+            self._title = wx.html.HtmlWindow(self, size=(-1, int(58/divider)), style=wx.html.HW_SCROLLBAR_NEVER)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         
         self._page = wx.html.HtmlWindow(self, size=(-1, 28), style=wx.html.HW_SCROLLBAR_NEVER)
