@@ -228,7 +228,7 @@ def SaveWindowPosition(view, filename):
     if not os.path.exists(constants.CONFIG_PATH):
         os.mkdir(constants.CONFIG_PATH)
 
-    with open(filename, 'w') as f:
+    with open(filename, 'w', encoding='utf-8') as f:
         rect = view.GetScreenRect()
         displaySize = wx.GetDisplaySize()
         json.dump(((rect[0], rect[1], rect[2], rect[3]), (displaySize[0], displaySize[1])), f)
@@ -243,7 +243,7 @@ def LoadWindowPosition(filename):
     if not os.path.exists(filename):
         return None
 
-    with open(filename) as f:
+    with open(filename, encoding='utf-8') as f:
         try:
             rect, savedScreen = json.load(f)
             currentScreen = wx.GetDisplaySize()
@@ -266,10 +266,10 @@ def LoadSearchWindowPosition():
 def LoadNoteStatus():
     if not os.path.exists(constants.NOTE_STATUS_CFG):
         return True
-    return True if open(constants.NOTE_STATUS_CFG).read().strip() == '1' else False
+    return True if open(constants.NOTE_STATUS_CFG, encoding='utf-8').read().strip() == '1' else False
 
 def SaveNoteStatus(status):
-    f = open(constants.NOTE_STATUS_CFG, 'w')
+    f = open(constants.NOTE_STATUS_CFG, 'w', encoding='utf-8')
     f.write('1' if status else '0')
     f.close()
 
@@ -345,7 +345,7 @@ def MoveOldUserData():
         else:
             shutil.copytree(full_path, os.path.join(constants.DATA_PATH, filename))
 
-    fout = open(constants.IMPORTED_MARK_FILE, 'w')
+    fout = open(constants.IMPORTED_MARK_FILE, 'w', encoding='utf-8')
     fout.close()
 
     UpdateDatabases()
@@ -369,7 +369,7 @@ def GetUserDataDir():
     user_data_cfg_path = os.path.join(data_dir, 'data_path.cfg')
 
     if os.path.exists(user_data_cfg_path):
-        with open(user_data_cfg_path, 'r') as f:
+        with open(user_data_cfg_path, 'r', encoding='utf-8') as f:
             path = f.readline().rstrip()
             if os.path.exists(path):
                 return path
@@ -380,5 +380,5 @@ def SaveUserDataDir(path):
 
     data_dir = user_data_dir(APP_NAME, APP_AUTHOR)
     user_data_cfg_path = os.path.join(data_dir, 'data_path.cfg')
-    with open(user_data_cfg_path, 'w') as f:
+    with open(user_data_cfg_path, 'w', encoding='utf-8') as f:
         f.write(path)

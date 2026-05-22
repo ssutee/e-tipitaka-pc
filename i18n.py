@@ -42,3 +42,4 @@ gettext.textdomain (constants.APP_NAME)
  
 
 language = gettext.translation(constants.APP_NAME, mo_location, languages=['th'], fallback=True)
+language.ugettext = language.gettext
