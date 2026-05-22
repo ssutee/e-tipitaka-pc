@@ -67,10 +67,10 @@ class Engine(object):
         return 0
         
     def GetSubItemsInVolume(self, volume):
-        return list(constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume].keys())
+        return list(constants.BOOK_ITEMS[self.BookCode][volume].keys())
         
     def GetItemsInVolume(self, volume, sub):
-        return list(constants.BOOK_ITEMS[self.BookCode.encode('utf8','ignore')][volume][sub].keys())
+        return list(constants.BOOK_ITEMS[self.BookCode][volume][sub].keys())
         
     def GetFirstPage(self, volume):
         pages = ['%s'%(x) for x in range(0, self.GetTotalPages(volume))]
@@ -130,7 +130,7 @@ class Engine(object):
         raise NotImplementedError('Subclass needs to implement this method!')
 
     def GetSubtitle(self, volume, section=None):
-        tokens = constants.BOOK_NAMES['%s_%s' % (self.BookCode, str(volume))].decode('utf8','ignore').split()
+        tokens = constants.BOOK_NAMES['%s_%s' % (self.BookCode, str(volume))].split()
         return '%s %s'%(' '.join(tokens[:3]),' '.join(tokens[3:]))
 
     def GetSectionBoundary(self, position):
@@ -141,7 +141,7 @@ class Engine(object):
         return 45
 
     def GetBookName(self, volume):
-        return constants.BOOK_NAMES['%s_%s' % (self.BookCode, str(volume))].decode('utf8','ignore')
+        return constants.BOOK_NAMES['%s_%s' % (self.BookCode, str(volume))]
 
     def GetBookListItems(self):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
@@ -336,7 +336,7 @@ class ThaiVinayaEngine(Engine):
         return [] if volume > 9 else list(map(int, list(map(utils.ThaiToArabic, re.findall(r'\[([๐-๙]+)\]', result[0])))))
 
     def GetSubtitle(self, volume, section=None):
-        tokens = constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].decode('utf8','ignore').split()
+        tokens = constants.BOOK_NAMES['%s_%s' % (self._code, str(volume))].split()
         return '%s'%(' '.join(tokens[1:]))
 
         
@@ -378,7 +378,7 @@ class ThaiPocketBookEngine(Engine):
         return '%s เล่มที่ %s' % (_('Thai Pocket Book'), utils.ArabicToThai(str(volume)))
 
     def GetSubtitle(self, volume, section=None):
-        return constants.BOOK_NAMES['%s_%s' % ('thaipb', str(volume))].decode('utf8','ignore') if volume else _('Thai Pocket Book')
+        return constants.BOOK_NAMES['%s_%s' % ('thaipb', str(volume))] if volume else _('Thai Pocket Book')
 
     def ProcessResult(self, result):
         r = {}
@@ -476,10 +476,10 @@ class PaliMahaChulaEngine(Engine):
         return 1 if 'wxMac' in wx.PlatformInfo else 0
 
     def GetBookName(self, volume):
-        return constants.BOOK_NAMES['%s_%s' % ('pali', str(volume))].decode('utf8','ignore')
+        return constants.BOOK_NAMES['%s_%s' % ('pali', str(volume))]
 
     def GetSubtitle(self, volume, section=None):
-        tokens = constants.BOOK_NAMES['%s_%s' % ('pali', str(volume))].decode('utf8','ignore').split()
+        tokens = constants.BOOK_NAMES['%s_%s' % ('pali', str(volume))].split()
         return '%s %s'%(' '.join(tokens[:3]),' '.join(tokens[3:]))
 
     def PrepareStatement(self, volume, page):
@@ -879,7 +879,7 @@ class RomanScriptEngine(ScriptEngine):
         return constants.ROMAN_SCRIPT_TITLES[str(volume)][1]
 
     def GetBookName(self, volume):
-        return constants.ROMAN_BOOK_NAMES[volume-1].decode('utf8','ignore')
+        return constants.ROMAN_BOOK_NAMES[volume-1].rstrip()
 
     def GetBookListItems(self):
         return ['%2s. %s' % (volume+1, self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]

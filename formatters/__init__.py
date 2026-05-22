@@ -1,4 +1,4 @@
-from cgi import escape as htmlescape
+from html import escape as htmlescape
 
 class MyHtmlFormatter(object):
     def __init__(self, tagname="strong", attrs="", between="...", classname="match", termclass="term"):
