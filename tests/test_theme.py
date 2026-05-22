@@ -45,12 +45,24 @@ class TestApplyThemeRecursive(unittest.TestCase):
         self.assertEqual(self.bg.Get(), attr.GetBackgroundColour().Get())
         self.assertEqual(self.fg.Get(), attr.GetTextColour().Get())
 
+    def testRecolorsRichTextCtrl(self):
+        ctrl = wx.richtext.RichTextCtrl(self.frame)
+        ctrl.WriteText('note text')
+        utils._ApplyThemeRecursive(self.frame, self.bg, self.fg)
+        attr = wx.TextAttr()
+        ctrl.GetStyle(0, attr)  # mutates attr in-place
+        # wx.Colour.__eq__ is broken for colours from TextAttr in wxPython 4.x;
+        # compare via .Get() tuples instead.
+        self.assertEqual(self.bg.Get(), attr.GetBackgroundColour().Get())
+        self.assertEqual(self.fg.Get(), attr.GetTextColour().Get())
+
 
 def suite():
     s = unittest.TestSuite()
     s.addTest(TestApplyThemeRecursive('testRecolorsTopWindow'))
     s.addTest(TestApplyThemeRecursive('testRecolorsNestedChildren'))
     s.addTest(TestApplyThemeRecursive('testRecolorsTextCtrlDefaultStyle'))
+    s.addTest(TestApplyThemeRecursive('testRecolorsRichTextCtrl'))
     return s
 
 

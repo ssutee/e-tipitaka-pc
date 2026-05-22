@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import wx
+import wx.richtext
 import os, codecs, json, shutil
 import constants
 import sqlite3
@@ -204,7 +205,7 @@ def LoadThemeBackgroundColour(prefix):
 def _ApplyThemeRecursive(window, bg, fg):
     window.SetBackgroundColour(bg)
     window.SetForegroundColour(fg)
-    if isinstance(window, wx.TextCtrl):
+    if isinstance(window, (wx.TextCtrl, wx.richtext.RichTextCtrl)):
         attr = window.GetDefaultStyle()
         attr.SetBackgroundColour(bg)
         attr.SetTextColour(fg)
