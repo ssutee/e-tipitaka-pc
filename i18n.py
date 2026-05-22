@@ -34,12 +34,11 @@ mo_location = LOCALE_DIR
  
 # Lets tell those details to gettext
 #  (nothing to change here for you)
-gettext.install(True, localedir=None, str=1)
+gettext.install(constants.APP_NAME, localedir=mo_location)
  
 gettext.find(constants.APP_NAME, mo_location)
  
 gettext.textdomain (constants.APP_NAME)
  
-gettext.bind_textdomain_codeset(constants.APP_NAME, "UTF-8")
 
 language = gettext.translation(constants.APP_NAME, mo_location, languages=['th'], fallback=True)

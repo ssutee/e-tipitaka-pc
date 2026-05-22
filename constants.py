@@ -4,11 +4,11 @@ import wx
 import os, os.path, sys, pickle, json
 from os.path import expanduser
 
-from .whoosh.spelling import SpellChecker
-from .whoosh.filedb.filestore import FileStorage
-from .whoosh.index import open_dir
+from whoosh.spelling import SpellChecker
+from whoosh.filedb.filestore import FileStorage
+from whoosh.index import open_dir
 from appdirs import user_data_dir, user_log_dir
-from .utils import GetUserDataDir
+from utils import GetUserDataDir
 
 APP_NAME = 'E-Tipitaka'
 APP_AUTHOR = 'Sutee'
@@ -195,28 +195,28 @@ ENGLISH_DICT_DB = os.path.join(RESOURCES_DIR, 'pali-english_v2.sqlite')
 THAI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_thai')))
 PALI_SPELL_CHECKER = SpellChecker(FileStorage(os.path.join(RESOURCES_DIR, 'spell_pali')))
 
-BOOK_NAMES = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_name.pkl'), 'rb'))
-BOOK_PAGES = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_page.pkl'),  'rb'))
-BOOK_ITEMS = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_item.pkl'),  'rb'))
-VOLUME_TABLE = pickle.load(open(os.path.join(RESOURCES_DIR, 'maps.pkl'),  'rb'))
-SCRIPT_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'ct_items.json')).read())
+BOOK_NAMES = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_name.pkl'), 'rb'), encoding='latin-1')
+BOOK_PAGES = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_page.pkl'),  'rb'), encoding='latin-1')
+BOOK_ITEMS = pickle.load(open(os.path.join(RESOURCES_DIR, 'book_item.pkl'),  'rb'), encoding='latin-1')
+VOLUME_TABLE = pickle.load(open(os.path.join(RESOURCES_DIR, 'maps.pkl'),  'rb'), encoding='latin-1')
+SCRIPT_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'ct_items.json'), encoding='utf-8').read())
 
-MAP_MC_TO_SIAM = pickle.load(open(os.path.join(RESOURCES_DIR, 'mc_map.pkl'), 'rb'))
-MAP_MS_TO_SIAM = pickle.load(open(os.path.join(RESOURCES_DIR, 'ms_map.pkl'), 'rb'))
+MAP_MC_TO_SIAM = pickle.load(open(os.path.join(RESOURCES_DIR, 'mc_map.pkl'), 'rb'), encoding='latin-1')
+MAP_MS_TO_SIAM = pickle.load(open(os.path.join(RESOURCES_DIR, 'ms_map.pkl'), 'rb'), encoding='latin-1')
 
-FIVE_BOOKS_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'bt_toc.json')).read())
+FIVE_BOOKS_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'bt_toc.json'), encoding='utf-8').read())
 
-ROMAN_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_rm.json')).read())
-THAI_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_th.json')).read())
+ROMAN_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_rm.json'), encoding='utf-8').read())
+THAI_SCRIPT_TOC = json.loads(open(os.path.join(RESOURCES_DIR, 'toc_th.json'), encoding='utf-8').read())
 
-ROMAN_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_rm.json')).read())
-THAI_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_th.json')).read())
+ROMAN_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_rm.json'), encoding='utf-8').read())
+THAI_SCRIPT_TITLES = json.loads(open(os.path.join(RESOURCES_DIR, 'titles_th.json'), encoding='utf-8').read())
 
-ROMAN_BOOK_NAMES = open(os.path.join(RESOURCES_DIR, 'roman_names.txt')).readlines()
-ROMAN_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst.json')).read())
-ROMAN_REVERSE_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst_r.json')).read())
-ROMAN_PAGE_INDEX = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_page_index.json')).read())
-ROMAN_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_items.json')).read())
+ROMAN_BOOK_NAMES = open(os.path.join(RESOURCES_DIR, 'roman_names.txt'), encoding='utf-8').readlines()
+ROMAN_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst.json'), encoding='utf-8').read())
+ROMAN_REVERSE_MAPPING_TABLE = json.loads(open(os.path.join(RESOURCES_DIR, 'map_cst_r.json'), encoding='utf-8').read())
+ROMAN_PAGE_INDEX = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_page_index.json'), encoding='utf-8').read())
+ROMAN_ITEMS = json.loads(open(os.path.join(RESOURCES_DIR, 'roman_items.json'), encoding='utf-8').read())
 
 FIVE_BOOKS_NAMES = [
     'ขุมทรัพย์จากพระโอษฐ์',

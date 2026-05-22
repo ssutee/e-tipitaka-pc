@@ -2,7 +2,7 @@
 
 import wx
 import os, codecs, json, shutil
-from . import constants
+import constants
 import sqlite3
 from appdirs import user_data_dir
 
@@ -363,7 +363,7 @@ def RemoveOldDatabases():
             pass
 
 def GetUserDataDir():    
-    from .constants import APP_NAME, APP_AUTHOR
+    from constants import APP_NAME, APP_AUTHOR
 
     data_dir = user_data_dir(APP_NAME, APP_AUTHOR)
     user_data_cfg_path = os.path.join(data_dir, 'data_path.cfg')
@@ -376,7 +376,7 @@ def GetUserDataDir():
     return user_data_dir(APP_NAME, APP_AUTHOR)
 
 def SaveUserDataDir(path):
-    from .constants import APP_NAME, APP_AUTHOR
+    from constants import APP_NAME, APP_AUTHOR
 
     data_dir = user_data_dir(APP_NAME, APP_AUTHOR)
     user_data_cfg_path = os.path.join(data_dir, 'data_path.cfg')
