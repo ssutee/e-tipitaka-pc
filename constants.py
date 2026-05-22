@@ -93,7 +93,12 @@ NIKHAHIT_CHAR   = '\uf711'
 THOTHAN_CHAR    = '\uf700'
 YOYING_CHAR     = '\uf70f'
 
-RESOURCES_DIR = 'resources'
+if getattr(sys, 'frozen', False):
+    _BASE_DIR = sys._MEIPASS
+else:
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+RESOURCES_DIR = os.path.join(_BASE_DIR, 'resources')
+FONTS_DIR = os.path.join(_BASE_DIR, 'fonts')
 NOTES_DIR = 'notes'
 MARKS_DIR = 'marks'
 BOOKMARKS_DIR = 'favs'

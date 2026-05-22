@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-import os, sys, traceback, datetime
+import os, sys, traceback, datetime, glob
 
 # Force macOS light appearance: wxWidgets 3.2 has no SetAppearance API, and the
 # UI is unreadable under the system dark theme. Re-exec once with the argument
-# so NSUserDefaults' argument domain forces a light system appearance.
-if sys.platform == 'darwin' and '-NSRequiresAquaSystemAppearance' not in sys.argv:
+# so NSUserDefaults' argument domain forces a light system appearance. A frozen
+# bundle gets this from its Info.plist instead, so only do it when run from source.
+if sys.platform == 'darwin' and not getattr(sys, 'frozen', False) \
+        and '-NSRequiresAquaSystemAppearance' not in sys.argv:
     os.execv(sys.executable,
              [sys.executable, os.path.abspath(__file__)] + sys.argv[1:]
              + ['-NSRequiresAquaSystemAppearance', 'YES'])
@@ -210,6 +212,11 @@ app = MyApp(redirect=False, clearSigInt=True, useBestVisual=True)
 # fine under wxPython 4.0 with those quirks; keep the lenient behaviour so a
 # latent quirk cannot crash the app at runtime.
 wx.SizerFlags.DisableConsistencyChecks()
+
+# Register the bundled fonts for this process so the app does not depend on
+# the user installing them system-wide.
+for _font_path in glob.glob(os.path.join(constants.FONTS_DIR, '*.ttf')):
+    wx.Font.AddPrivateFont(_font_path)
 
 parent = ParentFrame(None)
 parent.PostInit()

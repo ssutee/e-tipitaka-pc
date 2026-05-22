@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pylint>=3.0"]
+dev = ["pylint>=3.0", "pyinstaller>=6.0"]
 
 [tool.uv]
 package = false
