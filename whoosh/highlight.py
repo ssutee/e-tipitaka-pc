@@ -497,9 +497,11 @@ def top_fragments(text, terms, analyzer, fragmenter, top=3,
     termset = frozenset(terms)
     tokens = copyandmatchfilter(termset, analyzer(text, chars=True,
                                                   keeporiginal=True))
-    scored_frags = nlargest(top, ((scorer(f), f)
-                                  for f in fragmenter(text, tokens)))
-    return [sf for score, sf in scored_frags if score > minscore]
+    # Include a unique index so nlargest never compares Fragment objects
+    # directly (Python 3 has no default ordering) when scores tie.
+    scored_frags = nlargest(top, ((scorer(f), i, f)
+                                  for i, f in enumerate(fragmenter(text, tokens))))
+    return [sf for score, i, sf in scored_frags if score > minscore]
 
 
 def highlight(text, terms, analyzer, fragmenter, formatter, top=3,

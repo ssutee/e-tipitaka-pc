@@ -108,14 +108,14 @@ class ParentFrame(aui.AuiMDIParentFrame):
         self._statusBar.Bind(wx.EVT_SIZE, lambda event: wx.CallAfter(self.PositionProgressBar))
 
     def ProcessEvent(self, event):
-        # AGW AuiMDIParentFrame.ProcessEvent drops non-command events (its
-        # _pLastEvt re-entrancy guard swallows them when GetEventHandler() is
-        # self), so the window-close event never reaches OnFrameClose. Handle
-        # it here before delegating the rest to the AGW implementation.
-        if event.GetEventType() == wx.wxEVT_CLOSE_WINDOW:
-            self.OnFrameClose(event)
-            return True
-        return aui.AuiMDIParentFrame.ProcessEvent(self, event)
+        # AGW's AuiMDIParentFrame.ProcessEvent routes command events to the
+        # active MDI child, but its _pLastEvt re-entrancy guard silently drops
+        # non-command events (size, close, ...) because GetEventHandler() is
+        # self -- leaving the child window unsized and the frame unclosable.
+        # Route command events through AGW; handle the rest with base wx.Frame.
+        if event.IsCommandEvent():
+            return aui.AuiMDIParentFrame.ProcessEvent(self, event)
+        return wx.Frame.ProcessEvent(self, event)
 
     def OnFrameClose(self, event):
         try:
@@ -204,6 +204,12 @@ sys.excepthook = excepthook
 wx.Log.SetLogLevel(wx.LOG_FatalError)
 
 app = MyApp(redirect=False, clearSigInt=True, useBestVisual=True)
+
+# wxPython 4.2 added strict sizer consistency assertions that abort on
+# mis-parented widgets and EXPAND/alignment flag combinations. This app ran
+# fine under wxPython 4.0 with those quirks; keep the lenient behaviour so a
+# latent quirk cannot crash the app at runtime.
+wx.SizerFlags.DisableConsistencyChecks()
 
 parent = ParentFrame(None)
 parent.PostInit()

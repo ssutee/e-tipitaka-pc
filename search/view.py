@@ -210,7 +210,7 @@ class View(AuiBaseFrame):
         self._resultsWindow.SetPage(html)
         
     def SetProgress(self, progress):
-        self._parent.ProgressBar.SetValue(progress)
+        self._parent.ProgressBar.SetValue(int(progress))
         
     def SetStatusText(self, text, field):
         self._parent.StatusBar.SetStatusText(text, field)

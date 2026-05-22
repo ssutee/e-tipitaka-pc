@@ -353,7 +353,7 @@ class View(AuiBaseFrame):
         naviSizer.Add(self._bookFontsButton, 0, wx.RIGHT, 5)
         naviSizer.Add(labelPage, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(self._inputPage, flag=wx.ALIGN_CENTER_VERTICAL)
-        naviSizer.Add(wx.StaticText(panel, wx.ID_ANY, '  หรือ  '), flag=wx.ALIGN_CENTER_VERTICAL)
+        naviSizer.Add(wx.StaticText(naviPanel, wx.ID_ANY, '  หรือ  '), flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(labelItem, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add(self._inputItem, flag=wx.ALIGN_CENTER_VERTICAL)
         naviSizer.Add((5,-1))
@@ -604,9 +604,12 @@ class View(AuiBaseFrame):
     def Start(self):
         self._PostInit()
         self._components.Filter(self)
-        
+
         if wx.__version__[:3]<='2.8':
             self.Show()
         else:
-            self.Activate()        
+            self.Activate()
+        # Built on demand after the frame is already shown; re-run the
+        # AuiManager layout once the MDI page has its real size.
+        wx.CallAfter(self.AuiManager.Update)
 
