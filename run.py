@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys, traceback, datetime
-from . import constants
+import constants
 
 if not os.path.exists(constants.DATA_PATH):
     os.makedirs(constants.DATA_PATH)
@@ -9,19 +9,20 @@ if not os.path.exists(constants.DATA_PATH):
 if not os.path.exists(constants.LOG_PATH):
     os.makedirs(constants.LOG_PATH)
 
-from . import utils, settings
+import utils
+import settings
 
 utils.UpdateDatabases()
 
-from . import search.view
-from . import search.interactor
-from . import search.presenter
-from . import search.model
+import search.view
+import search.interactor
+import search.presenter
+import search.model
 
-from . import read.model
-from . import read.interactor
-from . import read.view
-from . import read.presenter
+import read.model
+import read.interactor
+import read.view
+import read.presenter
 
 import wx
 
@@ -30,7 +31,7 @@ try:
 except ImportError as e:
     import wx.lib.agw.aui as aui
 
-from . import i18n
+import i18n
 _ = i18n.language.ugettext
 
 class ParentFrame(aui.AuiMDIParentFrame):

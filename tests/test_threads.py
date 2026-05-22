@@ -2,7 +2,7 @@
 
 import unittest
 import threads
-import queue as queue
+import queue
 
 class TestSearchThread(unittest.TestCase):
             

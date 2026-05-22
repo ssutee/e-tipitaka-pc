@@ -1,5 +1,5 @@
 import unittest
-from . import tests.test_threads
+import tests.test_threads
 
 suite1 = tests.test_threads.suite()
 alltests = unittest.TestSuite([suite1])
