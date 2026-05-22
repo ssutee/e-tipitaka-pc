@@ -503,8 +503,6 @@ class DictWindow(wx.Frame):
         self.rightPanel.SetAutoLayout(True)
         rightSizer.Fit(self.rightPanel)
         
-        lpID = wx.ID_ANY
-
         tID = wx.ID_ANY
         self.wordList = wx.ListCtrl(self.sp,tID,style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SINGLE_SEL)
         self.wordList.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnSelectWord)

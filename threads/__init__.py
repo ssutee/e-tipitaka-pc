@@ -17,7 +17,7 @@ class CheckNewUpdateThread(threading.Thread):
         try:
             response = urllib.request.urlopen(constants.CHECK_VERSION_URL, timeout=3)
             if hasattr(self._delegate, 'CheckNewUpdateDidFinish'):                
-                wx.CallAfter(self._delegate.CheckNewUpdateDidFinish, response.read().strip())
+                wx.CallAfter(self._delegate.CheckNewUpdateDidFinish, response.read().strip().decode('utf-8'))
         except urllib.error.URLError as err:
             pass
         except urllib.error.HTTPError as err:
