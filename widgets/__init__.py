@@ -1430,28 +1430,30 @@ class ReadPanel(wx.Panel):
         if 'wxMSW' in wx.PlatformInfo:
             self._title.SetValue(title1 if self._delegate.IsSmallScreen() else title1 + '\n' + title2)
         elif self._delegate.IsSmallScreen():
-            self._title.SetPage('''<div align="center"><font color="#0000FF" size="4">%s</font></div>''' % (title1))            
+            self._title.SetPage('''<body bgcolor="%s"><div align="center"><font color="#0000FF" size="4">%s</font></div></body>''' % (utils.LoadThemeBackgroundHex(constants.READ), title1))
         else:
-            self._title.SetPage('''<div align="center"><font color="#0000FF" size="4">%s</font></div>
-                <div align="center"><font color="#0000FF" size="4">%s</font></div>''' % (title1, title2))
-    
-    def SetPageNumber(self, number):        
+            self._title.SetPage('''<body bgcolor="%s"><div align="center"><font color="#0000FF" size="4">%s</font></div>
+                <div align="center"><font color="#0000FF" size="4">%s</font></div></body>''' % (utils.LoadThemeBackgroundHex(constants.READ), title1, title2))
+
+    def SetPageNumber(self, number):
+        background = utils.LoadThemeBackgroundHex(constants.READ)
         if number is None:
-            self._page.SetPage('')
+            self._page.SetPage('<body bgcolor="%s"></body>' % background)
         else:
             text = _('Page') + ' ' + utils.ArabicToThai(str(number))
             size = 5 if 'wxMSW' in wx.PlatformInfo else 3
-            self._page.SetPage('<div align="left"><font color="#378000" size="%d">%s</font></div>' % (size, text))
-        
+            self._page.SetPage('<body bgcolor="%s"><div align="left"><font color="#378000" size="%d">%s</font></div></body>' % (background, size, text))
+
     def SetItemNumber(self, *numbers):
+        background = utils.LoadThemeBackgroundHex(constants.READ)
         if len(numbers) == 0 or numbers[0] is None:
-            self._item.SetPage('')
+            self._item.SetPage('<body bgcolor="%s"></body>' % background)
         else:
             text = _('Item') + ' ' + utils.ArabicToThai(str(numbers[0]))
             if len(numbers) > 1:
                 text += ' - ' + utils.ArabicToThai(str(numbers[-1]))
             size = 5 if 'wxMSW' in wx.PlatformInfo else 3
-            self._item.SetPage('<div align="right"><font color="#378000" size="%d">%s</font></div>' % (size, text))
+            self._item.SetPage('<body bgcolor="%s"><div align="right"><font color="#378000" size="%d">%s</font></div></body>' % (background, size, text))
 
     def ToggleTitles(self):
         if self._title.IsShown():
