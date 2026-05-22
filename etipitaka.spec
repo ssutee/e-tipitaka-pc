@@ -46,7 +46,6 @@ exe = EXE(
     strip=False,
     upx=False,
     console=False,
-    icon='resources/e-tri_64_icon.ico',
 )
 
 coll = COLLECT(
