@@ -57,10 +57,8 @@ except ImportError:
                 return
 
 
-if sys.platform == 'win32':
-    now = time.clock
-else:
-    now = time.time
+# time.clock was removed in Python 3.8; time.time works on every platform.
+now = time.time
 
 
 # Note: these functions return a tuple of (text, length), so when you call
