@@ -2,6 +2,7 @@
 
 import wx
 import wx.richtext
+import wx.html
 import os, codecs, json, shutil
 import constants
 import sqlite3
@@ -211,6 +212,10 @@ def _ApplyThemeRecursive(window, bg, fg):
         attr.SetTextColour(fg)
         window.SetDefaultStyle(attr)
         window.SetStyle(0, window.GetLastPosition(), attr)
+    elif isinstance(window, wx.html.HtmlWindow):
+        # HtmlWindow renders its own surface; SetBackgroundColour does not
+        # reach the rendered HTML area — SetHTMLBackgroundColour does.
+        window.SetHTMLBackgroundColour(bg)
     for child in window.GetChildren():
         _ApplyThemeRecursive(child, bg, fg)
     window.Refresh()

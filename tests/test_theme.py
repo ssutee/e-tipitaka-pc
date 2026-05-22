@@ -3,6 +3,7 @@
 import unittest
 import threads  # noqa: F401 – resolves utils/constants circular import
 import wx
+import wx.html
 import utils
 
 
@@ -57,12 +58,20 @@ class TestApplyThemeRecursive(unittest.TestCase):
         self.assertEqual(self.fg.Get(), attr.GetTextColour().Get())
 
 
+    def testRecolorsHtmlWindow(self):
+        win = wx.html.HtmlWindow(self.frame)
+        win.SetPage('<div>title</div>')
+        utils._ApplyThemeRecursive(self.frame, self.bg, self.fg)
+        self.assertEqual(self.bg.Get(), win.GetHTMLBackgroundColour().Get())
+
+
 def suite():
     s = unittest.TestSuite()
     s.addTest(TestApplyThemeRecursive('testRecolorsTopWindow'))
     s.addTest(TestApplyThemeRecursive('testRecolorsNestedChildren'))
     s.addTest(TestApplyThemeRecursive('testRecolorsTextCtrlDefaultStyle'))
     s.addTest(TestApplyThemeRecursive('testRecolorsRichTextCtrl'))
+    s.addTest(TestApplyThemeRecursive('testRecolorsHtmlWindow'))
     return s
 
 
