@@ -207,9 +207,7 @@ def _ApplyThemeRecursive(window, bg, fg):
     window.SetBackgroundColour(bg)
     window.SetForegroundColour(fg)
     if isinstance(window, (wx.TextCtrl, wx.richtext.RichTextCtrl)):
-        attr = window.GetDefaultStyle()
-        attr.SetBackgroundColour(bg)
-        attr.SetTextColour(fg)
+        attr = wx.TextAttr(fg, bg, window.GetFont())
         window.SetDefaultStyle(attr)
         window.SetStyle(0, window.GetLastPosition(), attr)
     elif isinstance(window, wx.html.HtmlWindow):
