@@ -46,6 +46,7 @@ exe = EXE(
     strip=False,
     upx=False,
     console=False,
+    icon='resources/e-tri_64_icon.ico',
 )
 
 coll = COLLECT(
@@ -61,6 +62,7 @@ if sys.platform == 'darwin':
     app = BUNDLE(
         coll,
         name='E-Tipitaka.app',
+        icon='resources/e-tipitaka.icns',
         bundle_identifier='org.watnapahpong.etipitaka',
         info_plist={
             'NSRequiresAquaSystemAppearance': True,
