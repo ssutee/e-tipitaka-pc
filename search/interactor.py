@@ -13,6 +13,10 @@ class Interactor(object):
         self.View.TopBar.FontsButton.Bind(wx.EVT_BUTTON, self.OnFontsButtonClick)
         self.View.TopBar.ReadButton.Bind(wx.EVT_BUTTON, self.OnReadButtonClick)
         self.View.TopBar.SearchCtrl.Bind(wx.EVT_TEXT, self.OnSearchCtrlTextChange)
+        # On macOS a SearchCtrl routes the Return key to its search event,
+        # not EVT_TEXT_ENTER; bind both so Enter runs the search.
+        self.View.TopBar.SearchCtrl.Bind(wx.EVT_TEXT_ENTER, self.OnSearchButtonClick)
+        self.View.TopBar.SearchCtrl.Bind(wx.EVT_SEARCH, self.OnSearchButtonClick)
 
         self.View.TopBar.LanguagesComboBox.Bind(wx.EVT_COMBOBOX, self.OnLanguagesComboBoxSelect)
         self.View.ThemeComboBox.Bind(wx.EVT_COMBOBOX, self.OnThemeComboBoxSelect)
