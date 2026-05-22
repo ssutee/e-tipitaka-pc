@@ -23,7 +23,7 @@ hiddenimports = [
 
 a = Analysis(
     ['run.py'],
-    pathex=[],
+    pathex=[SPECPATH],
     binaries=[],
     datas=datas,
     hiddenimports=hiddenimports,
