@@ -194,6 +194,7 @@ class Presenter(object):
 
     def SelectTheme(self, index):
         utils.SaveTheme(index, constants.SEARCH)
+        utils.ApplyTheme(self._view, constants.SEARCH)
         self._view.ResultsWindow.SetPage('<html><body bgcolor="%s"></body></html>'%(utils.LoadThemeBackgroundHex(constants.SEARCH)))
         self._model.ReloadDisplay()
         

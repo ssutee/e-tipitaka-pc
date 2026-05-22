@@ -152,6 +152,7 @@ class View(AuiBaseFrame):
         self.AddPane(self._topBar, info)
         
         self._CreateHistoryListPane()
+        utils.ApplyTheme(self, constants.SEARCH)
 
     def _CreateHistoryListPane(self):
         panel = wx.Panel(self, wx.ID_ANY)
