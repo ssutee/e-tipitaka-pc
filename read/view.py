@@ -321,7 +321,7 @@ class View(AuiBaseFrame):
         self._toolPanel = widgets.ReadToolPanel(self, self._dataSource)        
         self._listPanel = self._CreateBookListPanel()        
         
-        self.SetCenterPane(self._readPanel, caption=True)
+        self.SetCenterPane(self._readPanel)
 
         info = aui.AuiPaneInfo().CaptionVisible(False).Resizable(False)
         info = info.FloatingSize((740, 75)).MinSize((740, 75)).Top().Layer(0)
