@@ -3,6 +3,9 @@ name: Build
 on:
   workflow_dispatch:
   push:
+    branches:
+      - master
+      - migrate/python3
     tags:
       - 'v*'
 
