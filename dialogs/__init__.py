@@ -407,7 +407,7 @@ class SimpleFontDialog(wx.Dialog):
         mainSizer.Add(spinPanel, (1,1), flag=wx.ALIGN_CENTER_HORIZONTAL)
         
         self._text = wx.StaticText(self, wx.ID_ANY, 'ตถาคเต เอกนฺตคโต อภิปฺปสนฺโน', size=(500, 100), style=wx.ALIGN_CENTRE)
-        mainSizer.Add(self._text, (2,0), (1,2), flag=wx.ALIGN_CENTER|wx.EXPAND|wx.TOP, border=10)
+        mainSizer.Add(self._text, (2,0), (1,2), flag=wx.EXPAND|wx.TOP, border=10)
 
         buttonPanel = wx.Panel(self, wx.ID_ANY)
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -813,11 +813,11 @@ class BookmarkDialog(wx.Dialog):
         sizer1 = wx.BoxSizer(wx.HORIZONTAL)
         sizer1.Add(wx.StaticText(self, -1, 'หมายเหตุ :', size=(70,-1), style=wx.ALIGN_RIGHT), 0, wx.ALIGN_CENTER)
         self.NoteText = wx.TextCtrl(self, -1)
-        sizer1.Add(self.NoteText, 1, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.ALIGN_CENTER, 8)
+        sizer1.Add(self.NoteText, 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 8)
         sizer2 = wx.BoxSizer(wx.HORIZONTAL)
         sizer2.Add(wx.StaticText(self, -1, 'กลุ่ม :', size=(70,-1), style=wx.ALIGN_RIGHT), 0, wx.ALIGN_CENTER)
         self.ComboBox = self.CreateComboBox()
-        sizer2.Add(self.ComboBox, 1, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.ALIGN_CENTER, 8)
+        sizer2.Add(self.ComboBox, 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 8)
         sizer3 = wx.BoxSizer(wx.HORIZONTAL)
         self.CancelButton = wx.Button(self, wx.ID_CANCEL, 'ยกเลิก')
         self.SaveButton = wx.Button(self, -1, 'บันทึก')

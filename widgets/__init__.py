@@ -2,14 +2,11 @@
 
 import wx
 
-try:
-    import wx.aui as aui
-except ImportError as e:
-    import wx.lib.agw.aui as aui
+import wx.lib.agw.aui as aui  # pure-Python AUI; C++ wx.aui MDI frames segfault on macOS
 
 import wx.lib.buttons as buttons
 import wx.html
-import sys, os, os.path, sys, codecs, re, pickle, sqlite3
+import sys, os, os.path, codecs, re, pickle, sqlite3, traceback
 import wx.richtext as rt
 import wx.grid
 
@@ -783,7 +780,7 @@ class AuiBaseFrame(aui.AuiMDIChildFrame):
         if wx.Platform in ('__WXGTK__', '__WXMAC__') and aui.AUI_MGR_DEFAULT & aui.AUI_MGR_TRANSPARENT_HINT:
             auiFlags -= aui.AUI_MGR_TRANSPARENT_HINT
             auiFlags |= aui.AUI_MGR_VENETIAN_BLINDS_HINT
-        self._mgr = aui.AuiManager(self, flags=auiFlags)
+        self._mgr = aui.AuiManager(self, agwFlags=auiFlags)
         
         self.Bind(wx.EVT_CLOSE, self.OnAuiBaseClose)
         
@@ -792,11 +789,14 @@ class AuiBaseFrame(aui.AuiMDIChildFrame):
         return self._mgr
         
     def OnAuiBaseClose(self, event):
-        appName = wx.GetApp().GetAppName()
-        config = wx.Config(appName)
-        perspective = self._mgr.SavePerspective()
-        config.Write("perspective", perspective)
-        self._mgr.UnInit()
+        try:
+            appName = wx.GetApp().GetAppName()
+            config = wx.Config(appName)
+            perspective = self._mgr.SavePerspective()
+            config.Write("perspective", perspective)
+            self._mgr.UnInit()
+        except Exception:
+            traceback.print_exc()
         event.Skip()
         
     def AddPane(self, pane, auiInfo):
@@ -1323,15 +1323,15 @@ class ReadPanel(wx.Panel):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
         
         if 'wxMSW' in wx.PlatformInfo:
-            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT|wx.TOP, 10)
+            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
         else:
-            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, 5)
+            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self._page, 1, wx.EXPAND|wx.ALIGN_CENTER|wx.LEFT, 5)
-        sizer.Add(self._item, 1, wx.EXPAND|wx.ALIGN_CENTER|wx.RIGHT, 5)
+        sizer.Add(self._page, 1, wx.EXPAND|wx.LEFT, 5)
+        sizer.Add(self._item, 1, wx.EXPAND|wx.RIGHT, 5)
         
-        self._mainSizer.Add(sizer, 0, wx.EXPAND|wx.ALIGN_CENTER|wx.BOTTOM, 5)        
+        self._mainSizer.Add(sizer, 0, wx.EXPAND|wx.BOTTOM, 5)        
 
         if self._slider is not None:
             self._mainSizer.Add(self._slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)
@@ -1874,7 +1874,7 @@ class SearchToolPanel(wx.Panel):
         topSizer.Add(self._aboutButton, 0, flag=wx.ALIGN_CENTER)
         
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
-        bottomSizer.Add(self._langPanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
+        bottomSizer.Add(self._langPanel, 0, flag=wx.EXPAND)
         bottomSizer.Add((5,5))
         bottomSizer.Add(self._readButton, flag=wx.ALIGN_BOTTOM)
         bottomSizer.Add((5,5))        
@@ -1896,10 +1896,10 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._searchAndCompareButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add((10,-1), 0)
-        bottomSizer.Add(self._themePanel, 0, flag=wx.ALIGN_BOTTOM|wx.EXPAND)
+        bottomSizer.Add(self._themePanel, 0, flag=wx.EXPAND)
         
-        mainSizer.Add(topSizer, 1, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
-        mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND|wx.ALIGN_BOTTOM)
+        mainSizer.Add(topSizer, 1, flag=wx.EXPAND)
+        mainSizer.Add(bottomSizer, 0, flag=wx.EXPAND)
         
         self.SetSizer(mainSizer)
 

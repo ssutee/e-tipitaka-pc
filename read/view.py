@@ -6,10 +6,7 @@ import widgets, constants, utils
 from widgets import AuiBaseFrame
 from dialogs import BookmarkDialog, BookmarkManagerDialog
 
-try:
-    import wx.aui as aui
-except ImportError as e:
-    import wx.lib.agw.aui as aui
+import wx.lib.agw.aui as aui  # pure-Python AUI; C++ wx.aui MDI frames segfault on macOS
 
 import i18n
 _ = i18n.language.ugettext

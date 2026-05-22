@@ -1,6 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os, sys, traceback, datetime
+
+# Force macOS light appearance: wxWidgets 3.2 has no SetAppearance API, and the
+# UI is unreadable under the system dark theme. Re-exec once with the argument
+# so NSUserDefaults' argument domain forces a light system appearance.
+if sys.platform == 'darwin' and '-NSRequiresAquaSystemAppearance' not in sys.argv:
+    os.execv(sys.executable,
+             [sys.executable, os.path.abspath(__file__)] + sys.argv[1:]
+             + ['-NSRequiresAquaSystemAppearance', 'YES'])
+
 import constants
 
 if not os.path.exists(constants.DATA_PATH):
@@ -26,10 +35,7 @@ import read.presenter
 
 import wx
 
-try:
-    import wx.aui as aui
-except ImportError as e:
-    import wx.lib.agw.aui as aui
+import wx.lib.agw.aui as aui  # pure-Python AUI; C++ wx.aui MDI frames segfault on macOS
 
 import i18n
 _ = i18n.language.ugettext
@@ -101,19 +107,32 @@ class ParentFrame(aui.AuiMDIParentFrame):
     def PostInit(self):
         self._statusBar.Bind(wx.EVT_SIZE, lambda event: wx.CallAfter(self.PositionProgressBar))
 
+    def ProcessEvent(self, event):
+        # AGW AuiMDIParentFrame.ProcessEvent drops non-command events (its
+        # _pLastEvt re-entrancy guard swallows them when GetEventHandler() is
+        # self), so the window-close event never reaches OnFrameClose. Handle
+        # it here before delegating the rest to the AGW implementation.
+        if event.GetEventType() == wx.wxEVT_CLOSE_WINDOW:
+            self.OnFrameClose(event)
+            return True
+        return aui.AuiMDIParentFrame.ProcessEvent(self, event)
+
     def OnFrameClose(self, event):
-        self._presenter._canBeClosed = True
-        utils.SaveSearchWindowPosition(self)
-        if self._presenter: self._presenter.SaveSearches()
-        for code in self._presenters:
-            self._presenter.SaveHistory(code)
-        for child in self.GetClientWindow().GetChildren():
-            if isinstance(child, aui.AuiMDIChildFrame):
-                try:
-                    child.Close()
-                except wx.PyAssertionError as e:
-                    pass
-        event.Skip()
+        try:
+            self._presenter._canBeClosed = True
+            utils.SaveSearchWindowPosition(self)
+            if self._presenter: self._presenter.SaveSearches()
+            for code in self._presenters:
+                self._presenter.SaveHistory(code)
+            for child in self.GetClientWindow().GetChildren():
+                if isinstance(child, aui.AuiMDIChildFrame):
+                    try:
+                        child.Close()
+                    except Exception:
+                        pass
+        except Exception:
+            traceback.print_exc()
+        self.Destroy()
 
     def ReadAndCompare(self, code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords, code2, volume2, page2, keywords2):
         presenter = self.Read(code, volume, page, section, shouldHighlight, showBookList, shouldOpenNewWindow, keywords)
