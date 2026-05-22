@@ -780,7 +780,7 @@ class AuiBaseFrame(aui.AuiMDIChildFrame):
         super(AuiBaseFrame, self).__init__(parent, *args, **kwargs)
         
         auiFlags = aui.AUI_MGR_DEFAULT
-        if wx.Platform == '__WXGTK__' and aui.AUI_MGR_DEFAULT & aui.AUI_MGR_TRANSPARENT_HINT:
+        if wx.Platform in ('__WXGTK__', '__WXMAC__') and aui.AUI_MGR_DEFAULT & aui.AUI_MGR_TRANSPARENT_HINT:
             auiFlags -= aui.AUI_MGR_TRANSPARENT_HINT
             auiFlags |= aui.AUI_MGR_VENETIAN_BLINDS_HINT
         self._mgr = aui.AuiManager(self, flags=auiFlags)

@@ -93,8 +93,6 @@ class ParentFrame(aui.AuiMDIParentFrame):
         self._statusBar.SetStatusWidths([-1,170,170,100])
 
         self._progressBar = wx.Gauge(self._statusBar, -1, 100, size=(100,-1))
-        self._progressBar.SetBezelFace(3)
-        self._progressBar.SetShadowWidth(3)
         self._progressBar.SetRect(self._statusBar.GetFieldRect(3))
 
     def PositionProgressBar(self):
