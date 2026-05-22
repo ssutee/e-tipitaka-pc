@@ -508,8 +508,7 @@ class DictWindow(wx.Frame):
         self.wordList.SetColumnWidth(0, 250)
         
         self.sp.SplitVertically(self.wordList,self.rightPanel,200)
-        self.sp.SetSashSize(5)
-        
+
         self.SetSizer(mainSizer)
 
         self.conn = self.ConnectDatabase()
