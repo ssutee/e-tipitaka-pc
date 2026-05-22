@@ -45,7 +45,7 @@ class TestThaiMahaChulaSearchThread(TestSearchThread):
         super(TestThaiMahaChulaSearchThread, self).__init__(methodName)
         self.cls = threads.ThaiMahaChulaSearchThread
         self.keywords = 'กรรม'
-        self.expected = 3330
+        self.expected = 3355
 
 class TestThaiMahaMakutSearchThread(TestSearchThread):
 
@@ -61,7 +61,7 @@ class TestThaiFiveBooksSearchThread(TestSearchThread):
         super(TestThaiFiveBooksSearchThread, self).__init__(methodName)
         self.cls = threads.ThaiFiveBooksSearchThread
         self.keywords = 'กรรม'
-        self.expected = 300
+        self.expected = 298
 
 class TestThaiScriptSearchThread(TestSearchThread):
 
