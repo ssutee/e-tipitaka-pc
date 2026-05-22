@@ -201,6 +201,24 @@ def LoadThemeBackgroundColour(prefix):
         return wx.Colour(0xF9,0xEF,0xD8,0xFF)
     return wx.WHITE
 
+def _ApplyThemeRecursive(window, bg, fg):
+    window.SetBackgroundColour(bg)
+    window.SetForegroundColour(fg)
+    if isinstance(window, wx.TextCtrl):
+        attr = window.GetDefaultStyle()
+        attr.SetBackgroundColour(bg)
+        attr.SetTextColour(fg)
+        window.SetDefaultStyle(attr)
+        window.SetStyle(0, window.GetLastPosition(), attr)
+    for child in window.GetChildren():
+        _ApplyThemeRecursive(child, bg, fg)
+    window.Refresh()
+
+def ApplyTheme(window, prefix):
+    bg = LoadThemeBackgroundColour(prefix)
+    fg = LoadThemeForegroundColour(prefix)
+    _ApplyThemeRecursive(window, bg, fg)
+
 def SaveFont(font, path, code=None):
     t = '%s,%d,%d,%d,%d' % (font.GetFaceName(),font.GetFamily(),font.GetStyle(),font.GetWeight(),font.GetPointSize())
     path = path if code is None else path + '.' + code
