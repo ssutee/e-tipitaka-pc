@@ -128,6 +128,8 @@ SEARCH_RECT = os.path.join(CONFIG_PATH, 'rect_search.cfg')
 READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 
 THEME_CFG = os.path.join(CONFIG_PATH, 'theme.cfg')
+ACCOUNT_BASE_URL = 'https://data.etipitaka.com'
+ACCOUNT_CFG = os.path.join(CONFIG_PATH, 'account.cfg')
 NOTE_STATUS_CFG = os.path.join(CONFIG_PATH, 'comment.cfg')
 
 SEARCH_IMAGE = os.path.join(RESOURCES_DIR, 'search.png')
@@ -148,6 +150,7 @@ FILE_DELETE_IMAGE = os.path.join(RESOURCES_DIR, 'file_delete.png')
 
 STAR_IMAGE = os.path.join(RESOURCES_DIR, 'star.png')
 NOTES_IMAGE = os.path.join(RESOURCES_DIR, 'edit-notes.png')
+ACCOUNT_IMAGE = os.path.join(RESOURCES_DIR, 'account.png')
 DICT_IMAGE = os.path.join(RESOURCES_DIR, 'dict.png')
 THAI_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'thaidict.png')
 PALI_DICT_IMAGE = os.path.join(RESOURCES_DIR, 'palidict.png')
