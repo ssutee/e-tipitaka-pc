@@ -1985,7 +1985,7 @@ class SearchToolPanel(wx.Panel):
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
 
         self._accountButton = wx.BitmapButton(self, wx.ID_ANY,
-            wx.Bitmap(wx.Image(constants.ACCOUNT_IMAGE, wx.BITMAP_TYPE_PNG)))
+            wx.Bitmap(wx.Image(constants.ACCOUNT_IMAGE, wx.BITMAP_TYPE_PNG).Scale(32,32)))
         self._accountButton.SetToolTip(wx.ToolTip(_('Account / cloud sync')))
 
         self._settingButton = wx.BitmapButton(self, wx.ID_ANY, 
