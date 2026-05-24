@@ -1826,6 +1826,10 @@ class SearchToolPanel(wx.Panel):
         return self._importButton
 
     @property
+    def AccountButton(self):
+        return self._accountButton
+
+    @property
     def SettingButton(self):
         return self._settingButton
         
@@ -1896,7 +1900,8 @@ class SearchToolPanel(wx.Panel):
         bottomSizer.Add(self._notesButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)        
         bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._exportButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
-        bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
+        bottomSizer.Add(self._importButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
+        bottomSizer.Add(self._accountButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
         bottomSizer.Add(self._settingButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)            
         bottomSizer.Add((10,-1), 0)
         bottomSizer.Add(self._paliDictButton, flag=wx.ALIGN_BOTTOM|wx.SHAPED)
@@ -1975,9 +1980,13 @@ class SearchToolPanel(wx.Panel):
             wx.Bitmap(wx.Image(constants.IMPORT_IMAGE, wx.BITMAP_TYPE_PNG))) 
         self._importButton.SetToolTip(wx.ToolTip(_('Import data')))
         
-        self._exportButton = wx.BitmapButton(self, wx.ID_ANY, 
-            wx.Bitmap(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))         
+        self._exportButton = wx.BitmapButton(self, wx.ID_ANY,
+            wx.Bitmap(wx.Image(constants.EXPORT_IMAGE, wx.BITMAP_TYPE_PNG)))
         self._exportButton.SetToolTip(wx.ToolTip(_('Export data')))
+
+        self._accountButton = wx.BitmapButton(self, wx.ID_ANY,
+            wx.Bitmap(wx.Image(constants.ACCOUNT_IMAGE, wx.BITMAP_TYPE_PNG)))
+        self._accountButton.SetToolTip(wx.ToolTip(_('Account / cloud sync')))
 
         self._settingButton = wx.BitmapButton(self, wx.ID_ANY, 
             wx.Bitmap(wx.Image(constants.SETTING_IMAGE, wx.BITMAP_TYPE_PNG))) 

@@ -25,6 +25,7 @@ class Interactor(object):
         self.View.BackwardButton.Bind(wx.EVT_BUTTON, self.OnBackwardButtonClick)
         self.View.ExportButton.Bind(wx.EVT_BUTTON, self.OnExportButtonClick)
         self.View.ImportButton.Bind(wx.EVT_BUTTON, self.OnImportButtonClick)
+        self.View.AccountButton.Bind(wx.EVT_BUTTON, self.OnAccountButtonClick)
         self.View.SettingButton.Bind(wx.EVT_BUTTON, self.OnSettingButtonClick)
         
         self.View.VolumesRadio.Bind(wx.EVT_RADIOBOX, self.OnVolumesRadioSelect)
@@ -92,6 +93,9 @@ class Interactor(object):
         
     def OnImportButtonClick(self, event):
         self.Presenter.ImportData()
+
+    def OnAccountButtonClick(self, event):
+        self.Presenter.OpenAccount()
 
     def OnSettingButtonClick(self, event):
         self.Presenter.SetUserDataDir()

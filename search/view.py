@@ -36,6 +36,10 @@ class View(AuiBaseFrame):
         return self._topBar.ImportButton
 
     @property
+    def AccountButton(self):
+        return self._topBar.AccountButton
+
+    @property
     def SettingButton(self):
         return self._topBar.SettingButton
         

@@ -289,6 +289,16 @@ class Presenter(object):
             wx.MessageBox(_('Export data complete'), 'E-Tipitaka')
         dlg.Destroy()
 
+    def OpenAccount(self):
+        from account.client import AccountClient
+        from account.dialogs import AccountDialog
+        from account.tokenstore import TokenStore
+        store = TokenStore()
+        client = AccountClient(constants.ACCOUNT_BASE_URL, store)
+        dlg = AccountDialog(self._view, client, store, self)
+        dlg.ShowModal()
+        dlg.Destroy()
+
     def ImportHistory(self, keywords, total, code, read, skimmed, pages, notes):
         conn = sqlite3.connect(constants.DATA_DB)
         cursor = conn.cursor()
