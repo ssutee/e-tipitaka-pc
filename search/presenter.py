@@ -25,6 +25,15 @@ import read.presenter
 
 import codecs
 
+def BuildBackupZip(out_path):
+    """Write a .etz zip of constants.DATA_PATH to `out_path`. No UI."""
+    rootlen = len(constants.DATA_PATH) + 1
+    with zipfile.ZipFile(out_path, 'w') as fz:
+        for base, dirs, files in os.walk(constants.DATA_PATH):
+            for filename in files:
+                fn = os.path.join(base, filename)
+                fz.write(fn, fn[rootlen:])
+
 class Presenter(object):
     def __init__(self, model, view, interactor):
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
@@ -271,17 +280,12 @@ class Presenter(object):
         self.Search(h.keywords, refreshHistoryList=False)
     
     def ExportData(self):
-        from datetime import datetime        
+        from datetime import datetime
         zipFile = 'backup-%s.etz' % (datetime.now().strftime('%Y-%m-%d'))
-        dlg = wx.FileDialog(self._view, _('Save data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)        
+        dlg = wx.FileDialog(self._view, _('Save data'), constants.HOME, zipFile, constants.ETZ_TYPE, wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
-            with zipfile.ZipFile(os.path.join(dlg.GetDirectory(), dlg.GetFilename()), 'w') as fz:                
-                rootlen = len(constants.DATA_PATH) + 1
-                for base, dirs, files in os.walk(constants.DATA_PATH):
-                    for filename in files:
-                            fn = os.path.join(base, filename)
-                            fz.write(fn, fn[rootlen:])                
+            BuildBackupZip(os.path.join(dlg.GetDirectory(), dlg.GetFilename()))
             wx.MessageBox(_('Export data complete'), 'E-Tipitaka')
         dlg.Destroy()
 
