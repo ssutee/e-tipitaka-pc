@@ -146,6 +146,9 @@ class SignUpDialog(wx.Dialog):
 
 class BackupListDialog(wx.Dialog):
 
+    # (platform_key, tab_label) — tab order = display order.
+    PLATFORMS = [('pc', 'PC'), ('android', 'Android'), ('ios', 'iOS')]
+
     def __init__(self, parent, client, presenter):
         super(BackupListDialog, self).__init__(parent, title=u'จัดการข้อมูลสำรอง',
                                                size=(560, 360))
@@ -155,36 +158,58 @@ class BackupListDialog(wx.Dialog):
         panel = wx.Panel(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self._list.InsertColumn(0, u'วันที่', width=170)
-        self._list.InsertColumn(1, u'ชื่อไฟล์', width=240)
-        self._list.InsertColumn(2, u'แพลตฟอร์ม', width=80)
-        self._list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self._on_download)
+        self._notebook = wx.Notebook(panel)
+        self._lists = {}    # platform -> ListCtrl
+        self._rows = {}     # platform -> list of dicts
+        for plat, label in self.PLATFORMS:
+            page = wx.Panel(self._notebook)
+            psizer = wx.BoxSizer(wx.VERTICAL)
+            lc = wx.ListCtrl(page, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+            lc.InsertColumn(0, u'วันที่', width=180)
+            lc.InsertColumn(1, u'ชื่อไฟล์', width=320)
+            lc.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self._on_download)
+            psizer.Add(lc, 1, wx.EXPAND | wx.ALL, 4)
+            page.SetSizer(psizer)
+            self._notebook.AddPage(page, label)
+            self._lists[plat] = lc
+            self._rows[plat] = []
+        self._notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_page_changed)
 
         self._gauge = wx.Gauge(panel)
         self._gauge.Hide()
 
-        btnRow = wx.BoxSizer(wx.HORIZONTAL)
+        self._btnRow = wx.BoxSizer(wx.HORIZONTAL)
         self._btnDownload = wx.Button(panel, label=u'ดาวน์โหลด')
         self._btnDelete = wx.Button(panel, label=u'ลบ')
         self._btnClose = wx.Button(panel, wx.ID_CLOSE, label=u'ปิด')
         self._btnDownload.Bind(wx.EVT_BUTTON, self._on_download)
         self._btnDelete.Bind(wx.EVT_BUTTON, self._on_delete)
         self._btnClose.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_OK))
-        btnRow.Add(self._btnDownload, 0, wx.RIGHT, 6)
-        btnRow.Add(self._btnDelete, 0, wx.RIGHT, 6)
-        btnRow.AddStretchSpacer()
-        btnRow.Add(self._btnClose, 0)
+        self._btnRow.Add(self._btnDownload, 0, wx.RIGHT, 6)
+        self._btnRow.Add(self._btnDelete, 0, wx.RIGHT, 6)
+        self._btnRow.AddStretchSpacer()
+        self._btnRow.Add(self._btnClose, 0)
 
-        sizer.Add(self._list, 1, wx.EXPAND | wx.ALL, 10)
+        sizer.Add(self._notebook, 1, wx.EXPAND | wx.ALL, 10)
         sizer.Add(self._gauge, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
-        sizer.Add(btnRow, 0, wx.EXPAND | wx.ALL, 10)
+        sizer.Add(self._btnRow, 0, wx.EXPAND | wx.ALL, 10)
         panel.SetSizer(sizer)
 
+        self._update_download_visibility()
         self.Bind(wx.EVT_CLOSE, self._on_close)
-
-        self._rows = []
         self._refresh()
+
+    def _current_platform(self):
+        return self.PLATFORMS[self._notebook.GetSelection()][0]
+
+    def _on_page_changed(self, evt):
+        self._update_download_visibility()
+        evt.Skip()
+
+    def _update_download_visibility(self):
+        is_pc = self._current_platform() == 'pc'
+        self._btnRow.Show(self._btnDownload, is_pc)
+        self._btnRow.Layout()
 
     def _on_close(self, evt):
         if any(not b.IsEnabled() for b in (self._btnDownload, self._btnDelete, self._btnClose)):
@@ -202,30 +227,35 @@ class BackupListDialog(wx.Dialog):
 
     def _on_listed(self, rows):
         self._busy(False)
-        self._rows = sorted(rows, key=lambda r: r['created_at'], reverse=True)
-        self._list.DeleteAllItems()
-        for r in self._rows:
-            idx = self._list.InsertItem(self._list.GetItemCount(),
-                                        str(r['created_at']))
-            self._list.SetItem(idx, 1, os.path.basename(str(r['file'])))
-            self._list.SetItem(idx, 2, str(r['platform']))
+        for plat in self._rows:
+            self._rows[plat] = []
+            self._lists[plat].DeleteAllItems()
+        for r in rows:
+            plat = str(r.get('platform', '')).lower()
+            if plat not in self._rows:
+                continue  # skip unknown platform values silently
+            self._rows[plat].append(r)
+        for plat, lc in self._lists.items():
+            self._rows[plat].sort(key=lambda r: r['created_at'], reverse=True)
+            for r in self._rows[plat]:
+                idx = lc.InsertItem(lc.GetItemCount(), str(r['created_at']))
+                lc.SetItem(idx, 1, os.path.basename(str(r['file'])))
 
     def _selected_pk(self):
-        idx = self._list.GetFirstSelected()
+        plat = self._current_platform()
+        lc = self._lists[plat]
+        idx = lc.GetFirstSelected()
         if idx < 0:
             return None
-        return int(self._rows[idx]['pk'])
+        return int(self._rows[plat][idx]['pk'])
 
     def _on_download(self, _evt):
+        # Download is only exposed on the PC tab — both via _update_download_visibility
+        # and via the row-activation handler ignoring non-PC tabs.
+        if self._current_platform() != 'pc':
+            return
         pk = self._selected_pk()
         if pk is None:
-            return
-        idx = self._list.GetFirstSelected()
-        platform = str(self._rows[idx].get('platform', '')).lower()
-        if platform and platform != 'pc':
-            wx.MessageBox(
-                u'รายการที่เลือกเป็นข้อมูลสำรองของแพลตฟอร์ม "%s" ไม่สามารถนำเข้ามาที่ PC ได้' % platform,
-                MSGBOX_TITLE, wx.OK | wx.ICON_WARNING, self)
             return
         self._busy(True)
         _run_in_thread(
