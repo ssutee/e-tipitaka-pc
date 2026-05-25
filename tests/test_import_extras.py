@@ -8,6 +8,9 @@ import unittest
 from search.presenter import (
     ImportSearchAndCompareHistory,
     ImportFavorites,
+    ResolveIOSHighlightColor,
+    AppendPCMark,
+    DEFAULT_IOS_HIGHLIGHT_PALETTE,
 )
 
 
@@ -214,9 +217,75 @@ class TestImportFavorites(unittest.TestCase):
                              'table %s' % t)
 
 
+class TestResolveIOSHighlightColor(unittest.TestCase):
+
+    def testUsesFirstPaletteRowWhenAvailable(self):
+        palette = [{'name': 'My', 'highlight1': '#AAAAAA', 'highlight2': '#BBBBBB'}]
+        self.assertEqual('#AAAAAA', ResolveIOSHighlightColor(1, palette))
+        self.assertEqual('#BBBBBB', ResolveIOSHighlightColor(2, palette))
+
+    def testFallsBackToDefaultsWhenPaletteEmpty(self):
+        self.assertEqual(DEFAULT_IOS_HIGHLIGHT_PALETTE[0],
+                         ResolveIOSHighlightColor(1, []))
+        self.assertEqual(DEFAULT_IOS_HIGHLIGHT_PALETTE[4],
+                         ResolveIOSHighlightColor(5, []))
+
+    def testFallsBackToDefaultsWhenPaletteEntryBlank(self):
+        palette = [{'name': 'X', 'highlight1': ''}]
+        self.assertEqual(DEFAULT_IOS_HIGHLIGHT_PALETTE[0],
+                         ResolveIOSHighlightColor(1, palette))
+
+    def testColorIndexZeroFallsBackToYellow(self):
+        # iOS color=0 is the unset/default — pick a stable neutral.
+        self.assertEqual('yellow', ResolveIOSHighlightColor(0, []))
+
+    def testColorIndexOutOfRangeFallsBackToYellow(self):
+        self.assertEqual('yellow', ResolveIOSHighlightColor(99, []))
+        self.assertEqual('yellow', ResolveIOSHighlightColor(-1, []))
+
+
+class TestAppendPCMark(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _read(self, code, vol, page):
+        import json as _json
+        path = os.path.join(self.tmp, code, '%02d-%04d.json' % (vol, page))
+        with open(path) as f:
+            return _json.load(f)
+
+    def testCreatesFileForFirstMark(self):
+        AppendPCMark(self.tmp, 'thai', 1, 3, 13, 33, '#99FFFF')
+        self.assertEqual([[True, 13, 33, '#99FFFF']],
+                         self._read('thai', 1, 3))
+
+    def testAppendsToExistingFile(self):
+        AppendPCMark(self.tmp, 'thai', 1, 3, 13, 33, '#99FFFF')
+        AppendPCMark(self.tmp, 'thai', 1, 3, 50, 70, 'yellow')
+        self.assertEqual([[True, 13, 33, '#99FFFF'],
+                          [True, 50, 70, 'yellow']],
+                         self._read('thai', 1, 3))
+
+    def testDedupesByStartAndEnd(self):
+        AppendPCMark(self.tmp, 'thai', 1, 3, 13, 33, '#99FFFF')
+        AppendPCMark(self.tmp, 'thai', 1, 3, 13, 33, 'yellow')   # same range, diff color
+        self.assertEqual(1, len(self._read('thai', 1, 3)))
+
+    def testCreatesNestedCodeDirectory(self):
+        AppendPCMark(self.tmp, 'pali', 5, 100, 0, 10, 'yellow')
+        path = os.path.join(self.tmp, 'pali', '05-0100.json')
+        self.assertTrue(os.path.exists(path))
+
+
 def suite():
     s = unittest.TestSuite()
-    for cls in (TestImportSearchAndCompareHistory, TestImportFavorites):
+    for cls in (TestImportSearchAndCompareHistory, TestImportFavorites,
+                TestResolveIOSHighlightColor, TestAppendPCMark):
         for name in unittest.defaultTestLoader.getTestCaseNames(cls):
             s.addTest(cls(name))
     return s

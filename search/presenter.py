@@ -104,6 +104,59 @@ def ImportSearchAndCompareHistory(src_db_path, dst_db_path):
         dst.close()
 
 
+DEFAULT_IOS_HIGHLIGHT_PALETTE = [
+    '#B982CB', '#8C38BD', '#2DF487', '#99C860', '#DDEE0E',
+    '#FDE0D2', '#B5E0F4', '#E78EC2', '#DD28BD', '#A52A33',
+    '#B982CB', '#8C38BD', '#2DF487', '#99C860', '#DDEE0E',
+]
+
+
+def ResolveIOSHighlightColor(color_int, palette):
+    """Map an iOS Highlight.color int (1..15) to a PC mark color string.
+
+    `palette` is the list of dicts emitted under `highlightColors` in iOS's
+    JSON v3 export — each row has `name` plus `highlight1`..`highlight15`
+    columns of hex strings. We use the first row (iOS's default palette);
+    a blank or missing entry falls back to the hard-coded iOS defaults.
+    Color 0 (iOS 'unset') and out-of-range indices fall back to 'yellow'.
+    """
+    if not (1 <= color_int <= 15):
+        return 'yellow'
+    key = 'highlight%d' % color_int
+    if palette:
+        val = (palette[0] or {}).get(key, '')
+        if val:
+            return val
+    return DEFAULT_IOS_HIGHLIGHT_PALETTE[color_int - 1]
+
+
+def AppendPCMark(marks_root, code, volume, page, start, end, color):
+    """Append a single PC mark to marks/<code>/<volume>-<page>.json.
+
+    The PC mark format is a list of [marked, start, end, color] tuples
+    (see read.presenter._LoadMarks). We dedupe by (start, end) to make
+    re-imports idempotent — a re-import never duplicates a range, but a
+    different color for an already-present range is also ignored (first
+    write wins)."""
+    code_dir = os.path.join(marks_root, code)
+    if not os.path.exists(code_dir):
+        os.makedirs(code_dir)
+    path = os.path.join(code_dir, '%02d-%04d.json' % (volume, page))
+    existing = []
+    if os.path.exists(path):
+        try:
+            with open(path) as f:
+                existing = json.load(f)
+        except (ValueError, OSError):
+            existing = []
+    for entry in existing:
+        if len(entry) >= 3 and entry[1] == start and entry[2] == end:
+            return  # dedupe
+    existing.append([True, start, end, color])
+    with open(path, 'w') as f:
+        json.dump(existing, f)
+
+
 def ImportFavorites(src_db_path, dst_db_path):
     """Merge every bookmark table from `src_db_path` (fav.sqlite) into
     `dst_db_path`. Tables missing in the destination are created from the
@@ -540,14 +593,34 @@ class Presenter(object):
         jsonobj = json.loads(text)
         if jsonobj.get('version', 1) < 2:
             return False
-        
+
         for item in jsonobj.get('bookmarks', []):
             volume = item.get('volume', 0)
             page = item.get('page', 0)
-            code = constants.IOS_CODE_TABLE.get(item.get('code', -1)) 
+            code = constants.IOS_CODE_TABLE.get(item.get('code', -1))
             note = item.get('note', '')
 
             self.WriteXmlNoteFile(volume, page, code, note)
+
+        # iOS highlights map onto PC marks (filesystem: marks/<code>/<vol>-<page>.json).
+        # Per-highlight notes/selection/html are dropped — PC marks don't carry text.
+        palette = jsonobj.get('highlightColors', [])
+        for item in jsonobj.get('highlights', []):
+            code = constants.IOS_CODE_TABLE.get(item.get('code', -1))
+            if not code:
+                continue
+            volume = item.get('volume', 0)
+            page = item.get('page', 0)
+            start = item.get('start', 0)
+            end = item.get('end', 0)
+            if volume == 0 or page == 0 or end <= start:
+                continue
+            color = ResolveIOSHighlightColor(item.get('color', 0), palette)
+            try:
+                AppendPCMark(constants.MARKS_PATH, code, volume, page,
+                             start, end, color)
+            except OSError:
+                traceback.print_exc()
 
         return True
 
