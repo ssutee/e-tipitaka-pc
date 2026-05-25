@@ -130,16 +130,39 @@ class ParentFrame(aui.AuiMDIParentFrame):
         bar = wx.MenuBar()
         helpMenu = wx.Menu()
         checkItem = helpMenu.Append(wx.ID_ANY, u'ตรวจสอบอัปเดตฐานข้อมูล')
-        self.Bind(wx.EVT_MENU, lambda _e: self.ShowUpdatesDialog(), checkItem)
+        self.Bind(wx.EVT_MENU, self.OnManualUpdateCheck, checkItem)
         bar.Append(helpMenu, u'E-Tipitaka')
         self.SetMenuBar(bar)
 
-    def ShowUpdatesDialog(self, pending=None):
-        # Lazy import: wx.Dialog subclass + requests pulled only on demand.
+    def ShowUpdatesDialog(self, pending):
         from updates.dialog import UpdatesDialog
         dlg = UpdatesDialog(self, pending=pending)
         dlg.ShowModal()
         dlg.Destroy()
+
+    def OnManualUpdateCheck(self, _evt):
+        """Manual menu path. Fetches outside any modal so the
+        'up to date' alert is reliably shown (a MessageBox parented to
+        a freshly-started modal dialog gets swallowed on macOS)."""
+        from updates.dialog import check_in_background, MSGBOX_TITLE
+        self.SetStatusText(u'กำลังตรวจสอบการอัปเดต...')
+        wx.BeginBusyCursor()
+
+        def _on_pending(pending):
+            try:
+                wx.EndBusyCursor()
+            except Exception:
+                pass
+            if not self:
+                return
+            self.SetStatusText('')
+            if not pending:
+                wx.MessageBox(u'ฐานข้อมูลทั้งหมดเป็นเวอร์ชันล่าสุดแล้ว',
+                              MSGBOX_TITLE,
+                              wx.OK | wx.ICON_INFORMATION, self)
+                return
+            self.ShowUpdatesDialog(pending=pending)
+        check_in_background(_on_pending)
 
     def StartAutoUpdateCheck(self):
         """Kick off a background fetch a few seconds after the UI settles.

@@ -41,12 +41,15 @@ class UpdatesDialog(wx.Dialog):
     what's available (post-auto-check); pass nothing to trigger a fresh
     fetch on open (manual menu)."""
 
-    def __init__(self, parent, pending=None):
+    def __init__(self, parent, pending):
         super(UpdatesDialog, self).__init__(parent, title=u'อัปเดตฐานข้อมูล',
                                             size=(420, 260))
-        self._pending = pending  # None = fetch on open
-        self._manual = (pending is None)   # manual menu path; auto path
-                                           # always preselects pending
+        if not pending:
+            raise ValueError('UpdatesDialog requires non-empty pending; '
+                             'the menu handler is responsible for the '
+                             '"up to date" alert and never opens the '
+                             'dialog on empty results.')
+        self._pending = pending
 
         panel = wx.Panel(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -79,11 +82,7 @@ class UpdatesDialog(wx.Dialog):
 
         self.Bind(wx.EVT_CLOSE, self._on_close)
         self._busy = False
-        if pending is None:
-            self._set_busy(True)
-            check_in_background(self._on_pending)
-        else:
-            self._on_pending(pending)
+        self._on_pending(pending)
 
     def _on_close(self, evt):
         if self._busy:
@@ -106,19 +105,6 @@ class UpdatesDialog(wx.Dialog):
         self._set_busy(False)
         self._pending = pending
         self._list.DeleteAllItems()
-        if not pending:
-            # Manual menu path: surface an explicit "all up to date" alert
-            # and close. Auto-startup never opens the dialog on empty
-            # results, so this branch only fires from the menu.
-            if self._manual:
-                wx.MessageBox(u'ฐานข้อมูลทั้งหมดเป็นเวอร์ชันล่าสุดแล้ว',
-                              MSGBOX_TITLE, wx.OK | wx.ICON_INFORMATION, self)
-                self.EndModal(wx.ID_OK)
-                return
-            self._label.SetLabel(u'ฐานข้อมูลทั้งหมดเป็นเวอร์ชันล่าสุดแล้ว')
-            self._btnApply.Disable()
-            self.Layout()
-            return
         self._label.SetLabel(
             u'พบการอัปเดต %d รายการ ต้องการติดตั้งหรือไม่?' % len(pending))
         for key, patch, _ship in pending:
