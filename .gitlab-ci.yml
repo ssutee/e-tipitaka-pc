@@ -1,0 +1,57 @@
+# GitLab CI mirror of .github/workflows/build.yml — used because the GitHub
+# LFS bandwidth quota (1 GB/mo) is exhausted. GitLab gives 10 GB free.
+
+stages:
+  - build
+  - package
+
+variables:
+  GIT_LFS_SKIP_SMUDGE: "0"   # always fetch LFS objects on checkout
+  PYTHON_VERSION: "3.12"
+
+# ---------------------------------------------------------------------------
+# Windows .exe (PyInstaller one-file)
+# Uses GitLab's SaaS Windows shared runner. Free tier requires an account
+# with a verified payment method on file (no charge for free minutes).
+# ---------------------------------------------------------------------------
+build:windows:
+  stage: build
+  tags:
+    - saas-windows-medium-amd64
+  timeout: 1h
+  before_script:
+    - git lfs install
+    - git lfs pull
+    - python -m pip install --upgrade pip uv
+  script:
+    - uv sync --python $env:PYTHON_VERSION
+    - uv run pyinstaller etipitaka.spec --noconfirm --clean
+  artifacts:
+    name: "e-tipitaka-windows-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - dist/
+    expire_in: 30 days
+
+# ---------------------------------------------------------------------------
+# Linux folder build — small, fast, useful smoke test of the spec file
+# ---------------------------------------------------------------------------
+build:linux:
+  stage: build
+  image: python:3.12
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends
+        git-lfs libgtk-3-0 libnotify4 libsdl2-2.0-0
+        libgstreamer-plugins-base1.0-0 libwebkit2gtk-4.1-0
+    - git lfs install
+    - git lfs pull
+    - pip install uv
+  script:
+    - uv sync --python $PYTHON_VERSION
+    - uv run pyinstaller etipitaka.spec --noconfirm --clean
+  artifacts:
+    name: "e-tipitaka-linux-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - dist/
+    expire_in: 30 days
+  allow_failure: true   # windows is the real goal here
