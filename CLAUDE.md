@@ -31,4 +31,11 @@ Built with Python 3.12 and wxPython 4.2; dependencies are managed with `uv`
 - Don't manually modify files inside `graphify-out/`
 - Don't re-read the entire codebase if the graph already has the information
 
+## Commit Hygiene
+
+- **Never commit `*.sqlite` changes** unless the user explicitly asks for it.
+  Renames via `git mv` that preserve content are fine; content/data changes
+  (LFS oid bumps) are not. If a sqlite file ends up staged incidentally,
+  `git restore --staged` it before committing.
+
 
