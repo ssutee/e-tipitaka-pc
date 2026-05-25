@@ -2,7 +2,7 @@
 
 import search.model
 from dialogs import AboutDialog, UpdateDialog, NoteManagerDialog, SimpleFontDialog, NoteDialog, MarkManagerDialog
-import wx, zipfile, os, json, tempfile, sys
+import wx, zipfile, os, json, tempfile, sys, traceback
 import xml.etree.ElementTree as ET
 import wx.richtext as rt
 from utils import BookmarkManager
@@ -33,6 +33,123 @@ def BuildBackupZip(out_path):
             for filename in files:
                 fn = os.path.join(base, filename)
                 fz.write(fn, fn[rootlen:])
+
+
+def ImportSearchAndCompareHistory(src_db_path, dst_db_path):
+    """Copy SearchAndCompareHistory + SearchAndCompareHistoryReadItem from
+    `src_db_path` to `dst_db_path`.
+
+    Dedupes SearchAndCompareHistory rows by the natural key
+    (keywords1, keywords2, code1, code2). Old row IDs are remapped to the
+    matching (existing or freshly-inserted) destination IDs so the FK on
+    the items table remains valid. Items are deduped by
+    (history, row, col)."""
+    src = sqlite3.connect(src_db_path)
+    dst = sqlite3.connect(dst_db_path)
+    try:
+        # Histories
+        try:
+            sch_rows = src.execute(
+                'SELECT id, keywords1, keywords2, code1, code2, total, '
+                'count1, count2 FROM SearchAndCompareHistory'
+            ).fetchall()
+        except sqlite3.Error:
+            sch_rows = []
+
+        id_map = {}
+        for old_id, k1, k2, c1, c2, total, cnt1, cnt2 in sch_rows:
+            found = dst.execute(
+                'SELECT id FROM SearchAndCompareHistory '
+                'WHERE keywords1=? AND keywords2=? AND code1=? AND code2=?',
+                (k1, k2, c1, c2)
+            ).fetchone()
+            if found:
+                id_map[old_id] = found[0]
+            else:
+                cur = dst.execute(
+                    'INSERT INTO SearchAndCompareHistory '
+                    '(keywords1, keywords2, code1, code2, total, count1, count2) '
+                    'VALUES (?,?,?,?,?,?,?)',
+                    (k1, k2, c1, c2, total, cnt1, cnt2)
+                )
+                id_map[old_id] = cur.lastrowid
+
+        # Read items
+        try:
+            item_rows = src.execute(
+                'SELECT history, row, col FROM SearchAndCompareHistoryReadItem'
+            ).fetchall()
+        except sqlite3.Error:
+            item_rows = []
+
+        for old_hist, row, col in item_rows:
+            new_hist = id_map.get(old_hist)
+            if new_hist is None:
+                continue  # orphan — referenced history not in src
+            dup = dst.execute(
+                'SELECT 1 FROM SearchAndCompareHistoryReadItem '
+                'WHERE history=? AND row=? AND col=?',
+                (new_hist, row, col)
+            ).fetchone()
+            if dup:
+                continue
+            dst.execute(
+                'INSERT INTO SearchAndCompareHistoryReadItem '
+                '(history, row, col) VALUES (?,?,?)',
+                (new_hist, row, col)
+            )
+        dst.commit()
+    finally:
+        src.close()
+        dst.close()
+
+
+def ImportFavorites(src_db_path, dst_db_path):
+    """Merge every bookmark table from `src_db_path` (fav.sqlite) into
+    `dst_db_path`. Tables missing in the destination are created from the
+    source's CREATE statement. Each row is deduped by all four columns
+    (note, volume, page, parent_id) using IS-comparison so NULLs match."""
+    src = sqlite3.connect(src_db_path)
+    dst = sqlite3.connect(dst_db_path)
+    try:
+        tables = src.execute(
+            "SELECT name, sql FROM sqlite_master "
+            "WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        ).fetchall()
+        for name, ddl in tables:
+            if ddl:
+                # Ensure the table exists in the destination. The source DDL
+                # is `CREATE TABLE name (...)`; rewrite to IF NOT EXISTS so
+                # we don't clobber an existing dst table.
+                ddl_safe = ddl.replace(
+                    'CREATE TABLE ', 'CREATE TABLE IF NOT EXISTS ', 1)
+                try:
+                    dst.execute(ddl_safe)
+                except sqlite3.Error:
+                    pass
+
+            qname = '"%s"' % name.replace('"', '""')
+            rows = src.execute(
+                'SELECT note, volume, page, parent_id FROM %s' % qname
+            ).fetchall()
+            for note, vol, page, pid in rows:
+                # `IS` matches NULL == NULL (= behaves as false for NULL).
+                dup = dst.execute(
+                    'SELECT 1 FROM %s WHERE note IS ? AND volume IS ? '
+                    'AND page IS ? AND parent_id IS ?' % qname,
+                    (note, vol, page, pid)
+                ).fetchone()
+                if dup:
+                    continue
+                dst.execute(
+                    'INSERT INTO %s (note, volume, page, parent_id) '
+                    'VALUES (?,?,?,?)' % qname,
+                    (note, vol, page, pid)
+                )
+        dst.commit()
+    finally:
+        src.close()
+        dst.close()
 
 class Presenter(object):
     def __init__(self, model, view, interactor):
@@ -332,8 +449,9 @@ class Presenter(object):
             conn.commit()
             conn.close()
         
-        if os.path.exists(os.path.join(tempfile.gettempdir(), 'data.sqlite')):
-            conn = sqlite3.connect(os.path.join(tempfile.gettempdir(), 'data.sqlite'))
+        temp_data_sqlite = os.path.join(tempfile.gettempdir(), 'data.sqlite')
+        if os.path.exists(temp_data_sqlite):
+            conn = sqlite3.connect(temp_data_sqlite)
             cursor = conn.cursor()
             cursor.execute('PRAGMA user_version=4')
             cursor.execute('SELECT * FROM History')
@@ -346,6 +464,22 @@ class Presenter(object):
                 self.ImportHistory(keywords, total, code, read, skimmed, pages, notes)
             conn.commit()
             conn.close()
+            # Search-and-compare history was added after the original import
+            # path was written; merge it into the local data.sqlite too.
+            ImportSearchAndCompareHistory(temp_data_sqlite, constants.DATA_DB)
+
+        # fav.sqlite carries the bookmark tables (one per platform); merge
+        # them row-by-row so a re-import after edits doesn't duplicate.
+        temp_fav_sqlite = os.path.join(tempfile.gettempdir(), 'fav.sqlite')
+        if os.path.exists(temp_fav_sqlite):
+            try:
+                ImportFavorites(temp_fav_sqlite, constants.FAV_DB)
+            except Exception:
+                traceback.print_exc()
+            try:
+                os.remove(temp_fav_sqlite)
+            except OSError:
+                pass
 
         # relocate old version data file
         for filename in os.listdir(constants.DATA_PATH):
