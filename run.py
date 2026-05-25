@@ -128,11 +128,18 @@ class ParentFrame(aui.AuiMDIParentFrame):
 
     def _CreateMenuBar(self):
         bar = wx.MenuBar()
-        helpMenu = wx.Menu()
-        checkItem = helpMenu.Append(wx.ID_ANY, u'ตรวจสอบอัปเดตฐานข้อมูล')
+        toolsMenu = wx.Menu()
+        accountItem = toolsMenu.Append(wx.ID_ANY, u'บัญชีผู้ใช้')
+        toolsMenu.AppendSeparator()
+        checkItem = toolsMenu.Append(wx.ID_ANY, u'ตรวจสอบอัปเดตฐานข้อมูล')
+        self.Bind(wx.EVT_MENU, self.OnOpenAccount, accountItem)
         self.Bind(wx.EVT_MENU, self.OnManualUpdateCheck, checkItem)
-        bar.Append(helpMenu, u'E-Tipitaka')
+        bar.Append(toolsMenu, u'เครื่องมือ')
         self.SetMenuBar(bar)
+
+    def OnOpenAccount(self, _evt):
+        # Mirrors the toolbar Account button (search/interactor.OnAccountButtonClick).
+        self._presenter.OpenAccount()
 
     def ShowUpdatesDialog(self, pending):
         from updates.dialog import UpdatesDialog
