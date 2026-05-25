@@ -195,7 +195,6 @@ class BackupListDialog(wx.Dialog):
         sizer.Add(self._btnRow, 0, wx.EXPAND | wx.ALL, 10)
         panel.SetSizer(sizer)
 
-        self._update_download_visibility()
         self.Bind(wx.EVT_CLOSE, self._on_close)
         self._refresh()
 
@@ -203,13 +202,7 @@ class BackupListDialog(wx.Dialog):
         return self.PLATFORMS[self._notebook.GetSelection()][0]
 
     def _on_page_changed(self, evt):
-        self._update_download_visibility()
         evt.Skip()
-
-    def _update_download_visibility(self):
-        is_pc = self._current_platform() == 'pc'
-        self._btnRow.Show(self._btnDownload, is_pc)
-        self._btnRow.Layout()
 
     def _on_close(self, evt):
         if any(not b.IsEnabled() for b in (self._btnDownload, self._btnDelete, self._btnClose)):
@@ -250,16 +243,13 @@ class BackupListDialog(wx.Dialog):
         return int(self._rows[plat][idx]['pk'])
 
     def _on_download(self, _evt):
-        # Download is only exposed on the PC tab — both via _update_download_visibility
-        # and via the row-activation handler ignoring non-PC tabs.
-        if self._current_platform() != 'pc':
-            return
+        plat = self._current_platform()
         pk = self._selected_pk()
         if pk is None:
             return
         self._busy(True)
         _run_in_thread(
-            lambda: _download_and_import(self._client, self._presenter, pk),
+            lambda: _download_and_import(self._client, self._presenter, pk, plat),
             on_success=self._on_imported,
             on_error=self._on_err,
         )
@@ -298,17 +288,35 @@ class BackupListDialog(wx.Dialog):
         self.Layout()
 
 
-def _download_and_import(client, presenter, pk):
+_PLATFORM_DISPATCH = {
+    # platform -> (file_suffix, presenter_method_name, error_message)
+    'pc':      ('.etz',  'ImportPCData',      u'ไฟล์ที่ดาวน์โหลดไม่ใช่ไฟล์สำรองของ PC (ต้องเป็นไฟล์ .etz)'),
+    'ios':     ('.json', 'ImportIOSData',     u'ไฟล์ที่ดาวน์โหลดไม่ใช่ไฟล์สำรองของ iOS'),
+    'android': ('.js',   'ImportAndroidData', u'ไฟล์ที่ดาวน์โหลดไม่ใช่ไฟล์สำรองของ Android'),
+}
+
+
+def _download_and_import(client, presenter, pk, platform='pc'):
+    spec = _PLATFORM_DISPATCH.get(platform)
+    if spec is None:
+        raise AccountError(415, u'แพลตฟอร์มไม่รองรับ: %s' % platform)
+    suffix, method_name, fmt_err = spec
+    importer = getattr(presenter, method_name)
+
     data = client.download(pk)
-    fd, tmp = tempfile.mkstemp(suffix='.etz')
+    fd, tmp = tempfile.mkstemp(suffix=suffix)
     os.close(fd)
     try:
         with open(tmp, 'wb') as f:
             f.write(data)
         try:
-            presenter.ImportPCData(tmp)
+            importer(tmp)
         except zipfile.BadZipFile:
-            raise AccountError(422, u'ไฟล์ที่ดาวน์โหลดไม่ใช่ไฟล์สำรองของ PC (ต้องเป็นไฟล์ .etz)')
+            raise AccountError(422, fmt_err)
+        except (ValueError, KeyError):
+            # JSON parse error or missing expected field — content is not
+            # the format the importer expected.
+            raise AccountError(422, fmt_err)
     finally:
         try:
             os.remove(tmp)
