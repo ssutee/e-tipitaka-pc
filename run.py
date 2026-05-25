@@ -188,6 +188,11 @@ class ParentFrame(aui.AuiMDIParentFrame):
         # non-command events (size, close, ...) because GetEventHandler() is
         # self -- leaving the child window unsized and the frame unclosable.
         # Route command events through AGW; handle the rest with base wx.Frame.
+        # Exception: wxEVT_MENU is bound on the menubar's owning frame, not
+        # the active MDI child -- send it straight to wx.Frame so the handler
+        # actually fires.
+        if event.GetEventType() == wx.wxEVT_MENU:
+            return wx.Frame.ProcessEvent(self, event)
         if event.IsCommandEvent():
             return aui.AuiMDIParentFrame.ProcessEvent(self, event)
         return wx.Frame.ProcessEvent(self, event)
