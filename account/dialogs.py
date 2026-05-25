@@ -10,6 +10,9 @@ import wx
 from account.client import AccountError
 
 
+MSGBOX_TITLE = u'E-Tipitaka — บัญชีผู้ใช้'
+
+
 def _run_in_thread(work, on_success, on_error):
     """Run `work()` on a worker thread; deliver result via wx.CallAfter."""
     def _target():
@@ -28,20 +31,20 @@ def _run_in_thread(work, on_success, on_error):
 
 def _show_error(parent, err):
     if err.status == 401:
-        msg = 'Session expired, please log in again.'
+        msg = u'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'
     elif err.status == 404:
-        msg = 'Backup not found.'
+        msg = u'ไม่พบข้อมูลสำรอง'
     elif err.status == 0:
-        msg = 'Cannot reach server; check your internet connection.\n\n%s' % err.message
+        msg = u'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ต\n\n%s' % err.message
     else:
-        msg = err.message or ('HTTP %d' % err.status)
-    wx.MessageBox(msg, 'E-Tipitaka — Account', wx.OK | wx.ICON_ERROR, parent)
+        msg = err.message or (u'HTTP %d' % err.status)
+    wx.MessageBox(msg, MSGBOX_TITLE, wx.OK | wx.ICON_ERROR, parent)
 
 
 class SignUpDialog(wx.Dialog):
 
     def __init__(self, parent, client):
-        super(SignUpDialog, self).__init__(parent, title='Sign up',
+        super(SignUpDialog, self).__init__(parent, title=u'สมัครสมาชิก',
                                            size=(360, 260))
         self._client = client
 
@@ -55,10 +58,10 @@ class SignUpDialog(wx.Dialog):
         self._password = wx.TextCtrl(panel, style=wx.TE_PASSWORD)
         self._confirm = wx.TextCtrl(panel, style=wx.TE_PASSWORD)
 
-        for label, ctrl in [('Email', self._email),
-                            ('Username', self._username),
-                            ('Password', self._password),
-                            ('Confirm', self._confirm)]:
+        for label, ctrl in [(u'อีเมล', self._email),
+                            (u'ชื่อผู้ใช้', self._username),
+                            (u'รหัสผ่าน', self._password),
+                            (u'ยืนยันรหัสผ่าน', self._confirm)]:
             grid.Add(wx.StaticText(panel, label=label),
                      flag=wx.ALIGN_CENTER_VERTICAL)
             grid.Add(ctrl, 1, wx.EXPAND)
@@ -66,8 +69,8 @@ class SignUpDialog(wx.Dialog):
         self._gauge = wx.Gauge(panel)
         self._gauge.Hide()
 
-        self._btnOk = wx.Button(panel, label='Sign up')
-        self._btnCancel = wx.Button(panel, wx.ID_CANCEL, label='Cancel')
+        self._btnOk = wx.Button(panel, label=u'สมัครสมาชิก')
+        self._btnCancel = wx.Button(panel, wx.ID_CANCEL, label=u'ยกเลิก')
         self._btnOk.Bind(wx.EVT_BUTTON, self._on_signup)
 
         btnRow = wx.BoxSizer(wx.HORIZONTAL)
@@ -94,11 +97,11 @@ class SignUpDialog(wx.Dialog):
         pw = self._password.GetValue()
         cf = self._confirm.GetValue()
         if not (email and username and pw):
-            wx.MessageBox('Email, username and password are required.',
-                          'Sign up', wx.OK | wx.ICON_WARNING, self)
+            wx.MessageBox(u'ต้องระบุอีเมล ชื่อผู้ใช้ และรหัสผ่าน',
+                          u'สมัครสมาชิก', wx.OK | wx.ICON_WARNING, self)
             return
         if pw != cf:
-            wx.MessageBox('Passwords do not match.', 'Sign up',
+            wx.MessageBox(u'รหัสผ่านไม่ตรงกัน', u'สมัครสมาชิก',
                           wx.OK | wx.ICON_WARNING, self)
             return
         self._busy(True)
@@ -111,8 +114,8 @@ class SignUpDialog(wx.Dialog):
     def _on_done(self, email):
         def _cb(_result):
             self._busy(False)
-            wx.MessageBox('Verification email sent to %s.' % email,
-                          'Sign up', wx.OK | wx.ICON_INFORMATION, self)
+            wx.MessageBox(u'ส่งอีเมลยืนยันไปยัง %s แล้ว' % email,
+                          u'สมัครสมาชิก', wx.OK | wx.ICON_INFORMATION, self)
             self.EndModal(wx.ID_OK)
         return _cb
 
@@ -134,7 +137,7 @@ class SignUpDialog(wx.Dialog):
 class BackupListDialog(wx.Dialog):
 
     def __init__(self, parent, client, presenter):
-        super(BackupListDialog, self).__init__(parent, title='Manage backups',
+        super(BackupListDialog, self).__init__(parent, title=u'จัดการข้อมูลสำรอง',
                                                size=(560, 360))
         self._client = client
         self._presenter = presenter
@@ -143,18 +146,18 @@ class BackupListDialog(wx.Dialog):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         self._list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self._list.InsertColumn(0, 'Date', width=170)
-        self._list.InsertColumn(1, 'Filename', width=240)
-        self._list.InsertColumn(2, 'Platform', width=80)
+        self._list.InsertColumn(0, u'วันที่', width=170)
+        self._list.InsertColumn(1, u'ชื่อไฟล์', width=240)
+        self._list.InsertColumn(2, u'แพลตฟอร์ม', width=80)
         self._list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self._on_download)
 
         self._gauge = wx.Gauge(panel)
         self._gauge.Hide()
 
         btnRow = wx.BoxSizer(wx.HORIZONTAL)
-        self._btnDownload = wx.Button(panel, label='Download')
-        self._btnDelete = wx.Button(panel, label='Delete')
-        self._btnClose = wx.Button(panel, wx.ID_CLOSE, label='Close')
+        self._btnDownload = wx.Button(panel, label=u'ดาวน์โหลด')
+        self._btnDelete = wx.Button(panel, label=u'ลบ')
+        self._btnClose = wx.Button(panel, wx.ID_CLOSE, label=u'ปิด')
         self._btnDownload.Bind(wx.EVT_BUTTON, self._on_download)
         self._btnDelete.Bind(wx.EVT_BUTTON, self._on_delete)
         self._btnClose.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_OK))
@@ -216,14 +219,14 @@ class BackupListDialog(wx.Dialog):
 
     def _on_imported(self, _result):
         self._busy(False)
-        wx.MessageBox('Import complete.', 'E-Tipitaka — Account',
+        wx.MessageBox(u'นำเข้าข้อมูลสำเร็จ', MSGBOX_TITLE,
                       wx.OK | wx.ICON_INFORMATION, self)
 
     def _on_delete(self, _evt):
         pk = self._selected_pk()
         if pk is None:
             return
-        if wx.MessageBox('Delete this backup permanently?', 'Confirm',
+        if wx.MessageBox(u'ลบข้อมูลสำรองนี้ถาวรหรือไม่?', u'ยืนยัน',
                          wx.YES_NO | wx.ICON_QUESTION, self) != wx.YES:
             return
         self._busy(True)
@@ -283,7 +286,7 @@ def _build_and_upload(client, presenter, username):
 def _download_latest(client, presenter):
     rows = client.list_backups(platform='pc')
     if not rows:
-        raise AccountError(404, 'No PC backups found on server.')
+        raise AccountError(404, u'ไม่พบข้อมูลสำรองของ PC บนเซิร์ฟเวอร์')
     rows.sort(key=lambda r: r['created_at'], reverse=True)
     _download_and_import(client, presenter, int(rows[0]['pk']))
 
@@ -291,7 +294,7 @@ def _download_latest(client, presenter):
 class AccountDialog(wx.Dialog):
 
     def __init__(self, parent, client, tokenstore, presenter):
-        super(AccountDialog, self).__init__(parent, title='Account',
+        super(AccountDialog, self).__init__(parent, title=u'บัญชีผู้ใช้',
                                             size=(380, 280))
         self._client = client
         self._store = tokenstore
@@ -330,21 +333,21 @@ class AccountDialog(wx.Dialog):
     def _render_logged_out(self):
         grid = wx.FlexGridSizer(rows=3, cols=2, vgap=6, hgap=6)
         grid.AddGrowableCol(1, 1)
-        grid.Add(wx.StaticText(self._panel, label='Signed in: -'))
+        grid.Add(wx.StaticText(self._panel, label=u'เข้าสู่ระบบ: -'))
         grid.Add(wx.StaticText(self._panel, label=''))
         self._username = wx.TextCtrl(self._panel)
         self._password = wx.TextCtrl(self._panel, style=wx.TE_PASSWORD)
-        grid.Add(wx.StaticText(self._panel, label='Username'),
+        grid.Add(wx.StaticText(self._panel, label=u'ชื่อผู้ใช้'),
                  flag=wx.ALIGN_CENTER_VERTICAL)
         grid.Add(self._username, 1, wx.EXPAND)
-        grid.Add(wx.StaticText(self._panel, label='Password'),
+        grid.Add(wx.StaticText(self._panel, label=u'รหัสผ่าน'),
                  flag=wx.ALIGN_CENTER_VERTICAL)
         grid.Add(self._password, 1, wx.EXPAND)
 
         btnRow = wx.BoxSizer(wx.HORIZONTAL)
-        btnLogin = wx.Button(self._panel, label='Login')
-        btnSignup = wx.Button(self._panel, label='Sign up...')
-        btnClose = wx.Button(self._panel, wx.ID_CLOSE, label='Close')
+        btnLogin = wx.Button(self._panel, label=u'เข้าสู่ระบบ')
+        btnSignup = wx.Button(self._panel, label=u'สมัครสมาชิก...')
+        btnClose = wx.Button(self._panel, wx.ID_CLOSE, label=u'ปิด')
         btnLogin.Bind(wx.EVT_BUTTON, self._on_login)
         btnSignup.Bind(wx.EVT_BUTTON, self._on_signup)
         btnClose.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_OK))
@@ -363,16 +366,16 @@ class AccountDialog(wx.Dialog):
         data = self._store.get() or {}
         info = wx.BoxSizer(wx.VERTICAL)
         info.Add(wx.StaticText(self._panel,
-            label='Signed in: %s' % data.get('username', '')), 0, wx.BOTTOM, 4)
+            label=u'เข้าสู่ระบบ: %s' % data.get('username', '')), 0, wx.BOTTOM, 4)
         last = data.get('last_upload', '-')
-        info.Add(wx.StaticText(self._panel, label='Last upload: %s' % last),
+        info.Add(wx.StaticText(self._panel, label=u'อัปโหลดล่าสุด: %s' % last),
                  0, wx.BOTTOM, 4)
 
-        btnUpload = wx.Button(self._panel, label='Upload to Cloud')
-        btnDownload = wx.Button(self._panel, label='Download latest')
-        btnManage = wx.Button(self._panel, label='Manage backups...')
-        btnLogout = wx.Button(self._panel, label='Logout')
-        btnClose = wx.Button(self._panel, wx.ID_CLOSE, label='Close')
+        btnUpload = wx.Button(self._panel, label=u'อัปโหลดขึ้นคลาวด์')
+        btnDownload = wx.Button(self._panel, label=u'ดาวน์โหลดล่าสุด')
+        btnManage = wx.Button(self._panel, label=u'จัดการข้อมูลสำรอง...')
+        btnLogout = wx.Button(self._panel, label=u'ออกจากระบบ')
+        btnClose = wx.Button(self._panel, wx.ID_CLOSE, label=u'ปิด')
         btnUpload.Bind(wx.EVT_BUTTON, self._on_upload)
         btnDownload.Bind(wx.EVT_BUTTON, self._on_download_latest)
         btnManage.Bind(wx.EVT_BUTTON, self._on_manage)
@@ -400,8 +403,8 @@ class AccountDialog(wx.Dialog):
         u = self._username.GetValue().strip()
         p = self._password.GetValue()
         if not (u and p):
-            wx.MessageBox('Username and password are required.',
-                          'Login', wx.OK | wx.ICON_WARNING, self)
+            wx.MessageBox(u'ต้องระบุชื่อผู้ใช้และรหัสผ่าน',
+                          u'เข้าสู่ระบบ', wx.OK | wx.ICON_WARNING, self)
             return
         self._busy(True)
         _run_in_thread(
@@ -428,7 +431,7 @@ class AccountDialog(wx.Dialog):
     def _on_uploaded(self, iso_timestamp):
         self._store.set_last_upload(iso_timestamp)
         self._busy(False)
-        wx.MessageBox('Upload complete.', 'E-Tipitaka — Account',
+        wx.MessageBox(u'อัปโหลดสำเร็จ', MSGBOX_TITLE,
                       wx.OK | wx.ICON_INFORMATION, self)
         self._render()
 
@@ -437,7 +440,7 @@ class AccountDialog(wx.Dialog):
         _run_in_thread(
             lambda: _download_latest(self._client, self._presenter),
             on_success=lambda _r: (self._busy(False),
-                wx.MessageBox('Import complete.', 'E-Tipitaka — Account',
+                wx.MessageBox(u'นำเข้าข้อมูลสำเร็จ', MSGBOX_TITLE,
                               wx.OK | wx.ICON_INFORMATION, self)),
             on_error=self._on_err,
         )
