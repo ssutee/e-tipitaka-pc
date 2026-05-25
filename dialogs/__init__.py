@@ -1018,8 +1018,8 @@ class AboutDialog(wx.Dialog):
         
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
-        label1 = wx.StaticText(self, wx.ID_ANY, 
-            _('E-Tipitaka %s - developed by Sutee Sudprasert Copyright (C) 2010\n written by Python 2.7.5 and wxPython 2.8.12.1 (unicode)') % (settings.VERSION))
+        label1 = wx.StaticText(self, wx.ID_ANY,
+            _('E-Tipitaka %s - developed by Sutee Sudprasert Copyright (C) 2010-2026\n written in Python 3.12 and wxPython 4.2, packaged with uv and PyInstaller') % (settings.VERSION))
         label2 = wx.StaticText(self, wx.ID_ANY, 
             _('This program is free software distributed under Apache License, Version 2.0'))
         label3 = wx.StaticText(self, wx.ID_ANY, 
