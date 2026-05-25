@@ -131,7 +131,7 @@ class ParentFrame(aui.AuiMDIParentFrame):
         helpMenu = wx.Menu()
         checkItem = helpMenu.Append(wx.ID_ANY, u'ตรวจสอบอัปเดตฐานข้อมูล')
         self.Bind(wx.EVT_MENU, lambda _e: self.ShowUpdatesDialog(), checkItem)
-        bar.Append(helpMenu, u'ช่วยเหลือ')
+        bar.Append(helpMenu, u'E-Tipitaka')
         self.SetMenuBar(bar)
 
     def ShowUpdatesDialog(self, pending=None):
