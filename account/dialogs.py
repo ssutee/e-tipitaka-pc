@@ -3,6 +3,7 @@
 import os
 import tempfile
 import threading
+import zipfile
 from datetime import datetime
 
 import wx
@@ -22,7 +23,16 @@ def _run_in_thread(work, on_success, on_error):
             wx.CallAfter(on_error, e)
             return
         except Exception as e:
-            wx.CallAfter(on_error, AccountError(0, str(e)))
+            # Distinguish network errors (status=0 → "cannot reach server"
+            # message) from local/unexpected errors (status=-1 → show
+            # message verbatim via the else-branch of _show_error).
+            try:
+                import requests.exceptions as _re
+                is_network = isinstance(e, _re.RequestException)
+            except Exception:
+                is_network = False
+            status = 0 if is_network else -1
+            wx.CallAfter(on_error, AccountError(status, str(e)))
             return
         wx.CallAfter(on_success, result)
 
@@ -210,6 +220,13 @@ class BackupListDialog(wx.Dialog):
         pk = self._selected_pk()
         if pk is None:
             return
+        idx = self._list.GetFirstSelected()
+        platform = str(self._rows[idx].get('platform', '')).lower()
+        if platform and platform != 'pc':
+            wx.MessageBox(
+                u'รายการที่เลือกเป็นข้อมูลสำรองของแพลตฟอร์ม "%s" ไม่สามารถนำเข้ามาที่ PC ได้' % platform,
+                MSGBOX_TITLE, wx.OK | wx.ICON_WARNING, self)
+            return
         self._busy(True)
         _run_in_thread(
             lambda: _download_and_import(self._client, self._presenter, pk),
@@ -258,7 +275,10 @@ def _download_and_import(client, presenter, pk):
     try:
         with open(tmp, 'wb') as f:
             f.write(data)
-        presenter.ImportPCData(tmp)
+        try:
+            presenter.ImportPCData(tmp)
+        except zipfile.BadZipFile:
+            raise AccountError(422, u'ไฟล์ที่ดาวน์โหลดไม่ใช่ไฟล์สำรองของ PC (ต้องเป็นไฟล์ .etz)')
     finally:
         try:
             os.remove(tmp)
