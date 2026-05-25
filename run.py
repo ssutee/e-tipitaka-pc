@@ -103,6 +103,7 @@ class ParentFrame(aui.AuiMDIParentFrame):
 
         self.Bind(wx.EVT_CLOSE, self.OnFrameClose)
         self._CreateStatusBar()
+        self._CreateMenuBar()
 
         view = search.view.View(self)
         interactor = search.interactor.Interactor()
@@ -124,6 +125,33 @@ class ParentFrame(aui.AuiMDIParentFrame):
 
         self._progressBar = wx.Gauge(self._statusBar, -1, 100, size=(100,-1))
         self._progressBar.SetRect(self._statusBar.GetFieldRect(3))
+
+    def _CreateMenuBar(self):
+        bar = wx.MenuBar()
+        helpMenu = wx.Menu()
+        checkItem = helpMenu.Append(wx.ID_ANY, u'ตรวจสอบอัปเดตฐานข้อมูล')
+        self.Bind(wx.EVT_MENU, lambda _e: self.ShowUpdatesDialog(), checkItem)
+        bar.Append(helpMenu, u'ช่วยเหลือ')
+        self.SetMenuBar(bar)
+
+    def ShowUpdatesDialog(self, pending=None):
+        # Lazy import: wx.Dialog subclass + requests pulled only on demand.
+        from updates.dialog import UpdatesDialog
+        dlg = UpdatesDialog(self, pending=pending)
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def StartAutoUpdateCheck(self):
+        """Kick off a background fetch a few seconds after the UI settles.
+        If anything pending, surface the confirm dialog. Silent otherwise
+        (per Q5 — network failures never bother the user)."""
+        from updates.dialog import check_in_background
+
+        def _on_pending(pending):
+            if not pending or not self:
+                return
+            self.ShowUpdatesDialog(pending=pending)
+        wx.CallLater(3000, check_in_background, _on_pending)
 
     def PositionProgressBar(self):
         if self: self._progressBar.SetRect(self._statusBar.GetFieldRect(3))
@@ -260,6 +288,8 @@ parent = ParentFrame(None)
 parent.PostInit()
 
 parent.Show(True)
+
+parent.StartAutoUpdateCheck()
 
 if sys.platform == 'darwin':
     def _BringToFront():

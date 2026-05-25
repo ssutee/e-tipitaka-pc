@@ -130,6 +130,7 @@ READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 THEME_CFG = os.path.join(CONFIG_PATH, 'theme.cfg')
 ACCOUNT_BASE_URL = 'https://data.etipitaka.com'
 ACCOUNT_CFG = os.path.join(CONFIG_PATH, 'account.cfg')
+PATCH_INDEX_URL = 'https://download.watnapahpong.org/data/etipitaka/pc/patches/patches.toml'
 NOTE_STATUS_CFG = os.path.join(CONFIG_PATH, 'comment.cfg')
 
 # Writable per-user copies of the shipped sqlite dictionaries / corpora.
