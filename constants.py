@@ -132,6 +132,23 @@ ACCOUNT_BASE_URL = 'https://data.etipitaka.com'
 ACCOUNT_CFG = os.path.join(CONFIG_PATH, 'account.cfg')
 NOTE_STATUS_CFG = os.path.join(CONFIG_PATH, 'comment.cfg')
 
+# Writable per-user copies of the shipped sqlite dictionaries / corpora.
+# Populated lazily by the online-patcher: the shipped file is copied here
+# the first time a patch is applied. All read sites use resolve_db() so
+# the user copy wins when present, otherwise falls back to the shipped one.
+USER_DB_DIR = os.path.join(DATA_PATH, 'databases')
+
+
+def resolve_db(default_path):
+    """Return the writable per-user copy of a shipped db if it exists,
+    otherwise the bundled `default_path`. Used at every sqlite3.connect site
+    so the online patcher can override shipped dbs without rewriting the
+    bundle."""
+    user_copy = os.path.join(USER_DB_DIR, os.path.basename(default_path))
+    if os.path.exists(user_copy):
+        return user_copy
+    return default_path
+
 SEARCH_IMAGE = os.path.join(RESOURCES_DIR, 'search.png')
 NIKHAHIT_IMAGE = os.path.join(RESOURCES_DIR, 'nikhahit.gif')
 THOTHAN_IMAGE = os.path.join(RESOURCES_DIR, 'thothan.gif')

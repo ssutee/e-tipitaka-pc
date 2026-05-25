@@ -195,7 +195,7 @@ class ThaiRoyalEngine(Engine):
     def __init__(self):
         super(ThaiRoyalEngine, self).__init__()
         self._code = constants.THAI_ROYAL_CODE
-        self._conn = sqlite3.connect(constants.THAI_ROYAL_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_ROYAL_DB))
         self._searcher = self._conn.cursor()
                 
     def PrepareStatement(self, volume, page):
@@ -220,7 +220,7 @@ class PaliSiamEngine(Engine):
     def __init__(self):
         super(PaliSiamEngine, self).__init__()
         self._code = constants.PALI_SIAM_CODE
-        self._conn = sqlite3.connect(constants.PALI_SIAM_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.PALI_SIAM_DB))
         self._searcher = self._conn.cursor()
 
     @property
@@ -265,7 +265,7 @@ class PaliSiamNewEngine(PaliSiamEngine):
     def __init__(self):
         super(PaliSiamNewEngine, self).__init__()
         self._code = constants.PALI_SIAM_NEW_CODE
-        self._conn = sqlite3.connect(constants.PALI_SIAM_NEW_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.PALI_SIAM_NEW_DB))
         self._searcher = self._conn.cursor()
 
     @property
@@ -297,7 +297,7 @@ class ThaiVinayaEngine(Engine):
     def __init__(self):
         super(ThaiVinayaEngine, self).__init__()
         self._code = constants.THAI_VINAYA_CODE
-        self._conn = sqlite3.connect(constants.THAI_VINAYA_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_VINAYA_DB))
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
@@ -363,7 +363,7 @@ class ThaiPocketBookEngine(Engine):
     def __init__(self):
         super(ThaiPocketBookEngine, self).__init__()
         self._code = constants.THAI_POCKET_BOOK_CODE
-        self._conn = sqlite3.connect(constants.THAI_POCKET_BOOK_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_POCKET_BOOK_DB))
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
@@ -418,7 +418,7 @@ class ThaiWatnaEngine(Engine):
     def __init__(self):
         super(ThaiWatnaEngine, self).__init__()
         self._code = constants.THAI_WATNA_CODE
-        self._conn = sqlite3.connect(constants.THAI_WATNA_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_WATNA_DB))
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
@@ -468,7 +468,7 @@ class PaliMahaChulaEngine(Engine):
     def __init__(self):
         super(PaliMahaChulaEngine, self).__init__()
         self._code = constants.PALI_MAHACHULA_CODE
-        self._conn = sqlite3.connect(constants.PALI_MAHACHULA_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.PALI_MAHACHULA_DB))
         self._searcher = self._conn.cursor()
 
     @property
@@ -541,7 +541,7 @@ class ThaiSupremeEngine(Engine):
     def __init__(self):
         super(ThaiSupremeEngine, self).__init__()
         self._code = constants.THAI_SUPREME_CODE
-        self._conn = sqlite3.connect(constants.THAI_SUPREME_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_SUPREME_DB))
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
@@ -592,7 +592,7 @@ class ThaiMahaChulaEngine(Engine):
     def __init__(self):
         super(ThaiMahaChulaEngine, self).__init__()
         self._code = constants.THAI_MAHACHULA_CODE
-        self._conn = sqlite3.connect(constants.THAI_MAHACHULA_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_MAHACHULA_DB))
         self._searcher = self._conn.cursor()
 
     def PrepareStatement(self, volume, page):
@@ -689,7 +689,7 @@ class ThaiMahaMakutEngine(Engine):
     def __init__(self):
         super(ThaiMahaMakutEngine, self).__init__()
         self._code = constants.THAI_MAHAMAKUT_CODE
-        self._conn = sqlite3.connect(constants.THAI_MAHAMAKUT_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_MAHAMAKUT_DB))
         self._searcher = self._conn.cursor()
 
     def GetTitle(self, volume=None):
@@ -749,7 +749,7 @@ class ThaiFiveBooksEngine(Engine):
     def __init__(self):
         super(ThaiFiveBooksEngine, self).__init__()
         self._code = constants.THAI_FIVE_BOOKS_CODE
-        self._conn = sqlite3.connect(constants.THAI_FIVE_BOOKS_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_FIVE_BOOKS_DB))
         self._searcher = self._conn.cursor()
 
     def GetFirstPageNumber(self, volume):
@@ -850,7 +850,7 @@ class RomanScriptEngine(ScriptEngine):
     def __init__(self):
         super(RomanScriptEngine, self).__init__()
         self._code = constants.ROMAN_SCRIPT_CODE
-        self._conn = sqlite3.connect(constants.ROMAN_SCRIPT_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.ROMAN_SCRIPT_DB))
         self._searcher = self._conn.cursor()    
 
     def ProcessResult(self, result):
@@ -919,7 +919,7 @@ class ThaiScriptEngine(ScriptEngine):
     def __init__(self):
         super(ThaiScriptEngine, self).__init__()
         self._code = constants.THAI_SCRIPT_CODE
-        self._conn = sqlite3.connect(constants.THAI_SCRIPT_DB)
+        self._conn = sqlite3.connect(constants.resolve_db(constants.THAI_SCRIPT_DB))
         self._searcher = self._conn.cursor()
         
     def GetTitle(self, volume=None):

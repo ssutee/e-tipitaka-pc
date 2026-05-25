@@ -133,7 +133,7 @@ class RomanScriptSearchThread(ScriptSearchThread):
         
     @property
     def Database(self):
-        return constants.ROMAN_SCRIPT_DB
+        return constants.resolve_db(constants.ROMAN_SCRIPT_DB)
     
     
 class ThaiScriptSearchThread(ScriptSearchThread):
@@ -144,7 +144,7 @@ class ThaiScriptSearchThread(ScriptSearchThread):
         
     @property
     def Database(self):
-        return constants.THAI_SCRIPT_DB
+        return constants.resolve_db(constants.THAI_SCRIPT_DB)
         
     
 class ThaiFiveBooksSearchThread(SearchThread):
@@ -155,7 +155,7 @@ class ThaiFiveBooksSearchThread(SearchThread):
     
     @property
     def Database(self):
-        return constants.THAI_FIVE_BOOKS_DB    
+        return constants.resolve_db(constants.THAI_FIVE_BOOKS_DB)    
         
     def ProcessResult(self, result):
         r = {}
@@ -205,7 +205,7 @@ class ThaiRoyalSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.THAI_ROYAL_DB    
+        return constants.resolve_db(constants.THAI_ROYAL_DB)    
 
     @property
     def TableName(self):
@@ -231,7 +231,7 @@ class PaliSiamSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.PALI_SIAM_DB    
+        return constants.resolve_db(constants.PALI_SIAM_DB)    
 
 class PaliSiamNewSearchThread(SearchThread):
     
@@ -255,7 +255,7 @@ class PaliSiamNewSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.PALI_SIAM_NEW_DB    
+        return constants.resolve_db(constants.PALI_SIAM_NEW_DB)    
 
 
 class PaliMahaChulaSearchThread(SearchThread):
@@ -266,7 +266,7 @@ class PaliMahaChulaSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.PALI_MAHACHULA_DB    
+        return constants.resolve_db(constants.PALI_MAHACHULA_DB)    
         
     @property
     def TableName(self):
@@ -290,7 +290,7 @@ class ThaiMahaChulaSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.THAI_MAHACHULA_DB    
+        return constants.resolve_db(constants.THAI_MAHACHULA_DB)    
         
     @property
     def TableName(self):
@@ -344,7 +344,7 @@ class ThaiSupremeSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.THAI_SUPREME_DB    
+        return constants.resolve_db(constants.THAI_SUPREME_DB)    
         
     @property
     def TableName(self):
@@ -368,7 +368,7 @@ class ThaiMahaMakutSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.THAI_MAHAMAKUT_DB    
+        return constants.resolve_db(constants.THAI_MAHAMAKUT_DB)    
         
     @property
     def TableName(self):
@@ -391,7 +391,7 @@ class ThaiWatnaSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.THAI_WATNA_DB
+        return constants.resolve_db(constants.THAI_WATNA_DB)
 
     @property
     def TableName(self):
@@ -415,7 +415,7 @@ class ThaiPocketBookSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.THAI_POCKET_BOOK_DB
+        return constants.resolve_db(constants.THAI_POCKET_BOOK_DB)
 
     @property
     def TableName(self):
@@ -438,7 +438,7 @@ class ThaiVinayaSearchThread(SearchThread):
 
     @property
     def Database(self):
-        return constants.THAI_VINAYA_DB
+        return constants.resolve_db(constants.THAI_VINAYA_DB)
 
     @property
     def TableName(self):

@@ -599,7 +599,7 @@ class DictWindow(wx.Frame):
 class EnglishDictWindow(DictWindow):
 
     def ConnectDatabase(self):
-        return sqlite3.connect(constants.ENGLISH_DICT_DB)
+        return sqlite3.connect(constants.resolve_db(constants.ENGLISH_DICT_DB))
 
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
@@ -663,7 +663,7 @@ class EnglishDictWindow(DictWindow):
 class ThaiDictWindow(DictWindow):
 
     def ConnectDatabase(self):
-        return sqlite3.connect(constants.THAI_DICT_DB)
+        return sqlite3.connect(constants.resolve_db(constants.THAI_DICT_DB))
 
     def OnTextEntered(self, event):
         text = self.input.GetValue().strip()
@@ -692,7 +692,7 @@ class ThaiDictWindow(DictWindow):
 class PaliDictWindow(DictWindow):
     
     def ConnectDatabase(self):
-        conn = sqlite3.connect(constants.PALI_DICT_DB)
+        conn = sqlite3.connect(constants.resolve_db(constants.PALI_DICT_DB))
         return conn
 
     def OnSelectWord(self, event):
