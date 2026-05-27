@@ -48,7 +48,7 @@ class Model(object):
         sortDesc = (lambda h: h.keywords) if alphabetSort else (lambda h: desc(h.id))
         results, start, page = [], 0, 500
         while True:
-            query = select(h for h in History if h.code == constants.CODES[constants.LANGS_ORDER[index]] and text in h.keywords).order_by(sortDesc)[start:start+page]
+            query = select(h for h in History if h.code == constants.CODES[constants.VISIBLE_LANGS_ORDER[index]] and text in h.keywords).order_by(sortDesc)[start:start+page]
             if len(query) == 0: 
                 break
             results += list(query)
@@ -449,7 +449,7 @@ class SearchModelCreator(object):
     
     @staticmethod
     def Create(delegate, index):
-        code = constants.CODES[constants.LANGS_ORDER[index]]
+        code = constants.CODES[constants.VISIBLE_LANGS_ORDER[index]]
 
         if code == constants.THAI_ROYAL_CODE:
             return ThaiRoyalSearchModel(delegate)

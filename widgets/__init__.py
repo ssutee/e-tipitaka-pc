@@ -135,8 +135,8 @@ class SearchAndCompareWindow(wx.Frame):
         sizer1 = wx.BoxSizer(wx.HORIZONTAL)
         sizer2 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.combo1 = wx.ComboBox(mainPanel, wx.ID_ANY, choices=constants.LANGS, style=wx.CB_DROPDOWN|wx.CB_READONLY)
-        self.combo2 = wx.ComboBox(mainPanel, wx.ID_ANY, choices=constants.LANGS, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+        self.combo1 = wx.ComboBox(mainPanel, wx.ID_ANY, choices=constants.VISIBLE_LANGS, style=wx.CB_DROPDOWN|wx.CB_READONLY)
+        self.combo2 = wx.ComboBox(mainPanel, wx.ID_ANY, choices=constants.VISIBLE_LANGS, style=wx.CB_DROPDOWN|wx.CB_READONLY)
 
         self.ctrl1 = wx.TextCtrl(mainPanel, wx.ID_ANY)
         self.ctrl2 = wx.TextCtrl(mainPanel, wx.ID_ANY)
@@ -1931,7 +1931,7 @@ class SearchToolPanel(wx.Panel):
         self._buddhawajOnly = wx.CheckBox(self, wx.ID_ANY, label='เฉพาะพุทธวจน')
         self._buddhawajOnly.Disable()
 
-        langs = constants.LANGS
+        langs = constants.VISIBLE_LANGS
         self._langPanel = wx.Panel(self, wx.ID_ANY)
         langSizer = wx.StaticBoxSizer(wx.StaticBox(self._langPanel, wx.ID_ANY, 'เลือก'), orient=wx.HORIZONTAL)
         self._langComboBox = wx.ComboBox(self._langPanel, wx.ID_ANY, choices=langs, style=wx.CB_DROPDOWN|wx.CB_READONLY)
@@ -2083,7 +2083,7 @@ class ReferencesWindow(wx.html.HtmlWindow):
     def OnLinkClicked(self, link):
         href = link.GetHref()
         dlg = wx.SingleChoiceDialog(self.Parent, 
-            'พระไตรปิฎก', 'เทียบเคียง', constants.COMPARE_CHOICES, wx.CHOICEDLG_STYLE)
+            'พระไตรปิฎก', 'เทียบเคียง', constants.VISIBLE_COMPARE_CHOICES, wx.CHOICEDLG_STYLE)
         dlg.SetSize((250,280))
         dlg.Center()
         if dlg.ShowModal() == wx.ID_OK:
@@ -2091,5 +2091,5 @@ class ReferencesWindow(wx.html.HtmlWindow):
             volume = utils.ThaiToArabic(tokens[0])
             item = utils.ThaiToArabic(re.split(r'[–\-,\s]+', tokens[2])[0])
             if hasattr(self._delegate, 'OnLinkToReference'):
-                self._delegate.OnLinkToReference(constants.CODES[constants.COMPARE_ORDER[dlg.GetSelection()]], int(volume), int(item))
+                self._delegate.OnLinkToReference(constants.CODES[constants.VISIBLE_COMPARE_ORDER[dlg.GetSelection()]], int(volume), int(item))
         dlg.Destroy()

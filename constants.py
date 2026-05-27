@@ -42,6 +42,63 @@ COMPARE_ORDER = [0,1,11,2,3,4,12,9,8,7]
 LANGS = ['ไทย (ฉบับหลวง)', 'บาลี (สยามรัฐ พ.ศ.๒๕๓๘)', 'บาลี (สยามรัฐ พ.ศ.๒๔๗๐)', 'พุทธวจนปิฎก ๓๓ เล่ม', 'ไทย (มหามกุฏฯ)', 'ไทย (มหาจุฬาฯ ๑)', 'ไทย (มหาจุฬาฯ ๒)', 'ไทย (เฉลิมพระเกียรติ ๒๕๔๙)', 'บาลี (มหาจุฬาฯ)', 'พุทธวจน หมวดธรรม', 'ชุดจากพระโอษฐ์ ๕ เล่ม', 'อริยวินัย', 'Roman Script']
 LANGS_ORDER = [0,1,11,2,3,4,12,9,8,5,6,10,7]
 
+
+# ---------------------------------------------------------------------------
+# Build-time feature toggles (see build.toml.example).
+#
+# `build.toml` is read at import time. Missing file -> full release (include
+# every code book). Currently only `features.include_thaiwn` is supported;
+# setting it to false removes the thaiwn entry from the language combo and
+# every code-selection list in the UI. The thaiwn.sqlite resource is still
+# bundled by default unless the etipitaka.spec build also reads the same
+# build.toml and filters it out (which it does).
+# ---------------------------------------------------------------------------
+
+def _load_build_config():
+    try:
+        import tomllib
+    except ImportError:   # pragma: no cover -- Python <3.11
+        try:
+            import tomli as tomllib
+        except ImportError:
+            return {}
+    base = sys._MEIPASS if getattr(sys, 'frozen', False) \
+        else os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base, 'build.toml')
+    try:
+        with open(path, 'rb') as f:
+            return tomllib.load(f)
+    except (OSError, FileNotFoundError):
+        return {}
+
+
+_BUILD_CONFIG = _load_build_config()
+_features = _BUILD_CONFIG.get('features', {}) or {}
+
+DISABLED_CODES = frozenset(
+    code for code in (
+        ('thaiwn' if not _features.get('include_thaiwn', True) else None),
+    )
+    if code is not None
+)
+
+
+def IS_CODE_ENABLED(code):
+    return code not in DISABLED_CODES
+
+
+def _filter_visible(order):
+    return [o for o in order if IS_CODE_ENABLED(CODES[o])]
+
+
+# Display-time filtered variants. UI sites use these in place of LANGS /
+# LANGS_ORDER / COMPARE_ORDER so disabled codes never appear in pickers,
+# combo boxes, or compare dialogs.
+VISIBLE_LANGS_ORDER = _filter_visible(LANGS_ORDER)
+VISIBLE_LANGS = [LANGS[LANGS_ORDER.index(o)] for o in VISIBLE_LANGS_ORDER]
+VISIBLE_COMPARE_ORDER = _filter_visible(COMPARE_ORDER)
+VISIBLE_COMPARE_CHOICES = [COMPARE_CHOICES[COMPARE_ORDER.index(o)] for o in VISIBLE_COMPARE_ORDER]
+
 LANG_THAI = 'thai'
 LANG_PALI = 'pali'
 

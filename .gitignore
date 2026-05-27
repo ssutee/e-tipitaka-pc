@@ -11,3 +11,6 @@ dist/
 error.log
 data_path.cfg
 run.spec
+
+# Build-time feature toggles (see build.toml.example).
+build.toml

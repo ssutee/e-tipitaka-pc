@@ -288,7 +288,7 @@ class Presenter(object):
         if len(keywords.strip()) == 0 or len(keywords.replace('+',' ').strip()) == 0:
             return True
         
-        position = constants.LANGS_ORDER.index(constants.CODES.index(code)) if code is not None else 0
+        position = constants.VISIBLE_LANGS_ORDER.index(constants.CODES.index(code)) if code is not None else 0
         if code is not None and position != self._view.TopBar.LanguagesComboBox.GetSelection():
             self._view.TopBar.LanguagesComboBox.SetSelection(position)
             self.SelectLanguage(position)
@@ -600,6 +600,8 @@ class Presenter(object):
             code = constants.IOS_CODE_TABLE.get(item.get('code', -1))
             note = item.get('note', '')
 
+            if code is None or not constants.IS_CODE_ENABLED(code):
+                continue
             self.WriteXmlNoteFile(volume, page, code, note)
 
         # iOS highlights map onto PC marks (filesystem: marks/<code>/<vol>-<page>.json).
@@ -607,7 +609,7 @@ class Presenter(object):
         palette = jsonobj.get('highlightColors', [])
         for item in jsonobj.get('highlights', []):
             code = constants.IOS_CODE_TABLE.get(item.get('code', -1))
-            if not code:
+            if not code or not constants.IS_CODE_ENABLED(code):
                 continue
             volume = item.get('volume', 0)
             page = item.get('page', 0)

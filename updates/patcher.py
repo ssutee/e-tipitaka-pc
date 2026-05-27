@@ -192,7 +192,17 @@ def http_get(url, timeout=DEFAULT_TIMEOUT):
 
 
 # Keys in patches.toml that we never apply — orphaned or experimental files.
-DEFAULT_IGNORE = ('thaimc2',)
+_STATIC_IGNORE = ('thaimc2',)
+
+
+def _effective_ignore():
+    # Disabled codes (build.toml feature toggle) also skip the updater so
+    # we don't download patches for resources that aren't in the bundle.
+    import constants
+    return _STATIC_IGNORE + tuple(constants.DISABLED_CODES)
+
+
+DEFAULT_IGNORE = _effective_ignore()
 
 
 # Map TOML key -> shipped constants attribute name. Assume <key>.sqlite under

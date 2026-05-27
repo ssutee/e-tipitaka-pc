@@ -1,9 +1,53 @@
 # -*- mode: python ; coding: utf-8 -*-
 # Cross-platform PyInstaller spec (onedir). Bundles the full resources/ and
 # fonts/ directories. Builds a .app on macOS, a folder elsewhere.
+import os
 import sys
 
-datas = [('resources', 'resources'), ('fonts', 'fonts')]
+# ---------------------------------------------------------------------------
+# Build-time feature toggles (build.toml, gitignored; see build.toml.example).
+# Same file is also read by constants.py at runtime so the UI hides whatever
+# this section excludes from the bundle.
+# ---------------------------------------------------------------------------
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
+_build_cfg = {}
+if os.path.exists('build.toml'):
+    with open('build.toml', 'rb') as _f:
+        _build_cfg = tomllib.load(_f)
+_features = _build_cfg.get('features', {}) or {}
+
+# Per-feature exclusion lists. Add new toggles by extending these.
+_excluded_resource_files = set()
+if not _features.get('include_thaiwn', True):
+    _excluded_resource_files.add('thaiwn.sqlite')
+
+# Build the `datas` list. Normally we just bundle the whole `resources/`
+# directory in one tuple; when something needs to be omitted we expand the
+# top-level files into individual entries so the excluded ones can be
+# skipped. Subdirectories under `resources/` are always bundled whole.
+if not _excluded_resource_files:
+    datas = [('resources', 'resources'), ('fonts', 'fonts')]
+else:
+    datas = [('fonts', 'fonts')]
+    for entry in sorted(os.listdir('resources')):
+        full = os.path.join('resources', entry)
+        if os.path.isfile(full):
+            if entry in _excluded_resource_files:
+                continue
+            datas.append((full, 'resources'))
+        elif os.path.isdir(full):
+            datas.append((full, os.path.join('resources', entry)))
+
+# Ship the build.toml itself when present so constants.py at runtime applies
+# the same gates (UI must hide what the bundle omits).
+if os.path.exists('build.toml'):
+    datas.append(('build.toml', '.'))
+
+print('[etipitaka.spec] features=%r excluded=%r' % (_features, _excluded_resource_files))
 
 hiddenimports = [
     'wx.adv', 'wx.html', 'wx.xml', 'wx.richtext', 'wx.grid',

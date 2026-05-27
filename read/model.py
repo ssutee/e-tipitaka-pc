@@ -147,7 +147,7 @@ class Engine(object):
         return ['%2s. %s' % (utils.ArabicToThai(volume+1), self.GetBookName(volume+1)) for volume in range(self.GetSectionBoundary(2))]
         
     def GetCompareChoices(self):
-        return constants.COMPARE_CHOICES
+        return constants.VISIBLE_COMPARE_CHOICES
         
     def GetSubItem(self, volume, page, item): 
         for sub in constants.BOOK_ITEMS[self.BookCode][volume]:
@@ -322,7 +322,7 @@ class ThaiVinayaEngine(Engine):
         return r
 
     def GetCompareChoices(self):
-        return constants.COMPARE_CHOICES
+        return constants.VISIBLE_COMPARE_CHOICES
 
     def ConvertVolume(self, volume, item, sub):
         return volume
@@ -863,7 +863,7 @@ class RomanScriptEngine(ScriptEngine):
         return r        
 
     def GetCompareChoices(self):
-        return constants.COMPARE_CHOICES
+        return constants.VISIBLE_COMPARE_CHOICES
 
     def GetTotalPages(self, volume):
         self._searcher.execute('SELECT COUNT(_id) FROM main WHERE volume=?', (int(volume),))

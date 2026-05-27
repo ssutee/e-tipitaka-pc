@@ -1,0 +1,19 @@
+# Build-time feature toggles for the release build.
+#
+# Copy this file to `build.toml` (gitignored) and edit before building. The
+# config is read both by `etipitaka.spec` at PyInstaller time (controls what
+# gets bundled) and by `constants.py` at app startup (controls what the UI
+# exposes). If `build.toml` is missing entirely, all features default ON
+# (full release).
+#
+# Currently supported keys:
+#
+#   features.include_thaiwn = true   # set to false to omit the Wat Na Pa
+#                                    # Phong (thaiwn) code book from the
+#                                    # build. The 162 MB thaiwn.sqlite is
+#                                    # dropped from the bundle and the
+#                                    # language/compare/search pickers no
+#                                    # longer list it.
+
+[features]
+include_thaiwn = true
