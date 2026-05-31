@@ -68,4 +68,3 @@ build:linux:
     paths:
       - dist/
     expire_in: 30 days
-  allow_failure: true   # windows is the real release; linux is a smoke test
