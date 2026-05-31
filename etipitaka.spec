@@ -79,8 +79,10 @@ a = Analysis(
 
 pyz = PYZ(a.pure)
 
-if sys.platform == 'win32':
-    # Windows: single-file executable (resources bundled inside).
+if sys.platform in ('win32', 'linux'):
+    # Windows + Linux: single-file executable (resources bundled inside,
+    # extracted to a tmpdir on each launch). macOS sticks with the one-dir
+    # `.app` bundle below — codesigning + notarization expect the dir layout.
     exe = EXE(
         pyz,
         a.scripts,
@@ -97,7 +99,7 @@ if sys.platform == 'win32':
         icon='resources/e-tri_64_icon.ico',
     )
 else:
-    # macOS / Linux: one-dir bundle.
+    # macOS: one-dir bundle wrapped in BUNDLE -> .app.
     exe = EXE(
         pyz,
         a.scripts,
