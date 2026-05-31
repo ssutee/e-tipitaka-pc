@@ -48,7 +48,7 @@ build:linux:
   before_script:
     - apt-get update
     - apt-get install -y --no-install-recommends
-        python3.12 python3.12-venv python3-pip
+        python3.12 python3.12-venv python3.12-dev python3-pip
         git git-lfs ca-certificates curl
         build-essential pkg-config libcairo2-dev
         libgtk-3-0 libnotify4 libsdl2-2.0-0
