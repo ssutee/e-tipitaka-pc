@@ -24,6 +24,10 @@ build:windows:
     - git lfs pull
     - python -m pip install --upgrade pip uv
   script:
+    # BUILD_TOML is a GitLab "File" CI variable; copy into the project root
+    # so etipitaka.spec + constants.py both pick up the slim-release toggles.
+    # If unset (e.g. fork without the variable), build defaults to full.
+    - if ($env:BUILD_TOML) { Copy-Item $env:BUILD_TOML build.toml }
     - uv sync --python $env:PYTHON_VERSION
     - uv run pyinstaller etipitaka.spec --noconfirm --clean
   artifacts:
@@ -58,6 +62,10 @@ build:linux:
     - git lfs pull
     - pip install --break-system-packages uv
   script:
+    # BUILD_TOML is a GitLab "File" CI variable; copy into the project root
+    # so etipitaka.spec + constants.py both pick up the slim-release toggles.
+    # If unset (e.g. fork without the variable), build defaults to full.
+    - if [ -n "$BUILD_TOML" ]; then cp "$BUILD_TOML" build.toml; fi
     - uv venv --python python3.12
     - . .venv/bin/activate
     - uv pip install "$WX_WHEEL_URL"
