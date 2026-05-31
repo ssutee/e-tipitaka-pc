@@ -33,25 +33,38 @@ build:windows:
     expire_in: 30 days
 
 # ---------------------------------------------------------------------------
-# Linux folder build — small, fast, useful smoke test of the spec file
+# Linux folder build — small, fast, useful smoke test of the spec file.
+# Uses ubuntu:24.04 (ships python 3.12) so we can pull the wxPython 4.2.5
+# prebuilt wheel from extras.wxpython.org — wxPython has no manylinux wheel
+# on PyPI and the python:3.12 (debian) image was forced to compile from
+# sdist (~45 min, needed full GTK -dev headers).
 # ---------------------------------------------------------------------------
 build:linux:
   stage: build
-  image: python:3.12
+  image: ubuntu:24.04
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+    WX_WHEEL_URL: "https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-24.04/wxpython-4.2.5-cp312-cp312-linux_x86_64.whl"
   before_script:
     - apt-get update
     - apt-get install -y --no-install-recommends
-        git-lfs libgtk-3-0 libnotify4 libsdl2-2.0-0
+        python3.12 python3.12-venv python3-pip
+        git git-lfs ca-certificates curl
+        libgtk-3-0 libnotify4 libsdl2-2.0-0
         libgstreamer-plugins-base1.0-0 libwebkit2gtk-4.1-0
+        libsm6 libxtst6
     - git lfs install
     - git lfs pull
-    - pip install uv
+    - pip install --break-system-packages uv
   script:
-    - uv sync --python $PYTHON_VERSION
-    - uv run pyinstaller etipitaka.spec --noconfirm --clean
+    - uv venv --python python3.12
+    - . .venv/bin/activate
+    - uv pip install "$WX_WHEEL_URL"
+    - uv pip install pony xhtml2pdf Pillow appdirs packaging requests pyinstaller
+    - pyinstaller etipitaka.spec --noconfirm --clean
   artifacts:
     name: "e-tipitaka-linux-$CI_COMMIT_SHORT_SHA"
     paths:
       - dist/
     expire_in: 30 days
-  allow_failure: true   # windows is the real goal here
+  allow_failure: true   # windows is the real release; linux is a smoke test
