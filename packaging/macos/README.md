@@ -14,6 +14,7 @@ All scripts run on macOS with the Homebrew framework Python
 | File | Purpose |
 |------|---------|
 | `build_app.sh`          | PyInstaller build (`--mas`, `--universal2`, `--arm64`, `--x86_64`) |
+| `fuse_wheels.sh`        | Build universal2 wheels for wxPython + Pillow (delocate-fuse) |
 | `verify_arch.sh`        | Check the built `.app` is universal2 (flags thin libs) |
 | `entitlements-devid.plist` | Hardened-runtime entitlements (Developer ID) |
 | `entitlements-mas.plist`   | App Sandbox entitlements (MAS) |
@@ -44,22 +45,32 @@ Prerequisites:
    3.12 (universal2). The Homebrew Python is single-arch (arm64) and will NOT
    produce a fat app. `build_app.sh --universal2` defaults `PYBIN` to
    `/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12`.
-2. **Universal2 wheels** for the native deps. Install into the env used by that
-   Python so pip/uv pick the `*_universal2.whl`:
-   - `wxPython`, `Pillow`, `reportlab` ship universal2 wheels.
-   - `pony`, `whoosh`, `xhtml2pdf`, `appdirs`, `packaging`, `requests` are pure
-     Python (arch-agnostic).
-   If any dep resolves to a thin (arm64-only) wheel, the build aborts naming the
-   file — replace it with its universal2 wheel (or `pip install --platform
-   macosx_11_0_universal2 --only-binary=:all:`).
+2. **Universal2 wheels** for the native deps. ⚠️ As of now **wxPython 4.2.5 and
+   Pillow publish only thin wheels** (`arm64` + `x86_64`, no universal2). They
+   must be fused into universal2 wheels first with `delocate-fuse` —
+   `fuse_wheels.sh` does this. (`reportlab` is pure-Python;
+   `pony`/`whoosh`/`xhtml2pdf`/`appdirs`/`packaging`/`requests` are
+   arch-agnostic — none need fusing.) If a still-thin dep slips through,
+   PyInstaller aborts naming the file.
 
 Build + verify:
 
 ```bash
+PYBIN=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12
+
+# 1. fuse the thin deps into universal2 wheels
+PYBIN="$PYBIN" ./packaging/macos/fuse_wheels.sh
+# 2. install them (+ the pure-Python deps) into the universal2 env
+"$PYBIN" -m pip install wheels-universal2/*.whl pony xhtml2pdf appdirs packaging requests
+# 3. build fat, then verify
 ./packaging/macos/build_app.sh --universal2          # or: --mas --universal2
 ./packaging/macos/verify_arch.sh                     # confirms fat, lists thin libs
 lipo -archs dist/E-Tipitaka.app/Contents/MacOS/e-tipitaka   # -> x86_64 arm64
 ```
+
+> `build_app.sh --universal2` runs `pyinstaller` against the env's interpreter;
+> ensure that env has the fused universal2 wheels installed (step 2) or the
+> build comes out arm64-only / aborts on a thin binary.
 
 Signing / notarizing / DMG / MAS steps below are identical for a universal2
 `.app` — no changes needed.

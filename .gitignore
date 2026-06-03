@@ -14,3 +14,6 @@ run.spec
 
 # Build-time feature toggles (see build.toml.example).
 build.toml
+
+# Fused universal2 wheels (packaging/macos/fuse_wheels.sh output)
+wheels-universal2/
