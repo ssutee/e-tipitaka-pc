@@ -14,6 +14,16 @@
 #                                    # dropped from the bundle and the
 #                                    # language/compare/search pickers no
 #                                    # longer list it.
+#
+#   features.store_build = false     # set to true for a Microsoft Store
+#                                    # (MSIX) build. The spec then produces a
+#                                    # one-dir payload on Windows (instead of
+#                                    # the one-file .exe) and constants.py
+#                                    # suppresses the in-app exe self-update
+#                                    # prompt, which Store policy forbids. The
+#                                    # online database patcher still works.
+#                                    # See build.store.toml + packaging/msix/.
 
 [features]
 include_thaiwn = true
+store_build = false

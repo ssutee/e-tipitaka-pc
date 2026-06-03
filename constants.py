@@ -75,6 +75,13 @@ def _load_build_config():
 _BUILD_CONFIG = _load_build_config()
 _features = _BUILD_CONFIG.get('features', {}) or {}
 
+# Microsoft Store (MSIX) build. The Store distributes and updates the app
+# itself, and Store policy forbids an app from self-updating its own code
+# (downloading/launching a replacement .exe). When this is on, the in-app
+# "check for new version" prompt is suppressed. The online *database* patcher
+# (updates/) is unaffected — it downloads data, not code.
+IS_STORE_BUILD = bool(_features.get('store_build', False))
+
 DISABLED_CODES = frozenset(
     code for code in (
         ('thaiwn' if not _features.get('include_thaiwn', True) else None),

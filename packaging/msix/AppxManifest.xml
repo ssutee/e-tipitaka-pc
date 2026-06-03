@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX package manifest for the Microsoft Store build of E-Tipitaka.
+
+  The __TOKENS__ below are filled in at packaging time (see
+  packaging/msix/README.md and the GitLab `package:msix` job). Get the
+  real Identity Name / Publisher values from Partner Center after you
+  reserve the app name:
+
+    __IDENTITY_NAME__          Partner Center > Product identity > Package/Identity/Name
+    __PUBLISHER__              Partner Center > Product identity > Package/Identity/Publisher
+                               (e.g. "CN=ABCD1234-...") — must match exactly
+    __PUBLISHER_DISPLAY_NAME__ Partner Center > Package/Identity/Publisher display name
+    __VERSION__                4-part version, e.g. 3.2.0.0 (build segment must be 0 for Store)
+
+  Identity ProcessorArchitecture is x64 to match the PyInstaller build.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity
+    Name="__IDENTITY_NAME__"
+    Publisher="__PUBLISHER__"
+    Version="__VERSION__"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>E-Tipitaka</DisplayName>
+    <PublisherDisplayName>__PUBLISHER_DISPLAY_NAME__</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="th-TH" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application
+      Id="ETipitaka"
+      Executable="app\e-tipitaka.exe"
+      EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="E-Tipitaka"
+        Description="Thai Tipitaka reader (พระไตรปิฎก)"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile
+          Wide310x150Logo="Assets\Wide310x150Logo.png"
+          Square71x71Logo="Assets\Square71x71Logo.png"
+          Square310x310Logo="Assets\Square310x310Logo.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!-- runFullTrust is required for a packaged Win32 (PyInstaller) app. -->
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

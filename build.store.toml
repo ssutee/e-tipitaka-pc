@@ -1,0 +1,12 @@
+# Feature toggles for the Microsoft Store (MSIX) build.
+#
+# Committed (not gitignored) so the Store build is reproducible. The GitLab
+# `package:msix` job copies this file to `build.toml` before running
+# PyInstaller, so both etipitaka.spec and constants.py pick it up.
+#
+# Flip `include_thaiwn` to true if you want the 162 MB Wat Na Pa Phong book
+# in the Store package (larger download).
+
+[features]
+include_thaiwn = false
+store_build = true

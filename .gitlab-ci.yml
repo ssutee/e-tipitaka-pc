@@ -76,3 +76,42 @@ build:linux:
     paths:
       - dist/
     expire_in: 30 days
+
+# ---------------------------------------------------------------------------
+# Windows .msix (Microsoft Store package)
+# Builds the one-dir Store payload (build.store.toml -> store_build = true) and
+# packs it with makeappx from the Windows SDK. Produces an UNSIGNED .msix:
+# Partner Center re-signs with the Store certificate on upload, so no signing
+# secrets live in CI.
+#
+# Opt-in: runs only when the CI variable BUILD_MSIX is set, so normal pipelines
+# are unaffected. Set these CI variables (Settings > CI/CD > Variables) from
+# the Partner Center values before enabling:
+#   MSIX_IDENTITY_NAME            Package/Identity/Name
+#   MSIX_PUBLISHER               Package/Identity/Publisher  (e.g. CN=ABCD1234-...)
+#   MSIX_PUBLISHER_DISPLAY_NAME  Publisher display name
+#   MSIX_VERSION                 optional 4-part version (default 3.2.0.0)
+# ---------------------------------------------------------------------------
+package:msix:
+  stage: package
+  tags:
+    - saas-windows-medium-amd64
+  timeout: 1h
+  rules:
+    - if: '$BUILD_MSIX'
+  before_script:
+    - git lfs install
+    - git lfs pull
+    - python -m pip install --upgrade pip uv
+  script:
+    # Build the one-dir Store payload (store_build = true), then assemble +
+    # pack the MSIX. pack.ps1 reads the MSIX_* identity values from the env.
+    - Copy-Item build.store.toml build.toml -Force
+    - uv sync --python $env:PYTHON_VERSION
+    - uv run pyinstaller etipitaka.spec --noconfirm --clean
+    - powershell -ExecutionPolicy Bypass -File packaging\msix\pack.ps1
+  artifacts:
+    name: "e-tipitaka-msix-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - dist/e-tipitaka.msix
+    expire_in: 30 days

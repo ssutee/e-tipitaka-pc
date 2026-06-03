@@ -20,6 +20,12 @@ if os.path.exists('build.toml'):
         _build_cfg = tomllib.load(_f)
 _features = _build_cfg.get('features', {}) or {}
 
+# Microsoft Store (MSIX) build. On Windows this forces a one-dir payload
+# (folder of files) instead of the one-file .exe — MSIX expects a directory
+# layout and the one-file bootloader's per-launch temp extraction fights the
+# Store container. macOS/Linux are unaffected. See packaging/msix/.
+_store_build = bool(_features.get('store_build', False))
+
 # Per-feature exclusion lists. Add new toggles by extending these.
 _excluded_resource_files = set()
 if not _features.get('include_thaiwn', True):
@@ -79,7 +85,10 @@ a = Analysis(
 
 pyz = PYZ(a.pure)
 
-if sys.platform in ('win32', 'linux'):
+# Windows MSIX builds take the one-dir path (COLLECT) below alongside macOS.
+_win_msix = sys.platform == 'win32' and _store_build
+
+if sys.platform in ('win32', 'linux') and not _win_msix:
     # Windows + Linux: single-file executable (resources bundled inside,
     # extracted to a tmpdir on each launch). macOS sticks with the one-dir
     # `.app` bundle below — codesigning + notarization expect the dir layout.

@@ -759,6 +759,10 @@ class Presenter(object):
         dlg.Destroy()
                 
     def CheckNewUpdate(self):
+        # Store builds: the Store handles app updates and forbids in-app
+        # exe self-update. Suppress the version check / download prompt.
+        if constants.IS_STORE_BUILD:
+            return
         threads.CheckNewUpdateThread(self).start()
         
     def ShowInputText(self, text):
