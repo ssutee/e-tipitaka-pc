@@ -16,6 +16,7 @@ variables:
 # ---------------------------------------------------------------------------
 build:windows:
   stage: build
+  when: manual          # play from the pipeline view; never runs automatically
   tags:
     - saas-windows-medium-amd64
   timeout: 1h
@@ -45,6 +46,7 @@ build:windows:
 # ---------------------------------------------------------------------------
 build:linux:
   stage: build
+  when: manual          # play from the pipeline view; never runs automatically
   image: ubuntu:24.04
   variables:
     DEBIAN_FRONTEND: noninteractive
@@ -84,9 +86,9 @@ build:linux:
 # Partner Center re-signs with the Store certificate on upload, so no signing
 # secrets live in CI.
 #
-# Opt-in: runs only when the CI variable BUILD_MSIX is set, so normal pipelines
-# are unaffected. Set these CI variables (Settings > CI/CD > Variables) from
-# the Partner Center values before enabling:
+# Manual: play it from the pipeline view when you want a Store package. The
+# MSIX_* identity values must be set as CI variables (Settings > CI/CD >
+# Variables) from the Partner Center values:
 #   MSIX_IDENTITY_NAME            Package/Identity/Name
 #   MSIX_PUBLISHER               Package/Identity/Publisher  (e.g. CN=ABCD1234-...)
 #   MSIX_PUBLISHER_DISPLAY_NAME  Publisher display name
@@ -94,11 +96,10 @@ build:linux:
 # ---------------------------------------------------------------------------
 package:msix:
   stage: package
+  when: manual          # play from the pipeline view; never runs automatically
   tags:
     - saas-windows-medium-amd64
   timeout: 1h
-  rules:
-    - if: '$BUILD_MSIX'
   before_script:
     - git lfs install
     - git lfs pull
