@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Assemble and pack the E-Tipitaka MSIX from an existing one-dir PyInstaller
-  build (dist\e-tipitaka\). Produces an UNSIGNED dist\e-tipitaka.msix —
+  build (dist\e-tipitaka\). Produces an UNSIGNED dist\e-tipitaka.msix -
   Partner Center re-signs on upload.
 
 .DESCRIPTION
@@ -26,7 +26,7 @@ if (-not (Test-Path $payload)) {
 }
 foreach ($v in @($IdentityName, $Publisher, $PublisherDisplayName)) {
   if ([string]::IsNullOrWhiteSpace($v)) {
-    throw "missing identity value — set MSIX_IDENTITY_NAME, MSIX_PUBLISHER, MSIX_PUBLISHER_DISPLAY_NAME"
+    throw "missing identity value - set MSIX_IDENTITY_NAME, MSIX_PUBLISHER, MSIX_PUBLISHER_DISPLAY_NAME"
   }
 }
 
@@ -47,7 +47,7 @@ $manifest | Set-Content "$stage\AppxManifest.xml" -Encoding UTF8
 # 3. Pack with the newest makeappx from the Windows SDK (unsigned).
 $makeappx = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe" |
   Sort-Object FullName | Select-Object -Last 1
-if (-not $makeappx) { throw "makeappx.exe not found — install the Windows SDK" }
+if (-not $makeappx) { throw "makeappx.exe not found - install the Windows SDK" }
 
 $out = Join-Path $root "dist\e-tipitaka.msix"
 New-Item -ItemType Directory (Join-Path $root "dist") -Force | Out-Null
