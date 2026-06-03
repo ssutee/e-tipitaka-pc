@@ -26,6 +26,19 @@ _features = _build_cfg.get('features', {}) or {}
 # Store container. macOS/Linux are unaffected. See packaging/msix/.
 _store_build = bool(_features.get('store_build', False))
 
+# macOS target architecture. Default None = build for the running interpreter's
+# native arch (arm64 on Apple Silicon via Homebrew Python). Set
+# ETIPITAKA_MAC_ARCH=universal2 to build a fat arm64+x86_64 .app — this REQUIRES
+# a universal2 Python (python.org framework build, NOT Homebrew) and universal2
+# wheels for every native dependency, or PyInstaller aborts naming the thin
+# binary. See packaging/macos/README.md.
+_target_arch = None
+if sys.platform == 'darwin':
+    _arch = os.environ.get('ETIPITAKA_MAC_ARCH', '').strip()
+    if _arch in ('universal2', 'x86_64', 'arm64'):
+        _target_arch = _arch
+        print('[etipitaka.spec] macOS target_arch=%s' % _target_arch)
+
 # Per-feature exclusion lists. Add new toggles by extending these.
 _excluded_resource_files = set()
 if not _features.get('include_thaiwn', True):
@@ -121,6 +134,7 @@ else:
         upx=False,
         console=False,
         icon='resources/e-tri_64_icon.ico',
+        target_arch=_target_arch,
     )
 
     coll = COLLECT(

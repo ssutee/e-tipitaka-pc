@@ -13,7 +13,8 @@ All scripts run on macOS with the Homebrew framework Python
 
 | File | Purpose |
 |------|---------|
-| `build_app.sh`          | PyInstaller build (`--mas` flag = Store toggle on) |
+| `build_app.sh`          | PyInstaller build (`--mas`, `--universal2`, `--arm64`, `--x86_64`) |
+| `verify_arch.sh`        | Check the built `.app` is universal2 (flags thin libs) |
 | `entitlements-devid.plist` | Hardened-runtime entitlements (Developer ID) |
 | `entitlements-mas.plist`   | App Sandbox entitlements (MAS) |
 | `sign_devid.sh`         | Inside-out codesign for Developer ID |
@@ -25,9 +26,43 @@ Bundle id: **`org.watnapahpong.etipitaka`** (set in `etipitaka.spec`). The MAS
 App ID and provisioning profile must match it. (The legacy `pkg_osx.sh` /
 `sign_app.sh` used `com.watnapp.etipitaka` — superseded by these scripts.)
 
-Architecture: the build is **arm64** (Apple Silicon), matching the Homebrew
-Python + wxPython wheel. An Intel/universal2 build needs separate x86_64 deps
-and `lipo` merging — not set up here.
+Architecture: the default build is **arm64** (Apple Silicon), matching the
+Homebrew Python + wxPython wheel. A **universal2** (arm64 + x86_64) build is
+supported via `build_app.sh --universal2` — see "Universal2 build" below.
+
+---
+
+## Universal2 build (arm64 + x86_64)
+
+PyInstaller builds a fat binary only when **every** input is fat: the Python
+interpreter and every native wheel. The spec passes `target_arch=universal2`
+when `ETIPITAKA_MAC_ARCH=universal2` is set (done for you by `--universal2`).
+
+Prerequisites:
+
+1. **A universal2 Python** — install the python.org macOS framework build of
+   3.12 (universal2). The Homebrew Python is single-arch (arm64) and will NOT
+   produce a fat app. `build_app.sh --universal2` defaults `PYBIN` to
+   `/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12`.
+2. **Universal2 wheels** for the native deps. Install into the env used by that
+   Python so pip/uv pick the `*_universal2.whl`:
+   - `wxPython`, `Pillow`, `reportlab` ship universal2 wheels.
+   - `pony`, `whoosh`, `xhtml2pdf`, `appdirs`, `packaging`, `requests` are pure
+     Python (arch-agnostic).
+   If any dep resolves to a thin (arm64-only) wheel, the build aborts naming the
+   file — replace it with its universal2 wheel (or `pip install --platform
+   macosx_11_0_universal2 --only-binary=:all:`).
+
+Build + verify:
+
+```bash
+./packaging/macos/build_app.sh --universal2          # or: --mas --universal2
+./packaging/macos/verify_arch.sh                     # confirms fat, lists thin libs
+lipo -archs dist/E-Tipitaka.app/Contents/MacOS/e-tipitaka   # -> x86_64 arm64
+```
+
+Signing / notarizing / DMG / MAS steps below are identical for a universal2
+`.app` — no changes needed.
 
 ---
 
