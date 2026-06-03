@@ -142,5 +142,12 @@ else:
                 'NSRequiresAquaSystemAppearance': True,
                 'NSHighResolutionCapable': True,
                 'CFBundleShortVersionString': '3.2.0',
+                # CFBundleVersion is the build number; App Store requires it and
+                # rejects re-uploads that reuse a number. Bump per submission.
+                'CFBundleVersion': '3.2.0',
+                # Required for the Mac App Store listing.
+                'LSApplicationCategoryType': 'public.app-category.reference',
+                'NSHumanReadableCopyright':
+                    'Copyright (C) 2010-2026 Sutee Sudprasert',
             },
         )

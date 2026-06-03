@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements for the Developer ID (direct distribution / notarized DMG)
+  build. Hardened runtime is required for notarization; these exceptions let
+  the bundled CPython interpreter + wxPython native libraries run under it.
+  NOT for the Mac App Store (sandbox build uses entitlements-mas.plist).
+-->
+<plist version="1.0">
+<dict>
+  <!-- Python/ctypes allocate executable memory at runtime. -->
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+  <!-- PyInstaller loads many bundled dylibs/.so; allow loading our own
+       (all signed with the same Team ID) without strict library validation. -->
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+  <!-- PyInstaller sets DYLD_* at launch to find bundled libraries. -->
+  <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+  <true/>
+</dict>
+</plist>
