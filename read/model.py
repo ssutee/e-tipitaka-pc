@@ -174,7 +174,18 @@ class Engine(object):
 
     def ConvertVolume(self, volume, item, sub):
         return volume
-        
+
+    def _NearestItemPage(self, mapping, volume, sub, item):
+        # The Siam-item -> page maps (MAP_MC_TO_SIAM / MAP_MS_TO_SIAM) have
+        # scattered gaps for some items (e.g. thai vol 12 item 202). When the
+        # exact key is missing, fall back to the nearest lower item that exists
+        # so compare lands on the right page vicinity instead of page 0.
+        for i in range(item, 0, -1):
+            key = 'v%d-%d-i%d' % (volume, sub, i)
+            if key in mapping:
+                return int(mapping[key])
+        return 0
+
     def GetComparingVolume(self, volume, page):
         return volume
     
@@ -523,7 +534,9 @@ class PaliMahaChulaEngine(Engine):
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
-            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+            if checked:
+                return self._NearestItemPage(constants.MAP_MC_TO_SIAM, volume, sub, item)
+            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
         except KeyError as e:
             return 0
         except TypeError as e:
@@ -573,7 +586,9 @@ class ThaiSupremeEngine(Engine):
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
-            return int(constants.MAP_MS_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+            if checked:
+                return self._NearestItemPage(constants.MAP_MS_TO_SIAM, volume, sub, item)
+            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
         except KeyError as e:
             return 0
         except TypeError as e:
@@ -636,7 +651,9 @@ class ThaiMahaChulaEngine(Engine):
 
     def ConvertItemToPage(self, volume, item, sub, checked=False):
         try:
-            return int(constants.MAP_MC_TO_SIAM['v%d-%d-i%d'%(volume, sub, item)]) if checked else constants.BOOK_ITEMS[self._code][volume][sub][item][0]
+            if checked:
+                return self._NearestItemPage(constants.MAP_MC_TO_SIAM, volume, sub, item)
+            return constants.BOOK_ITEMS[self._code][volume][sub][item][0]
         except KeyError as e:
             return 0
         except TypeError as e:
