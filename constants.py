@@ -121,11 +121,13 @@ FOOTER_STYLE = '#3CBF3F', 4
 
 ETZ_TYPE = 'E-Tipitaka Backup File (*.etz;*.js;*.json)|*.etz;*.js;*.json'
 
-CHECK_VERSION_URL   = 'http://download.watnapahpong.org/data/etipitaka/version.txt'
-
-DOWNLOAD_MSW_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.exe'
-DOWNLOAD_OSX_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.pkg'
-DOWNLOAD_SRC_URL     = 'http://download.watnapahpong.org/data/E-Tipitaka-latest.tar.gz'
+# In-app update check. The website publishes a JSON manifest with the latest
+# version + per-platform download URLs (releases are versioned per-platform
+# .zip files; there is no static "-latest" file anymore). Primary is the Django
+# endpoint (always in sync with the release DB); fallback is a static file the
+# release script writes to the download host.
+LATEST_INFO_URL          = 'https://etipitaka.com/api/version.json'
+LATEST_INFO_FALLBACK_URL = 'https://download.watnapahpong.org/data/etipitaka/latest.json'
 
 PALI_PDF_URL_PATTERN = "http://pali.watnapp.com/?volume=%d&start=%d&end=%d"
 

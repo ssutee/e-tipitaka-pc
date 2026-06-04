@@ -1,4 +1,5 @@
 import wx
+import json
 import threading, sqlite3, os.path, sys, urllib.request, urllib.error, urllib.parse, http.client
 
 import constants, utils
@@ -7,23 +8,34 @@ from whoosh.highlight import highlight, HtmlFormatter, SimpleFragmenter
 from whoosh.analysis import NgramTokenizer
 from formatters import MyHtmlFormatter
 
+
+def fetch_update_manifest():
+    """Fetch the release manifest published by the website. Tries the Django
+    endpoint first, then the static fallback on the download host. Returns the
+    parsed dict ({'latest_version': str, 'downloads': {...}}) or None on any
+    network/parse error (the update check fails silently)."""
+    for url in (constants.LATEST_INFO_URL, constants.LATEST_INFO_FALLBACK_URL):
+        try:
+            response = urllib.request.urlopen(url, timeout=3)
+            data = json.loads(response.read().decode('utf-8'))
+            if isinstance(data, dict) and data.get('latest_version'):
+                return data
+        except (urllib.error.URLError, urllib.error.HTTPError,
+                http.client.HTTPException, ValueError, OSError):
+            continue
+    return None
+
+
 class CheckNewUpdateThread(threading.Thread):
-    
+
     def __init__(self, delegate):
         super(CheckNewUpdateThread, self).__init__()
         self._delegate = delegate
-        
+
     def run(self):
-        try:
-            response = urllib.request.urlopen(constants.CHECK_VERSION_URL, timeout=3)
-            if hasattr(self._delegate, 'CheckNewUpdateDidFinish'):                
-                wx.CallAfter(self._delegate.CheckNewUpdateDidFinish, response.read().strip().decode('utf-8'))
-        except urllib.error.URLError as err:
-            pass
-        except urllib.error.HTTPError as err:
-            pass
-        except http.client.HTTPException as err:
-            pass
+        info = fetch_update_manifest()
+        if info and hasattr(self._delegate, 'CheckNewUpdateDidFinish'):
+            wx.CallAfter(self._delegate.CheckNewUpdateDidFinish, info)
 
 class SearchThread(threading.Thread):
     

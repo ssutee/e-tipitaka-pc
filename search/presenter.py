@@ -733,23 +733,34 @@ class Presenter(object):
                 self._view.SortingRadioBox.GetSelection()==0, self._view.FilterCtrl.GetValue())
                 
     def Download(self):
-        import webbrowser
-        url = constants.DOWNLOAD_SRC_URL
-        if 'wxMac' in wx.PlatformInfo:
-            url = constants.DOWNLOAD_OSX_URL
-        elif 'wxMSW' in wx.PlatformInfo:
-            url = constants.DOWNLOAD_MSW_URL
-        webbrowser.open_new(url)
-        
+        import webbrowser, platform
+        downloads = getattr(self, '_latestDownloads', None) or {}
+        if 'wxMSW' in wx.PlatformInfo:
+            url = downloads.get('windows')
+        elif 'wxMac' in wx.PlatformInfo:
+            # arm64 (Apple Silicon) vs x86_64 (Intel / Rosetta).
+            url = downloads.get('mac_arm') if platform.machine() == 'arm64' \
+                else downloads.get('mac_intel')
+        else:
+            url = downloads.get('linux')
+        if url:
+            webbrowser.open_new(url)
+
     def SkipThisVersion(self, version):
         with open(constants.SKIP_VERSION_FILE, 'w') as f:
             f.write(version)
-                
-    def CheckNewUpdateDidFinish(self, version):
+
+    def CheckNewUpdateDidFinish(self, info):
+        # `info` is the website manifest: {'latest_version', 'downloads': {...}}.
+        version = (info or {}).get('latest_version')
+        if not version:
+            return
+        self._latestDownloads = (info or {}).get('downloads', {}) or {}
+
         skipped = open(constants.SKIP_VERSION_FILE).read() if os.path.exists(constants.SKIP_VERSION_FILE) else None
 
         if skipped == version or Version(version) <= Version(settings.VERSION): return
-        
+
         dlg = UpdateDialog(self._view, settings.VERSION, version)
         ret = dlg.ShowModal()
         if ret == wx.ID_OK:
