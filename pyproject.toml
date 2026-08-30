@@ -1,6 +1,6 @@
 [project]
 name = "e-tipitaka"
-version = "3.2.1"
+version = "3.2.2"
 description = "Thai Tipitaka reader"
 requires-python = ">=3.12"
 dependencies = [

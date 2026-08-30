@@ -155,10 +155,10 @@ else:
             info_plist={
                 'NSRequiresAquaSystemAppearance': True,
                 'NSHighResolutionCapable': True,
-                'CFBundleShortVersionString': '3.2.1',
+                'CFBundleShortVersionString': '3.2.2',
                 # CFBundleVersion is the build number; App Store requires it and
                 # rejects re-uploads that reuse a number. Bump per submission.
-                'CFBundleVersion': '3.2.1',
+                'CFBundleVersion': '3.2.2',
                 # Required for the Mac App Store listing.
                 'LSApplicationCategoryType': 'public.app-category.reference',
                 'NSHumanReadableCopyright':
