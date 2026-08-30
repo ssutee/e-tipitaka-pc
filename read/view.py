@@ -369,14 +369,32 @@ class View(AuiBaseFrame):
         return panel        
         
     def AddReadPanel(self, code):
-        index = 1 if len(list(self._comparePanel.keys())) == 0 else sum([int(k.startswith(code)) for k in list(self._comparePanel.keys())])+1
-        
-        self._comparePanel[utils.MakeKey(code,index)] = ReadPanelCreator.Create(self, code, index, self._font, self._delegate)
+        index = self._NextCompareIndex(code)
+        key = utils.MakeKey(code, index)
+
+        self._comparePanel[key] = ReadPanelCreator.Create(self, code, index, self._font, self._delegate)
         info = aui.AuiPaneInfo().CaptionVisible(False).Floatable(False).Center().Row(len(self._comparePanel))
-        self.AddPane(self._comparePanel[utils.MakeKey(code,index)], info.Name(utils.MakeKey(code,index)))
-        utils.ApplyTheme(self._comparePanel[utils.MakeKey(code,index)], constants.READ)
-        
+        self.AddPane(self._comparePanel[key], info.Name(key))
+        utils.ApplyTheme(self._comparePanel[key], constants.READ)
+
         return index
+
+    def _NextCompareIndex(self, code):
+        # max(existing index for this exact code) + 1, so closing a compare
+        # panel and reopening the same code never collides with a survivor.
+        # (Exact code match also avoids the old startswith() cross-match, e.g.
+        # 'thai' matching 'thaimc' / 'thaiwn'.)
+        indices = [utils.SplitKey(k)[1] for k in self._comparePanel.keys()
+                   if utils.SplitKey(k)[0] == code]
+        return max(indices) + 1 if indices else 1
+
+    def RemoveReadPanel(self, code, index):
+        key = utils.MakeKey(code, index)
+        panel = self._comparePanel.pop(key, None)
+        if panel is None:
+            return
+        self.RemovePane(panel)
+        panel.Destroy()
         
     def HideBookList(self):
         info = self.AuiManager.GetPane('BookList')

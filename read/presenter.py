@@ -631,7 +631,20 @@ class Presenter(object):
         
     def ToggleNotePanel(self, code, index):
         self._view.ToggleNotePanel(code, index)
-        
+
+    def CloseComparePanel(self, code, index):
+        # Only compare panels (real code) are closable; the main panel is None.
+        if code is None:
+            return
+        key = utils.MakeKey(code, index)
+        self._view.RemoveReadPanel(code, index)
+        self._compareVolume.pop(key, None)
+        self._comparePage.pop(key, None)
+        if key in self._focusList:
+            self._focusList.remove(key)
+        if self._lastFocus == key:
+            self._lastFocus = None
+
     def ShowFontDialog(self, target=constants.READ_FONT):
         code = None
         if target == constants.READ_FONT:

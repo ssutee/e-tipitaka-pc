@@ -801,7 +801,11 @@ class AuiBaseFrame(aui.AuiMDIChildFrame):
     def AddPane(self, pane, auiInfo):
         self._mgr.AddPane(pane, auiInfo)
         self._mgr.Update()
-        
+
+    def RemovePane(self, pane):
+        self._mgr.DetachPane(pane)
+        self._mgr.Update()
+
     def GetCenterPane(self):
         return self._mgr.GetPane("CenterPane")
         
@@ -1221,7 +1225,16 @@ class ReadPanel(wx.Panel):
         else:
             self._title = wx.html.HtmlWindow(self, size=(-1, int(58/divider)), style=wx.html.HW_SCROLLBAR_NEVER)
             self._title.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
-        
+
+        # Compare panels (real code) get a close button in the title row; the
+        # main read panel (code is None) can't be closed, so it gets none.
+        self._closeButton = None
+        if self._code is not None:
+            self._closeButton = wx.Button(self, wx.ID_ANY, '✕',
+                size=(24, 24), style=wx.BU_EXACTFIT)
+            self._closeButton.SetToolTip(wx.ToolTip('ปิดหน้าต่างเทียบเคียง'))
+            self._closeButton.Bind(wx.EVT_BUTTON, self.OnCloseButtonClick)
+
         self._page = wx.html.HtmlWindow(self, size=(-1, 28), style=wx.html.HW_SCROLLBAR_NEVER)
         self._page.Bind(wx.EVT_RIGHT_DOWN, self.OnTextCtrlMouseRightDown)
         self._item = wx.html.HtmlWindow(self, size=(-1, 28), style=wx.html.HW_SCROLLBAR_NEVER)
@@ -1326,11 +1339,20 @@ class ReadPanel(wx.Panel):
                         
     def _DoLayout(self):
         self._mainSizer = wx.BoxSizer(wx.VERTICAL)
-        
+
+        margin = 10 if 'wxMSW' in wx.PlatformInfo else 5
+        titleFlag = wx.EXPAND|wx.LEFT|wx.RIGHT
         if 'wxMSW' in wx.PlatformInfo:
-            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
+            titleFlag |= wx.TOP
+        if self._closeButton is not None:
+            # Left spacer matches the button width so the title stays centered.
+            titleRow = wx.BoxSizer(wx.HORIZONTAL)
+            titleRow.Add((24, -1))
+            titleRow.Add(self._title, 1, wx.EXPAND)
+            titleRow.Add(self._closeButton, 0, wx.ALIGN_CENTER_VERTICAL)
+            self._mainSizer.Add(titleRow, 0, titleFlag, margin)
         else:
-            self._mainSizer.Add(self._title, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
+            self._mainSizer.Add(self._title, 0, titleFlag, margin)
         
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self._page, 1, wx.EXPAND|wx.LEFT, 5)
@@ -1398,6 +1420,11 @@ class ReadPanel(wx.Panel):
         self.ToggleTitles()
         self.ToggleSlider()
 
+    def OnCloseButtonClick(self, event):
+        # Defer: this handler runs on a child of the panel about to be
+        # destroyed, so tearing down now would free the C++ button mid-event.
+        wx.CallAfter(self.Delegate.CloseComparePanel, self._code, self._index)
+
     def OnFind(self, event):
         event.GetDialog().Destroy()       
         self._body.SetFocus()
@@ -1459,10 +1486,14 @@ class ReadPanel(wx.Panel):
             self._title.Hide()
             self._page.Hide()
             self._item.Hide()
+            if self._closeButton is not None:
+                self._closeButton.Hide()
         else:
             self._title.Show()
             self._page.Show()
             self._item.Show()
+            if self._closeButton is not None:
+                self._closeButton.Show()
         self.Layout()
 
     def ToggleSlider(self):
