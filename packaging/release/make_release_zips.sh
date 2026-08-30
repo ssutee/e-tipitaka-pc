@@ -33,7 +33,17 @@ zip_mac() {  # $1 = arch label (arm64|x86_64)
     || echo "WARN: $app has no stapled notarization ticket"
   tmp="$(mktemp -d)"
   ditto "$app" "$tmp/E-Tipitaka.app"                       # bundle must be named E-Tipitaka.app
-  ditto -c -k --keepParent "$tmp/E-Tipitaka.app" "$OUT/E-Tipitaka-$VER-$arch.zip"
+  # --norsrc --noextattr keeps AppleDouble ._* sidecars OUT of the archive.
+  # Without them, the bundle's xattrs (provenance/macl/quarantine/FinderInfo)
+  # serialize into the zip as ._* files. ditto -x -k merges those back into
+  # xattrs on extract, but non-ditto extractors (unzip, The Unarchiver, some
+  # Finder paths) materialize them as real files. When that happens inside an
+  # embedded framework — e.g. Python.framework/._Python — the framework root
+  # gains "unsealed contents" and Gatekeeper rejects the app with
+  # "Apple could not verify ... is free of malware". The code signature is
+  # embedded in the Mach-O and the notarization ticket is a real file in the
+  # bundle, so neither depends on these xattrs — dropping them is safe.
+  ditto -c -k --norsrc --noextattr --keepParent "$tmp/E-Tipitaka.app" "$OUT/E-Tipitaka-$VER-$arch.zip"
   rm -rf "$tmp"
   echo "  mac $arch  -> E-Tipitaka-$VER-$arch.zip"
 }
