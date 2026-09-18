@@ -183,8 +183,8 @@ Add to `TestAccountClient`, after `testLoginClearsStaleLastUploadBeforeStoringNe
     @patch('account.client.requests.post')
     def testRateLimitedWithAnUnusableHeaderHasNoRetryAfter(self, post):
         # HTTP also allows an HTTP-date here, and a proxy could send a fraction
-        # or a negative number. None may escape as a ValueError: in the pairing
-        # loop that would end a pairing that is still live.
+        # or a negative number. Not one of these may escape as a ValueError: in
+        # the pairing loop that would end a pairing that is still live.
         for value in ('Wed, 21 Oct 2015 07:28:00 GMT', '1.5', '-3'):
             post.return_value = _resp(429, {'detail': 'slow down'},
                                       headers={'Retry-After': value})
@@ -230,7 +230,7 @@ In `account/client.py`, directly after the `AccountError` class (after line 12):
 ```python
 class RateLimited(AccountError):
     """A 429. `retry_after` is the server's Retry-After header in seconds, or
-    None if it sent none that parses.
+    None if it sent none that is a whole, non-negative number.
 
     Both of the server's rate limiters send that header, with different
     bodies: nginx's edge limit returns {"error", "retry_after", "detail"},

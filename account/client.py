@@ -14,7 +14,7 @@ class AccountError(Exception):
 
 class RateLimited(AccountError):
     """A 429. `retry_after` is the server's Retry-After header in seconds, or
-    None if it sent none that parses.
+    None if it sent none that is a whole, non-negative number.
 
     Both of the server's rate limiters send that header, with different
     bodies: nginx's edge limit returns {"error", "retry_after", "detail"},

@@ -228,8 +228,8 @@ class TestAccountClient(unittest.TestCase):
     @patch('account.client.requests.post')
     def testRateLimitedWithAnUnusableHeaderHasNoRetryAfter(self, post):
         # HTTP also allows an HTTP-date here, and a proxy could send a fraction
-        # or a negative number. None may escape as a ValueError: in the pairing
-        # loop that would end a pairing that is still live.
+        # or a negative number. Not one of these may escape as a ValueError: in
+        # the pairing loop that would end a pairing that is still live.
         for value in ('Wed, 21 Oct 2015 07:28:00 GMT', '1.5', '-3'):
             post.return_value = _resp(429, {'detail': 'slow down'},
                                       headers={'Retry-After': value})
