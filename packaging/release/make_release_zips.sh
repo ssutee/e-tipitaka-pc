@@ -45,6 +45,16 @@ zip_mac() {  # $1 = arch label (arm64|x86_64)
   # bundle, so neither depends on these xattrs — dropping them is safe.
   ditto -c -k --norsrc --noextattr --keepParent "$tmp/E-Tipitaka.app" "$OUT/E-Tipitaka-$VER-$arch.zip"
   rm -rf "$tmp"
+  # Regression guard for the bug the flags above fix: any AppleDouble ._* entry
+  # in the archive gets materialized as a real file by non-ditto extractors
+  # (unzip, The Unarchiver, some Finder paths). Inside an embedded framework
+  # root (e.g. Python.framework/._Python) that adds unsealed content and breaks
+  # the code-seal -> Gatekeeper "could not verify ... free of malware". Fail
+  # loudly rather than ship a zip that only opens when extracted with ditto.
+  if unzip -l "$OUT/E-Tipitaka-$VER-$arch.zip" 2>/dev/null | grep -qE '/\._'; then
+    echo "FATAL: E-Tipitaka-$VER-$arch.zip contains AppleDouble ._* entries" \
+         "(would break Gatekeeper when extracted with unzip)"; exit 1
+  fi
   echo "  mac $arch  -> E-Tipitaka-$VER-$arch.zip"
 }
 
