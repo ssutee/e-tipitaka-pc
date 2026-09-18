@@ -2082,8 +2082,11 @@ on your device and removed when you log out.
 A passkey lets you sign in without a password. It is created and kept by your
 device or password manager (for example iCloud Keychain, Google Password
 Manager or Windows Hello). Its private key never leaves that device or password
-manager and is never sent to us; our server stores only the matching public key,
-with the passkey's name and when it was last used.
+manager and is never sent to us. Our server stores the matching public key and
+the technical details your device reports with it — an identifier for the
+passkey, the kind of device or password manager that holds it, whether it is
+backed up, and a usage counter — together with the name you give it and when it
+was created and last used.
 
 The app itself never handles a passkey. When you choose to sign in with one, it
 opens `data.etipitaka.com` in your web browser, the browser performs the passkey
