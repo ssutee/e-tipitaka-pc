@@ -272,6 +272,8 @@ class TestPairingSession(unittest.TestCase):
         self._session(client).run()
         self.assertEqual(('done', 'alice'), self.rec.events[-1])
         self.assertEqual(6, len(client.poll_calls))
+        # The wait resets too: back to the interval, then doubling afresh.
+        self.assertEqual([5, 10, 20, 5, 10, 20], self.clock.sleeps)
 
     def testARateLimitIsNotAFailure(self):
         # Four 429s in a row, more than MAX_FAILURES, and the session lives.
