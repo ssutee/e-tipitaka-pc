@@ -4,64 +4,88 @@
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/constants.py": {
-    "mtime": 1776330496.0,
-    "hash": "56744ca843ee2a5bfef83556e2dacff1"
+    "mtime": 1789719691.0,
+    "hash": "d82e9d09a0e90137f0cdaac3a93d1320"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/i18n.py": {
-    "mtime": 1685754711.0,
-    "hash": "488f73485ae462d3435374193b39d503"
+    "mtime": 1779449817.0,
+    "hash": "8bd374d5e4451a1a829e8faefb8411fd"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/images.py": {
     "mtime": 1572320901.0,
     "hash": "b05db77e16f957ec02468291d98e88e9"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/run.py": {
-    "mtime": 1685754711.0,
-    "hash": "cbd24fdd900f60d0eb67c5d9e2a4c666"
+    "mtime": 1779848146.0,
+    "hash": "c4c956137fab22ca4ed3c8c6bc2cf630"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/settings.py": {
-    "mtime": 1707089739.0,
-    "hash": "26560c528b2b8a7d1898f228aa8724f7"
+    "mtime": 1788064617.0,
+    "hash": "0961f3f8415e16d89af928515ecc458d"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/setup.py": {
     "mtime": 1627524400.0,
     "hash": "1a9f8879a93e551d4b6a9e1fc2b95faa"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/test.py": {
-    "mtime": 1572320947.0,
-    "hash": "4198f74e50b7b377f6073a4f499b0298"
+    "mtime": 1789715743.0,
+    "hash": "96c00f7d75d89ab90cfcf2beb5b1504e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/utils.py": {
-    "mtime": 1707175483.0,
-    "hash": "dc8fb1888ee972bd4c41a55029f307c5"
+    "mtime": 1779464545.0,
+    "hash": "058765356013dad2b622eecd6e24ac3d"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/account/__init__.py": {
+    "mtime": 1779848134.0,
+    "hash": "bd699ee013583bbba593f1350d0ec94f"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/account/client.py": {
+    "mtime": 1789715384.0,
+    "hash": "98d4bcadc9cc903b6a85100c9974ea95"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/account/dialogs.py": {
+    "mtime": 1789720319.0,
+    "hash": "5e15b7da6c559352c2e958cf9bc74fb0"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/account/pairing.py": {
+    "mtime": 1789717646.0,
+    "hash": "e7d1d69ac5c4c57ecba2c4eaa7c394c6"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/dialogs/__init__.py": {
-    "mtime": 1685754711.0,
-    "hash": "51ff35bb94b17a5ed049ec72ff353e05"
+    "mtime": 1779848135.0,
+    "hash": "5ebb6f8a26d5de37e0dd408168a708e3"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/formatters/__init__.py": {
-    "mtime": 1685754711.0,
-    "hash": "7c878e23ea979624302d0c84ea13eeb5"
+    "mtime": 1779449817.0,
+    "hash": "53635dae7a9ec19d4ddcdc8ae3fba635"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/make_assets.py": {
+    "mtime": 1780468640.0,
+    "hash": "27a236e3f0af8a0851711d36e4d41b42"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/pack.ps1": {
+    "mtime": 1780468640.0,
+    "hash": "873e8b56744debfbcde4227aeb30ad7b"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/__init__.py": {
     "mtime": 1699609300.0,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/interactor.py": {
-    "mtime": 1685754711.0,
-    "hash": "e1492856d0e0d5393f786cc1a5265c54"
+    "mtime": 1779449817.0,
+    "hash": "2b477cc9c882104991437c512035582b"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/model.py": {
-    "mtime": 1706919376.0,
-    "hash": "1a3c9243fa3de5324fe190840cb6d8cd"
+    "mtime": 1780540096.0,
+    "hash": "0d37dac9e37e5529d7b1f56f0d89c32f"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/presenter.py": {
-    "mtime": 1707129881.0,
-    "hash": "1d76bb07e853edba7b8a135afc0d9326"
+    "mtime": 1788063410.0,
+    "hash": "52ebaf7e0c0b9999be55dc2aa3d95cb8"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/read/view.py": {
-    "mtime": 1699611237.0,
-    "hash": "c5111f616f93e315c8fc278836233b40"
+    "mtime": 1788063397.0,
+    "hash": "574dac5b5f24fff8adb3e14a7764a6e8"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/spell_pali/_SPELL_1.toc": {
     "mtime": 1294409066.0,
@@ -71,93 +95,145 @@
     "mtime": 1294409066.0,
     "hash": "513ef692519616bfeb2499988be3abce"
   },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/scripts/make_db_patch.py": {
+    "mtime": 1779848146.0,
+    "hash": "85736dea3e587d69ddbf32a6fe93ae02"
+  },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/__init__.py": {
     "mtime": 1699609303.0,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/interactor.py": {
-    "mtime": 1572320947.0,
-    "hash": "6cdc2d3b2985bbb614e6b2dbf061e9d8"
+    "mtime": 1779848146.0,
+    "hash": "a6f468db31987a714e138849d56e364d"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/model.py": {
-    "mtime": 1685754711.0,
-    "hash": "6b218ce3208478d144540f6d533a28a7"
+    "mtime": 1779848146.0,
+    "hash": "63774eb4aab6c95cc1b05f14813ba4bd"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/presenter.py": {
-    "mtime": 1685754711.0,
-    "hash": "44a63ad175b91e8db97737091c4d9c06"
+    "mtime": 1780533730.0,
+    "hash": "46b1dde3f07b4381c631ce9d5b0738be"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/search/view.py": {
-    "mtime": 1699610649.0,
-    "hash": "fa65cbefc8f4f5a95bc47143469beee3"
+    "mtime": 1779848146.0,
+    "hash": "4cc424c380bbe6a52b54bed1cbd0251a"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/__init__.py": {
     "mtime": 1699609303.0,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_account_client.py": {
+    "mtime": 1789715313.0,
+    "hash": "b058902eb4cb661a177563de54a8033e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_account_export.py": {
+    "mtime": 1779848146.0,
+    "hash": "9067ac07926f0edeadcfd3a291204d35"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_account_pairing.py": {
+    "mtime": 1789717585.0,
+    "hash": "0d22c0c36885584c8ca6881a19575b1f"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_build_config.py": {
+    "mtime": 1779848146.0,
+    "hash": "e75d4bb69bb8c6d58924bdc74dc01921"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_compare_close.py": {
+    "mtime": 1788063471.0,
+    "hash": "77c814e93b556e9c0390505a30b3592b"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_compare_mapping.py": {
+    "mtime": 1780540096.0,
+    "hash": "1810e54b23390d13e859d96f1276d557"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_import_extras.py": {
+    "mtime": 1779848146.0,
+    "hash": "80e0e5e66e0bfd113d66ca49348c3612"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_patcher.py": {
+    "mtime": 1779848146.0,
+    "hash": "cfc9d2742161e899577d0ecc6b4d3c7b"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_theme.py": {
+    "mtime": 1779461129.0,
+    "hash": "605458f5256ae4da2e849d9515a7e2ae"
+  },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/tests/test_threads.py": {
-    "mtime": 1572320947.0,
-    "hash": "b797681fe84cc8db2198236175c096a0"
+    "mtime": 1779449818.0,
+    "hash": "ae8c79fb184bfa81c87dca5a2e7f4fe8"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/threads/__init__.py": {
-    "mtime": 1685754711.0,
-    "hash": "672a001a93bc1df1339b63900a31a260"
+    "mtime": 1780533730.0,
+    "hash": "490d18f638ce778d2a88c26f2466e469"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/updates/__init__.py": {
+    "mtime": 1779848146.0,
+    "hash": "104d72ccbf74858b3c7e57933252c0cf"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/updates/dialog.py": {
+    "mtime": 1779848146.0,
+    "hash": "8bfb11e306dd547084a03c0315046504"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/updates/patcher.py": {
+    "mtime": 1779848146.0,
+    "hash": "6860675a788f8dbd6e87541a1ca6cfa2"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/__init__.py": {
     "mtime": 1572320947.0,
     "hash": "fcae9717bae847a3ef3fc7e0ef9078a4"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/analysis.py": {
-    "mtime": 1685754711.0,
-    "hash": "a5d08100cba8e9eb954ee56b0dd6f8aa"
+    "mtime": 1779449818.0,
+    "hash": "e427ee33cfe2590386caa7887f083926"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/classify.py": {
-    "mtime": 1572320947.0,
-    "hash": "456de6bea73a7acc3ab50692dbd83fe1"
+    "mtime": 1779449818.0,
+    "hash": "ba577cc0598942bbcbc12045b2252165"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/fields.py": {
-    "mtime": 1685754711.0,
-    "hash": "3e726590b2968c4ec9e21642fb7a1c16"
+    "mtime": 1779449818.0,
+    "hash": "0c3c5438ae731b98591a36d038b0558b"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/formats.py": {
-    "mtime": 1685754711.0,
-    "hash": "6a066d4bcb655447f69c7ad75bb8cc9e"
+    "mtime": 1779449818.0,
+    "hash": "2d852d6ac2e1f3a24ffab7b31099ec60"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/highlight.py": {
-    "mtime": 1685754711.0,
-    "hash": "e49d9dc334c665be45295135492f0a0c"
+    "mtime": 1779449818.0,
+    "hash": "7ea11e45fa5cf745ccf349754fe06413"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/index.py": {
-    "mtime": 1685754711.0,
-    "hash": "d572d995617531f3599d08a5fb7bba65"
+    "mtime": 1779449818.0,
+    "hash": "2fcac8409a191e76e528527ef55e2d62"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/matching.py": {
-    "mtime": 1685754711.0,
-    "hash": "1eb0b6dd463babf4887390ce0b5a6143"
+    "mtime": 1779449818.0,
+    "hash": "febc140d4fea435b5e7fbb75758542aa"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/query.py": {
-    "mtime": 1685754711.0,
-    "hash": "b533d77cf038d653b304bde37a5b608c"
+    "mtime": 1779449818.0,
+    "hash": "74d6bcba5c86827b70d01d162973a9d6"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/reading.py": {
-    "mtime": 1572320947.0,
-    "hash": "5c673f284091de56243845751215b361"
+    "mtime": 1779449818.0,
+    "hash": "3a9d1e30be35ced5b13b24114c967da9"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/scoring.py": {
-    "mtime": 1572320947.0,
-    "hash": "7f3a53d020bb5ceea6c065ffde88010b"
+    "mtime": 1779449818.0,
+    "hash": "f4e5f693505c10d13959050b91dfb3a8"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/searching.py": {
-    "mtime": 1572320947.0,
-    "hash": "a887c2fd97ae8e28da26e9cc0ecfa8f4"
+    "mtime": 1779449818.0,
+    "hash": "63fd376826e98401567a4fc231651424"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/spans.py": {
-    "mtime": 1572320947.0,
-    "hash": "7bd4d072326ea7c342c9382150274014"
+    "mtime": 1779449818.0,
+    "hash": "4abe4259936da4d7e33a0c6dc98e1774"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/spelling.py": {
-    "mtime": 1572320947.0,
-    "hash": "fbb313b88256f539b14d64db7c633483"
+    "mtime": 1779449818.0,
+    "hash": "20ebe01dfed08da5f30fd2454083a56f"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/store.py": {
     "mtime": 1572320947.0,
@@ -168,52 +244,52 @@
     "hash": "51f9362f7968618e282258a43c142c49"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/util.py": {
-    "mtime": 1685754711.0,
-    "hash": "775980a1ad072de5d07114b91c2876a0"
+    "mtime": 1779449818.0,
+    "hash": "1b4b0c43a8501e9f4dc65a78943bad1e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/writing.py": {
-    "mtime": 1572320947.0,
-    "hash": "07b7c5f048971e00de51c3af005ade74"
+    "mtime": 1779449818.0,
+    "hash": "7403972614f8b88d3df0a3de62870d93"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/__init__.py": {
     "mtime": 1699609303.0,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/fileindex.py": {
-    "mtime": 1572320947.0,
-    "hash": "36acff665f296a2e0a8cd8bde274d89f"
+    "mtime": 1779449818.0,
+    "hash": "fa7d6009637eb9e591edeae1a25b4cce"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filepostings.py": {
-    "mtime": 1572320947.0,
-    "hash": "b857e4b505387706d3cd56d19c4ff29f"
+    "mtime": 1779449818.0,
+    "hash": "5ce12b1604dcd1991d661113a21ac2d6"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filereading.py": {
-    "mtime": 1572320947.0,
-    "hash": "8516cb506470fd5e26c9edda12e4d534"
+    "mtime": 1779449818.0,
+    "hash": "be06e4760b43a4e79e83581f0dc5352c"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filestore.py": {
-    "mtime": 1685754711.0,
-    "hash": "eb1ec4cc65a06a8a18be37bc0773cf4e"
+    "mtime": 1779449818.0,
+    "hash": "d2786a1ed6c767f4328917cb1ec55de6"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filetables.py": {
-    "mtime": 1572320947.0,
-    "hash": "7cbba5a7b68d3789399326115c88961f"
+    "mtime": 1779449818.0,
+    "hash": "eccd6a6db93a697e73af0004779f3464"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/filewriting.py": {
-    "mtime": 1572320947.0,
-    "hash": "854a68141c5c1e35e8865808588c1d16"
+    "mtime": 1779449818.0,
+    "hash": "f787c35a4bdb56fd13d7c53ccffdcdff"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/multiproc.py": {
-    "mtime": 1572320947.0,
-    "hash": "e5f59cb57e193b8b2fc5200486d3f86c"
+    "mtime": 1779449818.0,
+    "hash": "acabe01f67c1dafe277cde387a603798"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/pools.py": {
-    "mtime": 1572320947.0,
-    "hash": "bfbd4013bcf433c67f8bf14b76c51a58"
+    "mtime": 1779449818.0,
+    "hash": "968743311d50afcbf3ceaf79ae02aa46"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/filedb/structfile.py": {
-    "mtime": 1685754711.0,
-    "hash": "ea8d8524f608e85bd243323dd4461b5a"
+    "mtime": 1779449818.0,
+    "hash": "7c718b17b6bf67c8030703f0ba6be6f7"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/__init__.py": {
     "mtime": 1699609303.0,
@@ -224,104 +300,180 @@
     "hash": "04b9be2739578c2429e35b4e571a16c3"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/morph_en.py": {
-    "mtime": 1685754711.0,
-    "hash": "8ca333d8c39be6fdbdc14cdb5c659ae9"
+    "mtime": 1779449818.0,
+    "hash": "9f164eb6a70af91d0d1cc6a763b0aac0"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/paicehusk.py": {
-    "mtime": 1572320947.0,
-    "hash": "167dd290ca70dbec4bf9cf616fbf01ee"
+    "mtime": 1779449818.0,
+    "hash": "32799202106c344f8b276cfe10f5d3f9"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/porter.py": {
-    "mtime": 1685754711.0,
-    "hash": "1693e5daf260a8cdeba5dbec4e29cd4a"
+    "mtime": 1779449818.0,
+    "hash": "05d1b4900d0f868a01a697744d3777d8"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/porter2.py": {
-    "mtime": 1572320947.0,
-    "hash": "dd26c9dc983f19caca81a451c7891b1b"
+    "mtime": 1779449818.0,
+    "hash": "46c1243e1010c19a9bdfbf0513badf6b"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/lang/wordnet.py": {
-    "mtime": 1572320947.0,
-    "hash": "d22cee30a37e3834d5f3ce3f37254140"
+    "mtime": 1779449818.0,
+    "hash": "cbf97f88c75c80bb53d508988f46227d"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/qparser/__init__.py": {
     "mtime": 1572320947.0,
     "hash": "9769266c3679078fc386fdad43678a7c"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/qparser/dateparse.py": {
-    "mtime": 1572320947.0,
-    "hash": "4a2228292d12c4b60975644ec7f67f25"
+    "mtime": 1779449818.0,
+    "hash": "fbc214e99774e0fbd215b84a84323fc6"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/qparser/default.py": {
-    "mtime": 1572320947.0,
-    "hash": "0c1e7c9396fa706dcbf41c27507649dd"
+    "mtime": 1779449818.0,
+    "hash": "f78b9c520a91cd13bd730e1bf6aeed53"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/ramdb/__init__.py": {
     "mtime": 1699609303.0,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/ramdb/ramindex.py": {
-    "mtime": 1572320947.0,
-    "hash": "b441df9b1e5eb89db2241758139384fa"
+    "mtime": 1779449818.0,
+    "hash": "713f52c288bbbc98cd387812d462ddff"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/ramdb/ramreading.py": {
-    "mtime": 1572320947.0,
-    "hash": "efa1159e72249af02be0252f393e2657"
+    "mtime": 1779449818.0,
+    "hash": "5f56e9b246050b2c967b98554ad7639c"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/__init__.py": {
     "mtime": 1699609303.0,
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/bitvector.py": {
-    "mtime": 1572320947.0,
-    "hash": "ed6219f7e748a2955848c426de822307"
+    "mtime": 1779449818.0,
+    "hash": "c722d0486e9f23e44a0d0fc7830606a6"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/charset.py": {
-    "mtime": 1572320947.0,
-    "hash": "8b5e2ac937f0069a9874be2f1af89342"
+    "mtime": 1779449818.0,
+    "hash": "2d67bf12d00be70adc2ed451be20719b"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/filelock.py": {
-    "mtime": 1685754711.0,
-    "hash": "4c0e44ad2f742ac62c751810bf58baf6"
+    "mtime": 1779449818.0,
+    "hash": "3ed83d95ab0625ee83432de008590539"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/levenshtein.py": {
-    "mtime": 1572320947.0,
-    "hash": "8ff104a1a530d684477d8148b2beba1a"
+    "mtime": 1779449818.0,
+    "hash": "a2a73e11c717346a22ba2786d70a1951"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/numeric.py": {
-    "mtime": 1685754711.0,
-    "hash": "0148304f3cf7ef5ec978f51f7239f9df"
+    "mtime": 1779449818.0,
+    "hash": "09fe92abdf610a0ef64ddcc462f7ef88"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/relativedelta.py": {
-    "mtime": 1685754711.0,
-    "hash": "a4fa4e1ad6108019242a6215a00a8228"
+    "mtime": 1779449818.0,
+    "hash": "c379b2f0eff0f557ffa4ccc14529b046"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/times.py": {
-    "mtime": 1572320947.0,
-    "hash": "192bd500932eea04d06cdae2c157c102"
+    "mtime": 1779449818.0,
+    "hash": "97da9575b5369be485ddb96ae4f46bd9"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/whoosh/support/unicode.py": {
-    "mtime": 1572320947.0,
-    "hash": "b2724e4656ead278c7d2e1151efc821d"
+    "mtime": 1779449818.0,
+    "hash": "979a00538decff88df27afcf4fec828d"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/widgets/__init__.py": {
-    "mtime": 1700093361.0,
-    "hash": "435ec79f0ecf997c33120639d215aba4"
+    "mtime": 1788063386.0,
+    "hash": "bb47a548e6735d52619d76bdacd8130f"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/CLAUDE.md": {
+    "mtime": 1779848134.0,
+    "hash": "56aede3a61333c5ab96beb22db53d82a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/PRIVACY.md": {
+    "mtime": 1789720577.0,
+    "hash": "b55b35a92e1e1959aba87fdc0115a886"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/README.md": {
     "mtime": 1627524397.0,
     "hash": "8c62a8a5831d7d350ee8b067355c7dd1"
   },
-  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/requirements.txt": {
-    "mtime": 1685754711.0,
-    "hash": "06d3eff51e6e059687a65270599b0197"
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/wxpython-4.2-audit.md": {
+    "mtime": 1779449817.0,
+    "hash": "021fd40cab07bd170b0190575fe1569e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/plans/2026-05-22-python3-migration.md": {
+    "mtime": 1779410696.0,
+    "hash": "53c1c2e2ef5fe5e62741614ec38a33aa"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/plans/2026-05-22-theme-all-components.md": {
+    "mtime": 1779459102.0,
+    "hash": "7edccf1b257e3c96abbbed669d619dcf"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/plans/2026-05-23-account-sync.md": {
+    "mtime": 1779493896.0,
+    "hash": "a0cbaf3260f31893820dff5501f45c02"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/plans/2026-09-18-desktop-passkey-client.md": {
+    "mtime": 1789720502.0,
+    "hash": "e1e8be0278374e4cf6dee768acf225ba"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/specs/2026-05-22-python3-migration-design.md": {
+    "mtime": 1779410431.0,
+    "hash": "578a40faca650ff6596925929cf9cbfb"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/specs/2026-05-22-theme-all-components-design.md": {
+    "mtime": 1779458953.0,
+    "hash": "f71d9e5a461e7dc26aaa89622fb60d23"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/specs/2026-05-23-account-sync-design.md": {
+    "mtime": 1779493228.0,
+    "hash": "cf7538c73f6ad861e6e20d9cb7f70124"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/docs/superpowers/specs/2026-09-18-desktop-passkey-design.md": {
+    "mtime": 1789720420.0,
+    "hash": "d6b8f481e7865864799a78b49eb7d266"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/macos/README.md": {
+    "mtime": 1780500421.0,
+    "hash": "dcac88aabfef0be7ddaffe8c4cac129a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/README.md": {
+    "mtime": 1780468640.0,
+    "hash": "efa3281095390d493001e39211746182"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/roman_names.txt": {
     "mtime": 1538642007.0,
     "hash": "1b325c18a8776f5e5ccf95ee603a887b"
   },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/Assets/Square150x150Logo.png": {
+    "mtime": 1780468640.0,
+    "hash": "4a20a18eab3e8be51802630b54c16f66"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/Assets/Square310x310Logo.png": {
+    "mtime": 1780468640.0,
+    "hash": "41c08ea0c677d100fb7d7dededbc6f28"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/Assets/Square44x44Logo.png": {
+    "mtime": 1780468640.0,
+    "hash": "7d7445e82334fef933aa49c947eccc2a"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/Assets/Square71x71Logo.png": {
+    "mtime": 1780468640.0,
+    "hash": "3c7e3a9ad63b055c349d0ad8d7a807f5"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/Assets/StoreLogo.png": {
+    "mtime": 1780468640.0,
+    "hash": "83c5a39c3cb1bd1aa8592e0fc26632a6"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/packaging/msix/Assets/Wide310x150Logo.png": {
+    "mtime": 1780468640.0,
+    "hash": "a19df12e3e48cdb6cf983cd1e09c647e"
+  },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/about.png": {
     "mtime": 1404867533.0,
     "hash": "151254cd93265e1f4fbaa5d37a59c79e"
+  },
+  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/account.png": {
+    "mtime": 1779848135.0,
+    "hash": "68425f0a9c27c1684329d8b30d652ad8"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/books.png": {
     "mtime": 1294409004.0,
@@ -330,10 +482,6 @@
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/clear.png": {
     "mtime": 1381578306.0,
     "hash": "b3ef1b43c1e8494e7a9728aca7dd03ca"
-  },
-  "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/close.png": {
-    "mtime": 1294409005.0,
-    "hash": "a6ffb3774e1dd45d8524396c20e9f953"
   },
   "/Volumes/SeagateBackup/Works/watnapahpong/E-Tipitaka-PC/resources/dict.png": {
     "mtime": 1294409005.0,

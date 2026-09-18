@@ -1,188 +1,195 @@
-# Graph Report - .  (2026-05-07)
+# Graph Report - E-Tipitaka-PC  (2026-09-18)
 
 ## Corpus Check
-- 118 files · ~121,188 words
+- 96 files · ~165,783 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4247 nodes · 7327 edges · 149 communities detected
-- Extraction: 81% EXTRACTED · 19% INFERRED · 0% AMBIGUOUS · INFERRED: 1400 edges (avg confidence: 0.58)
-- Token cost: 924,402 input · 102,711 output
+- 4699 nodes · 8288 edges · 156 communities detected
+- Extraction: 81% EXTRACTED · 19% INFERRED · 0% AMBIGUOUS · INFERRED: 1589 edges (avg confidence: 0.6)
+- Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Whoosh BitVector & Query Base|Whoosh BitVector & Query Base]]
-- [[_COMMUNITY_Search History & Aui Frames|Search History & Aui Frames]]
-- [[_COMMUNITY_E-Tipitaka Domain Model|E-Tipitaka Domain Model]]
-- [[_COMMUNITY_QParser Groups & Syntax|QParser Groups & Syntax]]
-- [[_COMMUNITY_Whoosh FileIndex|Whoosh FileIndex]]
-- [[_COMMUNITY_HTML Formatter & PaiceHusk Stemmer|HTML Formatter & PaiceHusk Stemmer]]
-- [[_COMMUNITY_Volumes Selection Dialog|Volumes Selection Dialog]]
-- [[_COMMUNITY_WordNet Synonym Index|WordNet Synonym Index]]
-- [[_COMMUNITY_Whoosh Matchers|Whoosh Matchers]]
-- [[_COMMUNITY_QParser Plugins|QParser Plugins]]
-- [[_COMMUNITY_Whoosh File Tables & Writing|Whoosh File Tables & Writing]]
-- [[_COMMUNITY_Whoosh Analysis Filters|Whoosh Analysis Filters]]
-- [[_COMMUNITY_Whoosh Reader Interface|Whoosh Reader Interface]]
-- [[_COMMUNITY_Search & Display Threads|Search & Display Threads]]
-- [[_COMMUNITY_Whoosh Segment Reader|Whoosh Segment Reader]]
-- [[_COMMUNITY_StructFile Binary IO|StructFile Binary IO]]
-- [[_COMMUNITY_App Bootstrap (MyAppParentFrame)|App Bootstrap (MyApp/ParentFrame)]]
-- [[_COMMUNITY_Read Presenter & Bookmarks|Read Presenter & Bookmarks]]
-- [[_COMMUNITY_Bookmark & About Dialogs|Bookmark & About Dialogs]]
-- [[_COMMUNITY_Whoosh Scoring (BM25FTF-IDF)|Whoosh Scoring (BM25F/TF-IDF)]]
-- [[_COMMUNITY_FileIndex Segment Internals|FileIndex Segment Internals]]
-- [[_COMMUNITY_Posting Reader Blocks|Posting Reader Blocks]]
-- [[_COMMUNITY_Searcher & Facets|Searcher & Facets]]
-- [[_COMMUNITY_MVP-Interactor Pattern Concepts|MVP-Interactor Pattern Concepts]]
-- [[_COMMUNITY_FileIndex TOC & Segment|FileIndex TOC & Segment]]
-- [[_COMMUNITY_Per-Corpus Search Models|Per-Corpus Search Models]]
-- [[_COMMUNITY_Search View Buttons|Search View Buttons]]
-- [[_COMMUNITY_Lovins Stemmer Helpers|Lovins Stemmer Helpers]]
-- [[_COMMUNITY_Sortable Numeric Encoders|Sortable Numeric Encoders]]
-- [[_COMMUNITY_Porter2 Stemmer|Porter2 Stemmer]]
-- [[_COMMUNITY_Search Thread Tests|Search Thread Tests]]
-- [[_COMMUNITY_Date Parser & Plugins|Date Parser & Plugins]]
-- [[_COMMUNITY_Whoosh Core Schema|Whoosh Core Schema]]
-- [[_COMMUNITY_Romanized Pali & Dict Windows|Romanized Pali & Dict Windows]]
-- [[_COMMUNITY_Highlight & Ngram Pipeline|Highlight & Ngram Pipeline]]
-- [[_COMMUNITY_Token & Group Hierarchy|Token & Group Hierarchy]]
-- [[_COMMUNITY_Stemmer Variants|Stemmer Variants]]
-- [[_COMMUNITY_Porter Stemmer|Porter Stemmer]]
-- [[_COMMUNITY_Sphinx Charset Tables|Sphinx Charset Tables]]
-- [[_COMMUNITY_Spell Index TOCs (PaliThai)|Spell Index TOCs (Pali/Thai)]]
-- [[_COMMUNITY_Search & Compare Window|Search & Compare Window]]
-- [[_COMMUNITY_Read Panels|Read Panels]]
-- [[_COMMUNITY_Edit Notes Icon|Edit Notes Icon]]
-- [[_COMMUNITY_Export Icon|Export Icon]]
-- [[_COMMUNITY_Font Size Up Icon|Font Size Up Icon]]
-- [[_COMMUNITY_Pali-English Language Toggle|Pali-English Language Toggle]]
-- [[_COMMUNITY_Print Icon|Print Icon]]
-- [[_COMMUNITY_Read Icon (อ่าน)|Read Icon (อ่าน)]]
-- [[_COMMUNITY_Zoom Document Icon|Zoom Document Icon]]
-- [[_COMMUNITY_Whoosh Version|Whoosh Version]]
-- [[_COMMUNITY_User Data Path & Excepthook|User Data Path & Excepthook]]
-- [[_COMMUNITY_Thai Script Search|Thai Script Search]]
-- [[_COMMUNITY_Analyzer & Format|Analyzer & Format]]
-- [[_COMMUNITY_OrUnion Matchers|Or/Union Matchers]]
-- [[_COMMUNITY_Span Query & Matcher Base|Span Query & Matcher Base]]
-- [[_COMMUNITY_Scorer Variants|Scorer Variants]]
-- [[_COMMUNITY_In-Memory RAM Index|In-Memory RAM Index]]
-- [[_COMMUNITY_Fonts Picker Icon|Fonts Picker Icon]]
-- [[_COMMUNITY_Header Banner Image|Header Banner Image]]
-- [[_COMMUNITY_Enter Key Icon|Enter Key Icon]]
-- [[_COMMUNITY_Layout Asset|Layout Asset]]
-- [[_COMMUNITY_Not-OK Error Icon|Not-OK Error Icon]]
-- [[_COMMUNITY_Save (Floppy Disk) Icon|Save (Floppy Disk) Icon]]
-- [[_COMMUNITY_Settings (Gear) Icon|Settings (Gear) Icon]]
-- [[_COMMUNITY_Tho Than Thai Letter Icon|Tho Than Thai Letter Icon]]
-- [[_COMMUNITY_Yellow Highlight Swatch|Yellow Highlight Swatch]]
-- [[_COMMUNITY_Yo Ying Thai Letter Icon|Yo Ying Thai Letter Icon]]
-- [[_COMMUNITY_Py2App Setup|Py2App Setup]]
-- [[_COMMUNITY_ParentFrame Read Methods|ParentFrame Read Methods]]
-- [[_COMMUNITY_Search & Compare History Entities|Search & Compare History Entities]]
-- [[_COMMUNITY_Script Search Model & Thread|Script Search Model & Thread]]
-- [[_COMMUNITY_ExpanderClassifier|Expander/Classifier]]
-- [[_COMMUNITY_AndIntersection Matcher|And/Intersection Matcher]]
-- [[_COMMUNITY_BitVector Popcount Table|BitVector Popcount Table]]
-- [[_COMMUNITY_Charset & Unicode Maps|Charset & Unicode Maps]]
-- [[_COMMUNITY_Filelock Helpers|Filelock Helpers]]
-- [[_COMMUNITY_FloatInt Sortable Encoders|Float/Int Sortable Encoders]]
-- [[_COMMUNITY_Results & Search Tool Windows|Results & Search Tool Windows]]
-- [[_COMMUNITY_README & Requirements|README & Requirements]]
-- [[_COMMUNITY_About Icon|About Icon]]
-- [[_COMMUNITY_Books  Library Icon|Books / Library Icon]]
-- [[_COMMUNITY_Clear (Broom) Icon|Clear (Broom) Icon]]
-- [[_COMMUNITY_Close (Red X) Icon|Close (Red X) Icon]]
-- [[_COMMUNITY_Dictionary Icon|Dictionary Icon]]
-- [[_COMMUNITY_File Delete Icon|File Delete Icon]]
-- [[_COMMUNITY_Font Size Down Icon|Font Size Down Icon]]
-- [[_COMMUNITY_Import Icon|Import Icon]]
-- [[_COMMUNITY_Left Arrow Navigation Icon|Left Arrow Navigation Icon]]
-- [[_COMMUNITY_Mark2 Highlight Swatch (Blue)|Mark2 Highlight Swatch (Blue)]]
-- [[_COMMUNITY_Mark3 Highlight Swatch (Cyan)|Mark3 Highlight Swatch (Cyan)]]
-- [[_COMMUNITY_Mark4 Highlight Swatch (Mint)|Mark4 Highlight Swatch (Mint)]]
-- [[_COMMUNITY_Mark5 Highlight Swatch (Pink)|Mark5 Highlight Swatch (Pink)]]
-- [[_COMMUNITY_OK (Green Check) Icon|OK (Green Check) Icon]]
-- [[_COMMUNITY_Pali Dictionary Icon|Pali Dictionary Icon]]
-- [[_COMMUNITY_Right Arrow Navigation Icon|Right Arrow Navigation Icon]]
-- [[_COMMUNITY_Search (Magnifier) Icon|Search (Magnifier) Icon]]
-- [[_COMMUNITY_Thai Dictionary Icon|Thai Dictionary Icon]]
-- [[_COMMUNITY_White Background Asset|White Background Asset]]
-- [[_COMMUNITY_Sets the facets in the object based on t (searching.py)|Sets the facets in the object based on t (searching.py)]]
-- [[_COMMUNITY_Merges overlapping and touches spans in  (spans.py)|Merges overlapping and touches spans in  (spans.py)]]
-- [[_COMMUNITY_Returns a tree of SpanNear queries to ma (spans.py)|Returns a tree of SpanNear queries to ma (spans.py)]]
-- [[_COMMUNITY_Creates a Thesaurus object from the give (wordnet.py)|Creates a Thesaurus object from the give (wordnet.py)]]
-- [[_COMMUNITY_Creates a Thesaurus object from the give (wordnet.py)|Creates a Thesaurus object from the give (wordnet.py)]]
-- [[_COMMUNITY_Creates a Thesaurus object from the give (wordnet.py)|Creates a Thesaurus object from the give (wordnet.py)]]
-- [[_COMMUNITY_PALI_SIAM_CODE (constants.py)|PALI_SIAM_CODE (constants.py)]]
-- [[_COMMUNITY_COMPARE_ORDER (constants.py)|COMPARE_ORDER (constants.py)]]
-- [[_COMMUNITY_i18n.language (gettext translation) (i18n.py)|i18n.language (gettext translation) (i18n.py)]]
-- [[_COMMUNITY_MyApp (wx.App) (run.py)|MyApp (wx.App) (run.py)]]
-- [[_COMMUNITY_LoadTheme (utils.py)|LoadTheme (utils.py)]]
-- [[_COMMUNITY_SaveUserDataDir (utils.py)|SaveUserDataDir (utils.py)]]
-- [[_COMMUNITY_SettingUserDataDirDialog (__init__.py)|SettingUserDataDirDialog (__init__.py)]]
-- [[_COMMUNITY_PageRangeDialog (__init__.py)|PageRangeDialog (__init__.py)]]
-- [[_COMMUNITY_VolumesDialog (__init__.py)|VolumesDialog (__init__.py)]]
-- [[_COMMUNITY_NoteDialog (__init__.py)|NoteDialog (__init__.py)]]
-- [[_COMMUNITY_UpdateDialog (__init__.py)|UpdateDialog (__init__.py)]]
-- [[_COMMUNITY_MyHtmlFormatter (__init__.py)|MyHtmlFormatter (__init__.py)]]
-- [[_COMMUNITY_TestSearchThread (test_threads.py)|TestSearchThread (test_threads.py)]]
-- [[_COMMUNITY_SearchThread (base) (__init__.py)|SearchThread (base) (__init__.py)]]
-- [[_COMMUNITY_ScriptSearchThread (__init__.py)|ScriptSearchThread (__init__.py)]]
-- [[_COMMUNITY_Token (analysis.py)|Token (analysis.py)]]
-- [[_COMMUNITY_Composable (analysis.py)|Composable (analysis.py)]]
-- [[_COMMUNITY_Tokenizer (analysis.py)|Tokenizer (analysis.py)]]
-- [[_COMMUNITY_RegexTokenizer (analysis.py)|RegexTokenizer (analysis.py)]]
-- [[_COMMUNITY_Filter (analysis.py)|Filter (analysis.py)]]
-- [[_COMMUNITY_StopFilter (analysis.py)|StopFilter (analysis.py)]]
-- [[_COMMUNITY_StemFilter (analysis.py)|StemFilter (analysis.py)]]
-- [[_COMMUNITY_NgramFilter (analysis.py)|NgramFilter (analysis.py)]]
-- [[_COMMUNITY_CompositeAnalyzer (analysis.py)|CompositeAnalyzer (analysis.py)]]
-- [[_COMMUNITY_ID field (fields.py)|ID field (fields.py)]]
-- [[_COMMUNITY_Existence (formats.py)|Existence (formats.py)]]
-- [[_COMMUNITY_Frequency (format) (formats.py)|Frequency (format) (formats.py)]]
-- [[_COMMUNITY_Positions (formats.py)|Positions (formats.py)]]
-- [[_COMMUNITY_Fragment (highlight.py)|Fragment (highlight.py)]]
-- [[_COMMUNITY_HtmlFormatter (highlight.py)|HtmlFormatter (highlight.py)]]
-- [[_COMMUNITY_CompoundQuery (query.py)|CompoundQuery (query.py)]]
-- [[_COMMUNITY_Term (query.py)|Term (query.py)]]
-- [[_COMMUNITY_Not (query.py)|Not (query.py)]]
-- [[_COMMUNITY_Phrase (query.py)|Phrase (query.py)]]
-- [[_COMMUNITY_Sorter (scoring.py)|Sorter (scoring.py)]]
-- [[_COMMUNITY_LRUCache (util.py)|LRUCache (util.py)]]
-- [[_COMMUNITY_make_binary_tree (util.py)|make_binary_tree (util.py)]]
-- [[_COMMUNITY_ClosableMixin (context manager) (util.py)|ClosableMixin (context manager) (util.py)]]
-- [[_COMMUNITY_NO_MERGE policy (filewriting.py)|NO_MERGE policy (filewriting.py)]]
-- [[_COMMUNITY_weekday (MO..SU) (relativedelta.py)|weekday (MO..SU) (relativedelta.py)]]
-- [[_COMMUNITY_datetime_to_long (times.py)|datetime_to_long (times.py)]]
-- [[_COMMUNITY_MySearchCtrl (__init__.py)|MySearchCtrl (__init__.py)]]
-- [[_COMMUNITY_NotePanel (__init__.py)|NotePanel (__init__.py)]]
-- [[_COMMUNITY_Nikhahit (Niggahita) Diacritic Icon (nikhahit.gif)|Nikhahit (Niggahita) Diacritic Icon (nikhahit.gif)]]
-- [[_COMMUNITY_Star Icon (BookmarkFavorite) (star.png)|Star Icon (Bookmark/Favorite) (star.png)]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 18|Community 18]]
+- [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
+- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
+- [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 43|Community 43]]
+- [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
+- [[_COMMUNITY_Community 51|Community 51]]
+- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 53|Community 53]]
+- [[_COMMUNITY_Community 54|Community 54]]
+- [[_COMMUNITY_Community 55|Community 55]]
+- [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 57|Community 57]]
+- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
+- [[_COMMUNITY_Community 61|Community 61]]
+- [[_COMMUNITY_Community 62|Community 62]]
+- [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 96|Community 96]]
+- [[_COMMUNITY_Community 97|Community 97]]
+- [[_COMMUNITY_Community 98|Community 98]]
+- [[_COMMUNITY_Community 99|Community 99]]
+- [[_COMMUNITY_Community 100|Community 100]]
+- [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
+- [[_COMMUNITY_Community 103|Community 103]]
+- [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 118|Community 118]]
+- [[_COMMUNITY_Community 119|Community 119]]
+- [[_COMMUNITY_Community 120|Community 120]]
+- [[_COMMUNITY_Community 124|Community 124]]
+- [[_COMMUNITY_Community 125|Community 125]]
+- [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 130|Community 130]]
+- [[_COMMUNITY_Community 131|Community 131]]
+- [[_COMMUNITY_Community 132|Community 132]]
+- [[_COMMUNITY_Community 133|Community 133]]
+- [[_COMMUNITY_Community 134|Community 134]]
+- [[_COMMUNITY_Community 135|Community 135]]
+- [[_COMMUNITY_Community 136|Community 136]]
+- [[_COMMUNITY_Community 137|Community 137]]
+- [[_COMMUNITY_Community 138|Community 138]]
+- [[_COMMUNITY_Community 139|Community 139]]
+- [[_COMMUNITY_Community 140|Community 140]]
+- [[_COMMUNITY_Community 141|Community 141]]
+- [[_COMMUNITY_Community 142|Community 142]]
+- [[_COMMUNITY_Community 143|Community 143]]
+- [[_COMMUNITY_Community 144|Community 144]]
+- [[_COMMUNITY_Community 145|Community 145]]
+- [[_COMMUNITY_Community 146|Community 146]]
+- [[_COMMUNITY_Community 147|Community 147]]
+- [[_COMMUNITY_Community 148|Community 148]]
+- [[_COMMUNITY_Community 149|Community 149]]
+- [[_COMMUNITY_Community 150|Community 150]]
+- [[_COMMUNITY_Community 151|Community 151]]
+- [[_COMMUNITY_Community 152|Community 152]]
+- [[_COMMUNITY_Community 153|Community 153]]
+- [[_COMMUNITY_Community 154|Community 154]]
+- [[_COMMUNITY_Community 155|Community 155]]
+- [[_COMMUNITY_Community 156|Community 156]]
+- [[_COMMUNITY_Community 157|Community 157]]
+- [[_COMMUNITY_Community 158|Community 158]]
+- [[_COMMUNITY_Community 159|Community 159]]
+- [[_COMMUNITY_Community 162|Community 162]]
+- [[_COMMUNITY_Community 163|Community 163]]
+- [[_COMMUNITY_Community 164|Community 164]]
+- [[_COMMUNITY_Community 165|Community 165]]
+- [[_COMMUNITY_Community 166|Community 166]]
+- [[_COMMUNITY_Community 167|Community 167]]
+- [[_COMMUNITY_Community 168|Community 168]]
+- [[_COMMUNITY_Community 169|Community 169]]
+- [[_COMMUNITY_Community 170|Community 170]]
+- [[_COMMUNITY_Community 171|Community 171]]
+- [[_COMMUNITY_Community 172|Community 172]]
+- [[_COMMUNITY_Community 173|Community 173]]
+- [[_COMMUNITY_Community 174|Community 174]]
+- [[_COMMUNITY_Community 175|Community 175]]
+- [[_COMMUNITY_Community 176|Community 176]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Presenter` - 86 edges
-2. `WrappingMatcher` - 72 edges
-3. `NullMatcher` - 69 edges
-4. `IntersectionMatcher` - 62 edges
-5. `AndMaybeMatcher` - 61 edges
-6. `Presenter` - 58 edges
-7. `UnionMatcher` - 58 edges
-8. `Term` - 58 edges
-9. `StructFile` - 57 edges
-10. `Model` - 56 edges
+1. `Range` - 89 edges
+2. `Presenter` - 87 edges
+3. `WrappingMatcher` - 72 edges
+4. `NullMatcher` - 69 edges
+5. `IntersectionMatcher` - 62 edges
+6. `Presenter` - 61 edges
+7. `AndMaybeMatcher` - 61 edges
+8. `UnionMatcher` - 58 edges
+9. `Term` - 58 edges
+10. `StructFile` - 57 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `DictWindow (base dictionary frame)` --semantically_similar_to--> `synonyms`  [INFERRED] [semantically similar]
   widgets/__init__.py → whoosh/lang/wordnet.py
 - `Romanized Pali book/nipata names list` --shares_data_with--> `PaliDictWindow`  [INFERRED]
   resources/roman_names.txt → widgets/__init__.py
+- `_load_build_config()` --calls--> `Open`  [INFERRED]
+  constants.py → whoosh/qparser/default.py
 - `excepthook()` --calls--> `Open`  [INFERRED]
   run.py → whoosh/qparser/default.py
 - `Presenter` --uses--> `BookmarkManager`  [INFERRED]
   search/presenter.py → utils.py
-- `LoadNoteStatus()` --calls--> `Open`  [INFERRED]
-  utils.py → whoosh/qparser/default.py
 
 ## Hyperedges (group relationships)
 - **Read module MVP quartet** — read_model_model, read_view_view, read_presenter_presenter, read_interactor_interactor [EXTRACTED 1.00]
@@ -201,291 +208,311 @@
 - **Export Icon Visual Composition (Document + Arrow = Export)** — export_icon, export_icon_document_metaphor, export_icon_outward_arrow, export_icon_action [INFERRED 0.85]
 - **Read Icon Composition (Glyph + Label + Action)** — read_icon, read_icon_book_glyph, read_icon_thai_label, read_icon_action [EXTRACTED 1.00]
 
-## Communities (168 total, 83 thin omitted)
+## Communities (177 total, 85 thin omitted)
 
-### Community 0 - "Whoosh BitVector & Query Base"
+### Community 0 - "Community 0"
 Cohesion: 0.01
-Nodes (140): Query, BitVector, Returns the number of "on" bits in the bit array., Returns a copy of this BitArray., Implements a memory-efficient array of bits.          >>> bv = BitVector(10), NUMERIC, Special field type that lets you index int, long, or floating point     numbers, AndMaybeMatcher (+132 more)
+Nodes (141): Query, BitVector, Returns the number of "on" bits in the bit array., Returns a copy of this BitArray., Implements a memory-efficient array of bits.          >>> bv = BitVector(10), NUMERIC, Special field type that lets you index int, long, or floating point     numbers, AndMaybeMatcher (+133 more)
 
-### Community 1 - "Search History & Aui Frames"
+### Community 1 - "Community 1"
 Cohesion: 0.01
-Nodes (30): SearchAndCompareHistory, SearchAndCompareHistoryReadItem, AuiBaseFrame, AuiManager(), _ChangeReadCellBackgroundColor(), CheckBox(), CustomDataTable, CustomTableGrid (+22 more)
+Nodes (165): Analyzer, BiWordFilter, BoostTextFilter, CharsetFilter, CharsetTokenizer, CommaSeparatedTokenizer(), Composable, CompositeAnalyzer (+157 more)
 
-### Community 2 - "E-Tipitaka Domain Model"
+### Community 2 - "Community 2"
 Cohesion: 0.01
-Nodes (36): Book code -> Engine dispatcher, Compare-via-pivot translation between editions, Pali special-character mac/windows substitution (NIKHAHIT/THOTHAN/YOYING), BOOK_ITEMS (pickle), BOOK_NAMES (pickle), COMPARE_CHOICES, MAP_MC_TO_SIAM, MAP_MS_TO_SIAM (+28 more)
+Nodes (60): VolumesDialog, F(), fix_ending(), This module implements the Lovins stemming algorithm. Use the ``stem()`` functio, Returns the stemmed version of the argument string., remove_ending(), stem(), Range (+52 more)
 
-### Community 3 - "QParser Groups & Syntax"
+### Community 3 - "Community 3"
+Cohesion: 0.01
+Nodes (113): Exception, _clean_files(), _create_index(), FileIndex, _latest_generation(), _next_segment_name(), Returns a lock object that you can try to call acquire() on to         lock the, Do not instantiate this object directly. It is used by the Index object     to h (+105 more)
+
+### Community 4 - "Community 4"
+Cohesion: 0.01
+Nodes (39): Book code -> Engine dispatcher, Compare-via-pivot translation between editions, Pali special-character mac/windows substitution (NIKHAHIT/THOTHAN/YOYING), BOOK_ITEMS (pickle), BOOK_NAMES (pickle), COMPARE_CHOICES, MAP_MC_TO_SIAM, MAP_MS_TO_SIAM (+31 more)
+
+### Community 5 - "Community 5"
+Cohesion: 0.01
+Nodes (32): SearchAndCompareHistory, SearchAndCompareHistoryReadItem, AuiBaseFrame, AuiManager(), _ChangeReadCellBackgroundColor(), CheckBox(), CustomDataTable, CustomTableGrid (+24 more)
+
+### Community 6 - "Community 6"
 Cohesion: 0.02
-Nodes (100): F(), AndGroup, AndMaybeGroup, AndNotGroup, BasicSyntax, Boost, BoostPlugin, clean_boost() (+92 more)
+Nodes (99): AndGroup, AndMaybeGroup, AndNotGroup, BasicSyntax, Boost, BoostPlugin, clean_boost(), Close (+91 more)
 
-### Community 4 - "Whoosh FileIndex"
-Cohesion: 0.02
-Nodes (79): _clean_files(), _create_index(), FileIndex, _latest_generation(), _next_segment_name(), Returns a lock object that you can try to call acquire() on to         lock the, Returns a regular expression object that matches TOC filenames.     name is the, Returns a regular expression object that matches segment filenames.     name is (+71 more)
+### Community 7 - "Community 7"
+Cohesion: 0.03
+Nodes (84): BasicSyntax, object, Plugin, Bag, Choice, Combo, create(), DateParseError (+76 more)
 
-### Community 5 - "HTML Formatter & PaiceHusk Stemmer"
-Cohesion: 0.02
-Nodes (47): MyHtmlFormatter, PaiceHuskStemmer, This module contains an object that implements the Paice-Husk stemming algorithm, Implements the Paice-Husk stemming algorithm., :param ruletable: a string containing the rule data, separated             by ne, Returns a stemmed version of the argument string., object, CheckBox() (+39 more)
-
-### Community 6 - "Volumes Selection Dialog"
-Cohesion: 0.02
-Nodes (30): VolumesDialog, Range, Create(), GetHistories(), GetHistoryListItems(), History, LoadHistory(), Model (+22 more)
-
-### Community 7 - "WordNet Synonym Index"
-Cohesion: 0.02
-Nodes (88): from_file(), from_filename(), make_index(), parse_file(), Creates am index in the given storage object from the         synonyms loaded fr, Returns a list of synonyms for the given word.                  >>> thesaurus.sy, Parses the WordNet wn_s.pl prolog file and returns two dictionaries:     word2nu, Creates a Whoosh index in the given storage object containing     synonyms taken (+80 more)
-
-### Community 8 - "Whoosh Matchers"
+### Community 8 - "Community 8"
 Cohesion: 0.02
 Nodes (33): AdditiveBiMatcher, AndNotMatcher, BiMatcher, ExcludeMatcher, Matcher, MultiMatcher, Returns a quality measurement of the current block of postings,         accordin, Returns the ID of the current posting. (+25 more)
 
-### Community 9 - "QParser Plugins"
-Cohesion: 0.03
-Nodes (79): BasicSyntax, Plugin, Bag, Choice, Combo, create(), DateParseError, DateParser (+71 more)
-
-### Community 10 - "Whoosh File Tables & Writing"
+### Community 9 - "Community 9"
 Cohesion: 0.02
-Nodes (59): Exception, LengthReader, LengthWriter, MERGE_SMALL(), NO_MERGE(), OPTIMIZE(), :returns: True if this index has documents that are marked deleted but, :returns: the total number of deleted documents in the index. (+51 more)
+Nodes (53): _build_and_upload(), _filter_visible(), IS_CODE_ENABLED(), _load_build_config(), Return the writable per-user copy of a shipped db if it exists,     otherwise th, resolve_db(), ApplyTheme(), _ApplyThemeRecursive() (+45 more)
 
-### Community 11 - "Whoosh Analysis Filters"
+### Community 10 - "Community 10"
+Cohesion: 0.03
+Nodes (32): AccountClient, AccountError, _extract_message(), _pairing_body(), RateLimited, A 429. `retry_after` is the server's Retry-After header in seconds, or     None, Start a desktop passkey pairing (see account/pairing.py).          Returns the s, Poll a pairing once. Returns the server's dict:         {'status': 'pending'}, { (+24 more)
+
+### Community 11 - "Community 11"
 Cohesion: 0.02
-Nodes (76): BiWordFilter, BoostTextFilter, CharsetFilter, CharsetTokenizer, CommaSeparatedTokenizer(), Composable, CompositeAnalyzer, FancyAnalyzer() (+68 more)
+Nodes (45): ClosableMixin, EmptyReader, IndexReader, MultiReader, Yields all terms in the given field., Returns True if the underlying index/segment has deleted         documents., Returns an iterator of all (undeleted) document IDs in the reader., Returns True if the given document number is marked deleted. (+37 more)
 
-### Community 12 - "Whoosh Reader Interface"
+### Community 12 - "Community 12"
+Cohesion: 0.03
+Nodes (70): MyHtmlFormatter, CheckNewUpdateThread, DisplayThread, fetch_update_manifest(), PaliMahaChulaDisplayThread, PaliMahaChulaSearchThread, PaliSiamDisplayThread, PaliSiamNewSearchThread (+62 more)
+
+### Community 13 - "Community 13"
 Cohesion: 0.02
-Nodes (43): ClosableMixin, EmptyReader, IndexReader, MultiReader, Yields all terms in the given field., Returns True if the underlying index/segment has deleted         documents., Returns an iterator of all (undeleted) document IDs in the reader., Returns True if the given document number is marked deleted. (+35 more)
+Nodes (59): collect(), Facets, from_field(), Hit, pull_results(), You can supply keyword arguments in the form facetname=queryobject.         For, Adds a facet to the object.                  :param name: the name of the facet., Returns a list of (facetname, queryobject) pairs for the facets in         this (+51 more)
 
-### Community 13 - "Search & Display Threads"
+### Community 14 - "Community 14"
 Cohesion: 0.03
-Nodes (67): CheckNewUpdateThread, DisplayThread, PaliMahaChulaDisplayThread, PaliMahaChulaSearchThread, PaliSiamDisplayThread, PaliSiamNewSearchThread, PaliSiamSearchThread, RomanScriptSearchThread (+59 more)
+Nodes (24): all_stored_fields(), expand_prefix(), has_vector(), iter_from(), SegmentReader, _term_info(), CodedHashReader, CodedHashWriter (+16 more)
 
-### Community 14 - "Whoosh Segment Reader"
-Cohesion: 0.03
-Nodes (26): all_stored_fields(), expand_prefix(), has_vector(), iter_from(), SegmentReader, _term_info(), CodedHashReader, CodedHashWriter (+18 more)
-
-### Community 15 - "StructFile Binary IO"
+### Community 15 - "Community 15"
 Cohesion: 0.02
-Nodes (50): Writes a string to the wrapped file. This method writes the length         of th, Reads a string from the wrapped file., Writes a variable-length unsigned integer to the wrapped file., Writes a variable-length signed integer to the wrapped file., Reads a variable-length encoded unsigned integer from the wrapped file., Reads a variable-length encoded signed integer from the wrapped file., Writes a single byte to the wrapped file, shortcut for         ``file.write(chr(, Writes a byte-sized representation of floating point value f to the         wrap (+42 more)
+Nodes (44): LengthReader, LengthWriter, MultiPool, MultiSegmentWriter, PoolWritingTask, SegmentWritingTask, imerge(), PoolBase (+36 more)
 
-### Community 16 - "App Bootstrap (MyApp/ParentFrame)"
+### Community 16 - "Community 16"
 Cohesion: 0.03
-Nodes (30): excepthook(), MyApp, ParentFrame, Presenter(), Called when the doc icon is clicked, and ???, ArabicToThai(), GetFilePaths(), GetUserDataDir() (+22 more)
+Nodes (15): THAI_ROYAL_CODE, SimpleFontDialog, BookmarkManager, dump_hash(), HtmlEasyPrinting, main(), FindTextHandler, KeyCommandHandler (+7 more)
 
-### Community 17 - "Read Presenter & Bookmarks"
-Cohesion: 0.04
-Nodes (13): THAI_ROYAL_CODE, SimpleFontDialog, BookmarkManager, HtmlEasyPrinting, FindTextHandler, KeyCommandHandler, Presenter, Printer (+5 more)
-
-### Community 18 - "Bookmark & About Dialogs"
-Cohesion: 0.03
-Nodes (16): AboutDialog, BookmarkDialog, BookmarkFolderDialog, BookmarkManagerDialog, DataXferCheckboxValidator, DataXferFontValidator, DataXferPagesValidator, DataXferPathValidator (+8 more)
-
-### Community 19 - "Whoosh Scoring (BM25F/TF-IDF)"
+### Community 17 - "Community 17"
 Cohesion: 0.03
 Nodes (46): BaseScorer, BM25F, BM25FScorer, CompatibilityScorer, FieldSorter, Frequency, MultiFieldSorter, MultiWeighting (+38 more)
 
-### Community 20 - "FileIndex Segment Internals"
+### Community 18 - "Community 18"
 Cohesion: 0.03
-Nodes (28): Do not instantiate this object directly. It is used by the Index object     to h, :param name: The name of the segment (the Index object computes this, :returns: the total number of documents, DELETED OR UNDELETED, in this, :returns: the number of (undeleted) documents in this segment., :returns: True if any documents in this segment are deleted., :returns: the total number of deleted documents in this segment., Returns the total number of terms in the given field across all         document, Returns the maximum length of the given field in any of the         documents in (+20 more)
+Nodes (16): AboutDialog, BookmarkDialog, BookmarkFolderDialog, BookmarkManagerDialog, DataXferCheckboxValidator, DataXferFontValidator, DataXferPagesValidator, DataXferPathValidator (+8 more)
 
-### Community 21 - "Posting Reader Blocks"
+### Community 19 - "Community 19"
 Cohesion: 0.03
-Nodes (13): BlockInfo, FilePostingReader, FilePostingWriter, from_file(), # TODO: THIS IS NOT CROSS-PLATFORM BECAUSE YOU ARE CONVERTING AN ARRAY, Matcher, PostingWriter, RamIndexReader (+5 more)
+Nodes (16): BlockInfo, FilePostingReader, FilePostingWriter, from_file(), # TODO: THIS IS NOT CROSS-PLATFORM BECAUSE YOU ARE CONVERTING AN ARRAY, Matcher, PostingWriter, RamIndexReader (+8 more)
 
-### Community 22 - "Searcher & Facets"
+### Community 20 - "Community 20"
 Cohesion: 0.03
-Nodes (39): collect(), Facets, from_field(), Hit, pull_results(), You can supply keyword arguments in the form facetname=queryobject.         For, Adds a facet to the object.                  :param name: the name of the face, Returns a list of (facetname, queryobject) pairs for the facets in         this (+31 more)
+Nodes (12): CheckBox(), Create(), ReadPanelCreator, RomanScriptViewComponents, ScriptViewComponents, ThaiFiveBooksViewComponents, ThaiMahaChulaViewComponents, ThaiScriptViewComponents (+4 more)
 
-### Community 23 - "MVP-Interactor Pattern Concepts"
+### Community 21 - "Community 21"
 Cohesion: 0.03
 Nodes (21): Model-View-Presenter-Interactor pattern, CODES (book code list), DATA_DB (search history), FAV_DB (bookmark sqlite), AboutDialog, BookmarkDialog, BookmarkFolderDialog, BookmarkManagerDialog (+13 more)
 
-### Community 24 - "FileIndex TOC & Segment"
+### Community 22 - "Community 22"
+Cohesion: 0.04
+Nodes (52): Writes a variable-length signed integer to the wrapped file., Writes a variable-length signed integer to the wrapped file., build_pure(), build_sqldiff(), data_diff(), detect_version(), fetch_all(), footer() (+44 more)
+
+### Community 23 - "Community 23"
 Cohesion: 0.04
 Nodes (65): _clean_files, _create_index, FileIndex, _latest_generation, _read_toc, Segment, Toc (table of contents), _write_toc (+57 more)
 
-### Community 25 - "Per-Corpus Search Models"
+### Community 24 - "Community 24"
+Cohesion: 0.05
+Nodes (23): AsyncWriter, BatchWriter, IndexWriter, PostingWriter, Deletes a document by number., The keyword arguments map field names to the values to index/store., The keyword arguments map field names to the values to index/store., Finishes writing and unlocks the index. (+15 more)
+
+### Community 25 - "Community 25"
+Cohesion: 0.06
+Nodes (25): _make_patch_sql(), TestApplyChain, TestComputePending, TestEnsureUserCopy, TestGetLocalVersion, TestParseIndex, apply_chain(), apply_pending() (+17 more)
+
+### Community 26 - "Community 26"
 Cohesion: 0.04
 Nodes (48): History (db.Entity), Model (search base), PaliMahaChulaSearchModel, PaliSiamNewSearchModel, PaliSiamSearchModel, RomanScriptSearchModel, SearchModelCreator, ThaiFiveBooksSearchModel (+40 more)
 
-### Community 26 - "Search View Buttons"
+### Community 27 - "Community 27"
 Cohesion: 0.05
 Nodes (5): AuiBaseFrame, Font(), ResultsWindow(), SearchCtrl(), View
 
-### Community 27 - "Lovins Stemmer Helpers"
-Cohesion: 0.07
-Nodes (5): fix_ending(), This module implements the Lovins stemming algorithm. Use the ``stem()`` functio, Returns the stemmed version of the argument string., remove_ending(), stem()
+### Community 28 - "Community 28"
+Cohesion: 0.06
+Nodes (14): _ActivateOnMacOS(), _BringToFront(), excepthook(), MyApp, ParentFrame, Presenter(), Manual menu path. Fetches outside any modal so the         'up to date' alert is, Kick off a background fetch a few seconds after the UI settles.         If anyth (+6 more)
 
-### Community 28 - "Sortable Numeric Encoders"
+### Community 29 - "Community 29"
+Cohesion: 0.11
+Nodes (29): _resp(), suite(), TestAccountClient, testCurrentUser(), testDeleteBackup(), testDesktopBeginPostsAnEmptyObject(), testDesktopBeginRaisesTheServersError(), testDesktopBeginRejectsAnIncompleteResponse() (+21 more)
+
+### Community 30 - "Community 30"
+Cohesion: 0.09
+Nodes (11): FakePanel, FakePresenter, FakePresenterView, FakeView, Bare stand-in carrying only the state the tested View methods touch., View._NextCompareIndex: exact-code match + max+1 (no reuse collisions)., View.RemoveReadPanel: pop from dict, detach pane, destroy widget., Presenter.CloseComparePanel: tear down view pane + clean all state. (+3 more)
+
+### Community 31 - "Community 31"
+Cohesion: 0.1
+Nodes (4): BitSet, An implementation of an object that acts like a collection of on/off bits., Turns the bit at the given position off., A set-like object for holding positive integers. It is dynamically     backed by
+
+### Community 32 - "Community 32"
 Cohesion: 0.16
 Nodes (19): float_to_sortable_long(), float_to_text(), int_to_sortable_int(), int_to_text(), long_to_sortable_long(), long_to_text(), Splits a range of numbers (from ``start`` to ``end``, inclusive)     into a sequ, sortable_int_to_int() (+11 more)
 
-### Community 29 - "Porter2 Stemmer"
+### Community 33 - "Community 33"
 Cohesion: 0.2
 Nodes (20): capitalize_consonant_ys(), ends_with_double(), ends_with_short_syllable(), get_r1(), get_r2(), is_short_word(), normalize_ys(), remove_initial_apostrophe() (+12 more)
 
-### Community 30 - "Search Thread Tests"
+### Community 34 - "Community 34"
 Cohesion: 0.22
 Nodes (9): suite(), TestPaliSiamSearchThread, TestRomanScriptSearchThread, TestSearchThread, TestThaiFiveBooksSearchThread, TestThaiMahaChulaSearchThread, TestThaiMahaMakutSearchThread, TestThaiRoyalSearchThread (+1 more)
 
-### Community 31 - "Date Parser & Plugins"
+### Community 35 - "Community 35"
+Cohesion: 0.13
+Nodes (9): FcntlLock, LockBase, MsvcrtLock, File lock based on Windows-only msvcrt module., Calls ``fn`` every ``delay`` seconds until it returns True or ``timeout``     se, Base class for file locks., Acquire the lock. Returns True if the lock was acquired.                  :param, File lock based on UNIX-only fcntl module. (+1 more)
+
+### Community 36 - "Community 36"
 Cohesion: 0.15
 Nodes (15): Plug-in based query parser architecture, DateParser, DateParserPlugin, English DateParser, Regex parser element, FieldsPlugin, MultifieldParser, PhrasePlugin (+7 more)
 
-### Community 32 - "Whoosh Core Schema"
+### Community 37 - "Community 37"
 Cohesion: 0.17
 Nodes (11): FieldType, Schema, Index, IndexReader, MultiReader, WeightingModel, Hit, Results (+3 more)
 
-### Community 33 - "Romanized Pali & Dict Windows"
+### Community 39 - "Community 39"
+Cohesion: 0.24
+Nodes (5): PaiceHuskStemmer, This module contains an object that implements the Paice-Husk stemming algorithm, Implements the Paice-Husk stemming algorithm., :param ruletable: a string containing the rule data, separated             by ne, Returns a stemmed version of the argument string.
+
+### Community 41 - "Community 41"
 Cohesion: 0.2
 Nodes (10): distance (edit distance), relative (similarity ratio), Romanized Pali book/nipata names list, DictWindow (base dictionary frame), EnglishDictWindow, PaliDictWindow, ThaiDictWindow, make_index (+2 more)
 
-### Community 34 - "Highlight & Ngram Pipeline"
+### Community 42 - "Community 42"
 Cohesion: 0.25
 Nodes (7): NgramTokenizer, NGRAM field, highlight(), SimpleFragmenter, Span, SpanNear, DisplayThread (base)
 
-### Community 35 - "Token & Group Hierarchy"
+### Community 43 - "Community 43"
 Cohesion: 0.25
 Nodes (8): DateToken, AndGroup, BasicSyntax, Group, OrGroup, SyntaxObject, Token, Word
 
-### Community 36 - "Stemmer Variants"
+### Community 44 - "Community 44"
 Cohesion: 0.29
 Nodes (5): Lovins fix_ending, Lovins remove_ending, Lovins stem(), PaiceHuskStemmer, Porter stem()
 
-### Community 37 - "Porter Stemmer"
+### Community 45 - "Community 45"
 Cohesion: 0.5
 Nodes (3): Reimplementation of the `Porter stemming algorithm <http://tartarus.org/~martin/, Uses the Porter stemming algorithm to remove suffixes from English     words., stem()
 
-### Community 38 - "Sphinx Charset Tables"
-Cohesion: 0.67
-Nodes (3): charset_table_to_dict(), charspec_to_int(), Takes a string with the contents of a Sphinx charset table file and     returns
-
-### Community 39 - "Spell Index TOCs (Pali/Thai)"
+### Community 46 - "Community 46"
 Cohesion: 0.5
 Nodes (4): PALI_SPELL_CHECKER, THAI_SPELL_CHECKER, Pali Whoosh spell index TOC, Thai Whoosh spell index TOC
 
-### Community 40 - "Search & Compare Window"
+### Community 47 - "Community 47"
 Cohesion: 0.67
 Nodes (4): AuiBaseFrame, CustomDataTable, CustomTableGrid, SearchAndCompareWindow
 
-### Community 41 - "Read Panels"
+### Community 48 - "Community 48"
 Cohesion: 0.5
 Nodes (4): ReadPanel, ReadToolPanel, ReadWithReferencesPanel, ReferencesWindow
 
-### Community 42 - "Edit Notes Icon"
+### Community 49 - "Community 49"
 Cohesion: 0.67
 Nodes (4): Edit Notes Action, Document with Lines (visual element), Edit Notes Icon, Pencil (visual element)
 
-### Community 43 - "Export Icon"
+### Community 50 - "Community 50"
 Cohesion: 0.83
 Nodes (4): Export Icon, Export Action (Send Document Out), Document Metaphor (Page with Content), Outward Arrow (Send/Upload Indicator)
 
-### Community 44 - "Font Size Up Icon"
+### Community 51 - "Community 51"
 Cohesion: 0.5
 Nodes (4): Accessibility / Readability Feature, Action: Increase Text Size, Font Size Up Icon, UI Toolbar Button (Font Size Up)
 
-### Community 45 - "Pali-English Language Toggle"
+### Community 52 - "Community 52"
 Cohesion: 0.67
 Nodes (4): English Language Reference, Language Switch UI Action (Pali/English), Pali Language Reference, Pali-English Language Toggle Icon
 
-### Community 46 - "Print Icon"
+### Community 53 - "Community 53"
 Cohesion: 0.67
 Nodes (4): Print Action, Print Icon, Printer Device Representation, Toolbar Button Asset
 
-### Community 47 - "Read Icon (อ่าน)"
+### Community 54 - "Community 54"
 Cohesion: 0.83
 Nodes (4): Read Icon (อ่าน), Read Action (Open/View Text), Open Book Glyph, Thai Label อ่าน (Read)
 
-### Community 48 - "Zoom Document Icon"
+### Community 55 - "Community 55"
 Cohesion: 0.5
 Nodes (4): Magnifier Overlay on Paper, Text Size Adjustment Toolbar Button, Zoom Document Action, Zoom Paper Icon
 
-### Community 50 - "User Data Path & Excepthook"
+### Community 57 - "Community 57"
 Cohesion: 0.67
 Nodes (3): DATA_PATH (user data dir), excepthook, GetUserDataDir
 
-### Community 51 - "Thai Script Search"
+### Community 58 - "Community 58"
 Cohesion: 0.67
 Nodes (3): ThaiScriptSearchModel, TestThaiScriptSearchThread, ThaiScriptSearchThread
 
-### Community 52 - "Analyzer & Format"
+### Community 59 - "Community 59"
 Cohesion: 0.67
 Nodes (3): Analyzer, TEXT field, Format
 
-### Community 53 - "Or/Union Matchers"
+### Community 60 - "Community 60"
 Cohesion: 0.67
 Nodes (3): UnionMatcher, WrappingMatcher, Or
 
-### Community 54 - "Span Query & Matcher Base"
+### Community 61 - "Community 61"
 Cohesion: 0.67
 Nodes (3): Matcher, Query (base), SpanQuery
 
-### Community 55 - "Scorer Variants"
+### Community 62 - "Community 62"
 Cohesion: 1.0
 Nodes (3): BaseScorer, BM25F, TF_IDF
 
-### Community 56 - "In-Memory RAM Index"
+### Community 63 - "Community 63"
 Cohesion: 1.0
 Nodes (3): In-memory index/reader pair pattern, RamIndex (in-memory index), RamIndexReader
 
-### Community 57 - "Fonts Picker Icon"
+### Community 64 - "Community 64"
 Cohesion: 1.0
 Nodes (3): Font Picker Action, Fonts Icon, Typography/Font Settings
 
-### Community 58 - "Header Banner Image"
+### Community 65 - "Community 65"
 Cohesion: 0.67
 Nodes (3): Header Branding/Identity Element, Application Header Banner, Top Navigation/Title Bar
 
-### Community 59 - "Enter Key Icon"
+### Community 66 - "Community 66"
 Cohesion: 0.67
 Nodes (3): Keyboard Shortcut Hint, Submit/Confirm Action, Enter Key Icon
 
-### Community 60 - "Layout Asset"
+### Community 67 - "Community 67"
 Cohesion: 0.67
 Nodes (3): Layout Diagram (layout.gif), Application Resource Asset, E-Tipitaka UI Layout Specification
 
-### Community 61 - "Not-OK Error Icon"
+### Community 68 - "Community 68"
 Cohesion: 0.67
 Nodes (3): Error / Failure / Negative State Indicator, User Feedback / Validation Result, Not OK / Error Icon (Red X)
 
-### Community 62 - "Save (Floppy Disk) Icon"
+### Community 69 - "Community 69"
 Cohesion: 1.0
 Nodes (3): Save Action, Floppy Disk Save Metaphor, Save Icon (Floppy Disk)
 
-### Community 63 - "Settings (Gear) Icon"
+### Community 70 - "Community 70"
 Cohesion: 1.0
 Nodes (3): Gear Metaphor for Configuration, Settings/Configuration Action, Setting Icon (Gear/Cog)
 
-### Community 64 - "Tho Than Thai Letter Icon"
+### Community 71 - "Community 71"
 Cohesion: 0.67
 Nodes (3): Tho Than (Thai letter ฐ) Icon, Thai Language Mode (Tho Than - Royal Thai Script), Thai Script Display Marker
 
-### Community 65 - "Yellow Highlight Swatch"
+### Community 72 - "Community 72"
 Cohesion: 0.67
 Nodes (3): Yellow Highlight/Marker Color, Yellow Solid Color Image, UI Color Asset (Yellow)
 
-### Community 66 - "Yo Ying Thai Letter Icon"
+### Community 73 - "Community 73"
 Cohesion: 0.67
 Nodes (3): Yo Ying Thai Character Icon, Thai Consonant Yo Ying (ญ), Thai Typography UI Resource
 
 ## Knowledge Gaps
-- **825 isolated node(s):** `Called when the doc icon is clicked, and ???`, `This is a setup.py script generated by py2applet  Usage:     python setup.py py2`, `This function will generate the file names in a directory      tree by walking t`, `Returns the version number of Whoosh as a string.          :param build: Wheth`, `Removes tokens from a token stream where token.stopped = True.` (+820 more)
+- **895 isolated node(s):** `Return the writable per-user copy of a shipped db if it exists,     otherwise th`, `Manual menu path. Fetches outside any modal so the         'up to date' alert is`, `Kick off a background fetch a few seconds after the UI settles.         If anyth`, `Called when the doc icon is clicked, and ???`, `This is a setup.py script generated by py2applet  Usage:     python setup.py py2` (+890 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **83 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **85 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Model` connect `Volumes Selection Dialog` to `Read Presenter & Bookmarks`, `HTML Formatter & PaiceHusk Stemmer`?**
-  _High betweenness centrality (0.116) - this node is a cross-community bridge._
-- **Why does `BitVector` connect `Whoosh BitVector & Query Base` to `FileIndex Segment Internals`, `HTML Formatter & PaiceHusk Stemmer`?**
-  _High betweenness centrality (0.088) - this node is a cross-community bridge._
-- **Why does `Query` connect `Whoosh BitVector & Query Base` to `HTML Formatter & PaiceHusk Stemmer`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
+- **Why does `Model` connect `Community 2` to `Community 16`, `Community 7`?**
+  _High betweenness centrality (0.081) - this node is a cross-community bridge._
+- **Why does `Presenter` connect `Community 16` to `Community 2`, `Community 4`, `Community 7`, `Community 20`, `Community 21`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Why does `BitVector` connect `Community 0` to `Community 2`, `Community 3`, `Community 7`, `Community 31`?**
+  _High betweenness centrality (0.061) - this node is a cross-community bridge._
+- **Are the 82 inferred relationships involving `Range` (e.g. with `.__init__()` and `.GetCheckedVolumes()`) actually correct?**
+  _`Range` has 82 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 3 inferred relationships involving `Presenter` (e.g. with `Model` and `BookmarkManager`) actually correct?**
   _`Presenter` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 44 inferred relationships involving `WrappingMatcher` (e.g. with `QueryError` and `Query`) actually correct?**
   _`WrappingMatcher` has 44 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 56 inferred relationships involving `NullMatcher` (e.g. with `QueryError` and `Query`) actually correct?**
   _`NullMatcher` has 56 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 48 inferred relationships involving `IntersectionMatcher` (e.g. with `QueryError` and `Query`) actually correct?**
-  _`IntersectionMatcher` has 48 INFERRED edges - model-reasoned connections that need verification._
