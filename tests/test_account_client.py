@@ -248,6 +248,51 @@ class TestAccountClient(unittest.TestCase):
                 self.client.login('alice', 'wrong')
             self.assertIs(AccountError, type(cm.exception), status)
 
+    @patch('account.client.requests.post')
+    def testDesktopBeginPostsAnEmptyObject(self, post):
+        body = {'device_code': 'dev-secret', 'user_code': 'ABCD-2345',
+                'verification_url': BASE + '/desktop/?code=ABCD-2345',
+                'interval': 5, 'expires_in': 600}
+        post.return_value = _resp(200, body)
+        self.assertEqual(body, self.client.desktop_begin())
+        post.assert_called_once_with(
+            BASE + '/api/passkeys/desktop/begin/', json={}, timeout=30)
+
+    @patch('account.client.requests.post')
+    def testDesktopBeginRejectsAResponseWithoutADeviceCode(self, post):
+        post.return_value = _resp(200, {'user_code': 'ABCD-2345',
+                                        'verification_url': BASE + '/desktop/'})
+        with self.assertRaises(AccountError) as cm:
+            self.client.desktop_begin()
+        self.assertIn('device_code', cm.exception.message)
+
+    @patch('account.client.requests.post')
+    def testDesktopPollPostsTheDeviceCodeAndStoresNothing(self, post):
+        approved = {'status': 'approved', 'key': 'tok', 'username': 'alice'}
+        post.return_value = _resp(200, approved)
+        self.assertEqual(approved, self.client.desktop_poll('dev-secret'))
+        post.assert_called_once_with(
+            BASE + '/api/passkeys/desktop/poll/',
+            json={'device_code': 'dev-secret'}, timeout=30)
+        self.assertFalse(self.store.is_logged_in())
+
+    @patch('account.client.requests.post')
+    def testDesktopPollRaises400WhenThePairingIsGone(self, post):
+        post.return_value = _resp(
+            400, {'detail': u'คำขอเข้าสู่ระบบนี้หมดอายุแล้ว กรุณาลองใหม่'})
+        with self.assertRaises(AccountError) as cm:
+            self.client.desktop_poll('dev-secret')
+        self.assertEqual(400, cm.exception.status)
+
+    @patch('account.client.requests.post')
+    def testDesktopPollRaisesRateLimited(self, post):
+        post.return_value = _resp(429, {'error': 'rate_limited', 'retry_after': 5,
+                                        'detail': 'Too many requests.'},
+                                  headers={'Retry-After': '5'})
+        with self.assertRaises(RateLimited) as cm:
+            self.client.desktop_poll('dev-secret')
+        self.assertEqual(5, cm.exception.retry_after)
+
 
 def suite():
     s = unittest.TestSuite()
@@ -266,7 +311,12 @@ def suite():
                  'testRateLimitedReadsTheHeaderNotTheBody',
                  'testRateLimitedWithoutAHeaderHasNoRetryAfter',
                  'testRateLimitedWithAnUnusableHeaderHasNoRetryAfter',
-                 'testOtherErrorsAreNotRateLimited']:
+                 'testOtherErrorsAreNotRateLimited',
+                 'testDesktopBeginPostsAnEmptyObject',
+                 'testDesktopBeginRejectsAResponseWithoutADeviceCode',
+                 'testDesktopPollPostsTheDeviceCodeAndStoresNothing',
+                 'testDesktopPollRaises400WhenThePairingIsGone',
+                 'testDesktopPollRaisesRateLimited']:
         s.addTest(TestAccountClient(name))
     return s
 

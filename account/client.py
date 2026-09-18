@@ -160,6 +160,44 @@ class AccountClient(object):
         )
         self._raise_if_error(resp)
 
+    def desktop_begin(self):
+        """Start a desktop passkey pairing (see account/pairing.py).
+
+        Returns the server's dict: device_code (the app's secret -- never
+        shown), user_code (shown to the user), verification_url (opened in
+        the browser), interval and expires_in (seconds).
+        """
+        resp = requests.post(
+            self._base + '/api/passkeys/desktop/begin/',
+            json={},
+            timeout=self._timeout,
+        )
+        self._raise_if_error(resp)
+        body = resp.json() if resp.content else {}
+        for key in ('device_code', 'user_code', 'verification_url'):
+            if not body.get(key):
+                raise AccountError(resp.status_code,
+                                   'pairing response missing %s' % key)
+        return body
+
+    def desktop_poll(self, device_code):
+        """Poll a pairing once. Returns the server's dict:
+        {'status': 'pending'}, {'status': 'denied'}, or
+        {'status': 'approved', 'key': ..., 'username': ...}.
+
+        Raises AccountError(400) once the pairing is unknown, expired or
+        already used -- the server deliberately does not say which -- and
+        RateLimited on a 429. Stores nothing: PairingSession decides whether
+        a token is kept.
+        """
+        resp = requests.post(
+            self._base + '/api/passkeys/desktop/poll/',
+            json={'device_code': device_code},
+            timeout=self._timeout,
+        )
+        self._raise_if_error(resp)
+        return resp.json()
+
     def _auth_headers(self):
         data = self._store.get() or {}
         token = data.get('token')
