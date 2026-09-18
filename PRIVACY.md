@@ -35,7 +35,7 @@ The app itself never handles a passkey. When you choose to sign in with one, it
 opens `data.etipitaka.com` in your web browser, the browser performs the passkey
 check, and the app then receives the same login token a password sign-in gives.
 To link the two, the app shows a short one-time code that you confirm in the
-browser. The code expires after ten minutes, and the sign-in request stores no
+browser. The code expires after ten minutes, and the sign-in record stores no
 information about your computer.
 
 ## Optional cloud backup

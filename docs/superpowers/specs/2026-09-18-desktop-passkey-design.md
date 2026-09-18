@@ -335,15 +335,24 @@ follows these where they differ from the sections above.
 - **A token that cannot be stored still ends the session.** Storing runs on
   the UI thread, outside the worker's catch-all, so a full disk or a read-only
   config directory reports a failure instead of leaving the dialog waiting.
-- **Only a 400 ends a pairing.** Every other error is retried with backoff
-  like a network failure: a 5xx during maintenance, and a 200 whose body is
-  not a JSON object.
+- **Of the errors, only a 400 ends a pairing.** Every other error is retried
+  with backoff like a network failure: a 5xx during maintenance, and a 200
+  whose body is not a JSON object. (A readable response the client does not
+  understand, such as an unknown status, ends it at once as a failure.)
 - **Errors do not all reuse `_show_error`.** Its 401 and 404 wording is about
   sessions and backups, so a 404 on begin would read "backup not found". Only
   network failures go through it. Refusal and expiry have their own messages,
   and anything else says the passkey sign-in failed, then why, naming a 5xx as
   `HTTP N` because its body is usually a proxy's HTML page.
 - **Esc cancels a pairing**, the same as its Cancel button.
+- **`PairingSession` also takes the token store**, because it stores the token
+  itself, and its default `sleep` waits on the cancel event rather than
+  `time.sleep`, so `cancel()` wakes the worker at once. `dispatch` is called
+  with a single no-argument callable, which suits `wx.CallAfter`.
+- **The client opens `verification_url` only if it is on the API's own
+  origin.** The app hands it to the OS (`os.startfile` on Windows), so a bad
+  begin response must not be able to point it at a file, a network share or
+  another app's protocol handler.
 - **Rate limits** are a dedicated nginx zone (120 r/m, burst 60) plus a DRF
   scope at 90/min, not the shared passkey zone proposed above.
 - **No language cookie.** Server messages are Thai unless the
