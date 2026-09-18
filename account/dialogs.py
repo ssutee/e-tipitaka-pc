@@ -401,6 +401,12 @@ class AccountDialog(wx.Dialog):
         self._actionButtons = []
 
     def _relayout(self):
+        # Grow, never shrink: 420x380 is sized for macOS, and GTK's taller
+        # Thai lines and 34px buttons need more on the signed-out screen.
+        need, have = self._panel.GetBestSize(), self.GetClientSize()
+        if need.width > have.width or need.height > have.height:
+            self.SetClientSize((max(need.width, have.width),
+                                max(need.height, have.height)))
         self._panel.Layout()
         self.Layout()
 
