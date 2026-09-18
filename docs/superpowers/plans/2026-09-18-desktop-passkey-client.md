@@ -1182,9 +1182,12 @@ Add to `TestPairingSession`, after `testA400EndsTheSessionAsExpired`:
         self.assertEqual([5, 10, 20], self.clock.sleeps)
 
     def testServerErrorsCountAsFailuresToo(self):
-        client = FakeClient(_begin(), [AccountError(502, 'bad gateway')] * 3)
+        # Only a 400 means the pairing is gone. Anything else -- a 503 during
+        # maintenance, a 200 whose body was not a JSON object -- is retried.
+        client = FakeClient(_begin(), [AccountError(s, 'x')
+                                       for s in (200, 404, 503)])
         self._session(client).run()
-        self.assertEqual(502, self._failed().status)
+        self.assertEqual(503, self._failed().status)
         self.assertEqual(3, len(client.poll_calls))
 
     def testTheFailureCountResetsOnAnyGoodResponse(self):
@@ -1368,6 +1371,7 @@ Expected: `Ran 25 tests` … `OK`. `suite()` check: `suite() lists 25 of 25 test
 | Delete the `except RateLimited` block, so a 429 falls into the `AccountError` branch | `testARateLimitIsNotAFailure` |
 | In the `pending` branch, change `wait, failures = interval, 0` to `wait = interval` | `testTheFailureCountResetsOnAnyGoodResponse` |
 | Change `max(interval, e.retry_after or 0)` to `e.retry_after or interval` | `testARateLimitNeverPollsFasterThanTheInterval` |
+| Change `if e.status == 400:` to `if e.status >= 400:`, so any client or server error ends the pairing | `testServerErrorsCountAsFailuresToo` |
 
 Restore after each; confirm `OK`.
 
