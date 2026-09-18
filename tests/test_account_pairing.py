@@ -134,6 +134,33 @@ class TestPairingSession(unittest.TestCase):
         self.assertEqual('alice', data['username'])
         self.assertNotIn('last_upload', data)
 
+    def testTheTokenIsStoredBeforeOnDoneRuns(self):
+        # The dialog redraws from the store the moment on_done runs.
+        seen = []
+        self.rec.on_done = lambda username: seen.append(
+            (self.store.get() or {}).get('token'))
+        self._session(FakeClient(_begin(), [APPROVED])).run()
+        self.assertEqual(['tok-alice'], seen)
+
+    def testAFailedTokenWriteStillEndsTheSession(self):
+        # _approved runs on the UI thread, outside run()'s catch-all, so it
+        # must end the session itself. Hence a queued dispatch, as in the
+        # app: a synchronous one would let run() catch the error and hide
+        # the bug.
+        def full_disk(token, username):
+            raise OSError(28, 'No space left on device')
+        self.store.set = full_disk
+        queue = []
+        self._session(FakeClient(_begin(), [APPROVED]),
+                      dispatch=queue.append).run()
+        for fn in queue:
+            fn()
+        err = self._failed()
+        self.assertEqual(2, len(self.rec.events))   # the code, then this
+        self.assertIn('No space left on device', err.message)
+        self.assertNotIn('tok-alice', err.message)
+        self.assertFalse(self.store.is_logged_in())
+
     def testFollowsTheServersIntervalAndExpiry(self):
         client = FakeClient(_begin(interval=7, expires_in=20),
                             [PENDING, PENDING])
@@ -145,13 +172,16 @@ class TestPairingSession(unittest.TestCase):
         self.assertFalse(self.store.is_logged_in())
 
     def testFallsBackToDefaultsWhenServerValuesAreUnusable(self):
-        client = FakeClient(_begin(interval='soon', expires_in=0),
-                            [PENDING] * 200)
-        self._session(client).run()
-        self.assertEqual(5, self.clock.sleeps[0])
-        self.assertEqual(600, sum(self.clock.sleeps))
-        self.assertEqual(119, len(client.poll_calls))
-        self.assertEqual(('error', EXPIRED, None), self.rec.events[-1])
+        for interval, expires_in in (('soon', 0), (None, -1), (-5, None)):
+            case = (interval, expires_in)
+            self.clock, self.rec = FakeClock(), Recorder()
+            client = FakeClient(_begin(interval, expires_in), [PENDING] * 200)
+            self._session(client).run()
+            self.assertEqual(5, self.clock.sleeps[0], case)
+            self.assertEqual(600, sum(self.clock.sleeps), case)
+            self.assertEqual(119, len(client.poll_calls), case)
+            self.assertEqual(('error', EXPIRED, None), self.rec.events[-1],
+                             case)
 
     def testAnUnexpectedExceptionStillEndsTheSession(self):
         # Every session must end in exactly one callback; a worker that dies
@@ -172,8 +202,12 @@ class TestPairingSession(unittest.TestCase):
         client = FakeClient(_begin(),
                             [{'status': 'approved', 'key': 'tok-secret'}])
         self._session(client).run()
+        err = self._failed()
+        # 200 is _unexpected's status. run()'s catch-all would say -1, which
+        # would mean the missing username was never checked.
+        self.assertEqual(200, err.status)
         # The message is shown to the user, so it must never carry the key.
-        self.assertNotIn('tok-secret', self._failed().message)
+        self.assertNotIn('tok-secret', err.message)
         self.assertFalse(self.store.is_logged_in())
 
     # --- cancellation ----------------------------------------------------
@@ -242,6 +276,8 @@ def suite():
     s = unittest.TestSuite()
     for name in ['testApprovalAfterPendingStoresTheToken',
                  'testApprovalReplacesThePreviousAccount',
+                 'testTheTokenIsStoredBeforeOnDoneRuns',
+                 'testAFailedTokenWriteStillEndsTheSession',
                  'testFollowsTheServersIntervalAndExpiry',
                  'testFallsBackToDefaultsWhenServerValuesAreUnusable',
                  'testAnUnexpectedExceptionStillEndsTheSession',

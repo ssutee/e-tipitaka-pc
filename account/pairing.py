@@ -120,8 +120,16 @@ class PairingSession(object):
         # wins the race leaves the store untouched. clear() first, exactly as
         # AccountClient.login() does, or the previous account's last_upload
         # leaks into this one.
-        self._store.clear()
-        self._store.set(key, username)
+        try:
+            self._store.clear()
+            self._store.set(key, username)
+        except Exception as e:
+            # A full disk or a read-only config dir. This runs on the UI
+            # thread, where run()'s catch-all cannot see it, so end the
+            # session here or the dialog waits forever. The server has
+            # already handed out the token; the user must start over.
+            self._on_error(FAILED, AccountError(-1, str(e)))
+            return
         self._on_done(username)
 
     def _deliver(self, fn, *args):
