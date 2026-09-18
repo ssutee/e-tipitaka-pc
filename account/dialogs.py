@@ -3,12 +3,14 @@
 import os
 import tempfile
 import threading
+import webbrowser
 import zipfile
 from datetime import datetime
 
 import wx
 
 from account.client import AccountError
+from account.pairing import PairingSession, DENIED, EXPIRED
 
 
 MSGBOX_TITLE = u'E-Tipitaka — บัญชีผู้ใช้'
@@ -353,10 +355,17 @@ class AccountDialog(wx.Dialog):
 
     def __init__(self, parent, client, tokenstore, presenter):
         super(AccountDialog, self).__init__(parent, title=u'บัญชีผู้ใช้',
-                                            size=(380, 280))
+                                            size=(420, 380))
         self._client = client
         self._store = tokenstore
         self._presenter = presenter
+
+        self._pairing = None        # the PairingSession in flight, if any
+        self._pairing_url = None
+        # A single Gauge.Pulse() animates continuously on macOS and Windows
+        # but moves one step on GTK, and a pairing can last ten minutes.
+        self._pulse = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_pulse, self._pulse)
 
         self._panel = wx.Panel(self)
         self._sizer = wx.BoxSizer(wx.VERTICAL)
@@ -370,29 +379,49 @@ class AccountDialog(wx.Dialog):
         self.Bind(wx.EVT_CLOSE, self._on_close)
 
     def _on_close(self, evt):
-        # Veto window-manager close while a worker thread is in-flight.
-        if any(not b.IsEnabled() for b in self._actionButtons):
+        if self._pairing is not None:
+            # A pairing can run for ten minutes, so closing the window
+            # cancels it instead of being vetoed. cancel() guarantees nothing
+            # fires into this dialog afterwards -- the danger the veto below
+            # exists to prevent for the short requests, which cannot be
+            # cancelled.
+            self._cancel_pairing()
+        elif any(not b.IsEnabled() for b in self._actionButtons):
+            # Veto window-manager close while a worker thread is in-flight.
             evt.Veto()
             return
         self.EndModal(wx.ID_OK)
 
-    def _render(self):
+    def _reset(self):
+        self._pulse.Stop()
         self._sizer.Clear(delete_windows=True)
         self._gauge = wx.Gauge(self._panel)
         self._gauge.Hide()
         self._actionButtons = []
+
+    def _relayout(self):
+        self._panel.Layout()
+        self.Layout()
+
+    def _render(self):
+        self._reset()
         if self._store.is_logged_in():
             self._render_logged_in()
         else:
             self._render_logged_out()
-        self._panel.Layout()
-        self.Layout()
+        self._relayout()
 
     def _render_logged_out(self):
-        grid = wx.FlexGridSizer(rows=3, cols=2, vgap=6, hgap=6)
+        status = wx.StaticText(self._panel, label=u'เข้าสู่ระบบ: -')
+
+        # The primary action. The label must stay exactly this: the
+        # confirmation page in the browser asks whether the user just pressed
+        # "เข้าสู่ระบบด้วยพาสคีย์" on their computer, quoting it by name.
+        btnPasskey = wx.Button(self._panel, label=u'เข้าสู่ระบบด้วยพาสคีย์')
+        btnPasskey.Bind(wx.EVT_BUTTON, self._on_passkey_login)
+
+        grid = wx.FlexGridSizer(rows=2, cols=2, vgap=6, hgap=6)
         grid.AddGrowableCol(1, 1)
-        grid.Add(wx.StaticText(self._panel, label=u'เข้าสู่ระบบ: -'))
-        grid.Add(wx.StaticText(self._panel, label=''))
         self._username = wx.TextCtrl(self._panel)
         self._password = wx.TextCtrl(self._panel, style=wx.TE_PASSWORD)
         grid.Add(wx.StaticText(self._panel, label=u'ชื่อผู้ใช้'),
@@ -414,8 +443,13 @@ class AccountDialog(wx.Dialog):
         btnRow.AddStretchSpacer()
         btnRow.Add(btnClose, 0)
 
-        self._actionButtons = [btnLogin, btnSignup, btnClose]
+        self._actionButtons = [btnPasskey, btnLogin, btnSignup, btnClose]
 
+        self._sizer.Add(status, 0, wx.ALL, 10)
+        self._sizer.Add(btnPasskey, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        self._sizer.Add(wx.StaticText(self._panel,
+                        label=u'หรือใช้ชื่อผู้ใช้และรหัสผ่าน'),
+                        0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         self._sizer.Add(grid, 1, wx.EXPAND | wx.ALL, 10)
         self._sizer.Add(self._gauge, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         self._sizer.Add(btnRow, 0, wx.EXPAND | wx.ALL, 10)
@@ -475,6 +509,112 @@ class AccountDialog(wx.Dialog):
         dlg = SignUpDialog(self, self._client)
         dlg.ShowModal()
         dlg.Destroy()
+
+    # --- passkey sign-in ---------------------------------------------------
+
+    def _on_passkey_login(self, _evt):
+        self._busy(True)
+        self._pairing = PairingSession(
+            self._client, self._store,
+            on_code=self._show_pairing,
+            on_done=self._on_pairing_done,
+            on_error=self._on_pairing_error,
+            dispatch=wx.CallAfter)
+        self._pairing.start()
+
+    def _show_pairing(self, user_code, url):
+        self._pairing_url = url
+        self._reset()
+        self._render_pairing(user_code)
+        self._relayout()
+        self._pulse.Start(100)
+        # The app opens the page itself, so the honest flow never involves
+        # following a pairing link from anywhere else -- with the code in the
+        # URL, a link from elsewhere is exactly what a phisher would send.
+        # Rendered first, so the code is on screen before the browser takes
+        # focus.
+        self._open_browser(url)
+
+    def _render_pairing(self, user_code):
+        col = wx.BoxSizer(wx.VERTICAL)
+        # Name the app beside the code: the browser page cannot say which
+        # computer is asking, so this screen is the only place that can.
+        col.Add(wx.StaticText(self._panel,
+                label=u'E-Tipitaka บนคอมพิวเตอร์เครื่องนี้แสดงรหัส:'),
+                0, wx.BOTTOM, 6)
+        code = wx.StaticText(self._panel, label=user_code)
+        code.SetFont(wx.Font(24, wx.FONTFAMILY_TELETYPE,
+                             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+        col.Add(code, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, 8)
+        hint = wx.StaticText(self._panel, label=(
+            u'ลงชื่อเข้าใช้ในเบราว์เซอร์ที่เปิดขึ้น แล้วตรวจว่าหน้าเว็บแสดงรหัส'
+            u'เดียวกันนี้ ถ้าไม่ตรงกัน อย่ากด "ใช่ อนุญาต"'))
+        hint.Wrap(380)
+        col.Add(hint, 0, wx.BOTTOM, 10)
+        self._gauge.Show()
+        col.Add(self._gauge, 0, wx.EXPAND | wx.BOTTOM, 4)
+        col.Add(wx.StaticText(self._panel,
+                label=u'กำลังรอการยืนยันในเบราว์เซอร์...'), 0)
+
+        btnReopen = wx.Button(self._panel, label=u'เปิดเบราว์เซอร์อีกครั้ง')
+        btnCancel = wx.Button(self._panel, label=u'ยกเลิก')
+        btnReopen.Bind(wx.EVT_BUTTON,
+                       lambda _e: self._open_browser(self._pairing_url))
+        btnCancel.Bind(wx.EVT_BUTTON, self._on_cancel_pairing)
+        btnRow = wx.BoxSizer(wx.HORIZONTAL)
+        btnRow.Add(btnReopen, 0)
+        btnRow.AddStretchSpacer()
+        btnRow.Add(btnCancel, 0)
+
+        self._actionButtons = [btnReopen, btnCancel]
+
+        self._sizer.Add(col, 1, wx.EXPAND | wx.ALL, 10)
+        self._sizer.Add(btnRow, 0, wx.EXPAND | wx.ALL, 10)
+
+    def _on_pulse(self, _evt):
+        self._gauge.Pulse()
+
+    def _on_cancel_pairing(self, _evt):
+        self._cancel_pairing()
+        self._render()
+
+    def _cancel_pairing(self):
+        if self._pairing is not None:
+            self._pairing.cancel()
+            self._pairing = None
+        self._pulse.Stop()
+
+    def _on_pairing_done(self, _username):
+        self._pairing = None
+        self._render()          # the store now holds the token
+        # The user is still in the browser: bounce the Dock icon / flash the
+        # taskbar so they know to come back.
+        self.RequestUserAttention()
+
+    def _on_pairing_error(self, reason, err):
+        self._pairing = None
+        self._render()
+        if reason == DENIED:
+            wx.MessageBox(u'คำขอเข้าสู่ระบบถูกปฏิเสธในเบราว์เซอร์',
+                          MSGBOX_TITLE, wx.OK | wx.ICON_INFORMATION, self)
+        elif reason == EXPIRED:
+            wx.MessageBox(u'คำขอเข้าสู่ระบบหมดอายุแล้ว กรุณาลองใหม่',
+                          MSGBOX_TITLE, wx.OK | wx.ICON_WARNING, self)
+        elif err.status == 0:
+            _show_error(self, err)      # "cannot reach the server"
+        else:
+            # Not _show_error for the rest: its 401 and 404 wording is about
+            # an existing session and backups. Say what failed, then why --
+            # the server's Thai, or a local error such as a full disk.
+            wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s'
+                          % (err.message or u'HTTP %d' % err.status),
+                          MSGBOX_TITLE, wx.OK | wx.ICON_ERROR, self)
+
+    def _open_browser(self, url):
+        if not webbrowser.open_new(url):
+            wx.MessageBox(
+                u'เปิดเบราว์เซอร์ไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดเอง:\n\n%s' % url,
+                MSGBOX_TITLE, wx.OK | wx.ICON_WARNING, self)
 
     def _on_upload(self, _evt):
         data = self._store.get() or {}
