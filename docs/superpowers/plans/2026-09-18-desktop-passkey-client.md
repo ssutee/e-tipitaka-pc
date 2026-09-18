@@ -1959,6 +1959,30 @@ Add after it:
         self._open_browser(constants.ACCOUNT_PASSKEYS_URL)
 ```
 
+- [ ] **Step 5b: Grow the dialog to fit**
+
+The signed-out screen now stacks seven rows. They fit in 420x380 on macOS with room to spare, and on Windows by estimate. On GTK, Thai lines are taller and buttons are 34px, so the busy signed-out screen likely clips the recovery button, and the user cannot resize the dialog to reveal it. Replace `_relayout` (added in Task 6):
+
+```python
+    def _relayout(self):
+        self._panel.Layout()
+        self.Layout()
+```
+
+with:
+
+```python
+    def _relayout(self):
+        # Grow, never shrink: 420x380 is sized for macOS, and GTK's taller
+        # Thai lines and 34px buttons need more on the signed-out screen.
+        need, have = self._panel.GetBestSize(), self.GetClientSize()
+        if need.width > have.width or need.height > have.height:
+            self.SetClientSize((max(need.width, have.width),
+                                max(need.height, have.height)))
+        self._panel.Layout()
+        self.Layout()
+```
+
 - [ ] **Step 6: Import check and render smoke check**
 
 ```bash
@@ -2220,7 +2244,7 @@ Sign out and sign in with username and password. Expected: works exactly as befo
 
 - [ ] **Step 7: Windows and Linux**
 
-Repeat Steps 2 and 4 on Windows and Linux builds, if available. On Windows, **ยกเลิก** matters most: its click handler re-renders the dialog, destroying the button whose event is being handled. That was verified safe on macOS only. On Linux, watch the gauge on the pairing screen specifically: it must keep moving for the whole wait, because a single `Pulse()` only moves one step on GTK. Record any platform that is not checked, rather than marking it verified.
+Repeat Steps 2 and 4 on Windows and Linux builds, if available. On Linux, the signed-out screen must show **ลืมรหัสผ่าน / พาสคีย์หาย...** in full, including while signing in with a password (the gauge adds a row); the dialog grows to fit rather than clipping it. On Windows, **ยกเลิก** matters most: its click handler re-renders the dialog, destroying the button whose event is being handled. That was verified safe on macOS only. On Linux, watch the gauge on the pairing screen specifically: it must keep moving for the whole wait, because a single `Pulse()` only moves one step on GTK. Record any platform that is not checked, rather than marking it verified.
 
 ---
 
