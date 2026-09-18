@@ -6,14 +6,14 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 
-from account.client import AccountClient, AccountError
+from account.client import AccountClient, AccountError, RateLimited
 from account.tokenstore import TokenStore
 
 
 BASE = 'https://data.etipitaka.example'
 
 
-def _resp(status=200, json_body=None, content=b''):
+def _resp(status=200, json_body=None, content=b'', headers=None):
     r = MagicMock()
     r.status_code = status
     r.ok = 200 <= status < 300
@@ -22,6 +22,9 @@ def _resp(status=200, json_body=None, content=b''):
         content = json.dumps(json_body).encode('utf-8')
     r.content = content
     r.text = json.dumps(json_body) if json_body is not None else content.decode('utf-8', 'ignore')
+    # A real dict, not the MagicMock default: int() of a MagicMock is 1, so a
+    # mocked response would otherwise appear to send "Retry-After: 1".
+    r.headers = headers or {}
     return r
 
 
@@ -189,6 +192,43 @@ class TestAccountClient(unittest.TestCase):
         self.assertEqual('alice', data['username'])
         self.assertNotIn('last_upload', data)
 
+    @patch('account.client.requests.post')
+    def testRateLimitedCarriesRetryAfter(self, post):
+        post.return_value = _resp(429, {'error': 'rate_limited', 'retry_after': 5,
+                                        'detail': 'Too many requests.'},
+                                  headers={'Retry-After': '5'})
+        with self.assertRaises(RateLimited) as cm:
+            self.client.login('alice', 'pw')
+        self.assertIsInstance(cm.exception, AccountError)
+        self.assertEqual(429, cm.exception.status)
+        self.assertEqual(5, cm.exception.retry_after)
+        self.assertEqual('Too many requests.', cm.exception.message)
+
+    @patch('account.client.requests.post')
+    def testRateLimitedReadsTheHeaderNotTheBody(self, post):
+        # DRF's own throttle sends no retry_after key in the body at all --
+        # only the header, which is the one thing both limiters agree on.
+        post.return_value = _resp(
+            429, {'detail': 'Request was throttled. Expected available in 42 seconds.'},
+            headers={'Retry-After': '42'})
+        with self.assertRaises(RateLimited) as cm:
+            self.client.login('alice', 'pw')
+        self.assertEqual(42, cm.exception.retry_after)
+
+    @patch('account.client.requests.post')
+    def testRateLimitedWithoutAHeaderHasNoRetryAfter(self, post):
+        post.return_value = _resp(429, {'detail': 'slow down'})
+        with self.assertRaises(RateLimited) as cm:
+            self.client.login('alice', 'pw')
+        self.assertIsNone(cm.exception.retry_after)
+
+    @patch('account.client.requests.post')
+    def testOtherErrorsAreNotRateLimited(self, post):
+        post.return_value = _resp(400, {'non_field_errors': ['bad creds']})
+        with self.assertRaises(AccountError) as cm:
+            self.client.login('alice', 'wrong')
+        self.assertIs(AccountError, type(cm.exception))
+
 
 def suite():
     s = unittest.TestSuite()
@@ -202,7 +242,11 @@ def suite():
                  'testLogoutClearsLocalTokenEvenOnServerError',
                  'testLogoutNoOpWhenNotLoggedIn',
                  'testLoginRaisesAccountErrorWhenKeyMissing',
-                 'testLoginClearsStaleLastUploadBeforeStoringNewToken']:
+                 'testLoginClearsStaleLastUploadBeforeStoringNewToken',
+                 'testRateLimitedCarriesRetryAfter',
+                 'testRateLimitedReadsTheHeaderNotTheBody',
+                 'testRateLimitedWithoutAHeaderHasNoRetryAfter',
+                 'testOtherErrorsAreNotRateLimited']:
         s.addTest(TestAccountClient(name))
     return s
 

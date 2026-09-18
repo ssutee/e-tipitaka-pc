@@ -12,6 +12,21 @@ class AccountError(Exception):
         self.message = message
 
 
+class RateLimited(AccountError):
+    """A 429. `retry_after` is the server's Retry-After header in seconds, or
+    None if it sent none that parses.
+
+    Both of the server's rate limiters send that header, with different
+    bodies: nginx's edge limit returns {"error", "retry_after", "detail"},
+    while DRF's own throttle returns only {"detail"}. The header is the one
+    thing they agree on, so it is what this reads.
+    """
+
+    def __init__(self, status, message, retry_after=None):
+        super(RateLimited, self).__init__(status, message)
+        self.retry_after = retry_after
+
+
 def _extract_message(resp):
     try:
         body = resp.json()
@@ -28,6 +43,13 @@ def _extract_message(resp):
             if isinstance(v, str):
                 return v
     return str(body)
+
+
+def _retry_after(resp):
+    try:
+        return int(resp.headers.get('Retry-After'))
+    except (TypeError, ValueError):
+        return None
 
 
 class AccountClient(object):
@@ -143,5 +165,7 @@ class AccountClient(object):
         return {'Authorization': 'Token ' + token}
 
     def _raise_if_error(self, resp):
+        if resp.status_code == 429:
+            raise RateLimited(429, _extract_message(resp), _retry_after(resp))
         if not resp.ok:
             raise AccountError(resp.status_code, _extract_message(resp))
