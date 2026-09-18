@@ -8,6 +8,7 @@ import tests.test_patcher
 import tests.test_import_extras
 import tests.test_build_config
 import tests.test_compare_close
+import tests.test_account_pairing
 
 suite1 = tests.test_threads.suite()
 suite2 = tests.test_theme.suite()
@@ -18,7 +19,8 @@ suite6 = tests.test_patcher.suite()
 suite7 = tests.test_import_extras.suite()
 suite8 = tests.test_build_config.suite()
 suite9 = tests.test_compare_close.suite()
-alltests = unittest.TestSuite([suite1, suite2, suite3, suite4, suite5, suite6, suite7, suite8, suite9])
+suite10 = tests.test_account_pairing.suite()
+alltests = unittest.TestSuite([suite1, suite2, suite3, suite4, suite5, suite6, suite7, suite8, suite9, suite10])
 
 runner = unittest.TextTestRunner()
 runner.run(alltests)
