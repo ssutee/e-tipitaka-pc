@@ -2187,8 +2187,10 @@ Expected: `git status` shows only what predates this work — ` M uv.lock` and u
 `CLAUDE.md` asks for a graph update after structural changes, and `account/pairing.py` is a new module:
 
 ```bash
-graphify . --update
+graphify update .
 ```
+
+(`graphify update .` is the CLI form of `CLAUDE.md`'s `graphify . --update`. It re-extracts code only and needs no LLM. If `graphify-out/.graphify_root` changes only from `/Users/sutee/Works/...` to `/Volumes/SeagateBackup/Works/...`, restore it with `git checkout -- graphify-out/.graphify_root`: the first is a symlink to the second.)
 
 Then commit whatever it changed under `graphify-out/`:
 
