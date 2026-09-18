@@ -210,6 +210,23 @@ class TestPairingSession(unittest.TestCase):
         self.assertNotIn('tok-secret', err.message)
         self.assertFalse(self.store.is_logged_in())
 
+    # --- the server ends it ----------------------------------------------
+
+    def testDenialEndsTheSession(self):
+        client = FakeClient(_begin(), [PENDING, REFUSED])
+        self._session(client).run()
+        self.assertEqual(('error', DENIED, None), self.rec.events[-1])
+        self.assertEqual(2, len(client.poll_calls))
+        self.assertFalse(self.store.is_logged_in())
+
+    def testA400EndsTheSessionAsExpired(self):
+        # Also what happens when an approval's response is lost in transit:
+        # the server hands the token over at most once, so the retry is a 400.
+        client = FakeClient(_begin(), [PENDING, AccountError(400, 'gone')])
+        self._session(client).run()
+        self.assertEqual(('error', EXPIRED, None), self.rec.events[-1])
+        self.assertEqual(2, len(client.poll_calls))
+
     # --- cancellation ----------------------------------------------------
 
     def testCancelStopsPollingAndFiresNothing(self):
@@ -283,6 +300,8 @@ def suite():
                  'testAnUnexpectedExceptionStillEndsTheSession',
                  'testAnUnrecognisedStatusFailsLoudly',
                  'testApprovedWithoutUsernameFailsWithoutLeakingTheToken',
+                 'testDenialEndsTheSession',
+                 'testA400EndsTheSessionAsExpired',
                  'testCancelStopsPollingAndFiresNothing',
                  'testCancelDropsACallbackAlreadyQueued',
                  'testCancelWakesTheDefaultSleepPromptly',

@@ -96,10 +96,23 @@ class PairingSession(object):
             if self._now() >= deadline:
                 self._deliver(self._on_error, EXPIRED, None)
                 return
-            result = self._client.desktop_poll(device_code)
+            try:
+                result = self._client.desktop_poll(device_code)
+            except AccountError as e:
+                if e.status != 400:
+                    raise
+                # Unknown, expired or already used -- the server will not
+                # say which. "Already used" includes an approval whose
+                # response never reached us: the token is delivered at most
+                # once, so there is nothing left to retry.
+                self._deliver(self._on_error, EXPIRED, None)
+                return
             status = result.get('status')
             if status == 'pending':
                 continue
+            if status == 'denied':
+                self._deliver(self._on_error, DENIED, None)
+                return
             if status == 'approved' and result.get('key') \
                     and result.get('username'):
                 self._deliver(self._approved, result['key'],
