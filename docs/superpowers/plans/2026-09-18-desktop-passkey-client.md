@@ -126,9 +126,10 @@ def _resp(status=200, json_body=None, content=b'', headers=None):
         content = json.dumps(json_body).encode('utf-8')
     r.content = content
     r.text = json.dumps(json_body) if json_body is not None else content.decode('utf-8', 'ignore')
-    # A real dict, not the MagicMock default: int() of a MagicMock is 1, so a
+    # Case-insensitive like a real requests response, and a real mapping
+    # rather than the MagicMock default: int() of a MagicMock is 1, so a
     # mocked response would otherwise appear to send "Retry-After: 1".
-    r.headers = headers or {}
+    r.headers = CaseInsensitiveDict(headers or {})
     return r
 ```
 
@@ -136,6 +137,12 @@ And change the import on line 9 to:
 
 ```python
 from account.client import AccountClient, AccountError, RateLimited
+```
+
+and add a third-party import group below the `from unittest.mock import patch, MagicMock` line, separated from it by a blank line (PEP 8 grouping):
+
+```python
+from requests.structures import CaseInsensitiveDict
 ```
 
 - [ ] **Step 2: Write the failing tests**
@@ -174,20 +181,37 @@ Add to `TestAccountClient`, after `testLoginClearsStaleLastUploadBeforeStoringNe
         self.assertIsNone(cm.exception.retry_after)
 
     @patch('account.client.requests.post')
+    def testRateLimitedWithAnUnusableHeaderHasNoRetryAfter(self, post):
+        # HTTP also allows an HTTP-date here, and a proxy could send a fraction
+        # or a negative number. None may escape as a ValueError: in the pairing
+        # loop that would end a pairing that is still live.
+        for value in ('Wed, 21 Oct 2015 07:28:00 GMT', '1.5', '-3'):
+            post.return_value = _resp(429, {'detail': 'slow down'},
+                                      headers={'Retry-After': value})
+            with self.assertRaises(RateLimited) as cm:
+                self.client.login('alice', 'pw')
+            self.assertIsNone(cm.exception.retry_after, value)
+
+    @patch('account.client.requests.post')
     def testOtherErrorsAreNotRateLimited(self, post):
-        post.return_value = _resp(400, {'non_field_errors': ['bad creds']})
-        with self.assertRaises(AccountError) as cm:
-            self.client.login('alice', 'wrong')
-        self.assertIs(AccountError, type(cm.exception))
+        # A 5xx in particular must stay a plain AccountError: the pairing loop
+        # never counts a RateLimited as a failure, so a misclassified outage
+        # would poll for the whole ten minutes instead of giving up.
+        for status in (400, 500, 503):
+            post.return_value = _resp(status, {'detail': 'nope'})
+            with self.assertRaises(AccountError) as cm:
+                self.client.login('alice', 'wrong')
+            self.assertIs(AccountError, type(cm.exception), status)
 ```
 
-Add the four names to the list in `suite()`, after `'testLoginClearsStaleLastUploadBeforeStoringNewToken'`:
+Add the five names to the list in `suite()`, after `'testLoginClearsStaleLastUploadBeforeStoringNewToken'`. Keep `'testOtherErrorsAreNotRateLimited'` last: Task 2 extends the list from that line.
 
 ```python
                  'testLoginClearsStaleLastUploadBeforeStoringNewToken',
                  'testRateLimitedCarriesRetryAfter',
                  'testRateLimitedReadsTheHeaderNotTheBody',
                  'testRateLimitedWithoutAHeaderHasNoRetryAfter',
+                 'testRateLimitedWithAnUnusableHeaderHasNoRetryAfter',
                  'testOtherErrorsAreNotRateLimited']:
 ```
 
@@ -224,9 +248,12 @@ Directly after `_extract_message` (after line 30):
 ```python
 def _retry_after(resp):
     try:
-        return int(resp.headers.get('Retry-After'))
+        seconds = int(resp.headers.get('Retry-After'))
     except (TypeError, ValueError):
         return None
+    # A negative delay is nonsense; report "unknown" rather than pass it on.
+    # (An HTTP-date or a fraction already landed in ValueError above.)
+    return seconds if seconds >= 0 else None
 ```
 
 Replace `_raise_if_error` (the last method in the file) with:
@@ -245,11 +272,20 @@ Replace `_raise_if_error` (the last method in the file) with:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_client -v
 ```
 
-Expected: `Ran 19 tests` … `OK`. Then run the `suite()` check from *Before you start* with `tests.test_account_client`: expected `suite() lists 19 of 19 test methods`.
+Expected: `Ran 20 tests` … `OK`. Then run the `suite()` check from *Before you start* with `tests.test_account_client`: expected `suite() lists 20 of 20 test methods`.
 
 - [ ] **Step 6: Prove the header test can fail**
 
-Temporarily change `_retry_after` to read the body instead: `return int(resp.json().get('retry_after'))`. Re-run the module. Expected: `testRateLimitedReadsTheHeaderNotTheBody` **FAILS** (the DRF-shaped body has no `retry_after`). Restore the header version and confirm green.
+Apply each mutation alone, run the module, see the named test **FAIL**, and restore before the next:
+
+| Mutation in `account/client.py` | Test that must fail |
+|---|---|
+| `_retry_after` reads the body: `seconds = int(resp.json().get('retry_after'))` | `testRateLimitedReadsTheHeaderNotTheBody` |
+| Narrow `except (TypeError, ValueError)` to `except TypeError` | `testRateLimitedWithAnUnusableHeaderHasNoRetryAfter` |
+| `return seconds` instead of rejecting negatives | `testRateLimitedWithAnUnusableHeaderHasNoRetryAfter` (on `'-3'`) |
+| `if resp.status_code >= 429:` | `testOtherErrorsAreNotRateLimited` |
+
+And one that must **not** fail: changing `.get('Retry-After')` to `.get('retry-after')` keeps every test green, because the fixture is case-insensitive like a real `requests` response.
 
 - [ ] **Step 7: Commit**
 
@@ -389,7 +425,7 @@ In `account/client.py`, after `delete_backup` and before `_auth_headers`:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_client -v
 ```
 
-Expected: `Ran 24 tests` … `OK`. `suite()` check with `tests.test_account_client`: `suite() lists 24 of 24 test methods`.
+Expected: `Ran 25 tests` … `OK`. `suite()` check with `tests.test_account_client`: `suite() lists 25 of 25 test methods`.
 
 - [ ] **Step 5: Prove the missing-field test can fail**
 
@@ -1586,7 +1622,7 @@ Expected: `signed out: ok`, `pairing: ok`, `signed in: ok`, and no traceback.
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 129 tests` … `OK`.
+Expected: `Ran 130 tests` … `OK`.
 
 - [ ] **Step 9: Commit**
 
@@ -1928,12 +1964,12 @@ git commit -m "docs: passkeys in the privacy policy; spec amendments after the s
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 129 tests` … `OK` (97 before + 9 client + 23 pairing). Read the output; the exit code means nothing here.
+Expected: `Ran 130 tests` … `OK` (97 before + 10 client + 23 pairing). Read the output; the exit code means nothing here.
 
 - [ ] **Step 2: Every new test is registered**
 
 Run the `suite()` check from *Before you start* for both modules:
-- `tests.test_account_client` → `suite() lists 24 of 24 test methods`
+- `tests.test_account_client` → `suite() lists 25 of 25 test methods`
 - `tests.test_account_pairing` → `suite() lists 23 of 23 test methods`
 
 - [ ] **Step 3: Nothing stray is staged or committed**
