@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
 
+from requests.structures import CaseInsensitiveDict
+
 from account.client import AccountClient, AccountError, RateLimited
 from account.tokenstore import TokenStore
 
@@ -22,9 +24,10 @@ def _resp(status=200, json_body=None, content=b'', headers=None):
         content = json.dumps(json_body).encode('utf-8')
     r.content = content
     r.text = json.dumps(json_body) if json_body is not None else content.decode('utf-8', 'ignore')
-    # A real dict, not the MagicMock default: int() of a MagicMock is 1, so a
+    # Case-insensitive like a real requests response, and a real mapping
+    # rather than the MagicMock default: int() of a MagicMock is 1, so a
     # mocked response would otherwise appear to send "Retry-After: 1".
-    r.headers = headers or {}
+    r.headers = CaseInsensitiveDict(headers or {})
     return r
 
 
@@ -223,11 +226,27 @@ class TestAccountClient(unittest.TestCase):
         self.assertIsNone(cm.exception.retry_after)
 
     @patch('account.client.requests.post')
+    def testRateLimitedWithAnUnusableHeaderHasNoRetryAfter(self, post):
+        # HTTP also allows an HTTP-date here, and a proxy could send a fraction
+        # or a negative number. None may escape as a ValueError: in the pairing
+        # loop that would end a pairing that is still live.
+        for value in ('Wed, 21 Oct 2015 07:28:00 GMT', '1.5', '-3'):
+            post.return_value = _resp(429, {'detail': 'slow down'},
+                                      headers={'Retry-After': value})
+            with self.assertRaises(RateLimited) as cm:
+                self.client.login('alice', 'pw')
+            self.assertIsNone(cm.exception.retry_after, value)
+
+    @patch('account.client.requests.post')
     def testOtherErrorsAreNotRateLimited(self, post):
-        post.return_value = _resp(400, {'non_field_errors': ['bad creds']})
-        with self.assertRaises(AccountError) as cm:
-            self.client.login('alice', 'wrong')
-        self.assertIs(AccountError, type(cm.exception))
+        # A 5xx in particular must stay a plain AccountError: the pairing loop
+        # never counts a RateLimited as a failure, so a misclassified outage
+        # would poll for the whole ten minutes instead of giving up.
+        for status in (400, 500, 503):
+            post.return_value = _resp(status, {'detail': 'nope'})
+            with self.assertRaises(AccountError) as cm:
+                self.client.login('alice', 'wrong')
+            self.assertIs(AccountError, type(cm.exception), status)
 
 
 def suite():
@@ -246,6 +265,7 @@ def suite():
                  'testRateLimitedCarriesRetryAfter',
                  'testRateLimitedReadsTheHeaderNotTheBody',
                  'testRateLimitedWithoutAHeaderHasNoRetryAfter',
+                 'testRateLimitedWithAnUnusableHeaderHasNoRetryAfter',
                  'testOtherErrorsAreNotRateLimited']:
         s.addTest(TestAccountClient(name))
     return s

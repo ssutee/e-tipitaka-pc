@@ -47,9 +47,12 @@ def _extract_message(resp):
 
 def _retry_after(resp):
     try:
-        return int(resp.headers.get('Retry-After'))
+        seconds = int(resp.headers.get('Retry-After'))
     except (TypeError, ValueError):
         return None
+    # A negative delay is nonsense; report "unknown" rather than pass it on.
+    # (An HTTP-date or a fraction already landed in ValueError above.)
+    return seconds if seconds >= 0 else None
 
 
 class AccountClient(object):
