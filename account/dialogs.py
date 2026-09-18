@@ -546,9 +546,10 @@ class AccountDialog(wx.Dialog):
         code.SetFont(wx.Font(24, wx.FONTFAMILY_TELETYPE,
                              wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
         col.Add(code, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, 8)
+        # A no-break space keeps the quoted button name on one line.
         hint = wx.StaticText(self._panel, label=(
             u'ลงชื่อเข้าใช้ในเบราว์เซอร์ที่เปิดขึ้น แล้วตรวจว่าหน้าเว็บแสดงรหัส'
-            u'เดียวกันนี้ ถ้าไม่ตรงกัน อย่ากด "ใช่ อนุญาต"'))
+            u'เดียวกันนี้ ถ้าไม่ตรงกัน อย่ากด "ใช่\u00a0อนุญาต"'))
         hint.Wrap(380)
         col.Add(hint, 0, wx.BOTTOM, 10)
         self._gauge.Show()
@@ -557,7 +558,9 @@ class AccountDialog(wx.Dialog):
                 label=u'กำลังรอการยืนยันในเบราว์เซอร์...'), 0)
 
         btnReopen = wx.Button(self._panel, label=u'เปิดเบราว์เซอร์อีกครั้ง')
-        btnCancel = wx.Button(self._panel, label=u'ยกเลิก')
+        # wx.ID_CANCEL, so Esc cancels too. The handler below does not Skip(),
+        # so the dialog's default Esc handling never ends the modal.
+        btnCancel = wx.Button(self._panel, wx.ID_CANCEL, label=u'ยกเลิก')
         btnReopen.Bind(wx.EVT_BUTTON,
                        lambda _e: self._open_browser(self._pairing_url))
         btnCancel.Bind(wx.EVT_BUTTON, self._on_cancel_pairing)
@@ -605,9 +608,12 @@ class AccountDialog(wx.Dialog):
         else:
             # Not _show_error for the rest: its 401 and 404 wording is about
             # an existing session and backups. Say what failed, then why --
-            # the server's Thai, or a local error such as a full disk.
-            wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s'
-                          % (err.message or u'HTTP %d' % err.status),
+            # the server's Thai, or a local error such as a full disk. A 5xx
+            # body is usually a proxy's HTML page, so name the status instead.
+            detail = err.message
+            if err.status >= 500 or not detail:
+                detail = u'HTTP %d' % err.status
+            wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s' % detail,
                           MSGBOX_TITLE, wx.OK | wx.ICON_ERROR, self)
 
     def _open_browser(self, url):
@@ -674,4 +680,6 @@ class AccountDialog(wx.Dialog):
             self._gauge.Pulse()
         else:
             self._gauge.Hide()
-        self.Layout()
+        # The gauge lives on the panel: laying out only the dialog leaves it
+        # a sliver at the panel's origin, over the status line.
+        self._relayout()
