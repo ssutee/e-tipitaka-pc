@@ -1196,6 +1196,8 @@ Add to `TestPairingSession`, after `testA400EndsTheSessionAsExpired`:
         self._session(client).run()
         self.assertEqual(('done', 'alice'), self.rec.events[-1])
         self.assertEqual(6, len(client.poll_calls))
+        # The wait resets too: back to the interval, then doubling afresh.
+        self.assertEqual([5, 10, 20, 5, 10, 20], self.clock.sleeps)
 
     def testARateLimitIsNotAFailure(self):
         # Four 429s in a row, more than MAX_FAILURES, and the session lives.
@@ -1370,6 +1372,7 @@ Expected: `Ran 25 tests` … `OK`. `suite()` check: `suite() lists 25 of 25 test
 |---|---|
 | Delete the `except RateLimited` block, so a 429 falls into the `AccountError` branch | `testARateLimitIsNotAFailure` |
 | In the `pending` branch, change `wait, failures = interval, 0` to `wait = interval` | `testTheFailureCountResetsOnAnyGoodResponse` |
+| In the `pending` branch, change `wait, failures = interval, 0` to `failures = 0` | `testTheFailureCountResetsOnAnyGoodResponse` |
 | Change `max(interval, e.retry_after or 0)` to `e.retry_after or interval` | `testARateLimitNeverPollsFasterThanTheInterval` |
 | Change `if e.status == 400:` to `if e.status >= 400:`, so any client or server error ends the pairing | `testServerErrorsCountAsFailuresToo` |
 
@@ -1672,8 +1675,15 @@ Add directly after it:
         elif reason == EXPIRED:
             wx.MessageBox(u'คำขอเข้าสู่ระบบหมดอายุแล้ว กรุณาลองใหม่',
                           MSGBOX_TITLE, wx.OK | wx.ICON_WARNING, self)
+        elif err.status == 0:
+            _show_error(self, err)      # "cannot reach the server"
         else:
-            _show_error(self, err)
+            # Not _show_error for the rest: its 401 and 404 wording is about
+            # an existing session and backups. Say what failed, then why --
+            # the server's Thai, or a local error such as a full disk.
+            wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s'
+                          % (err.message or u'HTTP %d' % err.status),
+                          MSGBOX_TITLE, wx.OK | wx.ICON_ERROR, self)
 
     def _open_browser(self, url):
         if not webbrowser.open_new(url):
@@ -1686,6 +1696,7 @@ Notes for the reviewer:
 - The pairing screen does not use `_busy()`. That would disable its own Cancel button. It shows the gauge and drives it with the timer instead.
 - `_on_pairing_error` re-renders *before* showing the message box, so the signed-out screen is already behind the box.
 - The dialog's `_on_err` is not used here. It clears the store on a 401, and no pairing response can be a 401.
+- Only network failures (status 0) go through `_show_error`. Its 401 and 404 messages are about sessions and backups, so a 404 on begin would otherwise tell the user "backup not found".
 
 - [ ] **Step 6: Import check**
 
