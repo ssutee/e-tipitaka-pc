@@ -300,10 +300,12 @@ git commit -m "feat(account): RateLimited carries the server's Retry-After" \
 ### Task 2: `desktop_begin` and `desktop_poll`
 
 **Files:**
-- Modify: `account/client.py` (new methods after `delete_backup`, before `_auth_headers`)
+- Modify: `account/client.py` (a `_pairing_body` helper after `_retry_after`; new methods after `delete_backup`, before `_auth_headers`)
 - Test: `tests/test_account_client.py`
 
 Both follow the file's existing shape: bare `requests.post`, `_raise_if_error`, return the parsed body. Neither stores anything — `PairingSession` decides whether a token is kept (Task 3), which is what lets a cancel discard it.
+
+The parsed body must be a JSON object. `_pairing_body` turns anything else (empty, a list, a bare string) into an `AccountError`, which `PairingSession` retries like any other failure, rather than an `AttributeError` that would end the session at once.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -321,22 +323,58 @@ Add to `TestAccountClient`, after `testOtherErrorsAreNotRateLimited`:
             BASE + '/api/passkeys/desktop/begin/', json={}, timeout=30)
 
     @patch('account.client.requests.post')
-    def testDesktopBeginRejectsAResponseWithoutADeviceCode(self, post):
-        post.return_value = _resp(200, {'user_code': 'ABCD-2345',
-                                        'verification_url': BASE + '/desktop/'})
+    def testDesktopBeginRejectsAnIncompleteResponse(self, post):
+        good = {'device_code': 'dev-secret', 'user_code': 'ABCD-2345',
+                'verification_url': BASE + '/desktop/?code=ABCD-2345'}
+        for key in good:
+            missing = {k: v for k, v in good.items() if k != key}
+            for broken in (missing, dict(good, **{key: ''}),
+                           dict(good, **{key: None})):
+                post.return_value = _resp(200, broken)
+                with self.assertRaises(AccountError, msg=repr(broken)) as cm:
+                    self.client.desktop_begin()
+                self.assertIn(key, cm.exception.message, repr(broken))
+
+    @patch('account.client.requests.post')
+    def testDesktopBeginRaisesTheServersError(self, post):
+        post.return_value = _resp(429, {'error': 'rate_limited', 'retry_after': 5,
+                                        'detail': 'Too many requests.'},
+                                  headers={'Retry-After': '5'})
+        with self.assertRaises(RateLimited) as cm:
+            self.client.desktop_begin()
+        self.assertEqual('Too many requests.', cm.exception.message)
+        post.return_value = _resp(503, {'detail': u'ระบบปิดปรับปรุง'})
         with self.assertRaises(AccountError) as cm:
             self.client.desktop_begin()
-        self.assertIn('device_code', cm.exception.message)
+        self.assertEqual(503, cm.exception.status)
+        self.assertEqual(u'ระบบปิดปรับปรุง', cm.exception.message)
+
+    @patch('account.client.requests.post')
+    def testDesktopRejectsABodyThatIsNotAnObject(self, post):
+        calls = {'begin': self.client.desktop_begin,
+                 'poll': lambda: self.client.desktop_poll('dev-secret')}
+        for name, call in calls.items():
+            for resp in (_resp(200), _resp(200, []), _resp(200, 'ok'),
+                         _resp(200, 5)):
+                post.return_value = resp
+                with self.assertRaises(AccountError, msg=name) as cm:
+                    call()
+                self.assertEqual(200, cm.exception.status, name)
+                self.assertEqual('unexpected pairing response',
+                                 cm.exception.message, name)
 
     @patch('account.client.requests.post')
     def testDesktopPollPostsTheDeviceCodeAndStoresNothing(self, post):
+        self.store.set('old-tok', 'bob')
         approved = {'status': 'approved', 'key': 'tok', 'username': 'alice'}
         post.return_value = _resp(200, approved)
         self.assertEqual(approved, self.client.desktop_poll('dev-secret'))
         post.assert_called_once_with(
             BASE + '/api/passkeys/desktop/poll/',
             json={'device_code': 'dev-secret'}, timeout=30)
-        self.assertFalse(self.store.is_logged_in())
+        # Neither replaced nor wiped: the token already here is untouched.
+        self.assertEqual('old-tok', self.store.get()['token'])
+        self.assertEqual('bob', self.store.get()['username'])
 
     @patch('account.client.requests.post')
     def testDesktopPollRaises400WhenThePairingIsGone(self, post):
@@ -361,7 +399,9 @@ Extend the `suite()` list after `'testOtherErrorsAreNotRateLimited'`:
 ```python
                  'testOtherErrorsAreNotRateLimited',
                  'testDesktopBeginPostsAnEmptyObject',
-                 'testDesktopBeginRejectsAResponseWithoutADeviceCode',
+                 'testDesktopBeginRejectsAnIncompleteResponse',
+                 'testDesktopBeginRaisesTheServersError',
+                 'testDesktopRejectsABodyThatIsNotAnObject',
                  'testDesktopPollPostsTheDeviceCodeAndStoresNothing',
                  'testDesktopPollRaises400WhenThePairingIsGone',
                  'testDesktopPollRaisesRateLimited']:
@@ -373,11 +413,27 @@ Extend the `suite()` list after `'testOtherErrorsAreNotRateLimited'`:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_client -v
 ```
 
-Expected: five errors, `AttributeError: 'AccountClient' object has no attribute 'desktop_begin'` (and `'desktop_poll'`).
+Expected: seven errors, `AttributeError: 'AccountClient' object has no attribute 'desktop_begin'` (and `'desktop_poll'`).
 
 - [ ] **Step 3: Implement**
 
-In `account/client.py`, after `delete_backup` and before `_auth_headers`:
+In `account/client.py`, after `_retry_after` and before `class AccountClient`:
+
+```python
+def _pairing_body(resp):
+    # A pairing endpoint's 2xx body must be a JSON object. Anything else --
+    # empty, a list, a bare string -- becomes an AccountError, one of the
+    # errors PairingSession handles, instead of an AttributeError further
+    # on. A body that is not JSON at all (a captive portal's HTML page, say)
+    # still raises requests' JSONDecodeError, a RequestException, so it
+    # counts as a network failure.
+    body = resp.json() if resp.content else None
+    if not isinstance(body, dict):
+        raise AccountError(resp.status_code, 'unexpected pairing response')
+    return body
+```
+
+Then, after `delete_backup` and before `_auth_headers`:
 
 ```python
     def desktop_begin(self):
@@ -393,7 +449,7 @@ In `account/client.py`, after `delete_backup` and before `_auth_headers`:
             timeout=self._timeout,
         )
         self._raise_if_error(resp)
-        body = resp.json() if resp.content else {}
+        body = _pairing_body(resp)
         for key in ('device_code', 'user_code', 'verification_url'):
             if not body.get(key):
                 raise AccountError(resp.status_code,
@@ -406,9 +462,10 @@ In `account/client.py`, after `delete_backup` and before `_auth_headers`:
         {'status': 'approved', 'key': ..., 'username': ...}.
 
         Raises AccountError(400) once the pairing is unknown, expired or
-        already used -- the server deliberately does not say which -- and
-        RateLimited on a 429. Stores nothing: PairingSession decides whether
-        a token is kept.
+        already used -- the server deliberately does not say which --
+        RateLimited on a 429, and AccountError if a 2xx body is not a JSON
+        object. Stores nothing: PairingSession decides whether a token is
+        kept.
         """
         resp = requests.post(
             self._base + '/api/passkeys/desktop/poll/',
@@ -416,7 +473,7 @@ In `account/client.py`, after `delete_backup` and before `_auth_headers`:
             timeout=self._timeout,
         )
         self._raise_if_error(resp)
-        return resp.json()
+        return _pairing_body(resp)
 ```
 
 - [ ] **Step 4: Run to verify it passes**
@@ -425,11 +482,15 @@ In `account/client.py`, after `delete_backup` and before `_auth_headers`:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_client -v
 ```
 
-Expected: `Ran 25 tests` … `OK`. `suite()` check with `tests.test_account_client`: `suite() lists 25 of 25 test methods`.
+Expected: `Ran 27 tests` … `OK`. `suite()` check with `tests.test_account_client`: `suite() lists 27 of 27 test methods`.
 
-- [ ] **Step 5: Prove the missing-field test can fail**
+- [ ] **Step 5: Prove the validation tests can fail**
 
-Temporarily delete the `for key in (...)` check in `desktop_begin`. Re-run. Expected: `testDesktopBeginRejectsAResponseWithoutADeviceCode` **FAILS** (`AccountError not raised`). Restore and confirm green.
+One at a time, re-running after each and restoring before the next:
+- Delete the `for key in (...)` check in `desktop_begin`. Expected: `testDesktopBeginRejectsAnIncompleteResponse` **FAILS** (`AccountError not raised`).
+- In `desktop_poll`, return `resp.json()` instead of `_pairing_body(resp)`. Expected: `testDesktopRejectsABodyThatIsNotAnObject` **FAILS** (`AccountError not raised : poll`).
+
+Restore and confirm green.
 
 - [ ] **Step 6: Commit**
 
@@ -1622,7 +1683,7 @@ Expected: `signed out: ok`, `pairing: ok`, `signed in: ok`, and no traceback.
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 130 tests` … `OK`.
+Expected: `Ran 132 tests` … `OK`.
 
 - [ ] **Step 9: Commit**
 
@@ -1964,12 +2025,12 @@ git commit -m "docs: passkeys in the privacy policy; spec amendments after the s
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 130 tests` … `OK` (97 before + 10 client + 23 pairing). Read the output; the exit code means nothing here.
+Expected: `Ran 132 tests` … `OK` (97 before + 12 client + 23 pairing). Read the output; the exit code means nothing here.
 
 - [ ] **Step 2: Every new test is registered**
 
 Run the `suite()` check from *Before you start* for both modules:
-- `tests.test_account_client` → `suite() lists 25 of 25 test methods`
+- `tests.test_account_client` → `suite() lists 27 of 27 test methods`
 - `tests.test_account_pairing` → `suite() lists 23 of 23 test methods`
 
 - [ ] **Step 3: Nothing stray is staged or committed**
