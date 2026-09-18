@@ -1621,9 +1621,10 @@ Add directly after it:
         code.SetFont(wx.Font(24, wx.FONTFAMILY_TELETYPE,
                              wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
         col.Add(code, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, 8)
+        # A no-break space keeps the quoted button name on one line.
         hint = wx.StaticText(self._panel, label=(
             u'ลงชื่อเข้าใช้ในเบราว์เซอร์ที่เปิดขึ้น แล้วตรวจว่าหน้าเว็บแสดงรหัส'
-            u'เดียวกันนี้ ถ้าไม่ตรงกัน อย่ากด "ใช่ อนุญาต"'))
+            u'เดียวกันนี้ ถ้าไม่ตรงกัน อย่ากด "ใช่\u00a0อนุญาต"'))
         hint.Wrap(380)
         col.Add(hint, 0, wx.BOTTOM, 10)
         self._gauge.Show()
@@ -1632,7 +1633,9 @@ Add directly after it:
                 label=u'กำลังรอการยืนยันในเบราว์เซอร์...'), 0)
 
         btnReopen = wx.Button(self._panel, label=u'เปิดเบราว์เซอร์อีกครั้ง')
-        btnCancel = wx.Button(self._panel, label=u'ยกเลิก')
+        # wx.ID_CANCEL, so Esc cancels too. The handler below does not Skip(),
+        # so the dialog's default Esc handling never ends the modal.
+        btnCancel = wx.Button(self._panel, wx.ID_CANCEL, label=u'ยกเลิก')
         btnReopen.Bind(wx.EVT_BUTTON,
                        lambda _e: self._open_browser(self._pairing_url))
         btnCancel.Bind(wx.EVT_BUTTON, self._on_cancel_pairing)
@@ -1680,9 +1683,12 @@ Add directly after it:
         else:
             # Not _show_error for the rest: its 401 and 404 wording is about
             # an existing session and backups. Say what failed, then why --
-            # the server's Thai, or a local error such as a full disk.
-            wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s'
-                          % (err.message or u'HTTP %d' % err.status),
+            # the server's Thai, or a local error such as a full disk. A 5xx
+            # body is usually a proxy's HTML page, so name the status instead.
+            detail = err.message
+            if err.status >= 500 or not detail:
+                detail = u'HTTP %d' % err.status
+            wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s' % detail,
                           MSGBOX_TITLE, wx.OK | wx.ICON_ERROR, self)
 
     def _open_browser(self, url):
@@ -1697,6 +1703,39 @@ Notes for the reviewer:
 - `_on_pairing_error` re-renders *before* showing the message box, so the signed-out screen is already behind the box.
 - The dialog's `_on_err` is not used here. It clears the store on a 401, and no pairing response can be a 401.
 - Only network failures (status 0) go through `_show_error`. Its 401 and 404 messages are about sessions and backups, so a 404 on begin would otherwise tell the user "backup not found".
+- The pairing screen's Cancel button has `wx.ID_CANCEL`, so Esc cancels a pairing as well. Its handler does not call `Skip()`, which keeps the dialog's default Esc behaviour (ending the modal) from running.
+
+- [ ] **Step 5b: `_busy` lays out the panel**
+
+`AccountDialog._busy` lays out only the dialog. The gauge lives on the panel, so while begin is in flight it shows as a sliver at the panel's origin, on top of the status line. This predates this plan, but the passkey button is the first busy state a user sees on the signed-out screen. In `AccountDialog`, replace (the `for b in self._actionButtons:` line makes this block unique; the two other dialogs' `_busy` differ):
+
+```python
+    def _busy(self, on):
+        for b in self._actionButtons:
+            b.Enable(not on)
+        if on:
+            self._gauge.Show()
+            self._gauge.Pulse()
+        else:
+            self._gauge.Hide()
+        self.Layout()
+```
+
+with:
+
+```python
+    def _busy(self, on):
+        for b in self._actionButtons:
+            b.Enable(not on)
+        if on:
+            self._gauge.Show()
+            self._gauge.Pulse()
+        else:
+            self._gauge.Hide()
+        # The gauge lives on the panel: laying out only the dialog leaves it
+        # a sliver at the panel's origin, over the status line.
+        self._relayout()
+```
 
 - [ ] **Step 6: Import check**
 
@@ -2155,6 +2194,7 @@ Sign out, press **เข้าสู่ระบบด้วยพาสคี�
 1. Start a pairing and press **ยกเลิก**. Expected: back to the signed-out screen at once. If the pairing is then approved in the browser anyway, the app stays signed out.
 2. Start a pairing and close the window with its title-bar close button. Expected: it closes immediately, with no hang and no crash. Reopen the dialog; it works.
 3. Start a pairing, close the browser tab, and press **เปิดเบราว์เซอร์อีกครั้ง**. Expected: the same page opens again with the same code.
+4. Start a pairing and press **Esc**. Expected: the same as **ยกเลิก**: back to the signed-out screen, and the dialog stays open.
 
 - [ ] **Step 5: Links**
 
@@ -2168,7 +2208,7 @@ Sign out and sign in with username and password. Expected: works exactly as befo
 
 - [ ] **Step 7: Windows and Linux**
 
-Repeat Steps 2 and 4 on Windows and Linux builds, if available. On Linux, watch the gauge on the pairing screen specifically: it must keep moving for the whole wait, because a single `Pulse()` only moves one step on GTK. Record any platform that is not checked, rather than marking it verified.
+Repeat Steps 2 and 4 on Windows and Linux builds, if available. On Windows, **ยกเลิก** matters most: its click handler re-renders the dialog, destroying the button whose event is being handled. That was verified safe on macOS only. On Linux, watch the gauge on the pairing screen specifically: it must keep moving for the whole wait, because a single `Pulse()` only moves one step on GTK. Record any platform that is not checked, rather than marking it verified.
 
 ---
 
