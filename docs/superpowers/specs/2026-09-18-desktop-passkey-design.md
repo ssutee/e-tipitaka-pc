@@ -94,7 +94,7 @@ Two properties make the client side cheap:
 | `user_code` | 8 chars, unique among non-expired rows |
 | `status` | `pending` / `approved` / `denied` |
 | `user` | FK, null until approved |
-| `created_at`, `expires_at` | TTL 300s, matching `PASSKEY_CHALLENGE_TTL` |
+| `created_at`, `expires_at` | TTL 600s, from a new `PASSKEY_DESKTOP_TTL` setting |
 
 Purged on the same schedule and with the same race-safe criteria as
 `PasskeyChallenge` (`app/user_data/passkey_challenges.py`).
@@ -104,7 +104,7 @@ existing `challenge_id`. It is the app's secret and is never displayed.
 
 `user_code` = 8 characters drawn from `23456789ABCDEFGHJKMNPQRSTVWXYZ`
 (Crockford-style, no `0/O/1/I`), rendered `K7QP-4M2X`. ~39 bits, ample for a
-300-second window. Generated with retry on collision against live rows.
+600-second window. Generated with retry on collision against live rows.
 
 ### Endpoints
 
@@ -113,7 +113,7 @@ guard so a non-object body is a clean 400, DRF `Response`, Thai messages.
 
 | Method + path | Auth | Body | Success |
 |---|---|---|---|
-| `POST /api/passkeys/desktop/begin/` | none | `{}` | `200 {device_code, user_code, verification_url, interval: 5, expires_in: 300}` |
+| `POST /api/passkeys/desktop/begin/` | none | `{}` | `200 {device_code, user_code, verification_url, interval: 5, expires_in: 600}` |
 | `POST /api/passkeys/desktop/poll/` | none | `{device_code}` | `200 {"status":"pending"}` · `200 {"status":"approved","key":"<token>","username":"<name>"}` · `200 {"status":"denied"}` |
 
 `poll` returns `400 {"detail": …}` for an unknown, expired or already-consumed
