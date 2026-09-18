@@ -511,10 +511,11 @@ git commit -m "feat(account): client calls for desktop passkey pairing" \
 
 This task builds the session's skeleton: begin, report the code, poll until approved or expired, store the token, and cancel cleanly. Tasks 4 and 5 widen `_poll` to handle every other server response.
 
-Two properties matter more than the rest, and each has a test built to catch its violation:
+Three properties matter more than the rest, and each has a test built to catch its violation:
 
 - **"No callback after `cancel()`" is enforced when the callback *executes*, not when it is queued.** `wx.CallAfter` defers. A callback the worker queued a moment before the user pressed Cancel would otherwise still run, into a dialog that has moved on or been destroyed.
 - **The token is written under that same guard**, so cancelling means nothing happened locally.
+- **Every session ends in a callback, even when writing the token fails.** `_approved` runs on the UI thread, where `run()`'s catch-all cannot see it, so it catches its own store errors. Otherwise a full disk would leave the dialog waiting forever for a token the server has already handed out.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -657,6 +658,33 @@ class TestPairingSession(unittest.TestCase):
         self.assertEqual('alice', data['username'])
         self.assertNotIn('last_upload', data)
 
+    def testTheTokenIsStoredBeforeOnDoneRuns(self):
+        # The dialog redraws from the store the moment on_done runs.
+        seen = []
+        self.rec.on_done = lambda username: seen.append(
+            (self.store.get() or {}).get('token'))
+        self._session(FakeClient(_begin(), [APPROVED])).run()
+        self.assertEqual(['tok-alice'], seen)
+
+    def testAFailedTokenWriteStillEndsTheSession(self):
+        # _approved runs on the UI thread, outside run()'s catch-all, so it
+        # must end the session itself. Hence a queued dispatch, as in the
+        # app: a synchronous one would let run() catch the error and hide
+        # the bug.
+        def full_disk(token, username):
+            raise OSError(28, 'No space left on device')
+        self.store.set = full_disk
+        queue = []
+        self._session(FakeClient(_begin(), [APPROVED]),
+                      dispatch=queue.append).run()
+        for fn in queue:
+            fn()
+        err = self._failed()
+        self.assertEqual(2, len(self.rec.events))   # the code, then this
+        self.assertIn('No space left on device', err.message)
+        self.assertNotIn('tok-alice', err.message)
+        self.assertFalse(self.store.is_logged_in())
+
     def testFollowsTheServersIntervalAndExpiry(self):
         client = FakeClient(_begin(interval=7, expires_in=20),
                             [PENDING, PENDING])
@@ -668,13 +696,16 @@ class TestPairingSession(unittest.TestCase):
         self.assertFalse(self.store.is_logged_in())
 
     def testFallsBackToDefaultsWhenServerValuesAreUnusable(self):
-        client = FakeClient(_begin(interval='soon', expires_in=0),
-                            [PENDING] * 200)
-        self._session(client).run()
-        self.assertEqual(5, self.clock.sleeps[0])
-        self.assertEqual(600, sum(self.clock.sleeps))
-        self.assertEqual(119, len(client.poll_calls))
-        self.assertEqual(('error', EXPIRED, None), self.rec.events[-1])
+        for interval, expires_in in (('soon', 0), (None, -1), (-5, None)):
+            case = (interval, expires_in)
+            self.clock, self.rec = FakeClock(), Recorder()
+            client = FakeClient(_begin(interval, expires_in), [PENDING] * 200)
+            self._session(client).run()
+            self.assertEqual(5, self.clock.sleeps[0], case)
+            self.assertEqual(600, sum(self.clock.sleeps), case)
+            self.assertEqual(119, len(client.poll_calls), case)
+            self.assertEqual(('error', EXPIRED, None), self.rec.events[-1],
+                             case)
 
     def testAnUnexpectedExceptionStillEndsTheSession(self):
         # Every session must end in exactly one callback; a worker that dies
@@ -695,8 +726,12 @@ class TestPairingSession(unittest.TestCase):
         client = FakeClient(_begin(),
                             [{'status': 'approved', 'key': 'tok-secret'}])
         self._session(client).run()
+        err = self._failed()
+        # 200 is _unexpected's status. run()'s catch-all would say -1, which
+        # would mean the missing username was never checked.
+        self.assertEqual(200, err.status)
         # The message is shown to the user, so it must never carry the key.
-        self.assertNotIn('tok-secret', self._failed().message)
+        self.assertNotIn('tok-secret', err.message)
         self.assertFalse(self.store.is_logged_in())
 
     # --- cancellation ----------------------------------------------------
@@ -765,6 +800,8 @@ def suite():
     s = unittest.TestSuite()
     for name in ['testApprovalAfterPendingStoresTheToken',
                  'testApprovalReplacesThePreviousAccount',
+                 'testTheTokenIsStoredBeforeOnDoneRuns',
+                 'testAFailedTokenWriteStillEndsTheSession',
                  'testFollowsTheServersIntervalAndExpiry',
                  'testFallsBackToDefaultsWhenServerValuesAreUnusable',
                  'testAnUnexpectedExceptionStillEndsTheSession',
@@ -936,8 +973,16 @@ class PairingSession(object):
         # wins the race leaves the store untouched. clear() first, exactly as
         # AccountClient.login() does, or the previous account's last_upload
         # leaks into this one.
-        self._store.clear()
-        self._store.set(key, username)
+        try:
+            self._store.clear()
+            self._store.set(key, username)
+        except Exception as e:
+            # A full disk or a read-only config dir. This runs on the UI
+            # thread, where run()'s catch-all cannot see it, so end the
+            # session here or the dialog waits forever. The server has
+            # already handed out the token; the user must start over.
+            self._on_error(FAILED, AccountError(-1, str(e)))
+            return
         self._on_done(username)
 
     def _deliver(self, fn, *args):
@@ -957,9 +1002,9 @@ class PairingSession(object):
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_pairing -v
 ```
 
-Expected: `Ran 11 tests` … `OK`. Then the `suite()` check from *Before you start*: `suite() lists 11 of 11 test methods`.
+Expected: `Ran 13 tests` … `OK`. Then the `suite()` check from *Before you start*: `suite() lists 13 of 13 test methods`.
 
-- [ ] **Step 6: Prove the four guarantees can fail**
+- [ ] **Step 6: Prove the six guarantees can fail**
 
 Apply each mutation alone, run the module, see the named test **FAIL**, and restore before the next:
 
@@ -969,6 +1014,8 @@ Apply each mutation alone, run the module, see the named test **FAIL**, and rest
 | In `__init__`, make the default `time.sleep` instead of `self._cancelled.wait` | `testCancelWakesTheDefaultSleepPromptly` (after ~2s) |
 | In `_approved`, delete `self._store.clear()` | `testApprovalReplacesThePreviousAccount` |
 | In `_poll`, change `self._unexpected(status)` to `self._unexpected(result)`, so the whole response — token included — lands in the message | `testApprovedWithoutUsernameFailsWithoutLeakingTheToken` |
+| In `_approved`, remove the `try`/`except`, leaving the two store calls unguarded | `testAFailedTokenWriteStillEndsTheSession` (`OSError` escapes the drained queue) |
+| In `_approved`, move `self._on_done(username)` above the store calls | `testTheTokenIsStoredBeforeOnDoneRuns` |
 
 After restoring, re-run and confirm `OK`.
 
@@ -1075,7 +1122,7 @@ Replace `_poll` in `account/pairing.py` with:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_pairing -v
 ```
 
-Expected: `Ran 13 tests` … `OK`. `suite()` check: `suite() lists 13 of 13 test methods`.
+Expected: `Ran 15 tests` … `OK`. `suite()` check: `suite() lists 15 of 15 test methods`.
 
 - [ ] **Step 5: Prove the denial test can fail**
 
@@ -1312,7 +1359,7 @@ Replace `_poll` with:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_pairing -v
 ```
 
-Expected: `Ran 23 tests` … `OK`. `suite()` check: `suite() lists 23 of 23 test methods`.
+Expected: `Ran 25 tests` … `OK`. `suite()` check: `suite() lists 25 of 25 test methods`.
 
 - [ ] **Step 5: Prove the resilience rules can fail**
 
@@ -1683,7 +1730,7 @@ Expected: `signed out: ok`, `pairing: ok`, `signed in: ok`, and no traceback.
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 132 tests` … `OK`.
+Expected: `Ran 134 tests` … `OK`.
 
 - [ ] **Step 9: Commit**
 
@@ -2025,13 +2072,13 @@ git commit -m "docs: passkeys in the privacy policy; spec amendments after the s
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 132 tests` … `OK` (97 before + 12 client + 23 pairing). Read the output; the exit code means nothing here.
+Expected: `Ran 134 tests` … `OK` (97 before + 12 client + 25 pairing). Read the output; the exit code means nothing here.
 
 - [ ] **Step 2: Every new test is registered**
 
 Run the `suite()` check from *Before you start* for both modules:
 - `tests.test_account_client` → `suite() lists 27 of 27 test methods`
-- `tests.test_account_pairing` → `suite() lists 23 of 23 test methods`
+- `tests.test_account_pairing` → `suite() lists 25 of 25 test methods`
 
 - [ ] **Step 3: Nothing stray is staged or committed**
 
