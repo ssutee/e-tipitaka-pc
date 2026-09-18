@@ -9,6 +9,7 @@ from datetime import datetime
 
 import wx
 
+import constants
 from account.client import AccountError
 from account.pairing import PairingSession, DENIED, EXPIRED
 
@@ -443,7 +444,20 @@ class AccountDialog(wx.Dialog):
         btnRow.AddStretchSpacer()
         btnRow.Add(btnClose, 0)
 
-        self._actionButtons = [btnPasskey, btnLogin, btnSignup, btnClose]
+        btnPasskeySignup = wx.Button(self._panel,
+                                     label=u'สมัครสมาชิกด้วยพาสคีย์...')
+        btnRecover = wx.Button(self._panel,
+                               label=u'ลืมรหัสผ่าน / พาสคีย์หาย...')
+        btnPasskeySignup.Bind(wx.EVT_BUTTON, self._on_passkey_signup)
+        btnRecover.Bind(wx.EVT_BUTTON, self._on_recover)
+        # Stacked, not side by side: two Thai labels this long do not fit
+        # across 420px on every platform's default font.
+        linkCol = wx.BoxSizer(wx.VERTICAL)
+        linkCol.Add(btnPasskeySignup, 0, wx.EXPAND | wx.BOTTOM, 4)
+        linkCol.Add(btnRecover, 0, wx.EXPAND)
+
+        self._actionButtons = [btnPasskey, btnLogin, btnSignup, btnClose,
+                               btnPasskeySignup, btnRecover]
 
         self._sizer.Add(status, 0, wx.ALL, 10)
         self._sizer.Add(btnPasskey, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
@@ -453,6 +467,7 @@ class AccountDialog(wx.Dialog):
         self._sizer.Add(grid, 1, wx.EXPAND | wx.ALL, 10)
         self._sizer.Add(self._gauge, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         self._sizer.Add(btnRow, 0, wx.EXPAND | wx.ALL, 10)
+        self._sizer.Add(linkCol, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
 
     def _render_logged_in(self):
         data = self._store.get() or {}
@@ -471,20 +486,24 @@ class AccountDialog(wx.Dialog):
         btnUpload.Bind(wx.EVT_BUTTON, self._on_upload)
         btnDownload.Bind(wx.EVT_BUTTON, self._on_download_latest)
         btnManage.Bind(wx.EVT_BUTTON, self._on_manage)
+        btnPasskeys = wx.Button(self._panel, label=u'จัดการพาสคีย์...')
+        btnPasskeys.Bind(wx.EVT_BUTTON, self._on_manage_passkeys)
         btnLogout.Bind(wx.EVT_BUTTON, self._on_logout)
         btnClose.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_OK))
 
         actions = wx.BoxSizer(wx.VERTICAL)
         actions.Add(btnUpload, 0, wx.EXPAND | wx.BOTTOM, 4)
         actions.Add(btnDownload, 0, wx.EXPAND | wx.BOTTOM, 4)
-        actions.Add(btnManage, 0, wx.EXPAND)
+        actions.Add(btnManage, 0, wx.EXPAND | wx.BOTTOM, 4)
+        actions.Add(btnPasskeys, 0, wx.EXPAND)
 
         bottom = wx.BoxSizer(wx.HORIZONTAL)
         bottom.Add(btnLogout, 0)
         bottom.AddStretchSpacer()
         bottom.Add(btnClose, 0)
 
-        self._actionButtons = [btnUpload, btnDownload, btnManage, btnLogout, btnClose]
+        self._actionButtons = [btnUpload, btnDownload, btnManage, btnPasskeys,
+                               btnLogout, btnClose]
 
         self._sizer.Add(info, 0, wx.ALL, 10)
         self._sizer.Add(actions, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
@@ -653,6 +672,20 @@ class AccountDialog(wx.Dialog):
         dlg = BackupListDialog(self, self._client, self._presenter)
         dlg.ShowModal()
         dlg.Destroy()
+
+    def _on_passkey_signup(self, _evt):
+        # No token comes back: a passkey sign-up leaves the account inactive
+        # until the emailed link is opened. The user then signs in here with
+        # เข้าสู่ระบบด้วยพาสคีย์.
+        self._open_browser(constants.ACCOUNT_SIGNUP_URL)
+
+    def _on_recover(self, _evt):
+        self._open_browser(constants.ACCOUNT_RECOVER_URL)
+
+    def _on_manage_passkeys(self, _evt):
+        # The page signs in on its own; the app does not carry its token
+        # into the browser.
+        self._open_browser(constants.ACCOUNT_PASSKEYS_URL)
 
     def _on_logout(self, _evt):
         self._busy(True)

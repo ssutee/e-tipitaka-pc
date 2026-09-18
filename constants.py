@@ -196,6 +196,11 @@ READ_RECT = os.path.join(CONFIG_PATH, 'rect_read.cfg')
 THEME_CFG = os.path.join(CONFIG_PATH, 'theme.cfg')
 ACCOUNT_BASE_URL = 'https://data.etipitaka.com'
 ACCOUNT_CFG = os.path.join(CONFIG_PATH, 'account.cfg')
+# Browser-only account pages. Passkey ceremonies run only in a browser on the
+# server's own origin, so the app opens these rather than reimplementing them.
+ACCOUNT_SIGNUP_URL = ACCOUNT_BASE_URL + '/signup/'
+ACCOUNT_PASSKEYS_URL = ACCOUNT_BASE_URL + '/account/security/'
+ACCOUNT_RECOVER_URL = ACCOUNT_BASE_URL + '/password_reset/'
 PATCH_INDEX_URL = 'https://download.watnapahpong.org/data/etipitaka/pc/patches/patches.toml'
 NOTE_STATUS_CFG = os.path.join(CONFIG_PATH, 'comment.cfg')
 
