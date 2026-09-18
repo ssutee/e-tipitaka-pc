@@ -308,3 +308,45 @@ performs no cryptographic ceremony — the browser does.
 2. Build the PC client against the live endpoints.
 3. Manual verification on macOS, Windows and Linux.
 4. Version bump and release through the usual `full-release` flow.
+
+## Amendments after the server shipped
+
+Written 2026-09-18, after the server half was built, deployed and verified live.
+The client plan (`docs/superpowers/plans/2026-09-18-desktop-passkey-client.md`)
+follows these where they differ from the sections above.
+
+- **Labels use พาสคีย์, not "Passkey".** The browser confirmation page asks
+  `คุณเพิ่งกด "เข้าสู่ระบบด้วยพาสคีย์" บนคอมพิวเตอร์ใช่ไหม?`, quoting the
+  desktop button by name, and the site spells the word พาสคีย์ throughout.
+  The app's button must match it exactly.
+- **Closing the window cancels a pairing instead of being vetoed.** A pairing
+  can last ten minutes, and a close button that does nothing that long reads
+  as a hang. `cancel()` guarantees no callback reaches the dialog afterwards,
+  which is all the veto protects.
+- **The poll loop handles two responses the design above omits.** A **429** is
+  not a failure: the pairing is still live, so the client backs off by the
+  `Retry-After` header (both of the server's limiters send it, with different
+  bodies) and never polls faster than `interval`. A **400** ends the session as
+  expired — including when an approval's response was lost in transit, because
+  the server delivers the token at most once.
+- **The token is stored on the UI thread, only if the session was not
+  cancelled.** A cancel that races an approval leaves the app signed out; the
+  consumed pairing is simply gone.
+- **A token that cannot be stored still ends the session.** Storing runs on
+  the UI thread, outside the worker's catch-all, so a full disk or a read-only
+  config directory reports a failure instead of leaving the dialog waiting.
+- **Only a 400 ends a pairing.** Every other error is retried with backoff
+  like a network failure: a 5xx during maintenance, and a 200 whose body is
+  not a JSON object.
+- **Errors do not all reuse `_show_error`.** Its 401 and 404 wording is about
+  sessions and backups, so a 404 on begin would read "backup not found". Only
+  network failures go through it. Refusal and expiry have their own messages,
+  and anything else says the passkey sign-in failed, then why, naming a 5xx as
+  `HTTP N` because its body is usually a proxy's HTML page.
+- **Esc cancels a pairing**, the same as its Cancel button.
+- **Rate limits** are a dedicated nginx zone (120 r/m, burst 60) plus a DRF
+  scope at 90/min, not the shared passkey zone proposed above.
+- **No language cookie.** Server messages are Thai unless the
+  `django_language` cookie says otherwise, and `Accept-Language` is ignored.
+  This dialog is hardcoded Thai, so the default is right; localising the dialog
+  later would mean sending that cookie.

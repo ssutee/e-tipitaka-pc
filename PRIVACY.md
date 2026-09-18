@@ -1,6 +1,6 @@
 # E-Tipitaka — Privacy Policy
 
-_Last updated: 3 June 2026_
+_Last updated: 18 September 2026_
 
 E-Tipitaka is a desktop application for reading the Thai Tipitaka. This policy
 explains what data the app handles.
@@ -15,9 +15,25 @@ cloud backup feature.
 ## Optional account
 
 The app works fully without an account. If you choose to create one, we collect
-the **email address, username, and password** you provide, sent to our server
+the **email address, username, and password** you provide — or, if you sign up
+with a passkey instead, the email address and username only — sent to our server
 at `data.etipitaka.com` to register and sign you in. Your login token is stored
 on your device and removed when you log out.
+
+### Passkeys
+
+A passkey lets you sign in without a password. It is created and kept by your
+device or password manager (for example iCloud Keychain, Google Password
+Manager or Windows Hello). Its private key never leaves that device or password
+manager and is never sent to us; our server stores only the matching public key,
+with the passkey's name and when it was last used.
+
+The app itself never handles a passkey. When you choose to sign in with one, it
+opens `data.etipitaka.com` in your web browser, the browser performs the passkey
+check, and the app then receives the same login token a password sign-in gives.
+To link the two, the app shows a short one-time code that you confirm in the
+browser. The code expires after ten minutes, and the sign-in request stores no
+information about your computer.
 
 ## Optional cloud backup
 
