@@ -144,6 +144,9 @@ class SignUpDialog(wx.Dialog):
             self._gauge.Pulse()
         else:
             self._gauge.Hide()
+        # The gauge lives on the panel: laying out only the dialog leaves it
+        # a sliver at the panel's origin, or its empty slot behind once hidden.
+        self._gauge.GetParent().Layout()
         self.Layout()
 
 
@@ -288,6 +291,9 @@ class BackupListDialog(wx.Dialog):
             self._gauge.Pulse()
         else:
             self._gauge.Hide()
+        # The gauge lives on the panel: laying out only the dialog leaves it
+        # a sliver at the panel's origin, or its empty slot behind once hidden.
+        self._gauge.GetParent().Layout()
         self.Layout()
 
 
