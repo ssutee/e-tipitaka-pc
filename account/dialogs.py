@@ -634,9 +634,13 @@ class AccountDialog(wx.Dialog):
             # Not _show_error for the rest: its 401 and 404 wording is about
             # an existing session and backups. Say what failed, then why --
             # the server's Thai, or a local error such as a full disk. A 5xx
-            # body is usually a proxy's HTML page, so name the status instead.
+            # or an HTML body is a proxy's or a filter's page, not a message,
+            # so name the status instead.
             detail = err.message
-            if err.status >= 500 or not detail:
+            if err.status == 429:
+                detail = u'มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่'
+            elif err.status >= 500 or not detail \
+                    or detail.lstrip().startswith('<'):
                 detail = u'HTTP %d' % err.status
             wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s' % detail,
                           MSGBOX_TITLE, wx.OK | wx.ICON_ERROR, self)

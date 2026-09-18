@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import json
+from urllib.parse import urlsplit
 
 import requests
 
@@ -191,6 +192,14 @@ class AccountClient(object):
             if not body.get(key):
                 raise AccountError(resp.status_code,
                                    'pairing response missing %s' % key)
+        # The app opens this URL itself -- os.startfile on Windows -- so
+        # accept only a page on this API's own origin: never a file: URL, a
+        # network share or another app's protocol handler.
+        url = body['verification_url']
+        if not isinstance(url, str) or \
+                urlsplit(url)[:2] != urlsplit(self._base)[:2]:
+            raise AccountError(resp.status_code,
+                               'unexpected verification_url')
         return body
 
     def desktop_poll(self, device_code):

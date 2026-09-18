@@ -192,6 +192,12 @@ class TestPairingSession(unittest.TestCase):
         self.assertEqual(-1, err.status)
         self.assertIn('bug', err.message)
 
+    def testAnErrorWithoutAMessageIsNamed(self):
+        # str(KeyError()) is '', which would leave the dialog nothing to say.
+        client = FakeClient(_begin(), [KeyError()])
+        self._session(client).run()
+        self.assertEqual('KeyError', self._failed().message)
+
     def testAnUnrecognisedStatusFailsLoudly(self):
         client = FakeClient(_begin(), [{'status': 'weird'}])
         self._session(client).run()
@@ -371,6 +377,7 @@ def suite():
                  'testFollowsTheServersIntervalAndExpiry',
                  'testFallsBackToDefaultsWhenServerValuesAreUnusable',
                  'testAnUnexpectedExceptionStillEndsTheSession',
+                 'testAnErrorWithoutAMessageIsNamed',
                  'testAnUnrecognisedStatusFailsLoudly',
                  'testApprovedWithoutUsernameFailsWithoutLeakingTheToken',
                  'testDenialEndsTheSession',

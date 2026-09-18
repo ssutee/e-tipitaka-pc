@@ -272,6 +272,24 @@ class TestAccountClient(unittest.TestCase):
                 self.assertIn(key, cm.exception.message, repr(broken))
 
     @patch('account.client.requests.post')
+    def testDesktopBeginOnlyAcceptsAPageOnItsOwnOrigin(self, post):
+        # The app opens this URL itself (os.startfile on Windows), so a bad
+        # response must not be able to point it anywhere else.
+        for url in ('https://evil.example/desktop/?code=ABCD-2345',
+                    'http://data.etipitaka.example/desktop/',
+                    'https://data.etipitaka.example@evil.example/',
+                    'file:///etc/passwd',
+                    r'\\evil.example\share\x.exe',
+                    'ms-msdt:/id PCWDiagnostic',
+                    ['https://data.etipitaka.example/desktop/']):
+            post.return_value = _resp(200, {'device_code': 'dev-secret',
+                                            'user_code': 'ABCD-2345',
+                                            'verification_url': url})
+            with self.assertRaises(AccountError, msg=repr(url)) as cm:
+                self.client.desktop_begin()
+            self.assertIn('verification_url', cm.exception.message, repr(url))
+
+    @patch('account.client.requests.post')
     def testDesktopBeginRaisesTheServersError(self, post):
         post.return_value = _resp(429, {'error': 'rate_limited', 'retry_after': 5,
                                         'detail': 'Too many requests.'},
@@ -350,6 +368,7 @@ def suite():
                  'testOtherErrorsAreNotRateLimited',
                  'testDesktopBeginPostsAnEmptyObject',
                  'testDesktopBeginRejectsAnIncompleteResponse',
+                 'testDesktopBeginOnlyAcceptsAPageOnItsOwnOrigin',
                  'testDesktopBeginRaisesTheServersError',
                  'testDesktopRejectsABodyThatIsNotAnObject',
                  'testDesktopPollPostsTheDeviceCodeAndStoresNothing',

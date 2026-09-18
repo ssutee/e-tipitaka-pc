@@ -20,10 +20,11 @@ import requests
 from account.client import AccountError, RateLimited
 
 # Why a session ended without a token; passed to on_error. The dialog words
-# each case itself, so this module holds no user-facing text.
+# each case itself. The error that comes with FAILED is shown as it is, so no
+# message built here may carry the token.
 DENIED = 'denied'    # the user pressed No in the browser
 EXPIRED = 'expired'  # the pairing ran out, or the server no longer knows it
-FAILED = 'failed'    # begin failed, or polling kept failing; see the error
+FAILED = 'failed'    # anything else went wrong; see the error
 
 DEFAULT_INTERVAL = 5      # seconds; used when the server's value is unusable
 DEFAULT_EXPIRES_IN = 600
@@ -86,7 +87,8 @@ class PairingSession(object):
             self._handshake()
         except Exception as e:
             # Never leave the dialog pulsing at a thread that has died.
-            self._deliver(self._on_error, FAILED, AccountError(-1, str(e)))
+            self._deliver(self._on_error, FAILED,
+                          AccountError(-1, str(e) or type(e).__name__))
 
     def _handshake(self):
         try:
@@ -176,7 +178,8 @@ class PairingSession(object):
             # thread, where run()'s catch-all cannot see it, so end the
             # session here or the dialog waits forever. The server has
             # already handed out the token; the user must start over.
-            self._on_error(FAILED, AccountError(-1, str(e)))
+            self._on_error(FAILED,
+                           AccountError(-1, str(e) or type(e).__name__))
             return
         self._on_done(username)
 
