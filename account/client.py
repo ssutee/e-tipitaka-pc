@@ -55,6 +55,19 @@ def _retry_after(resp):
     return seconds if seconds >= 0 else None
 
 
+def _pairing_body(resp):
+    # A pairing endpoint's 2xx body must be a JSON object. Anything else --
+    # empty, a list, a bare string -- becomes an AccountError, one of the
+    # errors PairingSession handles, instead of an AttributeError further
+    # on. A body that is not JSON at all (a captive portal's HTML page, say)
+    # still raises requests' JSONDecodeError, a RequestException, so it
+    # counts as a network failure.
+    body = resp.json() if resp.content else None
+    if not isinstance(body, dict):
+        raise AccountError(resp.status_code, 'unexpected pairing response')
+    return body
+
+
 class AccountClient(object):
 
     def __init__(self, base_url, tokenstore, timeout=30):
@@ -173,7 +186,7 @@ class AccountClient(object):
             timeout=self._timeout,
         )
         self._raise_if_error(resp)
-        body = resp.json() if resp.content else {}
+        body = _pairing_body(resp)
         for key in ('device_code', 'user_code', 'verification_url'):
             if not body.get(key):
                 raise AccountError(resp.status_code,
@@ -186,9 +199,10 @@ class AccountClient(object):
         {'status': 'approved', 'key': ..., 'username': ...}.
 
         Raises AccountError(400) once the pairing is unknown, expired or
-        already used -- the server deliberately does not say which -- and
-        RateLimited on a 429. Stores nothing: PairingSession decides whether
-        a token is kept.
+        already used -- the server deliberately does not say which --
+        RateLimited on a 429, and AccountError if a 2xx body is not a JSON
+        object. Stores nothing: PairingSession decides whether a token is
+        kept.
         """
         resp = requests.post(
             self._base + '/api/passkeys/desktop/poll/',
@@ -196,7 +210,7 @@ class AccountClient(object):
             timeout=self._timeout,
         )
         self._raise_if_error(resp)
-        return resp.json()
+        return _pairing_body(resp)
 
     def _auth_headers(self):
         data = self._store.get() or {}

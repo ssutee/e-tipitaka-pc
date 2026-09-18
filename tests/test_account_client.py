@@ -259,22 +259,58 @@ class TestAccountClient(unittest.TestCase):
             BASE + '/api/passkeys/desktop/begin/', json={}, timeout=30)
 
     @patch('account.client.requests.post')
-    def testDesktopBeginRejectsAResponseWithoutADeviceCode(self, post):
-        post.return_value = _resp(200, {'user_code': 'ABCD-2345',
-                                        'verification_url': BASE + '/desktop/'})
+    def testDesktopBeginRejectsAnIncompleteResponse(self, post):
+        good = {'device_code': 'dev-secret', 'user_code': 'ABCD-2345',
+                'verification_url': BASE + '/desktop/?code=ABCD-2345'}
+        for key in good:
+            missing = {k: v for k, v in good.items() if k != key}
+            for broken in (missing, dict(good, **{key: ''}),
+                           dict(good, **{key: None})):
+                post.return_value = _resp(200, broken)
+                with self.assertRaises(AccountError, msg=repr(broken)) as cm:
+                    self.client.desktop_begin()
+                self.assertIn(key, cm.exception.message, repr(broken))
+
+    @patch('account.client.requests.post')
+    def testDesktopBeginRaisesTheServersError(self, post):
+        post.return_value = _resp(429, {'error': 'rate_limited', 'retry_after': 5,
+                                        'detail': 'Too many requests.'},
+                                  headers={'Retry-After': '5'})
+        with self.assertRaises(RateLimited) as cm:
+            self.client.desktop_begin()
+        self.assertEqual('Too many requests.', cm.exception.message)
+        post.return_value = _resp(503, {'detail': u'ระบบปิดปรับปรุง'})
         with self.assertRaises(AccountError) as cm:
             self.client.desktop_begin()
-        self.assertIn('device_code', cm.exception.message)
+        self.assertEqual(503, cm.exception.status)
+        self.assertEqual(u'ระบบปิดปรับปรุง', cm.exception.message)
+
+    @patch('account.client.requests.post')
+    def testDesktopRejectsABodyThatIsNotAnObject(self, post):
+        calls = {'begin': self.client.desktop_begin,
+                 'poll': lambda: self.client.desktop_poll('dev-secret')}
+        for name, call in calls.items():
+            for resp in (_resp(200), _resp(200, []), _resp(200, 'ok'),
+                         _resp(200, 5)):
+                post.return_value = resp
+                with self.assertRaises(AccountError, msg=name) as cm:
+                    call()
+                self.assertEqual(200, cm.exception.status, name)
+                self.assertEqual('unexpected pairing response',
+                                 cm.exception.message, name)
 
     @patch('account.client.requests.post')
     def testDesktopPollPostsTheDeviceCodeAndStoresNothing(self, post):
+        self.store.set('old-tok', 'bob')
         approved = {'status': 'approved', 'key': 'tok', 'username': 'alice'}
         post.return_value = _resp(200, approved)
         self.assertEqual(approved, self.client.desktop_poll('dev-secret'))
         post.assert_called_once_with(
             BASE + '/api/passkeys/desktop/poll/',
             json={'device_code': 'dev-secret'}, timeout=30)
-        self.assertFalse(self.store.is_logged_in())
+        # Neither replaced nor wiped: the token already here is untouched.
+        self.assertEqual('old-tok', self.store.get()['token'])
+        self.assertEqual('bob', self.store.get()['username'])
 
     @patch('account.client.requests.post')
     def testDesktopPollRaises400WhenThePairingIsGone(self, post):
@@ -313,7 +349,9 @@ def suite():
                  'testRateLimitedWithAnUnusableHeaderHasNoRetryAfter',
                  'testOtherErrorsAreNotRateLimited',
                  'testDesktopBeginPostsAnEmptyObject',
-                 'testDesktopBeginRejectsAResponseWithoutADeviceCode',
+                 'testDesktopBeginRejectsAnIncompleteResponse',
+                 'testDesktopBeginRaisesTheServersError',
+                 'testDesktopRejectsABodyThatIsNotAnObject',
                  'testDesktopPollPostsTheDeviceCodeAndStoresNothing',
                  'testDesktopPollRaises400WhenThePairingIsGone',
                  'testDesktopPollRaisesRateLimited']:
