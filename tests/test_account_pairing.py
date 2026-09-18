@@ -227,6 +227,77 @@ class TestPairingSession(unittest.TestCase):
         self.assertEqual(('error', EXPIRED, None), self.rec.events[-1])
         self.assertEqual(2, len(client.poll_calls))
 
+    # --- resilience --------------------------------------------------------
+
+    def testBeginNetworkFailureReportsFailed(self):
+        client = FakeClient(requests.ConnectionError('offline'), [])
+        self._session(client).run()
+        self.assertEqual(1, len(self.rec.events))
+        # Status 0 is what the dialog words as "cannot reach the server".
+        self.assertEqual(0, self._failed().status)
+        self.assertEqual([], client.poll_calls)
+
+    def testBeginServerErrorIsPassedThrough(self):
+        boom = AccountError(503, 'maintenance')
+        client = FakeClient(boom, [])
+        self._session(client).run()
+        self.assertEqual([('error', FAILED, boom)], self.rec.events)
+
+    def testATransientFailureIsRetriedWithBackoff(self):
+        client = FakeClient(_begin(), [PENDING, requests.ConnectionError('blip'),
+                                       APPROVED])
+        self._session(client).run()
+        self.assertEqual(('done', 'alice'), self.rec.events[-1])
+        self.assertEqual([5, 5, 10], self.clock.sleeps)
+
+    def testThreeConsecutiveFailuresEndTheSession(self):
+        client = FakeClient(_begin(), [requests.ConnectionError('down')] * 3)
+        self._session(client).run()
+        self.assertEqual(0, self._failed().status)
+        self.assertEqual(3, len(client.poll_calls))
+        self.assertEqual([5, 10, 20], self.clock.sleeps)
+
+    def testServerErrorsCountAsFailuresToo(self):
+        # Only a 400 means the pairing is gone. Anything else -- a 503 during
+        # maintenance, a 200 whose body was not a JSON object -- is retried.
+        client = FakeClient(_begin(), [AccountError(s, 'x')
+                                       for s in (200, 404, 503)])
+        self._session(client).run()
+        self.assertEqual(503, self._failed().status)
+        self.assertEqual(3, len(client.poll_calls))
+
+    def testTheFailureCountResetsOnAnyGoodResponse(self):
+        blip = requests.ConnectionError('blip')
+        client = FakeClient(_begin(), [blip, blip, PENDING, blip, blip, APPROVED])
+        self._session(client).run()
+        self.assertEqual(('done', 'alice'), self.rec.events[-1])
+        self.assertEqual(6, len(client.poll_calls))
+
+    def testARateLimitIsNotAFailure(self):
+        # Four 429s in a row, more than MAX_FAILURES, and the session lives.
+        limited = RateLimited(429, 'slow down', retry_after=30)
+        client = FakeClient(_begin(), [limited] * 4 + [APPROVED])
+        self._session(client).run()
+        self.assertEqual(('done', 'alice'), self.rec.events[-1])
+        self.assertEqual([5, 30, 30, 30, 30], self.clock.sleeps)
+
+    def testARateLimitNeverPollsFasterThanTheInterval(self):
+        client = FakeClient(_begin(), [RateLimited(429, '', retry_after=1),
+                                       APPROVED])
+        self._session(client).run()
+        self.assertEqual([5, 5], self.clock.sleeps)
+
+    def testARateLimitWaitIsCapped(self):
+        client = FakeClient(_begin(), [RateLimited(429, '', retry_after=3600),
+                                       APPROVED])
+        self._session(client).run()
+        self.assertEqual([5, 60], self.clock.sleeps)
+
+    def testARateLimitWithoutRetryAfterWaitsTheInterval(self):
+        client = FakeClient(_begin(), [RateLimited(429, ''), APPROVED])
+        self._session(client).run()
+        self.assertEqual([5, 5], self.clock.sleeps)
+
     # --- cancellation ----------------------------------------------------
 
     def testCancelStopsPollingAndFiresNothing(self):
@@ -302,6 +373,16 @@ def suite():
                  'testApprovedWithoutUsernameFailsWithoutLeakingTheToken',
                  'testDenialEndsTheSession',
                  'testA400EndsTheSessionAsExpired',
+                 'testBeginNetworkFailureReportsFailed',
+                 'testBeginServerErrorIsPassedThrough',
+                 'testATransientFailureIsRetriedWithBackoff',
+                 'testThreeConsecutiveFailuresEndTheSession',
+                 'testServerErrorsCountAsFailuresToo',
+                 'testTheFailureCountResetsOnAnyGoodResponse',
+                 'testARateLimitIsNotAFailure',
+                 'testARateLimitNeverPollsFasterThanTheInterval',
+                 'testARateLimitWaitIsCapped',
+                 'testARateLimitWithoutRetryAfterWaitsTheInterval',
                  'testCancelStopsPollingAndFiresNothing',
                  'testCancelDropsACallbackAlreadyQueued',
                  'testCancelWakesTheDefaultSleepPromptly',

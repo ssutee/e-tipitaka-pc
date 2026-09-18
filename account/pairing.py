@@ -15,7 +15,9 @@ drive the whole state machine synchronously with a fake clock.
 import threading
 import time
 
-from account.client import AccountError
+import requests
+
+from account.client import AccountError, RateLimited
 
 # Why a session ended without a token; passed to on_error. The dialog words
 # each case itself, so this module holds no user-facing text.
@@ -25,6 +27,8 @@ FAILED = 'failed'    # begin failed, or polling kept failing; see the error
 
 DEFAULT_INTERVAL = 5      # seconds; used when the server's value is unusable
 DEFAULT_EXPIRES_IN = 600
+MAX_FAILURES = 3          # consecutive transient failures before giving up
+MAX_WAIT = 60             # cap on any single wait, Retry-After included
 
 
 def _seconds(value, default):
@@ -33,6 +37,12 @@ def _seconds(value, default):
     except (TypeError, ValueError):
         return default
     return value if value > 0 else default
+
+
+def _network_error(e):
+    # Status 0 is what dialogs._show_error words as "cannot reach the
+    # server" -- the same convention as _run_in_thread there.
+    return AccountError(0, str(e))
 
 
 class PairingSession(object):
@@ -79,7 +89,14 @@ class PairingSession(object):
             self._deliver(self._on_error, FAILED, AccountError(-1, str(e)))
 
     def _handshake(self):
-        pairing = self._client.desktop_begin()
+        try:
+            pairing = self._client.desktop_begin()
+        except AccountError as e:
+            self._deliver(self._on_error, FAILED, e)
+            return
+        except requests.RequestException as e:
+            self._deliver(self._on_error, FAILED, _network_error(e))
+            return
         interval = _seconds(pairing.get('interval'), DEFAULT_INTERVAL)
         deadline = self._now() + _seconds(pairing.get('expires_in'),
                                           DEFAULT_EXPIRES_IN)
@@ -88,9 +105,11 @@ class PairingSession(object):
         self._poll(pairing['device_code'], interval, deadline)
 
     def _poll(self, device_code, interval, deadline):
+        wait = interval
+        failures, last = 0, None
         while True:
             # Sleep until the next poll or the deadline, whichever is sooner.
-            self._sleep(max(0, min(interval, deadline - self._now())))
+            self._sleep(max(0, min(wait, deadline - self._now())))
             if self._cancelled.is_set():
                 return
             if self._now() >= deadline:
@@ -98,28 +117,44 @@ class PairingSession(object):
                 return
             try:
                 result = self._client.desktop_poll(device_code)
-            except AccountError as e:
-                if e.status != 400:
-                    raise
-                # Unknown, expired or already used -- the server will not
-                # say which. "Already used" includes an approval whose
-                # response never reached us: the token is delivered at most
-                # once, so there is nothing left to retry.
-                self._deliver(self._on_error, EXPIRED, None)
-                return
-            status = result.get('status')
-            if status == 'pending':
+            except RateLimited as e:
+                # Not a failure: the pairing is still live. Back off by what
+                # the server asked, but never poll faster than the interval
+                # and never sleep longer than MAX_WAIT.
+                wait = min(max(interval, e.retry_after or 0), MAX_WAIT)
                 continue
-            if status == 'denied':
-                self._deliver(self._on_error, DENIED, None)
+            except AccountError as e:
+                if e.status == 400:
+                    # Unknown, expired or already used -- the server will not
+                    # say which. "Already used" includes an approval whose
+                    # response never reached us: the token is delivered at
+                    # most once, so there is nothing left to retry.
+                    self._deliver(self._on_error, EXPIRED, None)
+                    return
+                failures, last = failures + 1, e
+            except requests.RequestException as e:
+                failures, last = failures + 1, _network_error(e)
+            else:
+                status = result.get('status')
+                if status == 'pending':
+                    wait, failures = interval, 0
+                    continue
+                if status == 'denied':
+                    self._deliver(self._on_error, DENIED, None)
+                    return
+                if status == 'approved' and result.get('key') \
+                        and result.get('username'):
+                    self._deliver(self._approved, result['key'],
+                                  result['username'])
+                    return
+                self._unexpected(status)
                 return
-            if status == 'approved' and result.get('key') \
-                    and result.get('username'):
-                self._deliver(self._approved, result['key'],
-                              result['username'])
+            if failures >= MAX_FAILURES:
+                self._deliver(self._on_error, FAILED, last)
                 return
-            self._unexpected(status)
-            return
+            # The browser leg is slow, so one dropped request must not end a
+            # live pairing: retry, doubling the wait each time.
+            wait = min(interval * 2 ** failures, MAX_WAIT)
 
     def _unexpected(self, status):
         # Fail loudly rather than keep polling a response this code was never
