@@ -82,7 +82,7 @@ Each is deliberate; Task 8 records them in the spec so it stays true.
 2. **Closing the window cancels a pairing instead of being vetoed.** The spec copied the veto used for short requests; a pairing lasts up to ten minutes, and a close button that does nothing for that long reads as a hang. `cancel()` guarantees no callback reaches the dialog afterwards — which is the only thing the veto protects.
 3. **The poll loop handles 429 and 400**, which the spec's loop rules omit (see the table above).
 4. **The token is stored on the UI thread, only if the session was not cancelled.** A cancel that races an approval leaves the app signed out.
-5. **`on_error` receives a reason code** (`DENIED` / `EXPIRED` / `FAILED`) rather than a message, so `pairing.py` holds no user-facing text and the tests assert on stable values.
+5. **`on_error` receives a reason code** (`DENIED` / `EXPIRED` / `FAILED`) rather than a message, so the dialog words each outcome and the tests assert on stable values.
 
 ---
 
@@ -307,6 +307,8 @@ Both follow the file's existing shape: bare `requests.post`, `_raise_if_error`, 
 
 The parsed body must be a JSON object. `_pairing_body` turns anything else (empty, a list, a bare string) into an `AccountError`, which `PairingSession` retries like any other failure, rather than an `AttributeError` that would end the session at once.
 
+`desktop_begin` also refuses a `verification_url` that is not on the API's own origin. The app hands that URL to the OS to open (`os.startfile` on Windows), so a bad begin response must not be able to point it at a file, a network share or another app's protocol handler.
+
 - [ ] **Step 1: Write the failing tests**
 
 Add to `TestAccountClient`, after `testOtherErrorsAreNotRateLimited`:
@@ -334,6 +336,24 @@ Add to `TestAccountClient`, after `testOtherErrorsAreNotRateLimited`:
                 with self.assertRaises(AccountError, msg=repr(broken)) as cm:
                     self.client.desktop_begin()
                 self.assertIn(key, cm.exception.message, repr(broken))
+
+    @patch('account.client.requests.post')
+    def testDesktopBeginOnlyAcceptsAPageOnItsOwnOrigin(self, post):
+        # The app opens this URL itself (os.startfile on Windows), so a bad
+        # response must not be able to point it anywhere else.
+        for url in ('https://evil.example/desktop/?code=ABCD-2345',
+                    'http://data.etipitaka.example/desktop/',
+                    'https://data.etipitaka.example@evil.example/',
+                    'file:///etc/passwd',
+                    r'\\evil.example\share\x.exe',
+                    'ms-msdt:/id PCWDiagnostic',
+                    ['https://data.etipitaka.example/desktop/']):
+            post.return_value = _resp(200, {'device_code': 'dev-secret',
+                                            'user_code': 'ABCD-2345',
+                                            'verification_url': url})
+            with self.assertRaises(AccountError, msg=repr(url)) as cm:
+                self.client.desktop_begin()
+            self.assertIn('verification_url', cm.exception.message, repr(url))
 
     @patch('account.client.requests.post')
     def testDesktopBeginRaisesTheServersError(self, post):
@@ -400,6 +420,7 @@ Extend the `suite()` list after `'testOtherErrorsAreNotRateLimited'`:
                  'testOtherErrorsAreNotRateLimited',
                  'testDesktopBeginPostsAnEmptyObject',
                  'testDesktopBeginRejectsAnIncompleteResponse',
+                 'testDesktopBeginOnlyAcceptsAPageOnItsOwnOrigin',
                  'testDesktopBeginRaisesTheServersError',
                  'testDesktopRejectsABodyThatIsNotAnObject',
                  'testDesktopPollPostsTheDeviceCodeAndStoresNothing',
@@ -413,11 +434,28 @@ Extend the `suite()` list after `'testOtherErrorsAreNotRateLimited'`:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_client -v
 ```
 
-Expected: seven errors, `AttributeError: 'AccountClient' object has no attribute 'desktop_begin'` (and `'desktop_poll'`).
+Expected: eight errors, `AttributeError: 'AccountClient' object has no attribute 'desktop_begin'` (and `'desktop_poll'`).
 
 - [ ] **Step 3: Implement**
 
-In `account/client.py`, after `_retry_after` and before `class AccountClient`:
+In `account/client.py`, replace:
+
+```python
+import json
+
+import requests
+```
+
+with:
+
+```python
+import json
+from urllib.parse import urlsplit
+
+import requests
+```
+
+After `_retry_after` and before `class AccountClient`, add:
 
 ```python
 def _pairing_body(resp):
@@ -454,6 +492,14 @@ Then, after `delete_backup` and before `_auth_headers`:
             if not body.get(key):
                 raise AccountError(resp.status_code,
                                    'pairing response missing %s' % key)
+        # The app opens this URL itself -- os.startfile on Windows -- so
+        # accept only a page on this API's own origin: never a file: URL, a
+        # network share or another app's protocol handler.
+        url = body['verification_url']
+        if not isinstance(url, str) or \
+                urlsplit(url)[:2] != urlsplit(self._base)[:2]:
+            raise AccountError(resp.status_code,
+                               'unexpected verification_url')
         return body
 
     def desktop_poll(self, device_code):
@@ -482,13 +528,14 @@ Then, after `delete_backup` and before `_auth_headers`:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_client -v
 ```
 
-Expected: `Ran 27 tests` … `OK`. `suite()` check with `tests.test_account_client`: `suite() lists 27 of 27 test methods`.
+Expected: `Ran 28 tests` … `OK`. `suite()` check with `tests.test_account_client`: `suite() lists 28 of 28 test methods`.
 
 - [ ] **Step 5: Prove the validation tests can fail**
 
 One at a time, re-running after each and restoring before the next:
 - Delete the `for key in (...)` check in `desktop_begin`. Expected: `testDesktopBeginRejectsAnIncompleteResponse` **FAILS** (`AccountError not raised`).
 - In `desktop_poll`, return `resp.json()` instead of `_pairing_body(resp)`. Expected: `testDesktopRejectsABodyThatIsNotAnObject` **FAILS** (`AccountError not raised : poll`).
+- Delete the `verification_url` origin check in `desktop_begin`. Expected: `testDesktopBeginOnlyAcceptsAPageOnItsOwnOrigin` **FAILS**.
 
 Restore and confirm green.
 
@@ -716,6 +763,12 @@ class TestPairingSession(unittest.TestCase):
         self.assertEqual(-1, err.status)
         self.assertIn('bug', err.message)
 
+    def testAnErrorWithoutAMessageIsNamed(self):
+        # str(KeyError()) is '', which would leave the dialog nothing to say.
+        client = FakeClient(_begin(), [KeyError()])
+        self._session(client).run()
+        self.assertEqual('KeyError', self._failed().message)
+
     def testAnUnrecognisedStatusFailsLoudly(self):
         client = FakeClient(_begin(), [{'status': 'weird'}])
         self._session(client).run()
@@ -805,6 +858,7 @@ def suite():
                  'testFollowsTheServersIntervalAndExpiry',
                  'testFallsBackToDefaultsWhenServerValuesAreUnusable',
                  'testAnUnexpectedExceptionStillEndsTheSession',
+                 'testAnErrorWithoutAMessageIsNamed',
                  'testAnUnrecognisedStatusFailsLoudly',
                  'testApprovedWithoutUsernameFailsWithoutLeakingTheToken',
                  'testCancelStopsPollingAndFiresNothing',
@@ -871,10 +925,11 @@ import time
 from account.client import AccountError
 
 # Why a session ended without a token; passed to on_error. The dialog words
-# each case itself, so this module holds no user-facing text.
+# each case itself. The error that comes with FAILED is shown as it is, so no
+# message built here may carry the token.
 DENIED = 'denied'    # the user pressed No in the browser
 EXPIRED = 'expired'  # the pairing ran out, or the server no longer knows it
-FAILED = 'failed'    # begin failed, or polling kept failing; see the error
+FAILED = 'failed'    # anything else went wrong; see the error
 
 DEFAULT_INTERVAL = 5      # seconds; used when the server's value is unusable
 DEFAULT_EXPIRES_IN = 600
@@ -929,7 +984,8 @@ class PairingSession(object):
             self._handshake()
         except Exception as e:
             # Never leave the dialog pulsing at a thread that has died.
-            self._deliver(self._on_error, FAILED, AccountError(-1, str(e)))
+            self._deliver(self._on_error, FAILED,
+                          AccountError(-1, str(e) or type(e).__name__))
 
     def _handshake(self):
         pairing = self._client.desktop_begin()
@@ -981,7 +1037,8 @@ class PairingSession(object):
             # thread, where run()'s catch-all cannot see it, so end the
             # session here or the dialog waits forever. The server has
             # already handed out the token; the user must start over.
-            self._on_error(FAILED, AccountError(-1, str(e)))
+            self._on_error(FAILED,
+                           AccountError(-1, str(e) or type(e).__name__))
             return
         self._on_done(username)
 
@@ -1002,9 +1059,9 @@ class PairingSession(object):
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_pairing -v
 ```
 
-Expected: `Ran 13 tests` … `OK`. Then the `suite()` check from *Before you start*: `suite() lists 13 of 13 test methods`.
+Expected: `Ran 14 tests` … `OK`. Then the `suite()` check from *Before you start*: `suite() lists 14 of 14 test methods`.
 
-- [ ] **Step 6: Prove the six guarantees can fail**
+- [ ] **Step 6: Prove the seven guarantees can fail**
 
 Apply each mutation alone, run the module, see the named test **FAIL**, and restore before the next:
 
@@ -1016,6 +1073,7 @@ Apply each mutation alone, run the module, see the named test **FAIL**, and rest
 | In `_poll`, change `self._unexpected(status)` to `self._unexpected(result)`, so the whole response — token included — lands in the message | `testApprovedWithoutUsernameFailsWithoutLeakingTheToken` |
 | In `_approved`, remove the `try`/`except`, leaving the two store calls unguarded | `testAFailedTokenWriteStillEndsTheSession` (`OSError` escapes the drained queue) |
 | In `_approved`, move `self._on_done(username)` above the store calls | `testTheTokenIsStoredBeforeOnDoneRuns` |
+| In `run()`, drop `or type(e).__name__` | `testAnErrorWithoutAMessageIsNamed` |
 
 After restoring, re-run and confirm `OK`.
 
@@ -1122,7 +1180,7 @@ Replace `_poll` in `account/pairing.py` with:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_pairing -v
 ```
 
-Expected: `Ran 15 tests` … `OK`. `suite()` check: `suite() lists 15 of 15 test methods`.
+Expected: `Ran 16 tests` … `OK`. `suite()` check: `suite() lists 16 of 16 test methods`.
 
 - [ ] **Step 5: Prove the denial test can fail**
 
@@ -1364,7 +1422,7 @@ Replace `_poll` with:
 uv run --python /opt/homebrew/bin/python3.12 python -m unittest tests.test_account_pairing -v
 ```
 
-Expected: `Ran 25 tests` … `OK`. `suite()` check: `suite() lists 25 of 25 test methods`.
+Expected: `Ran 26 tests` … `OK`. `suite()` check: `suite() lists 26 of 26 test methods`.
 
 - [ ] **Step 5: Prove the resilience rules can fail**
 
@@ -1684,9 +1742,13 @@ Add directly after it:
             # Not _show_error for the rest: its 401 and 404 wording is about
             # an existing session and backups. Say what failed, then why --
             # the server's Thai, or a local error such as a full disk. A 5xx
-            # body is usually a proxy's HTML page, so name the status instead.
+            # or an HTML body is a proxy's or a filter's page, not a message,
+            # so name the status instead.
             detail = err.message
-            if err.status >= 500 or not detail:
+            if err.status == 429:
+                detail = u'มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่'
+            elif err.status >= 500 or not detail \
+                    or detail.lstrip().startswith('<'):
                 detail = u'HTTP %d' % err.status
             wx.MessageBox(u'เข้าสู่ระบบด้วยพาสคีย์ไม่สำเร็จ\n\n%s' % detail,
                           MSGBOX_TITLE, wx.OK | wx.ICON_ERROR, self)
@@ -1784,7 +1846,7 @@ Expected: `signed out: ok`, `pairing: ok`, `signed in: ok`, and no traceback.
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 134 tests` … `OK`.
+Expected: `Ran 136 tests` … `OK`.
 
 - [ ] **Step 9: Commit**
 
@@ -2092,7 +2154,7 @@ The app itself never handles a passkey. When you choose to sign in with one, it
 opens `data.etipitaka.com` in your web browser, the browser performs the passkey
 check, and the app then receives the same login token a password sign-in gives.
 To link the two, the app shows a short one-time code that you confirm in the
-browser. The code expires after ten minutes, and the sign-in request stores no
+browser. The code expires after ten minutes, and the sign-in record stores no
 information about your computer.
 ```
 
@@ -2128,15 +2190,24 @@ follows these where they differ from the sections above.
 - **A token that cannot be stored still ends the session.** Storing runs on
   the UI thread, outside the worker's catch-all, so a full disk or a read-only
   config directory reports a failure instead of leaving the dialog waiting.
-- **Only a 400 ends a pairing.** Every other error is retried with backoff
-  like a network failure: a 5xx during maintenance, and a 200 whose body is
-  not a JSON object.
+- **Of the errors, only a 400 ends a pairing.** Every other error is retried
+  with backoff like a network failure: a 5xx during maintenance, and a 200
+  whose body is not a JSON object. (A readable response the client does not
+  understand, such as an unknown status, ends it at once as a failure.)
 - **Errors do not all reuse `_show_error`.** Its 401 and 404 wording is about
   sessions and backups, so a 404 on begin would read "backup not found". Only
   network failures go through it. Refusal and expiry have their own messages,
   and anything else says the passkey sign-in failed, then why, naming a 5xx as
   `HTTP N` because its body is usually a proxy's HTML page.
 - **Esc cancels a pairing**, the same as its Cancel button.
+- **`PairingSession` also takes the token store**, because it stores the token
+  itself, and its default `sleep` waits on the cancel event rather than
+  `time.sleep`, so `cancel()` wakes the worker at once. `dispatch` is called
+  with a single no-argument callable, which suits `wx.CallAfter`.
+- **The client opens `verification_url` only if it is on the API's own
+  origin.** The app hands it to the OS (`os.startfile` on Windows), so a bad
+  begin response must not be able to point it at a file, a network share or
+  another app's protocol handler.
 - **Rate limits** are a dedicated nginx zone (120 r/m, burst 60) plus a DRF
   scope at 90/min, not the shared passkey zone proposed above.
 - **No language cookie.** Server messages are Thai unless the
@@ -2165,13 +2236,13 @@ git commit -m "docs: passkeys in the privacy policy; spec amendments after the s
 uv run --python /opt/homebrew/bin/python3.12 python test.py 2>&1 | tail -4
 ```
 
-Expected: `Ran 134 tests` … `OK` (97 before + 12 client + 25 pairing). Read the output; the exit code means nothing here.
+Expected: `Ran 136 tests` … `OK` (97 before + 13 client + 26 pairing). Read the output; the exit code means nothing here.
 
 - [ ] **Step 2: Every new test is registered**
 
 Run the `suite()` check from *Before you start* for both modules:
-- `tests.test_account_client` → `suite() lists 27 of 27 test methods`
-- `tests.test_account_pairing` → `suite() lists 25 of 25 test methods`
+- `tests.test_account_client` → `suite() lists 28 of 28 test methods`
+- `tests.test_account_pairing` → `suite() lists 26 of 26 test methods`
 
 - [ ] **Step 3: Nothing stray is staged or committed**
 
@@ -2210,6 +2281,10 @@ If `git status` shows no changes under `graphify-out/`, skip the commit.
 
 This task needs a human. The passkey sign-in in the browser uses the tester's own account and device, and the agent must not perform it. The agent runs the app and watches; the human signs in and presses the browser buttons.
 
+Before starting:
+- **Sign out of data.etipitaka.com in the default browser.** A browser already signed in skips the passkey prompt and goes straight to the confirmation page, and the test then proves nothing about passkeys.
+- **Signing out in the app signs out every client of that account.** It calls `/rest-auth/logout/`, which deletes the account's one DRF token, so the iOS app is signed out too at Steps 1, 3 and 6. Use an account where that is acceptable, or sign the iOS app back in afterwards.
+
 - [ ] **Step 1: Run from source (macOS)**
 
 ```bash
@@ -2241,7 +2316,7 @@ Sign out, press **เข้าสู่ระบบด้วยพาสคี�
 
 - **สมัครสมาชิกด้วยพาสคีย์...** opens `/signup/`
 - **ลืมรหัสผ่าน / พาสคีย์หาย...** opens `/password_reset/`
-- While signed in, **จัดการพาสคีย์...** opens `/account/security/`, which asks the browser to sign in on its own
+- While signed in, **จัดการพาสคีย์...** opens `/account/security/`. The browser is still signed in from Step 2, so the page shows the passkey list directly. With a signed-out browser it would ask to sign in first; the app never passes its token to the browser
 
 - [ ] **Step 6: Password sign-in is unchanged**
 
